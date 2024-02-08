@@ -87,4 +87,3 @@ class BRAM:
             pass
         else:
             return 0
-            

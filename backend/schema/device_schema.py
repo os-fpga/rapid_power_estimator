@@ -11,4 +11,3 @@ class DeviceSchema(Schema):
     package = fields.Str()
     speedgrade = fields.Str()
     temperature_grade = fields.Str()
-    

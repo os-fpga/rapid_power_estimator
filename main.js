@@ -4,7 +4,10 @@ const path = require("node:path");
 
 const startFlaskServer = () => {
   const device_xml = path.join(__dirname, "backend/etc/device.xml");
-  const apiServer = spawn(`python`, ["backend/restapi_server.py", device_xml]);
+  const apiServer = spawn(`python`, [
+    path.join(__dirname, "backend/restapi_server.py"),
+    device_xml,
+  ]);
 
   apiServer.stdout.on("data", (data) => {
     console.log(`stdout:\n${data}`);

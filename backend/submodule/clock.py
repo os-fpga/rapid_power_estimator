@@ -53,12 +53,13 @@ class Clock:
         self.state = state
         self.output = ClockOutput()
     
-    def compute_dynamic_power(self) -> float:
+    def compute_dynamic_power(self, clock_cap) -> float:
         if self.enable == True:
             # todo
-            self.output.block_power = 0.002
-            self.output.interconnect_power = 0.003
-            self.output.percentage = 100
+            self.output.fan_out = 0 # fan out calculate whether the clock is being used by other module
+            self.output.block_power = clock_cap * (self.frequency/1000000)
+            self.output.interconnect_power = self.output.fan_out * clock_cap * (self.frequency/1000000)
+            self.output.percentage = 100.0 # todo
             self.output.message = ''
             return self.output
         else:
@@ -67,6 +68,7 @@ class Clock:
 class Clock_SubModule:
     clocks = []
     def __init__(self, clocks):
+        self.clock_cap = 0.00001 # this is the clock_cap magic number should be pass into clock_submodule
         self.clocks = clocks
 
     def get_clocking_resources(self, total_clock_available, total_pll_available):
@@ -79,7 +81,7 @@ class Clock_SubModule:
         used_plls_percentage = used_plls / total_pll_available * 100
         used_clocks_power = 0.0  # todo, figure out the formula to calculate the power
         used_plls_power = 0.0  # todo, figure out the formula to calculate the power
-        return used_clocks, used_plls, used_clocks_percentage, used_plls_percentage, used_clocks_power
+        return used_clocks, used_plls, used_clocks_percentage, used_plls_percentage, used_clocks_power, used_plls_power
 
     def get_clocks(self):
         return self.clocks
@@ -129,11 +131,5 @@ class Clock_SubModule:
         return total_power
 
 if __name__ == '__main__':
-    # manual test code
-    clock = Clock(enable=True)
-    clock2 = Clock(enable=True)
-    print(clock)
-    print(clock2)
-    print(clock.compute_dynamic_power())
-    print(clock2.compute_dynamic_power())
+    pass
 

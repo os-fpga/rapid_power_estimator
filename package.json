@@ -1,0 +1,19 @@
+{
+  "name": "rapid_power_estimator",
+  "version": "1.0.0",
+  "description": "Rapid Power Estimation Tool allows you to estimate power consumption at various stages of your design cycle. It simplifies the input of design information through intuitive wizards and delivers comprehensive power and thermal data analysis.",
+  "main": "main.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Rapid Silicon",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.2.2"
+  }
+}

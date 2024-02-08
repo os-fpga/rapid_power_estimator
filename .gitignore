@@ -1,0 +1,54 @@
+#directories # Node.js
+bower_components
+node_modules
+dist
+package-lock.json
+
+#files
+*.tgz
+*.log
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.pyd
+*.dll
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+pytest_cache/
+coverage/
+
+# IDEs
+.idea/
+.vscode/
+
+# Environment
+.env/
+.venv/
+venv/
+ENV/
+env/

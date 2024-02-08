@@ -1,0 +1,26 @@
+<device_list>
+    <device name="MPW1" series="Gemini" family="Internal-Gemini" package="SBG484" pin_count="44" speedgrade="1" core_voltage="0.8V">
+        <resource type="io" num="44"/>
+        <resource type="lut" num="160"/>
+        <resource type="ff" num="320"/>
+        <resource type="bram" num="0"/>
+        <resource type="dsp" num="0"/>
+        <resource type="carry_length" num="32"/>
+        <internal type="vpr_arch" file="devices/mpw1/TSMC22nm_vpr.xml"/>
+        <internal type="device_size" name="16x16"/>
+        <internal type="openfpga_arch" file="devices/mpw1/TSMC22nm_openfpga.xml"/>
+        <internal type="bitstream_settings" file="devices/mpw1/bitstream_annotation_empty.xml"/>
+        <internal type="sim_settings" file="devices/mpw1/fixed_sim_openfpga.xml"/>
+        <internal type="repack_settings" file="devices/mpw1/repack_design_constraint.xml"/>
+        <internal type="pinmap_xml" file="devices/mpw1/pinmap_qlf_k6n10_tsmc22.xml"/>
+        <internal type="pinmap_csv" file=""/>
+        <internal type="plugin_lib" name="synth-rs"/>
+        <internal type="plugin_func" name="synth_rs"/>
+        <internal type="technology" name="genesis"/>
+        <internal type="synth_type" name="RS"/>
+        <internal type="synth_opts" name=""/>
+        <internal type="bitstream_enabled" num="false"/>
+        <internal type="pin_constraint_enabled" num="false"/>
+        <internal type="synth_opts" name=""/>
+    </device>
+</device_list>

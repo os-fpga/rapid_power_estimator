@@ -20,4 +20,4 @@ At the command prompt or terminal, execute the commands below to check if NodeJS
 
 ### Launch the app (development stage)
 
-1 Launch the Electron desktop app by command `npm start`
+1.  Launch the Electron desktop app by command `npm start`

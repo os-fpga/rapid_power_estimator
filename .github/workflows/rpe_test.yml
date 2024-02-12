@@ -18,32 +18,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
     
-      - name: Use Node.js ${{ matrix.os }}
+      - name: Setup Node.js ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20.11 #if update this then also update in Dockerfile for centos
           node-version-file: package.json
 
-      - name: Log in to the Container registry
+      - name: Setup Python
         if: ${{ matrix.os != 'ubuntu-22.04' }}
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: 3.8 #if update this then also update in Dockerfile for centos
+
+      - name: Login to the Container registry
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}          
 
-      - name: pull the CentOS image
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
+      - name: Pull the CentOS image
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
         run: docker pull ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
-        
-      - name: install packages
+
+      - name: Shell configuration on ${{ matrix.os }} 
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
-            npm install
-            python3 -m pip install -r requirements.txt
+              node --version
+              python3 -V
 
-      - name: install package on centos 7
+      - name: Shell configuration on centos 7
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -52,7 +58,25 @@ jobs:
           run: |
                 source /opt/rh/devtoolset-11/enable
                 cmake --version
-                gcc --version
-                python3 -V            
+                node --version
+                python3 -V
+        
+      - name: Install packages ${{ matrix.os }}
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: |
+            npm install
+            python3 -m pip install -r requirements.txt
+
+      - name: Install packages centos 7
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: addnab/docker-run-action@v3
+        with:
+          shell: bash
+          image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
+          options: -v ${{ github.workspace }}:/work
+          run: |
+                cd /work
+                npm install
+                python3 -m pip install -r requirements.txt          
 
 

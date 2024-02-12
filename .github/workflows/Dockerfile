@@ -13,10 +13,10 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     rm miniconda.sh
 RUN conda create -y --name py38 python=3.8
 ENV PATH="/opt/conda/envs/py38/bin:$PATH"
-RUN wget https://nodejs.org/dist/latest-v20.x/node-v20.11.0.tar.xz && tar -xf node-v20.11.0.tar.xz
-RUN cd node-v20.11.0 && scl enable devtoolset-11 bash && ./configure --prefix=usr && make -j2 && make install 
 ENV CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
 ENV CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
+RUN wget https://nodejs.org/dist/latest-v20.x/node-v20.11.0.tar.xz && tar -xf node-v20.11.0.tar.xz
+RUN cd node-v20.11.0 && scl enable devtoolset-11 bash && ./configure --prefix=usr && make -j2 && make install 
 ENV LC_ALL=en_US.utf-8
 ENV LANG=en_US.utf-8
 ENTRYPOINT ["/bin/bash"]

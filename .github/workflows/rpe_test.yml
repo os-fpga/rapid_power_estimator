@@ -24,9 +24,35 @@ jobs:
         with:
           node-version: 18
           node-version-file: package.json
+
+      - name: Log in to the Container registry
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}          
+
+      - name: pull the CentOS image
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: docker pull ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
         
       - name: install packages
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
             npm install
             python3 -m pip install -r requirements.txt
+
+      - name: install package on centos 7
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: addnab/docker-run-action@v3
+        with:
+          shell: bash
+          image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
+          run: |
+                source /opt/rh/devtoolset-11/enable
+                cmake --version
+                gcc --version
+                python3 -V            
+
+

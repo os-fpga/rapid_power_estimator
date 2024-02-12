@@ -1,0 +1,30 @@
+name: Build and Publish RPE
+
+on:
+  push:
+#    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest,ubuntu-22.04,macos-latest,windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      MODE: ${{ matrix.os }}        
+
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Use Node.js ${{ matrix.os }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+        
+      - name: install packages
+        run: |
+            npm ci
+            python3 -m pip install -r requirements.txt

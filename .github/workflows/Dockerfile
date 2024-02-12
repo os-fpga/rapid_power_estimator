@@ -16,7 +16,9 @@ ENV PATH="/opt/conda/envs/py38/bin:$PATH"
 ENV CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
 ENV CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
 RUN wget https://nodejs.org/dist/latest-v20.x/node-v20.11.0.tar.xz && tar -xf node-v20.11.0.tar.xz
-RUN cd node-v20.11.0 && scl enable devtoolset-11 bash && ./configure --prefix=usr && make -j2 && make install 
+RUN cd node-v20.11.0 && scl enable devtoolset-11 bash && ./configure --prefix=usr && make -j2
+RUN cd node-v20.11.0 && make install
+RUN rm -rf node-v20.11.0 cmake-3.28.0-linux-x86_64.tar.gz miniconda.sh && yum clean all
 ENV LC_ALL=en_US.utf-8
 ENV LANG=en_US.utf-8
 ENTRYPOINT ["/bin/bash"]

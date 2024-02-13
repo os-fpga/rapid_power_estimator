@@ -1,6 +1,4 @@
 import React from "react";
-// import "bootstrap/dist/css/bootstrap.css";
-// import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 import DeviceList from "./components/DeviceList"
 import FpgaTable from "./components/FpgaTable"
 import ClockingTable from "./components/ClockingTable";
@@ -21,6 +19,7 @@ const App = () => {
 
 
   const applyClockData = (deviceId) => {
+    setDevice(deviceId)
     // fetch("http://127.0.0.1:5000/devices/" + deviceId + "/clocking/resources")
     //         .then((response) => response.json())
     //         .then((data) => {
@@ -39,7 +38,6 @@ const App = () => {
       fetch("http://127.0.0.1:5000/devices/" + deviceId + "/clocking")
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
         setClockingData(data);
       });
 
@@ -49,11 +47,63 @@ const App = () => {
   }
 
   const deleteRow = (index) => {
-    setClockingData(clockingData.filter((_, idx) => idx !== index));
+    const url =
+      "http://127.0.0.1:5000/devices/" + device + "/clocking/" + index;
+    fetch(url, {
+      method: "DELETE",
+    }).then((response) => {
+      if (response.ok) {
+        applyClockData(device);
+      }
+    });
+  }
+
+  function addRow(newData) {
+    const url = "http://127.0.0.1:5000/devices/" + device + "/clocking";
+    let data = {
+      description: newData.description,
+      port: newData.port,
+      source: parseInt(newData.source, 10),
+      frequency: newData.frequency,
+      state: parseInt(newData.state)
+    };
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((response) => {
+      if (response.ok) {
+        applyClockData(device);
+      }
+    });
+  }
+
+  function modifyRow(index, row) {
+    const url =
+        "http://127.0.0.1:5000/devices/" + device + "/clocking/" + index;
+      let data = {};
+      console.log(row);
+      data["description"] = row.description;
+      data["source"] = parseInt(row.source, 10);
+      data["port"] = row.port;
+      data["frequency"] = row.frequency;
+      data["state"] = parseInt(row.state, 10);
+      fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).then((response) => {
+        if (response.ok) {
+          applyClockData(device);
+        } else {
+          //
+        }
+      });
   }
 
   return (
-    <><table className="main">
+    <div className="App">
+    <table className="main">
       <thead>
         <tr>
           <td colSpan={3}>
@@ -76,7 +126,9 @@ const App = () => {
           </td>
         </tr>
       </thead>
-    </table><ClockingTable data={clockingData} deleteRow={deleteRow}/></>
+    </table>
+    <ClockingTable data={clockingData} deleteRow={deleteRow} addRow={addRow} modifyRow={modifyRow}/>
+    </div>
   );
 }
 

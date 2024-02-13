@@ -1,28 +1,24 @@
 import React from "react";
 import { BsFillTrashFill, BsFillPencilFill, BsPlus } from "react-icons/bs"
 import "./Table.css"
+import ClockingModal from "./ClockingModal";
+import {sources, states, GetText} from "../assets/clocking"
 
-const ClockingTable = ({ data, deleteRow }) => {
+const ClockingTable = ({ data, deleteRow, addRow, modifyRow }) => {
+  const [editIndex, setEditIndex] = React.useState(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
 
-  const Sources = [
-    "IO",
-    "RC Oscillator",
-    "Boot Clock",
-    "PLL0 -> Fabric",
-    "PLL1 -> Fabric",
-    "PLL1 -> SERDES",
-    "PLL2 -> SERDES"
-  ];
-
-  const State = [
-    "Active",
-    "Gated"
-  ];
+  const handleSubmit = (newRow) => {
+    if (editIndex)
+      modifyRow(editIndex, newRow);
+    else
+      addRow(newRow);
+  };
 
   return <div className="clocking-head">
   <div className="layout-head">
     <label>FPGA &gt; Clocking</label>
-    <button><BsPlus /></button>
+    <button onClick={() => setModalOpen(true)}><BsPlus /></button>
   </div>
   <div className="table-wrapper">
     <table className="table-style">
@@ -45,18 +41,18 @@ const ClockingTable = ({ data, deleteRow }) => {
           data.map((row, index) => {
             return <tr key={index}>
               <td>{row.description}</td>
-              <td>{Sources[row.source]}</td>
+              <td>{GetText(row.source, sources)}</td>
               <td>{row.port}</td>
               <td>{row.frequency / 1000000} MHz</td>
-              <td>{State[row.state]}</td>
+              <td>{GetText(row.state, states)}</td>
               <td>{row.consumption.fan_out}</td>
               <td>{row.consumption.block_power} W</td>
               <td>{row.consumption.interconnect_power} W</td>
               <td>{row.consumption.percentage} %</td>
               <td>
                 <span className="actions">
-                  <BsFillPencilFill />
-                  <BsFillTrashFill className="delete" onClick={() => deleteRow(index)} />
+                  <BsFillPencilFill onClick={() => {setEditIndex(index); setModalOpen(true)}}/>
+                  <BsFillTrashFill className="delete" onClick={() => deleteRow(index)}/>
                 </span>
               </td>
             </tr>
@@ -64,6 +60,22 @@ const ClockingTable = ({ data, deleteRow }) => {
         }
       </tbody>
     </table>
+    {modalOpen && (
+        <ClockingModal
+          closeModal={() => {
+            setModalOpen(false);
+            setEditIndex(null);
+          }}
+          onSubmit={handleSubmit}
+          defaultValue={editIndex !== null && {
+            source: data[editIndex].source,
+            description: data[editIndex].description,
+            port: data[editIndex].port,
+            frequency: data[editIndex].frequency,
+            state: data[editIndex].state
+          }}
+        />
+      )}
   </div>
   </div>
 }

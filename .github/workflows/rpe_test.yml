@@ -23,11 +23,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.11 #if update this then also update in Dockerfile for centos
-          node-version-file: package.json
 
       - name: Setup Python
         if: ${{ matrix.os != 'ubuntu-22.04' }}
-        uses: actions/setup-python@v4.3.0
+        uses: actions/setup-python@v5.0.0
         with:
           python-version: 3.8 #if update this then also update in Dockerfile for centos
 

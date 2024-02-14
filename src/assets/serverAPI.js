@@ -5,7 +5,6 @@ export function GetDevices() {
     fetch(serverUrl)
         .then((response) => response.json())
         .then((data) => {
-            console.log(data)
             data.forEach(function(item) {
                 json.push(item);
             });

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 
-function DeviceList({devices, applyClockData}) {
+function DeviceList({devices, setDevice}) {
   const [deviceInfo, setDeviceInfo] = React.useState({});
 
   function get_device_info(id) {
@@ -15,7 +15,7 @@ function DeviceList({devices, applyClockData}) {
   function Device_OnChange(event) {
     const deviceId = event.target.value;
     get_device_info(deviceId);
-    applyClockData(deviceId);
+    setDevice(deviceId);
   }
 
   return (

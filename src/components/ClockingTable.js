@@ -9,7 +9,7 @@ const ClockingTable = ({ data, deleteRow, addRow, modifyRow }) => {
   const [modalOpen, setModalOpen] = React.useState(false);
 
   const handleSubmit = (newRow) => {
-    if (editIndex)
+    if (editIndex !== null)
       modifyRow(editIndex, newRow);
     else
       addRow(newRow);

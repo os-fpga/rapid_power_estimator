@@ -3,14 +3,14 @@
 }
 
 .dev-table {
-    background-color: darkgray;
+    background-color: #eaeaea;
     border-collapse:separate;
     border-radius:20px;
     border-spacing: 10px;
 }
 
 .dev-selector {
-    background-color: darkgray;
+    background-color: #eaeaea;
     border-style: none;
 }
 
@@ -20,18 +20,25 @@
 
 td.mainCell {
     border: 1px solid;
+    width: 100%;
 }
 
 td.fpgaCell {
     border: 1px solid;
+    /* max-width: min-content; */
     /* width: 1%; */
     /* white-space: nowrap; */
 }
 
 .fpgaTable {
-    border: 1px solid;
     width: 100%;
     text-align: center;
+    /* gap: 10px; */
+}
+
+td.td-fpga-table {
+    /* height: 1px; */
+    /* padding: 5px; */
 }
 
 .btn {
@@ -44,3 +51,19 @@ td.fpgaCell {
     cursor: pointer;
     box-shadow: 0px 5px 5px #ccc;
   }
+
+.fpga-table-btn {
+    /* border: 1px solid; */
+    cursor: pointer;
+    background-color: lightgreen;
+    height: 100%;
+    align-content: center;
+    min-width: 50px;
+    min-height: 50px;
+    padding: 5px;
+}
+
+.fpgaMain {
+    background-color: #e2e2e2;
+    max-width: min-content;
+}

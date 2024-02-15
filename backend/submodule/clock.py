@@ -4,6 +4,7 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
+from utilities.common_utils import update_attributes
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -99,10 +100,7 @@ class Clock_SubModule:
         # Check if the clock already exists based on the ID
         if any(existing_clock.description == clock_data["description"] for existing_clock in self.clocks):
             raise ValueError("Clock description already exists in the list of clocks.")
-        clock = Clock()
-        for key, value in clock_data.items():
-            if hasattr(clock, key):
-                setattr(clock, key, value)
+        clock = update_attributes(Clock(), clock_data)
         clock.compute_dynamic_power(self.clock_cap)
         self.clocks.append(clock)
         return clock
@@ -119,10 +117,7 @@ class Clock_SubModule:
 
     def update_clock(self, idx, clock_data):
         # Check if the provided index is valid
-        clock = self.get_clock(idx)
-        for key, value in clock_data.items():
-            if hasattr(clock, key):
-                setattr(clock, key, value)
+        clock = update_attributes(self.get_clock(idx), clock_data)
         clock.compute_dynamic_power(self.clock_cap)
         return clock
     

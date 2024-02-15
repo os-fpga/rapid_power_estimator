@@ -6,9 +6,9 @@ import argparse
 import os
 import sys
 from submodule.device_manager import DeviceManager
-from schema.device_schema import DeviceSchema
-from schema.device_clocking_schema import DeviceClockingSchema
-from schema.device_clocking_resources_consumption_schema import DeviceClockingResourcesConsumptionSchema
+from schema.device_schemas import DeviceSchema
+from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
+from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -34,11 +34,14 @@ def get_device(device_id):
     except ValueError as e:
         return f"Error: {e}", 404
 
+#
+# Device Clocking APIs
+#
 @app.route('/devices/<device_id>/clocking', methods=['GET'], strict_slashes=False)
 def get_device_clocking_all(device_id):
     try:
         clocks = devicemanager.get_device_clocking_all(device_id)
-        schema = DeviceClockingSchema(many=True)
+        schema = ClockingSchema(many=True)
         return schema.dump(clocks)
     except ValueError as e:
         return f"Error: {e}", 404
@@ -46,7 +49,7 @@ def get_device_clocking_all(device_id):
 @app.route('/devices/<device_id>/clocking', methods=['POST'], strict_slashes=False)
 def add_device_clocking(device_id):
     try:
-        schema = DeviceClockingSchema()
+        schema = ClockingSchema()
         data = schema.load(request.json)
         clock = devicemanager.add_device_clocking(device_id, data)
         return schema.dump(clock)
@@ -57,7 +60,7 @@ def add_device_clocking(device_id):
 def get_device_clocking(device_id, row_number):
     try:
         clock = devicemanager.get_device_clocking(device_id, row_number)
-        schema = DeviceClockingSchema()
+        schema = ClockingSchema()
         return schema.dump(clock)
     except ValueError as e:
         return f"Error: {e}", 404
@@ -65,7 +68,7 @@ def get_device_clocking(device_id, row_number):
 @app.route('/devices/<device_id>/clocking/<int:row_number>', methods=['PATCH'], strict_slashes=False)
 def update_device_clocking(device_id, row_number):
     try:
-        schema = DeviceClockingSchema()
+        schema = ClockingSchema()
         data = schema.load(request.json)
         updated_clock = devicemanager.update_device_clocking(device_id, row_number, data)
         return schema.dump(updated_clock)
@@ -76,7 +79,7 @@ def update_device_clocking(device_id, row_number):
 def delete_device_clocking(device_id, row_number):
     try:
         deleted_clock = devicemanager.delete_device_clocking(device_id, row_number)
-        schema = DeviceClockingSchema()
+        schema = ClockingSchema()
         return schema.dump(deleted_clock)
     except ValueError as e:
         return f"Error: {e}", 404
@@ -87,15 +90,83 @@ def get_device_clocking_power_consumption(device_id):
         consumption = devicemanager.get_device_clocking_power_consumption(device_id)
         res = devicemanager.get_device_clocking_resources(device_id)
         data = {
-            'total_clocks': res[0],
+            'total_clocks_available': res[0],
             'total_clocks_used': res[2],
-            'total_plls': res[1],
+            'total_plls_available': res[1],
             'total_plls_used': res[3],
             'total_clock_block_power': consumption[0],
             'total_clock_interconnect_power': consumption[1],
             'total_pll_power': consumption[2],
         }
-        schema = DeviceClockingResourcesConsumptionSchema()
+        schema = ClockingResourcesConsumptionSchema()
+        return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+#
+# Device Fabric Logic Element APIs
+#
+@app.route('/devices/<device_id>/fabric_le', methods=['GET'], strict_slashes=False)
+def get_device_fabric_le_all(device_id):
+    try:
+        fabric_les = devicemanager.get_device_fabric_le_all(device_id)
+        schema = FabricLogicElementSchema(many=True)
+        return schema.dump(fabric_les)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/fabric_le', methods=['POST'], strict_slashes=False)
+def add_device_fabric_le(device_id):
+    try:
+        schema = FabricLogicElementSchema()
+        data = schema.load(request.json)
+        clock = devicemanager.add_device_fabric_le(device_id, data)
+        return schema.dump(clock)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/fabric_le/<int:row_number>', methods=['GET'], strict_slashes=False)
+def get_device_fabric_le(device_id, row_number):
+    try:
+        fabric_le = devicemanager.get_device_fabric_le(device_id, row_number)
+        schema = FabricLogicElementSchema()
+        return schema.dump(fabric_le)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/fabric_le/<int:row_number>', methods=['PATCH'], strict_slashes=False)
+def update_device_fabric_le(device_id, row_number):
+    try:
+        schema = FabricLogicElementSchema()
+        data = schema.load(request.json)
+        fabric_le = devicemanager.update_device_fabric_le(device_id, row_number, data)
+        return schema.dump(fabric_le)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/fabric_le/<int:row_number>', methods=['DELETE'], strict_slashes=False)
+def delete_device_fabric_le(device_id, row_number):
+    try:
+        deleted_fabric_le = devicemanager.delete_device_fabric_le(device_id, row_number)
+        schema = FabricLogicElementSchema()
+        return schema.dump(deleted_fabric_le)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/fabric_le/consumption', methods=['GET'], strict_slashes=False)
+def get_device_fabric_le_power_consumption(device_id):
+    try:
+        consumption = devicemanager.get_device_fabric_le_power_consumption(device_id)
+        res = devicemanager.get_device_fabric_le_resources(device_id)
+        data = {
+            "total_lut6_available": res[2],
+            "total_lut6_used": res[0],
+            "total_flip_flop_available" : res[6],
+            "total_flip_flop_used" : res[4],
+            "total_block_power": consumption[0],
+            "total_interconnect_power": consumption[1]
+        }
+        schema = FabricLogicElementResourcesConsumptionSchema()
         return schema.dump(data)
     except ValueError as e:
         return f"Error: {e}", 404

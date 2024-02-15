@@ -1,5 +1,7 @@
 import React from "react";
-import "./PowerTable.css"
+import { fixed } from "../assets/common";
+
+import "./style/PowerTable.css"
 
 function PowerTable({ title, total, resourcesHeaders, resources }) {
     return <div className="power-table-main">
@@ -9,7 +11,7 @@ function PowerTable({ title, total, resourcesHeaders, resources }) {
             <tbody>
                 <tr>
                     <td>Total</td>
-                    <td>{total} W</td>
+                    <td>{fixed(parseFloat(total))} W</td>
                 </tr>
             </tbody>
         </table>

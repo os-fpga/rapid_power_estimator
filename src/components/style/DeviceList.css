@@ -1,0 +1,22 @@
+.devLabel {
+    color: dimgray;
+}
+
+.dev-table {
+    background-color: #eaeaea;
+    border-collapse:separate;
+    border-radius:20px;
+    border-spacing: 10px;
+}
+
+.dev-selector {
+    background-color: #eaeaea;
+    border-style: none;
+}
+
+td.fpgaCell {
+    /* border: 1px solid; */
+    /* max-width: min-content; */
+    /* width: 1%; */
+    /* white-space: nowrap; */
+}

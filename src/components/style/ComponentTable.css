@@ -47,15 +47,20 @@
     color: lightcoral;
 }
 
+.edit {
+    color: #2e65f3;
+}
+
 .layout-head {
     display: flex;
     padding: 0.4rem;
     gap: 10px;
 }
 
-.clocking-head {
-    border-style: solid;
-    border-color: darkgray;
+.component-table-head {
+    border: 1px solid;
+    border-color: #d9d9d9;
+    border-radius: 10px;
     padding: 10px;
     display: inline-flex;
     gap: 10px;

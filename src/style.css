@@ -1,69 +1,44 @@
-.devLabel {
-    color: dimgray;
-}
-
-.dev-table {
-    background-color: #eaeaea;
-    border-collapse:separate;
-    border-radius:20px;
-    border-spacing: 10px;
-}
-
-.dev-selector {
-    background-color: #eaeaea;
-    border-style: none;
-}
-
 .main {
     border-style: solid;
 }
 
 td.mainCell {
-    border: 1px solid;
-    width: 100%;
-}
-
-td.fpgaCell {
-    border: 1px solid;
-    /* max-width: min-content; */
-    /* width: 1%; */
-    /* white-space: nowrap; */
-}
-
-.fpgaTable {
-    width: 100%;
-    text-align: center;
-    /* gap: 10px; */
-}
-
-td.td-fpga-table {
-    /* height: 1px; */
-    /* padding: 5px; */
-}
-
-.btn {
-    margin-top: 1rem;
-    border: none;
-    background-color: #1d4ed8;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0px 5px 5px #ccc;
-  }
-
-.fpga-table-btn {
     /* border: 1px solid; */
-    cursor: pointer;
-    background-color: lightgreen;
-    height: 100%;
-    align-content: center;
-    min-width: 50px;
-    min-height: 50px;
-    padding: 5px;
+    width: 33%;
 }
 
-.fpgaMain {
-    background-color: #e2e2e2;
-    max-width: min-content;
+td.secCell {
+    /* border: 1px solid; */
+    width: 50%;
+}
+
+.cpu-layout {
+    display: block;
+}
+
+.acpu-layout {
+    /* border: solid; */
+    display: inline-block;
+    width: 33%;
+}
+
+.bcpu-layout {
+    /* border: solid; */
+    display: inline;
+    width: 33%;
+}
+
+.soc-layout {
+    /* border: solid; */
+    display: inline;
+    width: 33%;
+}
+
+.soc-layout-main {
+    float: left;
+    /* border: solid; */
+}
+
+.fpga-layout-main {
+    display: block;
 }

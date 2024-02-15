@@ -2,55 +2,53 @@ import React from "react";
 import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
-import ClockingModal from "./ClockingModal";
-import { sources, states } from "../assets/clocking"
+import {FleModal} from "./FleModal";
+import { glitch_factor } from "../assets/fle"
 import PowerTable from "./PowerTable";
-import { clocking } from "./../assets/serverAPI"
+import { fle } from "./../assets/serverAPI"
 import { fixed, GetText } from "../assets/common";
 
 import "./style/ComponentTable.css"
 
-const ClockingTable = ({ device, totalPowerCallback }) => {
+const FleTable = ({ device, totalPowerCallback }) => {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [clockingData, setClockingData] = React.useState([]);
+  const [fleData, setFleData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
 
   React.useEffect(() => {
     if (device !== null)
-      fetchClockData(device)
+      fetchFleData(device)
   }, [device]);
 
-  const fetchClockData = (deviceId) => {
+  const fetchFleData = (deviceId) => {
     if (deviceId !== null) {
-      fetch(clocking.fetch(deviceId))
+      fetch(fle.fetch(deviceId))
         .then((response) => response.json())
         .then((data) => {
-          setClockingData(data);
+          setFleData(data);
 
-          fetch(clocking.consumption(deviceId))
+          fetch(fle.consumption(deviceId))
             .then((response) => response.json())
             .then((data) => {
-              const total = data.total_clock_block_power + data.total_clock_interconnect_power + data.total_pll_power;
+              const total = data.total_block_power + data.total_interconnect_power;
               setPowerTotal(total);
               totalPowerCallback(total);
               setPowerTable([
-                [
-                  "Clocks",
-                  data.total_clocks_used,
-                  data.total_clocks_available,
-                  fixed(data.total_clock_block_power + data.total_clock_interconnect_power),
-                  fixed(data.total_clocks_used / data.total_clocks_available * 100, 0),
-                ],
-                [
-                  "PLLs",
-                  data.total_plls_used,
-                  data.total_plls_available,
-                  fixed(data.total_pll_power),
-                  fixed(data.total_plls_used / data.total_plls_available * 100, 0)
-                ]
-              ]);
+              [
+                "LUT6",
+                data.total_lut6_used,
+                data.total_lut6_available,
+                fixed(data.total_lut6_used / data.total_lut6_available * 100, 0),
+              ],
+              [
+                "FF/Latch",
+                data.total_flip_flop_used,
+                data.total_flip_flop_available,
+                fixed(data.total_flip_flop_used / data.total_flip_flop_available * 100, 0),
+              ]
+            ]);
             });
         });
     } else {
@@ -59,18 +57,19 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
 
   function modifyRow(index, row) {
     let data = {};
-    data["description"] = row.description;
-    data["source"] = parseInt(row.source, 10);
-    data["port"] = row.port;
-    data["frequency"] = row.frequency;
-    data["state"] = parseInt(row.state, 10);
-    fetch(clocking.index(device, index), {
+    data["name"] = row.name;
+    data["lut6"] = parseInt(row.lut6, 10);
+    data["flip_flop"] = parseInt(row.flip_flop, 10);
+    data["clock"] = row.clock;
+    data["toggle_rate"] = row.toggle_rate;
+    data["glitch_factor"] = parseInt(row.glitch_factor, 10);
+    fetch(fle.index(device, index), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }).then((response) => {
       if (response.ok) {
-        fetchClockData(device);
+        fetchFleData(device);
       } else {
         //
       }
@@ -78,11 +77,11 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   }
 
   const deleteRow = (index) => {
-    fetch(clocking.index(device, index), {
+    fetch(fle.index(device, index), {
       method: "DELETE",
     }).then((response) => {
       if (response.ok) {
-        fetchClockData(device);
+        fetchFleData(device);
       }
     });
   }
@@ -91,19 +90,20 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
     if (device === null) return;
     let data = {
       enable: true,
-      description: newData.description,
-      port: newData.port,
-      source: parseInt(newData.source, 10),
-      frequency: newData.frequency,
-      state: parseInt(newData.state)
+      name: newData.name,
+      lut6: parseInt(newData.lut6, 10),
+      flip_flop: parseInt(newData.flip_flop, 10),
+      clock: newData.clock,
+      toggle_rate: newData.toggle_rate,
+      glitch_factor: parseInt(newData.glitch_factor, 10),
     };
-    fetch(clocking.fetch(device), {
+    fetch(fle.fetch(device), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }).then((response) => {
       if (response.ok) {
-        fetchClockData(device);
+        fetchFleData(device);
       }
     });
   }
@@ -116,25 +116,27 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   };
 
   const resourcesHeaders = [
-    "Used", "Total", "Power", "%"
+    "Used", "Available", "%"
   ];
 
   return <div className="component-table-head">
     <div className="main-block">
       <div className="layout-head">
-        <label>FPGA &gt; Clocking</label>
+        <label>FPGA &gt; FLE</label>
         <button className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
       </div>
       <div className="table-wrapper">
         <table className="table-style">
           <thead>
             <tr>
-              <th className="expand">Description</th>
-              <th>Source</th>
-              <th>Port/Signal name</th>
-              <th>Frequency</th>
-              <th>Clock Control</th>
-              <th>Fanout</th>
+              <th className="expand">Name/Hierarchy</th>
+              <th>LUT6</th>
+              <th>FF/Latch</th>
+              <th>Clock</th>
+              <th>Toggle Rate</th>
+              <th>Glitch Factor</th>
+              <th>Clock Freq</th>
+              <th>O/P Sig Rate</th>
               <th>Block Power</th>
               <th>Intc. Power</th>
               <th>%</th>
@@ -143,14 +145,16 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
           </thead>
           <tbody>
             {
-              clockingData.map((row, index) => {
+              fleData.map((row, index) => {
                 return <tr key={index}>
-                  <td>{row.description}</td>
-                  <td>{GetText(row.source, sources)}</td>
-                  <td>{row.port}</td>
-                  <td>{fixed(row.frequency / 1000000, 0)}MHz</td>
-                  <td>{GetText(row.state, states)}</td>
-                  <td>{row.consumption.fan_out}</td>
+                  <td>{row.name}</td>
+                  <td>{row.lut6}</td>
+                  <td>{row.flip_flop}</td>
+                  <td>{row.clock}</td>
+                  <td>{row.toggle_rate}</td>
+                  <td>{GetText(row.glitch_factor, glitch_factor)}</td>
+                  <td>{fixed(row.consumption.clock_frequency / 1000000, 0)}MHz</td>
+                  <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
                   <td>{fixed(row.consumption.block_power)}W</td>
                   <td>{fixed(row.consumption.interconnect_power)}W</td>
                   <td>{fixed(row.consumption.percentage, 0)}%</td>
@@ -166,27 +170,27 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
           </tbody>
         </table>
         {modalOpen && (
-          <ClockingModal
+          <FleModal
             closeModal={() => {
               setModalOpen(false);
               setEditIndex(null);
             }}
             onSubmit={handleSubmit}
             defaultValue={editIndex !== null && {
-              source: clockingData[editIndex].source,
-              description: clockingData[editIndex].description,
-              port: clockingData[editIndex].port,
-              frequency: clockingData[editIndex].frequency,
-              state: clockingData[editIndex].state
-            } ||
-            {
-              source: 0,
-              description: '',
-              port: '',
-              frequency: 1000000,
-              state: 1,
-            }
-            }
+              name: fleData[editIndex].name,
+              lut6: fleData[editIndex].lut6,
+              flip_flop: fleData[editIndex].flip_flop,
+              clock: fleData[editIndex].clock,
+              toggle_rate: fleData[editIndex].toggle_rate,
+              glitch_factor: fleData[editIndex].glitch_factor,
+            } || {
+              name: '',
+              lut6: 0,
+              flip_flop: 0,
+              clock: '',
+              toggle_rate: 0,
+              glitch_factor: 0,
+            }}
           />
         )}
       </div>
@@ -199,4 +203,4 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   </div>
 }
 
-export default ClockingTable;
+export default FleTable;

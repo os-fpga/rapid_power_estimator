@@ -24,3 +24,8 @@
     color: #7f7d7d;
     font-weight: bold;
 }
+
+.no-wrap {
+    white-space: nowrap;
+    text-align: right;
+}

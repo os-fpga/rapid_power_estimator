@@ -7,6 +7,7 @@ import DspTable from "./components/DspTable";
 import { Table } from "./assets/common"
 import Peripherals from "./components/Peripherals";
 import { clocking, fle, dsp, devices as getDeviceListApi } from "./assets/serverAPI"
+import CPUComponent from "./components/CPUComponent";
 
 const App = () => {
   const [devices, setDevices] = React.useState([]);
@@ -49,45 +50,40 @@ const App = () => {
 
   return (
     <div>
-      <table className="main">
-        <tbody>
-          <tr>
-            <td colSpan={3}>
-              <DeviceList devices={devices} setDevice={setDevice} id="device-selection"></DeviceList>
-            </td>
-          </tr>
-          <tr className="mainCell">
-            <td className="mainCell fpga-table-btn" onClick={() => setOpenedTable(Table.ACPU)}>
-              ACPU
-            </td>
-            <td className="mainCell fpga-table-btn" onClick={() => setOpenedTable(Table.BCPU)}>
-              BCPU
-            </td>
-            <td className="mainCell">
-              SOC
-            </td>
-            <td className="fpgaCell" rowSpan={2}>
-              <FpgaTable clocking={clockingPower} fle={flePower} dsp={dspPower} tableOpen={setOpenedTable}></FpgaTable>
-            </td>
-          </tr>
-          <tr>
-            <td className="secCell" colSpan={3}>
-              <div>
-                <div className="fpga-table-btn" style={{ display: 'inline', border: '1px solid', width: '50%', height: '100%' }} onClick={() => setOpenedTable(Table.DMA)}>DMA</div>
-                <div className="fpga-table-btn" style={{ display: 'inline', border: '1px solid', width: '50%', height: '100%' }} onClick={() => setOpenedTable(Table.Connectivity)}>Connectivity</div>
+      <div className="app-main-container">
+        <div className="top-container">
+          <div className="top-l1">
+            <DeviceList devices={devices} setDevice={setDevice} />
+          </div>
+          <div className="top-l2">
+            <div className="top-l2-col1">
+              <div className="top-l2-col1-row1">
+                <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.ACPU)}><CPUComponent name={"ACPU"} /></div>
+                <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.BCPU)}><CPUComponent name={"BCPU"} /></div>
+                <div className="top-l2-col1-row1-elem">SOC</div>
               </div>
-            </td>
-          </tr>
-          <tr className="mainCell">
-            <td className="mainCell fpga-table-btn" colSpan={3}>
-              <Peripherals onClick={() => setOpenedTable(Table.Peripherals)} />
-            </td>
-            <td className="fpga-table-btn" onClick={() => setOpenedTable(Table.Memory)}>
-              Memory
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <div className="top-l2-col1-row2">
+                <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.DMA)}>DMA</div>
+                <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.Connectivity)}>Connectivity</div>
+              </div>
+              <Peripherals setOpenedTable={setOpenedTable} />
+            </div>
+            <div className="top-l2-col2">
+              <div className="top-l2-col2-elem"><FpgaTable clocking={clockingPower} fle={flePower} dsp={dspPower} tableOpen={setOpenedTable} /></div>
+              <div className="clickable top-l2-col2-elem" onClick={() => setOpenedTable(Table.Memory)}>Memory</div>
+            </div>
+          </div>
+        </div>
+        <div className="power-tables">
+          <div className="placeholder">placeholder</div>
+          <div className="placeholder">FPGA Complex and Core Power (placeholder)</div>
+        </div>
+        <div className="power-tables">
+          <div className="placeholder">placeholder</div>
+          <div className="placeholder">Processing Complex (SOC) Power (placeholder)</div>
+        </div>
+      </div>
+      <div className="hspacer"></div>
       {
         openedTable === Table.Clocking &&
         <ClockingTable device={device} totalPowerCallback={setClockingPower} />

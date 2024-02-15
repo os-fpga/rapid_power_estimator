@@ -21,6 +21,7 @@ function DeviceList({devices, setDevice}) {
   }
 
   return (
+    <div className='dev-table-container'>
     <table className='dev-table'>
       <thead>
         <tr>
@@ -72,6 +73,7 @@ function DeviceList({devices, setDevice}) {
         </tr>
       </thead>
     </table>
+    </div>
   );
 };
 

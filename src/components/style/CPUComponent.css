@@ -1,0 +1,30 @@
+.cpu-component-top {
+    gap: 10px;
+    block-size: fit-content;
+    min-width: 160px;
+}
+
+.cpu-component-title-top {
+    gap: 10px;
+}
+
+.cpu-component-l2 {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.cpu-component-l1,
+.cpu-component-l3 {
+    display: flex;
+    column-gap: 10px;
+    column-count: 2;
+}
+
+.cpu-component-title {
+    font-weight: bold;
+    display: inline-block;
+}
+
+.cpu-component-power {
+    display: inline;
+}

@@ -36,8 +36,8 @@ function PowerTable({ title, total, resourcesHeaders, resources }) {
                                 <td className="innerHeader">{item[0]}</td>
                                 <td>{item[1]}</td>
                                 <td>{item[2]}</td>
-                                <td className="no-space">{item[3]}{item.length === 4 ? '%' : ''}</td>
-                                <td className="no-space">{item[4]}{item.length === 5 ? '%' : ''}</td>
+                                <td className="no-wrap">{item[3]}{item.length === 4 ? ' %' : ''}</td>
+                                <td className="no-wrap">{item[4]}{item.length === 5 ? ' %' : ''}</td>
                             </tr>
                         })
                     }

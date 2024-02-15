@@ -1,0 +1,67 @@
+.table-wrapper {
+    width: 100%;
+}
+
+.table-style {
+    display: block;
+    overflow: hidden;
+    table-layout: auto;
+    border-collapse: collapse;
+    box-shadow: 0px 10px 10px darkgray;
+    border-radius: 10px;
+    max-width: 100%;
+}
+
+.table-style thead {
+    color: gray;
+    background-color: #eaeaea;
+}
+
+.table-style th,
+.table-style td {
+    padding: 0.4rem;
+}
+
+.table-style td {
+    white-space: nowrap;
+}
+
+.table-style tbody tr:hover {
+    background-color: #eee;
+}
+
+.expand {
+    width: 100%;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-around;
+}
+
+.actions svg {
+    cursor: pointer;
+}
+
+.delete {
+    color: lightcoral;
+}
+
+.layout-head {
+    display: flex;
+    padding: 0.4rem;
+    gap: 10px;
+}
+
+.clocking-head {
+    border-style: solid;
+    border-color: darkgray;
+    padding: 10px;
+    display: inline-flex;
+    gap: 10px;
+}
+
+.plus-button {
+    justify-content: center;
+    align-items: center;
+}

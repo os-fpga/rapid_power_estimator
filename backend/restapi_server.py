@@ -8,6 +8,7 @@ import sys
 from submodule.device_manager import DeviceManager
 from schema.device_schema import DeviceSchema
 from schema.device_clocking_schema import DeviceClockingSchema
+from schema.device_clocking_resources_consumption_schema import DeviceClockingResourcesConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -77,6 +78,25 @@ def delete_device_clocking(device_id, row_number):
         deleted_clock = devicemanager.delete_device_clocking(device_id, row_number)
         schema = DeviceClockingSchema()
         return schema.dump(deleted_clock)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/clocking/consumption', methods=['GET'], strict_slashes=False)
+def get_device_clocking_power_consumption(device_id):
+    try:
+        consumption = devicemanager.get_device_clocking_power_consumption(device_id)
+        res = devicemanager.get_device_clocking_resources(device_id)
+        data = {
+            'total_clocks': res[0],
+            'total_clocks_used': res[2],
+            'total_plls': res[1],
+            'total_plls_used': res[3],
+            'total_clock_block_power': consumption[0],
+            'total_clock_interconnect_power': consumption[1],
+            'total_pll_power': consumption[2],
+        }
+        schema = DeviceClockingResourcesConsumptionSchema()
+        return schema.dump(data)
     except ValueError as e:
         return f"Error: {e}", 404
 

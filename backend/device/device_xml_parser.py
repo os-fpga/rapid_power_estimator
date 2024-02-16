@@ -24,22 +24,3 @@ def parse_device_xml(file_path: str) -> DeviceList:
         devices.append(device)
 
     return DeviceList(devices=devices)
-
-if __name__ == '__main__':
-    # get current directory
-    current_dir = sys.path[0]
-    print(current_dir)
-    # go up one level of current dir
-    current_dir = current_dir[:current_dir.rfind('/')]
-    # current_dir = current_dir[:current_dir.rfind('\\')]
-
-    print("current dir: " + current_dir)
-    device_path = current_dir + '/python/etc/device.xml'
-    print(device_path)
-    devicelist = parse_device_xml(device_path)
-    for device in devicelist.devices:
-        # debug code to look at the output
-        print(device.name)
-        print(device.resources['io'].num)
-
-

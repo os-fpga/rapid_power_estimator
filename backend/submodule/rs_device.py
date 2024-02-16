@@ -4,7 +4,16 @@
 #
 from submodule.clock import Clock_SubModule, Clock
 from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
-from utilities.common_utils import ModuleType
+from enum import Enum
+
+class ModuleType(Enum):
+    CLOCKING = 0
+    FABRIC_LE = 1
+    DSP = 2
+    BRAM = 3
+    IO = 4
+    PERIPHERAL_PROCESSING = 5
+    REGULATOR = 6
 
 # each rs_device contains a rs_device_resource class object:
 # - *LE
@@ -72,8 +81,29 @@ class RsDeviceResources:
     def get_num_FFs(self) -> int:
         return self.get_attr('ff')
 
-    def get_clock_cap(self) -> float:
+    def get_clock_cap_block(self) -> float:
+        # todo: read from power data
         return 0.00001
+
+    def get_clock_cap_interconnect(self) -> float:
+        # todo: read from power data
+        return 0.00000003
+
+    def get_VCC_CORE(self) -> float:
+        # todo: should read from regulator module
+        return 0.8
+
+    def get_VCC_AUX(self) -> float:
+        # todo: should read from regulator module
+        return 1.8
+
+    def get_VCCINT(self) -> float:
+        # todo: should decouple the coefficient from the function and read from power data
+        return 0.0009 * self.get_VCC_CORE() ** 2
+
+    def get_VCCAUX(self) -> float:
+        # todo: should decouple the coefficient from the function and read from power data
+        return 0.01 * self.get_VCC_AUX() ** 2
 
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module
@@ -110,12 +140,13 @@ class RsDevice:
 
         # fabric logic element module
         self.fabric_le_module = self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
-            Fabric_LE(enable=True, clock='CLK_100', name='testing', flip_flop=100),
-            Fabric_LE(enable=True, clock='CLK_233', name='testing', flip_flop=50)
+            Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=2000, flip_flop=5000),
+            Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=1000, flip_flop=3000)
         ]))
 
         # clocking module
         self.clock_module = self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, [
-            Clock(True, "Default clock", port="CLK_100", frequency=100000000)
+            Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
+            Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
 

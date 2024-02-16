@@ -178,6 +178,7 @@ def main():
     # create and parse command line args
     parser = argparse.ArgumentParser(description='Rapid Power Estimator Rest API Server command-line arguments.')
     parser.add_argument('device_file', type=str, help='Path to the input device xml file')
+    parser.add_argument('--port', type=int, default=5000, help='Specify TCP Port to use for REST server')
     args = parser.parse_args()
 
     # Check if the device_file exists
@@ -190,7 +191,7 @@ def main():
     devicemanager = DeviceManager(args.device_file)
 
     # Start Rest API server
-    app.run(debug=False)
+    app.run(debug=False, port=args.port)
 
 if __name__ == "__main__":
     main()

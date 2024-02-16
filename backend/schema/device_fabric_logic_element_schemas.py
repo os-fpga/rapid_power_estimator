@@ -29,5 +29,5 @@ class FabricLogicElementSchema(Schema):
     clock = fields.Str()
     toggle_rate = fields.Number()
     glitch_factor = fields.Enum(Glitch_Factor, by_value=True)
-    clock_enable_rate = fields.Str()
+    clock_enable_rate = fields.Number()
     output = fields.Nested(FabricLogicElementOutputSchema, data_key="consumption")

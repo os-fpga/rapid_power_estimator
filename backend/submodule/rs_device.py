@@ -15,23 +15,6 @@ class ModuleType(Enum):
     PERIPHERAL_PROCESSING = 5
     REGULATOR = 6
 
-# each rs_device contains a rs_device_resource class object:
-# - *LE
-# - CLB columns	
-# - CLB Rows	
-# - BRAM columns	
-# - DSP Columns	
-# - *CLBs	
-# - *LUTs	
-# - *FFs
-# - *Actual BRAMs	
-# - BRAMs	
-# - *Actual DSPs	
-# - *DSP	
-# - char level	
-# - Clocks	
-# - PLLs
-
 class RsDeviceResources:
 
     def __init__(self, device):
@@ -81,13 +64,41 @@ class RsDeviceResources:
     def get_num_FFs(self) -> int:
         return self.get_attr('ff')
 
-    def get_clock_cap_block(self) -> float:
-        # todo: read from power data
+    def get_CLK_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate clock block power
         return 0.00001
 
-    def get_clock_cap_interconnect(self) -> float:
-        # todo: read from power data
+    def get_CLK_INT_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate clock interconnect power
         return 0.00000003
+
+    def get_PLL_INT(self) -> float:
+        # todo: read from power data. Coeffient to calculate PLL power (VCC Core)
+        return 0.0009
+
+    def get_PLL_AUX(self) -> float:
+        # todo: read from power data. Coeffient to calculate PLL power (Aux Int)
+        return 0.01
+
+    def get_LUT_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate FLE block power
+        return 0.0000003
+
+    def get_FF_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate FLE block power
+        return 0.00000035
+
+    def get_FF_CLK_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate FLE block power
+        return 2.91375291375291E-09
+
+    def get_LUT_INT_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate FLE interconnect power
+        return 0.00000002
+
+    def get_FF_INT_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate FLE interconnect power
+        return 0.00000004
 
     def get_VCC_CORE(self) -> float:
         # todo: should read from regulator module
@@ -96,14 +107,6 @@ class RsDeviceResources:
     def get_VCC_AUX(self) -> float:
         # todo: should read from regulator module
         return 1.8
-
-    def get_VCCINT(self) -> float:
-        # todo: should decouple the coefficient from the function and read from power data
-        return 0.0009 * self.get_VCC_CORE() ** 2
-
-    def get_VCCAUX(self) -> float:
-        # todo: should decouple the coefficient from the function and read from power data
-        return 0.01 * self.get_VCC_AUX() ** 2
 
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module
@@ -125,6 +128,14 @@ class RsDeviceResources:
         # todo: other modules
         
         return total_fanout
+
+    def get_clock(self, clkname):
+        clock_module = self.get_module(ModuleType.CLOCKING)
+        if clock_module != None:
+            for clock in clock_module.get_clocks():
+                if clock.port == clkname:
+                    return clock
+        return None
 
 class RsDevice:
 
@@ -150,3 +161,6 @@ class RsDevice:
             Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
 
+        # trigger initial calculation
+        self.fabric_le_module.compute_fabric_le_output_power()
+        self.clock_module.compute_clocks_output_power()

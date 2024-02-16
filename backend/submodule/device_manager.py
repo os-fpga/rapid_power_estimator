@@ -72,7 +72,7 @@ class DeviceManager:
 
     def get_device_fabric_le_power_consumption(self, device_id):
         device = self.get_device(device_id)
-        return device.fabric_le_module.compute_output_power()
+        return device.fabric_le_module.compute_fabric_le_output_power()
 
     def get_device_fabric_le_resources(self, device_id):
         device = self.get_device(device_id)

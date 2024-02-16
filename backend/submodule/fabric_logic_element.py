@@ -41,7 +41,7 @@ class Fabric_LE:
     percentage : float = field(default=100.0)
     output : Fabric_LE_output = field(default_factory=Fabric_LE_output())
 
-    def __init__(self, enable=False, name='', lut6=0, flip_flop=0, clock='', toggle_rate=12.5, glitch_factor=Glitch_Factor.TYPICAL) -> None:
+    def __init__(self, enable=False, name='', lut6=0, flip_flop=0, clock='', toggle_rate=0.125, glitch_factor=Glitch_Factor.VERY_HIGH, clock_enable_rate=0.5) -> None:
         self.enable = enable
         self.name = name
         self.lut6 = lut6
@@ -49,25 +49,61 @@ class Fabric_LE:
         self.clock = clock
         self.toggle_rate = toggle_rate
         self.glitch_factor = glitch_factor
+        self.clock_enable_rate = clock_enable_rate
         self.output = Fabric_LE_output()
 
-    def compute_dynamic_power(self):
+    def compute_percentage(self, total_power):
+        if (total_power > 0):
+            self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
+        else:
+            self.output.percentage = 0.0
+
+    def get_glitch_factor(self):
+        if self.glitch_factor == Glitch_Factor.TYPICAL:
+            return 1
+        elif self.glitch_factor == Glitch_Factor.HIGH:
+            return 2
+        else:
+            return 4 
+
+    def compute_dynamic_power(self, clock, VCC_CORE, LUT_CAP, FF_CAP, FF_CLK_CAP, LUT_INT_CAP, FF_INT_CAP):
+        if clock == None:
+            self.output.message = f"Invalid clock {self.clock}"
+            return
+
         if self.enable:
-            pass
-            # todo fill up the power estimation based on formula
-            # self.output.clock_frequency = self.clock.clock_frequency
-            # self.output.output_signal_rate
-            # self.output.block_power
-            # self.output.interconnect_power
-            # self.output.percentage
+            # set clock freq
+            self.output.clock_frequency = clock.frequency
+
+            # output signal rate = clock freq * toggle rate * clock enable rate
+            if self.lut6 > 0:
+                self.output.output_signal_rate = (clock.frequency / 1000000.0) * self.toggle_rate * self.clock_enable_rate
+            elif self.flip_flop > 0:
+                self.output.output_signal_rate = (clock.frequency / 1000000.0) * self.toggle_rate
+            else:
+                self.output.output_signal_rate = 0
+
+            # p1 = VCC_CORE^2 * lut * output signal rate * LUT_CAP * glitch factor
+            # p2 = VCC_CORE^2 * ff * output signal rate * FF_CAP 
+            # p3 = VCC_CORE^2 * ff * clock freq * clock enable rate * FF_CLK_CAP
+            # block power = p1 + p2 + p3
+            p1 = VCC_CORE ** 2 * self.lut6 * self.output.output_signal_rate * LUT_CAP * self.get_glitch_factor()
+            p2 = VCC_CORE ** 2 * self.flip_flop * self.output.output_signal_rate * FF_CAP
+            p3 = VCC_CORE ** 2 * self.flip_flop * (clock.frequency / 1000000.0) * self.clock_enable_rate * FF_CLK_CAP
+            self.output.block_power = p1 + p2 + p3
+
+            # p1 = VCC_CORE^2 * lut * output signal rate * LUT_INT_CAP * glitch factor
+            # p2 = VCC_CORE^2 * ff * output signal rate * FF_INT_CAP
+            # interconnect power = p1 + p2 
+            p1 = VCC_CORE ** 2 * self.lut6 * self.output.output_signal_rate * LUT_INT_CAP * self.get_glitch_factor()
+            p2 = VCC_CORE ** 2 * self.flip_flop * self.output.output_signal_rate * FF_INT_CAP
+            self.output.interconnect_power = p1 + p2
             self.output.message = ''
-            return self.output
         else:
             self.output.message = 'This logic is disabled'
-            return 0
         
 class Fabric_LE_SubModule:
-    fabric_les = []
+
     def __init__(self, resources, fabric_les):
         self.resources = resources
         self.total_lut6_available = resources.get_num_LUTs()
@@ -101,23 +137,47 @@ class Fabric_LE_SubModule:
         if any(existing_fabric_le.name == fabric_le_data["name"] for existing_fabric_le in self.fabric_les):
             raise ValueError("Fabric LE with same description already exists.")
         fabric_le = update_attributes(Fabric_LE(), fabric_le_data)
-        fabric_le.compute_dynamic_power()
         self.fabric_les.append(fabric_le)
+        self.compute_fabric_le_output_power()
         return fabric_le
     
     def delete_fabric_le(self, idx):
         if 0 <= idx < len(self.fabric_les):
             deleted_fabric_le = self.fabric_les[idx]
             del self.fabric_les[idx]
+            self.compute_fabric_le_output_power()
             return deleted_fabric_le
         else:
-            raise ValueError("Invalid index. Fabric LEs doesn't exist at the specified index.")
+            raise ValueError("Invalid index. Fabric LE doesn't exist at the specified index.")
         
     def update_fabric_le(self, idx, fabric_le_data):
         updated_fabric_le = update_attributes(self.get_fabric_le(idx), fabric_le_data)
-        updated_fabric_le.compute_dynamic_power()
+        self.compute_fabric_le_output_power()
         return updated_fabric_le
 
-    def compute_output_power(self):
-        # todo
-        return 0, 0
+    def compute_fabric_le_output_power(self):
+        # Get device power coefficients
+        VCC_CORE    = self.resources.get_VCC_CORE()
+        LUT_CAP     = self.resources.get_LUT_CAP()
+        LUT_INT_CAP = self.resources.get_LUT_INT_CAP()
+        FF_CAP      = self.resources.get_FF_CAP()
+        FF_CLK_CAP  = self.resources.get_FF_CLK_CAP()
+        FF_INT_CAP  = self.resources.get_FF_INT_CAP()
+
+        # Compute the total power consumption of all logic elements
+        total_block_power = 0.0
+        total_interconnect_power = 0.0
+
+        # Compute the power consumption for each individual logic element
+        for fle in self.fabric_les:
+            fle.compute_dynamic_power(self.resources.get_clock(fle.clock), VCC_CORE, LUT_CAP, FF_CAP, FF_CLK_CAP, LUT_INT_CAP, FF_INT_CAP)
+            total_block_power += fle.output.block_power
+            total_interconnect_power += fle.output.interconnect_power
+
+        # Update individual logic element percentage
+        total_power = total_block_power + total_interconnect_power
+        for fle in self.fabric_les:
+            fle.compute_percentage(total_power)
+
+        # Return total power consumption
+        return total_block_power, total_interconnect_power

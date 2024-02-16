@@ -75,14 +75,9 @@ class Clock_SubModule:
 
     def __init__(self, resources, clocks):
         self.resources = resources
-        self.clock_cap_block = resources.get_clock_cap_block() # this is the clock_cap magic number should be pass into clock_submodule
-        self.clock_cap_interconnect = resources.get_clock_cap_interconnect() # this is the clock_cap magic number should be pass into clock_submodule
-        self.pll_vccint = resources.get_VCCINT()
-        self.pll_vccaux = resources.get_VCCAUX()
         self.total_clock_available = resources.get_num_Clocks()
         self.total_pll_available = resources.get_num_PLLs()
         self.clocks = clocks
-        self.compute_clocks_output_power()
 
     def get_clocking_resources(self):
         return self.total_clock_available, self.total_pll_available, self.get_total_clock_used(), self.get_total_pll_used()
@@ -142,14 +137,24 @@ class Clock_SubModule:
         return total_pll_used
 
     def compute_clocks_output_power(self):
+        # Get device power coefficients
+        VCC_CORE    = self.resources.get_VCC_CORE()
+        VCC_AUX     = self.resources.get_VCC_AUX()
+        CLK_CAP     = self.resources.get_CLK_CAP()
+        CLK_INT_CAP = self.resources.get_CLK_INT_CAP()
+        PLL_INT     = self.resources.get_PLL_INT()
+        PLL_AUX     = self.resources.get_PLL_AUX()
+
         # Compute the total power consumption of all clocks
         total_clock_power = 0.0
         total_interconnect_power = 0.0
-        total_pll_power = self.get_total_pll_used() * (self.pll_vccint + self.pll_vccaux)
+
+        # Compute the total power consumption of all PLLs 
+        total_pll_power = self.get_total_pll_used() * ((PLL_INT * VCC_CORE ** 2) + (PLL_AUX * VCC_AUX ** 2))
         
         # Compute the power consumption for each individual clocks
         for clock in self.clocks:
-            clock.compute_dynamic_power(self.resources.get_clocking_fanout(clock.port), self.clock_cap_block, self.clock_cap_interconnect)
+            clock.compute_dynamic_power(self.resources.get_clocking_fanout(clock.port), CLK_CAP, CLK_INT_CAP)
             total_interconnect_power += clock.output.interconnect_power
             total_clock_power += clock.output.block_power
 

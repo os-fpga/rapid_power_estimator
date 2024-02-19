@@ -4,7 +4,8 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from clock import Clock
+from utilities.common_utils import update_attributes
+# from clock import Clock
 
 class Pipelining(Enum):
     INPUT_AND_OUTPUT = 0
@@ -47,18 +48,16 @@ class DSP_output:
 
 @dataclass
 class DSP:
-    _id_counter = 0  # Class variable to keep track of IDs
-    id : int = field(init=False)
     enable : bool = field(default=False)
     name : str = field(default='')
     number_of_multipliers : int = field(default=0)
     dsp_mode : DSP_Mode = field(default=DSP_Mode.MULTIPLY_ACCUMULATE)
     a_input_width : int = field(default=16)
     b_input_width : int = field(default=16)
-    clock : Clock = field(default=None)
+    clock : str = field(default='')
     pipelining : Pipelining = field(default=Pipelining.INPUT_AND_OUTPUT)
-    toggle_rate : float = field(default=12.5)
-    estimated_power_output : DSP_output = field(default=DSP_output())
+    toggle_rate : float = field(default=0.125)
+    output : DSP_output = field(default_factory=DSP_output())
 
     def __init__(
         self,
@@ -68,12 +67,10 @@ class DSP:
         dsp_mode: DSP_Mode = DSP_Mode.MULTIPLY_ACCUMULATE,
         a_input_width: int = 16,
         b_input_width: int = 16,
-        clock: Clock = None,
+        clock: str = '',
         pipelining: Pipelining = Pipelining.INPUT_AND_OUTPUT,
-        toggle_rate: float = 12.5,
-        estimated_power_output: DSP_output = DSP_output(),
+        toggle_rate: float = 0.125
     ):
-        self.id = self._generate_unique_id()
         self.enable = enable
         self.name = name
         self.number_of_multipliers = number_of_multipliers
@@ -83,12 +80,7 @@ class DSP:
         self.clock = clock
         self.pipelining = pipelining
         self.toggle_rate = toggle_rate
-        self.estimated_power_output = estimated_power_output
-
-    @classmethod
-    def _generate_unique_id(cls):
-        cls._id_counter += 1
-        return cls._id_counter
+        self.output = DSP_output()
 
     def compute_dynamic_power(self):
         if self.enable:
@@ -96,3 +88,48 @@ class DSP:
             pass
         else:
             return 0
+
+class DSP_SubModule:
+
+    def __init__(self, resources, dsplist):
+        self.resources = resources
+        self.total_dsp_blocks = resources.get_num_DSP_BLOCKs()
+        self.dsplist = dsplist
+
+    def get_resources(self):
+        total_dsp_blocks_used = 0
+        for dsp in self.dsplist:
+            total_dsp_blocks_used += dsp.number_of_multipliers
+        return total_dsp_blocks_used, self.total_dsp_blocks
+
+    def get_power_consumption(self):
+        # todo
+        return 0.123, 0.456
+
+    def get_all(self):
+        return self.dsplist
+
+    def get(self, idx):
+        if 0 <= idx < len(self.dsplist):
+            return self.dsplist[idx]
+        else:
+            raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
+
+    def add(self, data):
+        dsp = update_attributes(DSP(), data)
+        self.dsplist.append(dsp)
+        return dsp
+
+    def update(self, idx, data):
+        dsp = update_attributes(self.get(idx), data)
+        return dsp
+
+    def remove(self, idx):
+        if 0 <= idx < len(self.dsplist):
+            removed_dsp = self.dsplist.pop(idx)
+            return removed_dsp
+        else:
+            raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
+
+    def compute_ouput_power(self):
+        pass

@@ -9,6 +9,7 @@ from submodule.device_manager import DeviceManager
 from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
+from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -167,6 +168,72 @@ def get_device_fabric_le_power_consumption(device_id):
             "total_interconnect_power": consumption[1]
         }
         schema = FabricLogicElementResourcesConsumptionSchema()
+        return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+#
+# Device DSP APIs
+#
+@app.route('/devices/<device_id>/dsp', methods=['GET'], strict_slashes=False)
+def get_device_dsp_all(device_id):
+    try:
+        dsplist = devicemanager.get_device_dsp_all(device_id)
+        schema = DspSchema(many=True)
+        return schema.dump(dsplist)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/dsp', methods=['POST'], strict_slashes=False)
+def add_device_dsp(device_id):
+    try:
+        schema = DspSchema()
+        data = schema.load(request.json)
+        dsp = devicemanager.add_device_dsp(device_id, data)
+        return schema.dump(dsp)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/dsp/<int:row_number>', methods=['GET'], strict_slashes=False)
+def get_device_dsp(device_id, row_number):
+    try:
+        dsp = devicemanager.get_device_dsp(device_id, row_number)
+        schema = DspSchema()
+        return schema.dump(dsp)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/dsp/<int:row_number>', methods=['PATCH'], strict_slashes=False)
+def update_device_dsp(device_id, row_number):
+    try:
+        schema = DspSchema()
+        data = schema.load(request.json)
+        updated_dsp = devicemanager.update_device_dsp(device_id, row_number, data)
+        return schema.dump(updated_dsp)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/dsp/<int:row_number>', methods=['DELETE'], strict_slashes=False)
+def delete_device_dsp(device_id, row_number):
+    try:
+        deleted_dsp = devicemanager.delete_device_dsp(device_id, row_number)
+        schema = DspSchema()
+        return schema.dump(deleted_dsp)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/dsp/consumption', methods=['GET'], strict_slashes=False)
+def get_device_dsp_power_consumption(device_id):
+    try:
+        consumption = devicemanager.get_device_dsp_power_consumption(device_id)
+        res = devicemanager.get_device_dsp_resources(device_id)
+        data = {
+            "total_dsp_blocks_available": res[1],
+            "total_dsp_blocks_used": res[0],
+            "total_dsp_block_power" : consumption[0],
+            "total_dsp_interconnect_power" : consumption[1]
+        }
+        schema = DspResourcesConsumptionSchema()
         return schema.dump(data)
     except ValueError as e:
         return f"Error: {e}", 404

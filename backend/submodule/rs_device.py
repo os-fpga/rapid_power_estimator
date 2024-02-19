@@ -4,6 +4,7 @@
 #
 from submodule.clock import Clock_SubModule, Clock
 from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
+from submodule.dsp import DSP_SubModule, DSP
 from enum import Enum
 
 class ModuleType(Enum):
@@ -39,6 +40,10 @@ class RsDeviceResources:
             return 4
         elif series == 'Virgo':
             return 2
+
+    def get_num_DSP_BLOCKs(self) -> int:
+        # return self.get_attr('dsp')
+        return 200 # overwrite for test purpose
 
     def get_series(self):
         return self.device.series
@@ -151,8 +156,14 @@ class RsDevice:
 
         # fabric logic element module
         self.fabric_le_module = self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
-            Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=2000, flip_flop=5000),
-            Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=1000, flip_flop=3000)
+            Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=20, flip_flop=50),
+            Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=10, flip_flop=30)
+        ]))
+
+        # dsp module
+        self.dsp_module = self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
+            DSP(),
+            DSP()
         ]))
 
         # clocking module
@@ -161,6 +172,7 @@ class RsDevice:
             Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
 
-        # trigger initial calculation
+        # perform initial calculation
         self.fabric_le_module.compute_fabric_le_output_power()
         self.clock_module.compute_clocks_output_power()
+        self.dsp_module.compute_ouput_power()

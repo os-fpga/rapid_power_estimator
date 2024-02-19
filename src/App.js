@@ -3,15 +3,17 @@ import DeviceList from "./components/DeviceList"
 import FpgaTable from "./components/FpgaTable"
 import ClockingTable from "./components/ClockingTable";
 import FleTable from "./components/FleTable";
+import DspTable from "./components/DspTable";
 import { Table } from "./assets/common"
 import Peripherals from "./components/Peripherals";
-import { clocking, fle, devices as getDeviceListApi } from "./assets/serverAPI"
+import { clocking, fle, dsp, devices as getDeviceListApi } from "./assets/serverAPI"
 
 const App = () => {
   const [devices, setDevices] = React.useState([]);
   const [device, setDevice] = React.useState(null);
   const [clockingPower, setClockingPower] = React.useState(0);
   const [flePower, setFlePower] = React.useState(0);
+  const [dspPower, setDspPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
 
   React.useEffect(() => {
@@ -36,6 +38,12 @@ const App = () => {
           const total = data.total_block_power + data.total_interconnect_power;
           setFlePower(total);
         });
+      fetch(dsp.consumption(device))
+        .then((response) => response.json())
+        .then((data) => {
+          const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
+          setDspPower(total);
+        });
     }
   }, [device]);
 
@@ -59,7 +67,7 @@ const App = () => {
               SOC
             </td>
             <td className="fpgaCell" rowSpan={2}>
-              <FpgaTable clocking={clockingPower} fle={flePower} tableOpen={setOpenedTable}></FpgaTable>
+              <FpgaTable clocking={clockingPower} fle={flePower} dsp={dspPower} tableOpen={setOpenedTable}></FpgaTable>
             </td>
           </tr>
           <tr>
@@ -98,7 +106,7 @@ const App = () => {
       }
       {
         openedTable === Table.DSP &&
-        <label>DSP table</label>
+        <DspTable device={device} totalPowerCallback={setDspPower} />
       }
       {
         openedTable === Table.ACPU &&

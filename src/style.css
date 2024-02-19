@@ -42,3 +42,7 @@ td.secCell {
 .fpga-layout-main {
     display: block;
 }
+
+.no-wrap {
+    white-space: nowrap;
+}

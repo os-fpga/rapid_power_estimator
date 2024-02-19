@@ -6,7 +6,7 @@ import {FleModal} from "./FleModal";
 import { glitch_factor } from "../assets/fle"
 import PowerTable from "./PowerTable";
 import { fle } from "./../assets/serverAPI"
-import { fixed, GetText } from "../assets/common";
+import { fixed, GetText, showFreq } from "../assets/common";
 
 import "./style/ComponentTable.css"
 
@@ -151,9 +151,9 @@ const FleTable = ({ device, totalPowerCallback }) => {
                   <td>{row.lut6}</td>
                   <td>{row.flip_flop}</td>
                   <td>{row.clock}</td>
-                  <td>{row.toggle_rate}</td>
+                  <td>{row.toggle_rate}%</td>
                   <td>{GetText(row.glitch_factor, glitch_factor)}</td>
-                  <td>{fixed(row.consumption.clock_frequency / 1000000, 0)}MHz</td>
+                  <td>{showFreq(row.consumption.clock_frequency)}</td>
                   <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
                   <td>{fixed(row.consumption.block_power)}W</td>
                   <td>{fixed(row.consumption.interconnect_power)}W</td>
@@ -196,7 +196,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
       </div>
     </div>
     <div className="power-table-wrapper">
-      <PowerTable title="Clock power"
+      <PowerTable title="FLE power"
         total={powerTotal}
         resourcesHeaders={resourcesHeaders}
         resources={powerTable} /></div>

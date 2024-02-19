@@ -6,7 +6,7 @@ import ClockingModal from "./ClockingModal";
 import { sources, states } from "../assets/clocking"
 import PowerTable from "./PowerTable";
 import { clocking } from "./../assets/serverAPI"
-import { fixed, GetText } from "../assets/common";
+import { fixed, GetText, showFreq } from "../assets/common";
 
 import "./style/ComponentTable.css"
 
@@ -148,7 +148,7 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
                   <td>{row.description}</td>
                   <td>{GetText(row.source, sources)}</td>
                   <td>{row.port}</td>
-                  <td>{fixed(row.frequency / 1000000, 0)}MHz</td>
+                  <td>{showFreq(row.frequency)}</td>
                   <td>{GetText(row.state, states)}</td>
                   <td>{row.consumption.fan_out}</td>
                   <td>{fixed(row.consumption.block_power)}W</td>

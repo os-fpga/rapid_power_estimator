@@ -77,3 +77,31 @@ class DeviceManager:
     def get_device_fabric_le_resources(self, device_id):
         device = self.get_device(device_id)
         return device.fabric_le_module.get_fabric_le_resources()
+
+    def get_device_dsp_all(self, device_id):
+        device = self.get_device(device_id)
+        return device.dsp_module.get_all()
+
+    def get_device_dsp(self, device_id, row_number):
+        device = self.get_device(device_id)
+        return device.dsp_module.get(row_number)
+
+    def add_device_dsp(self, device_id, data):
+        device = self.get_device(device_id)
+        return device.dsp_module.add(data)
+
+    def update_device_dsp(self, device_id, row_number, data):
+        device = self.get_device(device_id)
+        return device.dsp_module.update(row_number, data)
+
+    def delete_device_dsp(self, device_id, row_number):
+        device = self.get_device(device_id)
+        return device.dsp_module.remove(row_number)
+
+    def get_device_dsp_power_consumption(self, device_id):
+        device = self.get_device(device_id)
+        return device.dsp_module.get_power_consumption()
+
+    def get_device_dsp_resources(self, device_id):
+        device = self.get_device(device_id)
+        return device.dsp_module.get_resources()

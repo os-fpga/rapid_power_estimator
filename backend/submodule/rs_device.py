@@ -2,9 +2,9 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-from submodule.clock import Clock_SubModule, Clock
-from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
-from submodule.dsp import DSP_SubModule, DSP
+from backend.submodule.clock import Clock_SubModule, Clock
+from backend.submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
+from backend.submodule.dsp import DSP_SubModule, DSP
 from enum import Enum
 
 class ModuleType(Enum):

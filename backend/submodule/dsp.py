@@ -4,8 +4,7 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from utilities.common_utils import update_attributes
-# from clock import Clock
+from backend.utilities.common_utils import update_attributes
 
 class Pipelining(Enum):
     INPUT_AND_OUTPUT = 0

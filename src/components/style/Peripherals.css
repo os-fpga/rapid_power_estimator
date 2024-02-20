@@ -1,0 +1,25 @@
+.periph-top {
+    display: flex;
+    height: 100%;
+    background-color: #dbdbdb;
+    padding: 8px;
+    flex-direction: column;
+    row-gap: 6px;
+    cursor: pointer;
+}
+
+.periph-row-head {
+}
+
+.periph-row {
+    display: flex;
+    flex-direction: row;
+    column-gap: 8px;
+    height: 100%;
+}
+
+.periph-rowx {
+    width: 100%;
+    background-color: #9fdda9;
+    padding: 4px;
+}

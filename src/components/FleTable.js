@@ -151,13 +151,13 @@ const FleTable = ({ device, totalPowerCallback }) => {
                   <td>{row.lut6}</td>
                   <td>{row.flip_flop}</td>
                   <td>{row.clock}</td>
-                  <td>{row.toggle_rate}%</td>
+                  <td>{row.toggle_rate} %</td>
                   <td>{GetText(row.glitch_factor, glitch_factor)}</td>
                   <td>{showFreq(row.consumption.clock_frequency)}</td>
                   <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
-                  <td>{fixed(row.consumption.block_power)}W</td>
-                  <td>{fixed(row.consumption.interconnect_power)}W</td>
-                  <td>{fixed(row.consumption.percentage, 0)}%</td>
+                  <td>{fixed(row.consumption.block_power)} W</td>
+                  <td>{fixed(row.consumption.interconnect_power)} W</td>
+                  <td>{fixed(row.consumption.percentage, 0)} %</td>
                   <td>
                     <span className="actions">
                       <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true) }} />

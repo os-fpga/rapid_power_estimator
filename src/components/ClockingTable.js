@@ -151,9 +151,9 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
                   <td>{showFreq(row.frequency)}</td>
                   <td>{GetText(row.state, states)}</td>
                   <td>{row.consumption.fan_out}</td>
-                  <td>{fixed(row.consumption.block_power)}W</td>
-                  <td>{fixed(row.consumption.interconnect_power)}W</td>
-                  <td>{fixed(row.consumption.percentage, 0)}%</td>
+                  <td>{fixed(row.consumption.block_power)} W</td>
+                  <td>{fixed(row.consumption.interconnect_power)} W</td>
+                  <td>{fixed(row.consumption.percentage, 0)} %</td>
                   <td>
                     <span className="actions">
                       <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true) }} />

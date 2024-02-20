@@ -105,3 +105,31 @@ class DeviceManager:
     def get_device_dsp_resources(self, device_id):
         device = self.get_device(device_id)
         return device.dsp_module.get_resources()
+
+    def get_device_bram_all(self, device_id):
+        device = self.get_device(device_id)
+        return device.bram_module.get_all()
+
+    def get_device_bram(self, device_id, row_number):
+        device = self.get_device(device_id)
+        return device.bram_module.get(row_number)
+
+    def add_device_bram(self, device_id, data):
+        device = self.get_device(device_id)
+        return device.bram_module.add(data)
+
+    def update_device_bram(self, device_id, row_number, data):
+        device = self.get_device(device_id)
+        return device.bram_module.update(row_number, data)
+
+    def delete_device_bram(self, device_id, row_number):
+        device = self.get_device(device_id)
+        return device.bram_module.remove(row_number)
+
+    def get_device_bram_power_consumption(self, device_id):
+        device = self.get_device(device_id)
+        return device.bram_module.get_power_consumption()
+
+    def get_device_bram_resources(self, device_id):
+        device = self.get_device(device_id)
+        return device.bram_module.get_resources()

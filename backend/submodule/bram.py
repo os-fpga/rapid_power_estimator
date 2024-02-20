@@ -4,7 +4,8 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from clock import Clock
+#from clock import Clock
+from utilities.common_utils import update_attributes
 
 class BRAM_Type(Enum):
     BRAM_18K_SDP = 0
@@ -22,17 +23,17 @@ class BRAM_Type(Enum):
 class PortOutputProperties:
     clock_frequency: int = field(default=100000000)
     output_signal_rate: float = field(default=0.0)
-    RAM_depth: int = field(default=1024)
+    ram_depth: int = field(default=1024)
 
-    def __init__(self, clock_frequency: int = 100000000, output_signal_rate: float = 0.0, RAM_depth: int = 1024):
+    def __init__(self, clock_frequency: int = 100000000, output_signal_rate: float = 0.0, ram_depth: int = 1024):
         self.clock_frequency = clock_frequency
         self.output_signal_rate = output_signal_rate
-        self.RAM_depth = RAM_depth
+        self.ram_depth = ram_depth
 
 @dataclass
 class BRAM_output:
-    port_A: PortOutputProperties = field(default_factory=PortOutputProperties)
-    port_B: PortOutputProperties = field(default_factory=PortOutputProperties)
+    port_a: PortOutputProperties = field(default_factory=PortOutputProperties)
+    port_b: PortOutputProperties = field(default_factory=PortOutputProperties)
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
@@ -40,22 +41,21 @@ class BRAM_output:
 
 @dataclass
 class PortProperties:
-    clock: Clock = field(default=None)
+    clock: str = field(default='')
     width: int = field(default=16)
-    write_enable_percentage: float = field(default=50.0)
-    toggle_rate: float = field(default=12.5)
+    write_enable_rate: float = field(default=0.5)
+    read_enable_rate: float = field(default=0.5)
+    toggle_rate: float = field(default=0.125)
 
 @dataclass
 class BRAM:
-    _id_counter = 0  # Class variable to keep track of IDs
-    id : int = field(init=False)
     enable : bool = field(default=False)
     name : str = field(default='')
     type : BRAM_Type = field(default=BRAM_Type.BRAM_18K_SDP)
     bram_used : int = field(default=0)
-    port_A: PortProperties = field(default_factory=PortProperties)
-    port_B: PortProperties = field(default_factory=PortProperties)
-    estimated_power_output : BRAM_output = field(default=BRAM_output())
+    port_a: PortProperties = field(default_factory=PortProperties)
+    port_b: PortProperties = field(default_factory=PortProperties)
+    output : BRAM_output = field(default_factory=BRAM_output())
 
     def __init__(
         self,
@@ -63,23 +63,14 @@ class BRAM:
         name: str = '',
         type: BRAM_Type = BRAM_Type.BRAM_18K_SDP,
         bram_used: int = 0,
-        port_A: PortProperties = PortProperties(),
-        port_B: PortProperties = PortProperties(),
-        estimated_power_output: BRAM_output = BRAM_output(),
     ):
-        self.id = self._generate_unique_id()
         self.enable = enable
         self.name = name
         self.type = type
         self.bram_used = bram_used
-        self.port_A = port_A
-        self.port_B = port_B
-        self.estimated_power_output = estimated_power_output
-
-    @classmethod
-    def _generate_unique_id(cls):
-        cls._id_counter += 1
-        return cls._id_counter
+        self.port_a = PortProperties()
+        self.port_b = PortProperties()
+        self.output = BRAM_output()
 
     def compute_dynamic_power(self):
         if self.enable:
@@ -87,3 +78,53 @@ class BRAM:
             pass
         else:
             return 0
+
+class BRAM_SubModule:
+
+    def __init__(self, resources, bramlist):
+        self.resources = resources
+        self.total_18k_bram_available = resources.get_num_18K_BRAM()
+        self.total_36k_bram_available = resources.get_num_36K_BRAM()
+        self.bramlist = bramlist
+
+    def get_resources(self):
+        total_18k_bram_used = 0
+        total_36k_bram_used = 0
+        for bram in self.bramlist:
+            if (bram.type.value & 1) == 0:
+                total_18k_bram_used += bram.bram_used
+            else:
+                total_36k_bram_used += bram.bram_used
+        return total_18k_bram_used, self.total_18k_bram_available, total_36k_bram_used, self.total_36k_bram_available
+
+    def get_power_consumption(self):
+        # todo
+        return 0.123, 0.456
+
+    def get_all(self):
+        return self.bramlist
+
+    def get(self, idx):
+        if 0 <= idx < len(self.bramlist):
+            return self.bramlist[idx]
+        else:
+            raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
+
+    def add(self, data):
+        bram = update_attributes(BRAM(), data)
+        self.bramlist.append(bram)
+        return bram
+
+    def update(self, idx, data):
+        bram = update_attributes(self.get(idx), data)
+        return bram
+
+    def remove(self, idx):
+        if 0 <= idx < len(self.bramlist):
+            removed_bram = self.bramlist.pop(idx)
+            return removed_bram
+        else:
+            raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
+
+    def compute_ouput_power(self):
+        pass

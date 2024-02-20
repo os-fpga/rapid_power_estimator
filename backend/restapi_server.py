@@ -10,6 +10,7 @@ from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
+from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -234,6 +235,74 @@ def get_device_dsp_power_consumption(device_id):
             "total_dsp_interconnect_power" : consumption[1]
         }
         schema = DspResourcesConsumptionSchema()
+        return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+#
+# Device BRAM APIs
+#
+@app.route('/devices/<device_id>/bram', methods=['GET'], strict_slashes=False)
+def get_device_bram_all(device_id):
+    try:
+        bramlist = devicemanager.get_device_bram_all(device_id)
+        schema = BramSchema(many=True)
+        return schema.dump(bramlist)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/bram', methods=['POST'], strict_slashes=False)
+def add_device_bram(device_id):
+    try:
+        schema = BramSchema()
+        data = schema.load(request.json)
+        bram = devicemanager.add_device_bram(device_id, data)
+        return schema.dump(bram)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/bram/<int:row_number>', methods=['GET'], strict_slashes=False)
+def get_device_bram(device_id, row_number):
+    try:
+        bram = devicemanager.get_device_bram(device_id, row_number)
+        schema = BramSchema()
+        return schema.dump(bram)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/bram/<int:row_number>', methods=['PATCH'], strict_slashes=False)
+def update_device_bram(device_id, row_number):
+    try:
+        schema = BramSchema()
+        data = schema.load(request.json)
+        updated_bram = devicemanager.update_device_bram(device_id, row_number, data)
+        return schema.dump(updated_bram)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/bram/<int:row_number>', methods=['DELETE'], strict_slashes=False)
+def delete_device_bram(device_id, row_number):
+    try:
+        deleted_bram = devicemanager.delete_device_bram(device_id, row_number)
+        schema = BramSchema()
+        return schema.dump(deleted_bram)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/bram/consumption', methods=['GET'], strict_slashes=False)
+def get_device_bram_power_consumption(device_id):
+    try:
+        consumption = devicemanager.get_device_bram_power_consumption(device_id)
+        res = devicemanager.get_device_bram_resources(device_id)
+        data = {
+            "total_18k_bram_available": res[1],
+            "total_18k_bram_used": res[0],
+            "total_36k_bram_available": res[3],
+            "total_36k_bram_used": res[2],
+            "total_bram_block_power" : consumption[0],
+            "total_bram_interconnect_power" : consumption[1]
+        }
+        schema = BramResourcesConsumptionSchema()
         return schema.dump(data)
     except ValueError as e:
         return f"Error: {e}", 404

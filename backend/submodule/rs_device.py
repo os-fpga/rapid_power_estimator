@@ -5,6 +5,7 @@
 from submodule.clock import Clock_SubModule, Clock
 from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
 from submodule.dsp import DSP_SubModule, DSP
+from submodule.bram import BRAM_SubModule, BRAM
 from enum import Enum
 
 class ModuleType(Enum):
@@ -44,6 +45,14 @@ class RsDeviceResources:
     def get_num_DSP_BLOCKs(self) -> int:
         # return self.get_attr('dsp')
         return 200 # overwrite for test purpose
+
+    def get_num_18K_BRAM(self) -> int:
+        # return self.get_attr('bram')
+        return 256 # overwrite for test purpose
+
+    def get_num_36K_BRAM(self) -> int:
+        # return self.get_attr('bram')
+        return 128 # overwrite for test purpose
 
     def get_series(self):
         return self.device.series
@@ -162,8 +171,14 @@ class RsDevice:
 
         # dsp module
         self.dsp_module = self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
-            DSP(),
-            DSP()
+            DSP(number_of_multipliers=11, enable=True, name="test test 1"),
+            DSP(number_of_multipliers=12, enable=True, name="test test 2")
+        ]))
+
+        # bram module
+        self.bram_module = self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
+            BRAM(name="test 1", bram_used=11),
+            BRAM(name="test 2", bram_used=17)
         ]))
 
         # clocking module
@@ -176,3 +191,4 @@ class RsDevice:
         self.fabric_le_module.compute_fabric_le_output_power()
         self.clock_module.compute_clocks_output_power()
         self.dsp_module.compute_ouput_power()
+        self.bram_module.compute_ouput_power()

@@ -77,7 +77,7 @@ jobs:
                 cd /work
                 npm install
                 python3 -m pip install -r requirements.txt
-      - name: Run pytest on ubuntu-22.04
+      - name: Run pytest on centos 7
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -85,8 +85,8 @@ jobs:
           image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
           options: -v ${{ github.workspace }}:/work
           run: |
-            cd /work
-            python3 -m pytest
+              cd /work
+              python3 -m pytest
       - name: Run pytest
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: python3 -m pytest

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { sources, states } from "../assets/clocking"
+import { glitch_factor } from "./../assets/fle"
 
 import "./style/Modal.css";
 
-export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
+export const FleModal = ({ closeModal, onSubmit, defaultValue }) => {
   const [formState, setFormState] = useState(defaultValue);
 
   const handleChange = (e) => {
@@ -41,45 +41,51 @@ export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
     >
       <div className="modal">
         <form>
+        <div className="form-group">
+            <label htmlFor="name">Name/Hierarchy</label>
+            <textarea
+              name="name"
+              onChange={handleChange}
+              value={formState.name}
+            />
+          </div>
           <div className="form-group">
-            <label htmlFor="source">Source</label>
-            <select name="source" onChange={handleChange} value={formState.source}>
+            <label htmlFor="lut6">LUT6</label>
+            <textarea
+              name="lut6"
+              onChange={handleChange}
+              value={formState.lut6}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="flip_flop">FF/Latch</label>
+            <textarea
+              name="flip_flop"
+              onChange={handleChange}
+              value={formState.flip_flop}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="clock">Clock</label>
+            <textarea
+              name="clock"
+              onChange={handleChange}
+              value={formState.clock}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="toggle_rate">Toggle Rate</label>
+            <textarea
+              name="toggle_rate"
+              onChange={handleChange}
+              value={formState.toggle_rate}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="glitch_factor">Glitch Factor</label>
+            <select name="glitch_factor" onChange={handleChange} value={formState.glitch_factor}>
               {
-                sources.map((item, index) => (
-                  <option key={item.id} value={item.id}>{item.text}</option>
-                ))
-              }
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              name="description"
-              onChange={handleChange}
-              value={formState.description}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="port">Port/Signal name</label>
-            <textarea
-              name="port"
-              onChange={handleChange}
-              value={formState.port}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="frequency">Frequency</label>
-            <textarea
-              name="frequency"
-              onChange={handleChange}
-              value={formState.frequency}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="state">State</label>
-            <select name="state" onChange={handleChange} value={formState.state}>
-              {
-                states.map((item, index) => (
+                glitch_factor.map((item, index) => (
                   <option key={item.id} value={item.id}>{item.text}</option>
                 ))
               }
@@ -94,4 +100,4 @@ export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
   );
 };
 
-export default ClockingModal;
+export default FleModal;

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { sources, states } from "../assets/clocking"
+import { dsp_mode, pipelining } from "../assets/dsp";
 
 import "./style/Modal.css";
 
-export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
+export const DspModal = ({ closeModal, onSubmit, defaultValue }) => {
   const [formState, setFormState] = useState(defaultValue);
 
   const handleChange = (e) => {
@@ -41,49 +41,73 @@ export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
     >
       <div className="modal">
         <form>
+        <div className="form-group">
+            <label htmlFor="name">Name/Hierarchy</label>
+            <textarea
+              name="name"
+              onChange={handleChange}
+              value={formState.name}
+            />
+          </div>
           <div className="form-group">
-            <label htmlFor="source">Source</label>
-            <select name="source" onChange={handleChange} value={formState.source}>
+            <label htmlFor="number_of_multipliers">Number Of Multipliers</label>
+            <textarea
+              name="number_of_multipliers"
+              onChange={handleChange}
+              value={formState.number_of_multipliers}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="dsp_mode">DSP Mode</label>
+            <select name="dsp_mode" onChange={handleChange} value={formState.dsp_mode}>
               {
-                sources.map((item, index) => (
+                dsp_mode.map((item, index) => (
                   <option key={item.id} value={item.id}>{item.text}</option>
                 ))
               }
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="a_input_width">A-Input Width</label>
             <textarea
-              name="description"
+              name="a_input_width"
               onChange={handleChange}
-              value={formState.description}
+              value={formState.a_input_width}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="port">Port/Signal name</label>
+            <label htmlFor="b_input_width">B-Input Width</label>
             <textarea
-              name="port"
+              name="b_input_width"
               onChange={handleChange}
-              value={formState.port}
+              value={formState.b_input_width}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="frequency">Frequency</label>
+            <label htmlFor="clock">Clock</label>
             <textarea
-              name="frequency"
+              name="clock"
               onChange={handleChange}
-              value={formState.frequency}
+              value={formState.clock}
             />
           </div>
           <div className="form-group">
-            <label htmlFor="state">State</label>
-            <select name="state" onChange={handleChange} value={formState.state}>
+            <label htmlFor="pipelining">Pipeline</label>
+            <select name="pipelining" onChange={handleChange} value={formState.pipelining}>
               {
-                states.map((item, index) => (
+                pipelining.map((item, index) => (
                   <option key={item.id} value={item.id}>{item.text}</option>
                 ))
               }
             </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="toggle_rate">Toggle Rate</label>
+            <textarea
+              name="toggle_rate"
+              onChange={handleChange}
+              value={formState.toggle_rate}
+            />
           </div>
           <button type="submit" className="btn" onClick={handleSubmit}>
             Submit
@@ -94,4 +118,4 @@ export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
   );
 };
 
-export default ClockingModal;
+export default DspModal;

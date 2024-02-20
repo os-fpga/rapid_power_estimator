@@ -12,11 +12,3 @@ export const states = [
     { id: 1, text: "Active" },
     { id: 2, text: "Gated" },
 ];
-
-export function GetText(id, map) {
-    for (let i = 0; i < map.length; i++) {
-        if (map[i].id == id) {
-            return map[i].text;
-        }
-    }
-}

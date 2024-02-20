@@ -1,11 +1,13 @@
 import * as React from 'react';
+import * as api from "./../assets/serverAPI"
 
+import "./style/DeviceList.css"
 
 function DeviceList({devices, setDevice}) {
   const [deviceInfo, setDeviceInfo] = React.useState({});
 
   function get_device_info(id) {
-    fetch("http://127.0.0.1:5000/devices/" + id)
+    fetch(api.deviceInfo(id))
       .then((response) => response.json())
       .then((data) => {
         setDeviceInfo(data);

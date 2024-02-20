@@ -1,0 +1,22 @@
+.fpgaTable {
+    width: 100%;
+    text-align: center;
+    background-color: #efefef;
+    /* gap: 10px; */
+}
+
+.fpga-table-btn {
+    /* border: 1px solid; */
+    cursor: pointer;
+    background-color: lightgreen;
+    height: 100%;
+    align-content: center;
+    min-width: 85px;
+    min-height: 75px;
+    padding: 5px;
+}
+
+.fpgaMain {
+    background-color: #efefef;
+    max-width: min-content;
+}

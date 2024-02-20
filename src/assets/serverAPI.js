@@ -1,6 +1,7 @@
 import { formatString } from "./common"
-const server = "http://127.0.0.1";
-const port = "5000";
+const config = require("./../../rpe.config.json")
+const server = config.server;
+const port = config.port;
 
 export const devices = formatString("{0}:{1}/devices", server, port)
 

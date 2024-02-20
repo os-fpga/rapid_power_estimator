@@ -2,11 +2,14 @@ const { app, BrowserWindow } = require("electron");
 const { spawn } = require("child_process");
 const path = require("node:path");
 
+const config = require("./rpe.config.json")
+
 const startFlaskServer = () => {
-  const device_xml = path.join(__dirname, "backend/etc/device.xml");
+
+  const device_xml = path.join(__dirname, config.device_xml);
   const apiServer = spawn(`python`, [
     path.join(__dirname, "backend/restapi_server.py"),
-    device_xml,
+    device_xml, "--port", config.port
   ]);
 
   apiServer.stdout.on("data", (data) => {

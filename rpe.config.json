@@ -1,0 +1,5 @@
+{
+    "port": 5000,
+    "server": "http://127.0.0.1",
+    "device_xml": "backend/etc/device.xml"
+}

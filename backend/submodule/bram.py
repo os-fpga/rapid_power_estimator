@@ -4,7 +4,6 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-#from clock import Clock
 from utilities.common_utils import update_attributes
 
 class BRAM_Type(Enum):

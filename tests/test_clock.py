@@ -1,5 +1,5 @@
 from backend.submodule.clock import Clock, Source, ClockOutput, Clock_SubModule, Clock_State
-from backend.submodule.rs_device import RsDeviceResources
+from backend.submodule.rs_device_resources import RsDeviceResources
 from unittest.mock import Mock
 import pytest
 
@@ -55,7 +55,7 @@ def test_clock_submodule_initialization():
 
     assert clock_submodule.total_clock_available == mock_resources.get_num_Clocks()
     assert clock_submodule.total_pll_available == mock_resources.get_num_PLLs()
-    assert clock_submodule.clocks == clocks
+    assert clock_submodule.itemlist == clocks
 
 def test_get_clocking_resources():
     mock_resources = Mock(spec=RsDeviceResources)
@@ -68,4 +68,4 @@ def test_get_clocking_resources():
     total_pll_used = 0
 
     expected_result = (16, 2, total_clock_used, total_pll_used)
-    assert clock_submodule.get_clocking_resources() == expected_result
+    assert clock_submodule.get_resources() == expected_result

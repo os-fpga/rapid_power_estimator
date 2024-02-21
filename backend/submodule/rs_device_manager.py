@@ -5,7 +5,7 @@
 from device.device_xml_parser import parse_device_xml, DeviceList
 from submodule.rs_device import RsDevice
 
-class DeviceManager:
+class RsDeviceManager:
 
     def __init__(self, device_xml):
         self.devices = []

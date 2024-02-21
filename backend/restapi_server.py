@@ -5,7 +5,7 @@
 import argparse
 import os
 import sys
-from submodule.device_manager import DeviceManager
+from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device import ModuleType
 from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
@@ -382,7 +382,7 @@ def main():
 
     # Parse Device XML file into Device List
     global devicemanager
-    devicemanager = DeviceManager(args.device_file)
+    devicemanager = RsDeviceManager(args.device_file)
 
     # Start Rest API server
     app.run(debug=args.debug, port=args.port)

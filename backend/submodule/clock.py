@@ -5,6 +5,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
+from submodule.rs_device_resources import ModuleType
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -133,6 +134,20 @@ class Clock_SubModule:
                 total_pll_used += 1
         return total_pll_used
 
+    def get_clock_fanout(self, clock):
+        total_fanout = 0
+
+        # fabric logic element
+        mod = self.resources.get_module(ModuleType.FABRIC_LE)
+        if mod is not None:
+            for item in mod.get_all():
+                if item.clock == clock:
+                    total_fanout += item.flip_flop
+        
+        # todo: other modules
+        
+        return total_fanout
+
     def compute_output_power(self):
         # Get device power coefficients
         VCC_CORE    = self.resources.get_VCC_CORE()
@@ -151,7 +166,7 @@ class Clock_SubModule:
         
         # Compute the power consumption for each individual clocks
         for item in self.itemlist:
-            item.compute_dynamic_power(self.resources.get_clocking_fanout(item.port), CLK_CAP, CLK_INT_CAP)
+            item.compute_dynamic_power(self.get_clock_fanout(item.port), CLK_CAP, CLK_INT_CAP)
             self.total_interconnect_power += item.output.interconnect_power
             self.total_clock_power += item.output.block_power
 

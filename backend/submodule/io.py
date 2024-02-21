@@ -220,8 +220,8 @@ class IO_SubModule:
 
     def remove(self, idx):
         if 0 <= idx < len(self.itemlist):
-            removed_item = self.itemlist.pop(idx)
-            return removed_item
+            item = self.itemlist.pop(idx)
+            return item
         else:
             raise ValueError("Invalid index. Item doesn't exist at the specified index.")
 

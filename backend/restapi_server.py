@@ -287,7 +287,7 @@ def delete_device_bram(device_id, row_number):
 def get_device_bram_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.BRAM, device_id)
-        res = devicemanager.get_device_resources(ModuleType.BRAM, device_id)
+        res = devicemanager.get_resources(ModuleType.BRAM, device_id)
         data = {
             "total_18k_bram_available": res[1],
             "total_18k_bram_used": res[0],

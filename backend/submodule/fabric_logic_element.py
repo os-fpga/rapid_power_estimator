@@ -104,13 +104,13 @@ class Fabric_LE:
         
 class Fabric_LE_SubModule:
 
-    def __init__(self, resources, fabric_les):
+    def __init__(self, resources, itemlist):
         self.resources = resources
         self.total_lut6_available = resources.get_num_LUTs()
         self.total_flipflop_available = resources.get_num_FFs()
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
-        self.fabric_les = fabric_les
+        self.itemlist = itemlist
 
     def get_power_consumption(self):
         return self.total_block_power, self.total_interconnect_power
@@ -118,38 +118,38 @@ class Fabric_LE_SubModule:
     def get_resources(self):
         total_lut6_used = 0
         total_flipflop_used = 0
-        for fabric_le in self.fabric_les:
-            total_lut6_used += fabric_le.lut6
-            total_flipflop_used += fabric_le.flip_flop
+        for item in self.itemlist:
+            total_lut6_used += item.lut6
+            total_flipflop_used += item.flip_flop
         return total_lut6_used, self.total_lut6_available, total_flipflop_used, self.total_flipflop_available
     
     def get_all(self):
-        return self.fabric_les
+        return self.itemlist
     
     def get(self, idx):
-        if 0 <= idx < len(self.fabric_les):
-            return self.fabric_les[idx]
+        if 0 <= idx < len(self.itemlist):
+            return self.itemlist[idx]
         else:
             raise ValueError("Invalid index. Fabric LEs doesn't exist at the specified index.")
         
-    def add(self, fabric_le_data):
+    def add(self, data):
         # check if the fabric_le already exists based on the description
-        if any(existing_fabric_le.name == fabric_le_data["name"] for existing_fabric_le in self.fabric_les):
+        if any(item.name == data["name"] for item in self.itemlist):
             raise ValueError("Fabric LE with same description already exists.")
-        fabric_le = update_attributes(Fabric_LE(), fabric_le_data)
-        self.fabric_les.append(fabric_le)
-        return fabric_le
+        item = update_attributes(Fabric_LE(), data)
+        self.itemlist.append(item)
+        return item
     
     def remove(self, idx):
-        if 0 <= idx < len(self.fabric_les):
-            removed_fabric_le = self.fabric_les.pop(idx)
-            return removed_fabric_le
+        if 0 <= idx < len(self.itemlist):
+            item = self.itemlist.pop(idx)
+            return item
         else:
             raise ValueError("Invalid index. Fabric LE doesn't exist at the specified index.")
         
-    def update(self, idx, fabric_le_data):
-        updated_fabric_le = update_attributes(self.get(idx), fabric_le_data)
-        return updated_fabric_le
+    def update(self, idx, data):
+        item = update_attributes(self.get(idx), data)
+        return item
 
     def compute_output_power(self):
         # Get device power coefficients
@@ -165,12 +165,12 @@ class Fabric_LE_SubModule:
         self.total_interconnect_power = 0.0
 
         # Compute the power consumption for each individual logic element
-        for fle in self.fabric_les:
-            fle.compute_dynamic_power(self.resources.get_clock(fle.clock), VCC_CORE, LUT_CAP, FF_CAP, FF_CLK_CAP, LUT_INT_CAP, FF_INT_CAP)
-            self.total_block_power += fle.output.block_power
-            self.total_interconnect_power += fle.output.interconnect_power
+        for item in self.itemlist:
+            item.compute_dynamic_power(self.resources.get_clock(item.clock), VCC_CORE, LUT_CAP, FF_CAP, FF_CLK_CAP, LUT_INT_CAP, FF_INT_CAP)
+            self.total_block_power += item.output.block_power
+            self.total_interconnect_power += item.output.interconnect_power
 
         # Update individual logic element percentage
         total_power = self.total_block_power + self.total_interconnect_power
-        for fle in self.fabric_les:
-            fle.compute_percentage(total_power)
+        for item in self.itemlist:
+            item.compute_percentage(total_power)

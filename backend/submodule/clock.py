@@ -73,14 +73,14 @@ class Clock:
 
 class Clock_SubModule:
 
-    def __init__(self, resources, clocks):
+    def __init__(self, resources, itemlist):
         self.resources = resources
         self.total_clock_available = resources.get_num_Clocks()
         self.total_pll_available = resources.get_num_PLLs()
         self.total_clock_power = 0.0
         self.total_interconnect_power = 0.0
         self.total_pll_power = 0.0
-        self.clocks = clocks
+        self.itemlist = itemlist
 
     def get_power_consumption(self):
         return self.total_clock_power, self.total_interconnect_power, self.total_pll_power
@@ -89,46 +89,46 @@ class Clock_SubModule:
         return self.total_clock_available, self.total_pll_available, self.get_total_clock_used(), self.get_total_pll_used()
 
     def get_all(self):
-        return self.clocks
+        return self.itemlist
     
     def get(self, idx):
-        if 0 <= idx < len(self.clocks):
-            return self.clocks[idx]
+        if 0 <= idx < len(self.itemlist):
+            return self.itemlist[idx]
         else:
             raise ValueError("Invalid index. Clock doesn't exist at the specified index.")
 
-    def add(self, clock_data):
+    def add(self, data):
         # Check if the clock already exists based on the ID
-        if any(existing_clock.description == clock_data["description"] 
-                or existing_clock.port == clock_data["port"]  for existing_clock in self.clocks):
+        if any(item.description == data["description"]
+                or item.port == data["port"]  for item in self.itemlist):
             raise ValueError("Clock description or port already exists in the list of clocks.")
-        if len(self.clocks) >= self.total_clock_available:
+        if len(self.itemlist) >= self.total_clock_available:
             raise ValueError("Maximum no. of clocks reached")
-        clock = update_attributes(Clock(), clock_data)
-        self.clocks.append(clock)
-        return clock
+        item = update_attributes(Clock(), data)
+        self.itemlist.append(item)
+        return item
 
     def remove(self, idx):
-        if 0 <= idx < len(self.clocks):
-            removed_dsp = self.clocks.pop(idx)
-            return removed_dsp
+        if 0 <= idx < len(self.itemlist):
+            item = self.itemlist.pop(idx)
+            return item
         else:
             raise ValueError("Invalid index. Clock doesn't exist at the specified index.")
 
-    def update(self, idx, clock_data):
-        clock = update_attributes(self.get(idx), clock_data)
-        return clock
+    def update(self, idx, data):
+        item = update_attributes(self.get(idx), data)
+        return item
 
     def get_total_clock_used(self):
         total_clock_used = 0
-        for clock in self.clocks:
+        for clock in self.itemlist:
             if clock.enable == True and clock.state == Clock_State.ACTIVE:
                 total_clock_used += 1
         return total_clock_used
 
     def get_total_pll_used(self):
         total_pll_used = 0
-        for clock in self.clocks:
+        for clock in self.itemlist:
             if clock.source in (Source.PLL0_FABRIC, Source.PLL1_FABRIC):
                 total_pll_used += 1
         return total_pll_used
@@ -150,12 +150,12 @@ class Clock_SubModule:
         self.total_pll_power = self.get_total_pll_used() * ((PLL_INT * VCC_CORE ** 2) + (PLL_AUX * VCC_AUX ** 2))
         
         # Compute the power consumption for each individual clocks
-        for clock in self.clocks:
-            clock.compute_dynamic_power(self.resources.get_clocking_fanout(clock.port), CLK_CAP, CLK_INT_CAP)
-            self.total_interconnect_power += clock.output.interconnect_power
-            self.total_clock_power += clock.output.block_power
+        for item in self.itemlist:
+            item.compute_dynamic_power(self.resources.get_clocking_fanout(item.port), CLK_CAP, CLK_INT_CAP)
+            self.total_interconnect_power += item.output.interconnect_power
+            self.total_clock_power += item.output.block_power
 
         # update individual clock percentage
         total_power = self.total_clock_power + self.total_interconnect_power + self.total_pll_power
-        for clock in self.clocks:
-            clock.compute_percentage(total_power)
+        for item in self.itemlist:
+            item.compute_percentage(total_power)

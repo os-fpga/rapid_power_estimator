@@ -12,6 +12,7 @@ from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesCons
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
+from schema.device_io_schemas import IoSchema, IoResourcesConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -296,6 +297,69 @@ def get_device_bram_power_consumption(device_id):
             "total_bram_interconnect_power" : consumption[1]
         }
         schema = BramResourcesConsumptionSchema()
+        return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+#
+# Device IO APIs
+#
+@app.route('/devices/<device_id>/io', methods=['GET'], strict_slashes=False)
+def get_device_io_all(device_id):
+    try:
+        itemlist = devicemanager.get_all(ModuleType.IO, device_id)
+        schema = IoSchema(many=True)
+        return schema.dump(itemlist)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/io', methods=['POST'], strict_slashes=False)
+def add_device_io(device_id):
+    try:
+        schema = IoSchema()
+        item = devicemanager.add(ModuleType.IO, device_id, schema.load(request.json))
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/io/<int:row_number>', methods=['GET'], strict_slashes=False)
+def get_device_io(device_id, row_number):
+    try:
+        item = devicemanager.get(ModuleType.IO, device_id, row_number)
+        schema = IoSchema()
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/io/<int:row_number>', methods=['PATCH'], strict_slashes=False)
+def update_device_io(device_id, row_number):
+    try:
+        schema = IoSchema()
+        updated_item = devicemanager.update(ModuleType.IO, device_id, row_number, schema.load(request.json))
+        return schema.dump(updated_item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/io/<int:row_number>', methods=['DELETE'], strict_slashes=False)
+def delete_device_io(device_id, row_number):
+    try:
+        removed_item = devicemanager.remove(ModuleType.IO, device_id, row_number)
+        schema = IoSchema()
+        return schema.dump(removed_item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/io/consumption', methods=['GET'], strict_slashes=False)
+def get_device_io_power_consumption(device_id):
+    try:
+        consumption = devicemanager.get_power_consumption(ModuleType.IO, device_id)
+        # todo
+        # res = devicemanager.get_device_resources(ModuleType.IO, device_id)
+        data = {
+            "total_block_power" : consumption[0],
+            "total_interconnect_power" : consumption[1]
+        }
+        schema = IoResourcesConsumptionSchema()
         return schema.dump(data)
     except ValueError as e:
         return f"Error: {e}", 404

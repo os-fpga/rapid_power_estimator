@@ -6,6 +6,7 @@ from submodule.clock import Clock_SubModule, Clock
 from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
 from submodule.dsp import DSP_SubModule, DSP
 from submodule.bram import BRAM_SubModule, BRAM
+from submodule.io import IO_SubModule, IO
 from enum import Enum
 
 class ModuleType(Enum):
@@ -182,6 +183,12 @@ class RsDevice:
         self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
             BRAM(name="test 1", bram_used=11),
             BRAM(name="test 2", bram_used=17)
+        ]))
+
+        # io module
+        self.resources.register_module(ModuleType.IO, IO_SubModule(self.resources, [
+            IO(name="test 1"),
+            IO(name="test 2")
         ]))
 
         # clocking module

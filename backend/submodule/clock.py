@@ -4,8 +4,9 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from utilities.common_utils import update_attributes
-from submodule.rs_device_resources import ModuleType
+
+from backend.utilities.common_utils import update_attributes
+from backend.submodule.rs_device_resources import ModuleType
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -59,6 +60,8 @@ class Clock:
             self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
         else:
             self.output.percentage = 0.0
+
+        return self.output.percentage
 
     def compute_dynamic_power(self, fan_out, clock_cap_block, clock_cap_interconnect) -> float:
         if self.enable == True and self.state == Clock_State.ACTIVE:

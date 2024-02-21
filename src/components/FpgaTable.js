@@ -4,25 +4,25 @@ import { Table, fixed } from "../assets/common";
 import "./style/FpgaTable.css"
 import { dsp } from "../assets/serverAPI";
 
-function FpgaTable({clocking, fle, dsp, tableOpen}) {
-    return <div className="fpgaMain">
-        <div><label>FPGA</label></div>
-        <div><label>info</label></div>
-        <table className="fpgaTable">
-            <tbody>
-                <tr>
-                    <td className="td-fpga-table"><div className="fpga-table-btn" onClick={() => tableOpen(Table.Clocking)}>Clocking<br/>{fixed(clocking)} W</div></td>
-                    <td className="td-fpga-table"><div className="fpga-table-btn" onClick={() => tableOpen(Table.FLE)}>FLE<br/>{fixed(fle)} W</div></td>
-                </tr>
-                <tr>
-                    <td className="td-fpga-table"><div className="fpga-table-btn" onClick={() => tableOpen(Table.BRAM)}>BRAM</div></td>
-                    <td className="td-fpga-table"><div className="fpga-table-btn" onClick={() => tableOpen(Table.DSP)}>DSP<br/>{fixed(dsp)} W</div></td>
-                </tr>
-                <tr>
-                    <td className="td-fpga-table" colSpan={2}><div className="fpga-table-btn" onClick={() => tableOpen(Table.IO)}>IO</div></td>
-                </tr>
-            </tbody>
-        </table>
+function FpgaTable({ clocking, fle, dsp, tableOpen }) {
+    return <div className="fpga-main">
+        <div className="fpga-main-head">
+            <div><label>FPGA</label></div>
+            <div><label>info</label></div>
+            <div><label>info</label></div>
+            <div><label>info</label></div>
+        </div>
+        <div className="fpga-rowx">
+            <div className="clickable" onClick={() => tableOpen(Table.Clocking)}>Clocking<br />{fixed(clocking)} W</div>
+            <div className="clickable" onClick={() => tableOpen(Table.FLE)}>FLE<br />{fixed(fle)} W</div>
+        </div>
+        <div className="fpga-rowx">
+            <div className="clickable" onClick={() => tableOpen(Table.BRAM)}>BRAM</div>
+            <div className="clickable" onClick={() => tableOpen(Table.DSP)}>DSP<br />{fixed(dsp)} W</div>
+        </div>
+        <div className="fpga-rowx">
+            <div className="clickable" id="io" onClick={() => tableOpen(Table.IO)}>IO</div>
+        </div>
     </div>;
 }
 

@@ -1,22 +1,27 @@
-.fpgaTable {
-    width: 100%;
-    text-align: center;
+.fpga-main {
+    display: flex;
+    row-gap: 8px;
+    flex-direction: column;
+    padding: 8px;
     background-color: #efefef;
-    /* gap: 10px; */
 }
 
-.fpga-table-btn {
-    /* border: 1px solid; */
+.fpga-main-head {}
+
+.fpga-rowx {
+    display: flex;
+    flex-direction: row;
+    column-gap: 8px;
+}
+
+.clickable {
     cursor: pointer;
-    background-color: lightgreen;
-    height: 100%;
-    align-content: center;
+    background-color: #9fdda9;
+    padding: 5px;
     min-width: 85px;
     min-height: 75px;
-    padding: 5px;
 }
 
-.fpgaMain {
-    background-color: #efefef;
-    max-width: min-content;
+#io {
+    width: 100%;
 }

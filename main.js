@@ -2,12 +2,18 @@ const { app, BrowserWindow } = require("electron");
 const { spawn } = require("child_process");
 const path = require("node:path");
 
+const config = require("./rpe.config.json")
+
 const startFlaskServer = () => {
-  const device_xml = path.join(__dirname, "backend/etc/device.xml");
-  const apiServer = spawn(`python`, [
+
+  const device_xml = path.join(__dirname, config.device_xml);
+  var args = [
     path.join(__dirname, "backend/restapi_server.py"),
-    device_xml,
-  ]);
+    device_xml, "--port", config.port
+  ];
+  if (config.debug === 1)
+    args.push("--debug");
+  const apiServer = spawn(`python`, args);
 
   apiServer.stdout.on("data", (data) => {
     console.log(`stdout:\n${data}`);
@@ -33,7 +39,7 @@ const startFlaskServer = () => {
 };
 
 const createWindow = () => {
-  const win = new BrowserWindow({ width: 1000, height: 600 });
+  const win = new BrowserWindow({ width: 1100, height: 700 });
   win.loadFile("dist/index.html");
 };
 

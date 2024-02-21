@@ -1,3 +1,7 @@
+.dev-table-container {
+    padding: 4px;
+}
+
 .devLabel {
     color: dimgray;
 }

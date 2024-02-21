@@ -1,48 +1,90 @@
-.main {
-    border-style: solid;
+.app-main-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
 }
 
-td.mainCell {
-    /* border: 1px solid; */
-    width: 33%;
+.top-container {
+    border: 2px solid black;
 }
 
-td.secCell {
-    /* border: 1px solid; */
-    width: 50%;
+.top-l1 {
+    border-bottom: 2px solid #908f8f;
 }
 
-.cpu-layout {
-    display: block;
+.top-l2 {
+    display: flex;
+    flex-direction: row;
+    column-gap: 8px;
+    margin: 8px;
 }
 
-.acpu-layout {
-    /* border: solid; */
-    display: inline-block;
-    width: 33%;
+.top-l2-col1 {
+    display: flex;
+    min-height: 10px;
+    width: fit-content;
+    flex-direction: column;
+    row-gap: 8px;
+    background-color: #f2f2f2;
 }
 
-.bcpu-layout {
-    /* border: solid; */
-    display: inline;
-    width: 33%;
+.top-l2-col2 {
+    flex-direction: column;
+    width: fit-content;
+    display: flex;
+    min-height: 10px;
+    row-gap: 8px;
 }
 
-.soc-layout {
-    /* border: solid; */
-    display: inline;
-    width: 33%;
+.top-l2-col1-row1 {
+    display: flex;
+    flex-direction: row;
+    column-gap: 8px;
 }
 
-.soc-layout-main {
-    float: left;
-    /* border: solid; */
+.top-l2-col1-row2 {
+    display: flex;
+    flex-direction: row;
+    column-gap: 8px;
+    min-height: 130px;
 }
 
-.fpga-layout-main {
-    display: block;
+.top-l2-col1-row1-elem {
+    min-width: 160px;
+    min-height: 120px;
 }
 
-.no-wrap {
-    white-space: nowrap;
+.top-l2-col1-row2-elem {
+    min-height: 130px;
+    width: 100%;
+}
+
+.top-l2-col2-elem {
+    min-height: 90px;
+}
+
+.top-l2-col1-row3 {
+    display: flex;
+    height: 100%;
+    background-color: #dbdbdb;
+    padding: 8px;
+    flex-direction: column;
+    row-gap: 6px;
+}
+
+.hspacer {
+    min-height: 5px;
+}
+
+.power-tables {
+    display: flex;
+    flex-direction: column;
+    /* height: 100%; */
+}
+
+.placeholder {
+    border: 1px solid;
+    min-height: 100px;
+    text-align: center;
+    flex-grow: 1;
 }

@@ -126,5 +126,5 @@ class BRAM_SubModule:
         else:
             raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
 
-    def compute_ouput_power(self):
+    def compute_output_power(self):
         pass

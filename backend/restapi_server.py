@@ -6,6 +6,7 @@ import argparse
 import os
 import sys
 from submodule.device_manager import DeviceManager
+from submodule.rs_device import ModuleType
 from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
@@ -42,9 +43,9 @@ def get_device(device_id):
 @app.route('/devices/<device_id>/clocking', methods=['GET'], strict_slashes=False)
 def get_device_clocking_all(device_id):
     try:
-        clocks = devicemanager.get_device_clocking_all(device_id)
+        itemlist = devicemanager.get_all(ModuleType.CLOCKING, device_id)
         schema = ClockingSchema(many=True)
-        return schema.dump(clocks)
+        return schema.dump(itemlist)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -52,18 +53,17 @@ def get_device_clocking_all(device_id):
 def add_device_clocking(device_id):
     try:
         schema = ClockingSchema()
-        data = schema.load(request.json)
-        clock = devicemanager.add_device_clocking(device_id, data)
-        return schema.dump(clock)
+        item = devicemanager.add(ModuleType.CLOCKING, device_id, schema.load(request.json))
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/clocking/<int:row_number>', methods=['GET'], strict_slashes=False)
 def get_device_clocking(device_id, row_number):
     try:
-        clock = devicemanager.get_device_clocking(device_id, row_number)
+        item = devicemanager.get(ModuleType.CLOCKING, device_id, row_number)
         schema = ClockingSchema()
-        return schema.dump(clock)
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -71,26 +71,25 @@ def get_device_clocking(device_id, row_number):
 def update_device_clocking(device_id, row_number):
     try:
         schema = ClockingSchema()
-        data = schema.load(request.json)
-        updated_clock = devicemanager.update_device_clocking(device_id, row_number, data)
-        return schema.dump(updated_clock)
+        updated_item = devicemanager.update(ModuleType.CLOCKING, device_id, row_number, schema.load(request.json))
+        return schema.dump(updated_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/clocking/<int:row_number>', methods=['DELETE'], strict_slashes=False)
 def delete_device_clocking(device_id, row_number):
     try:
-        deleted_clock = devicemanager.delete_device_clocking(device_id, row_number)
+        removed_item = devicemanager.remove(ModuleType.CLOCKING, device_id, row_number)
         schema = ClockingSchema()
-        return schema.dump(deleted_clock)
+        return schema.dump(removed_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/clocking/consumption', methods=['GET'], strict_slashes=False)
 def get_device_clocking_power_consumption(device_id):
     try:
-        consumption = devicemanager.get_device_clocking_power_consumption(device_id)
-        res = devicemanager.get_device_clocking_resources(device_id)
+        consumption = devicemanager.get_power_consumption(ModuleType.CLOCKING, device_id)
+        res = devicemanager.get_resources(ModuleType.CLOCKING, device_id)
         data = {
             'total_clocks_available': res[0],
             'total_clocks_used': res[2],
@@ -111,9 +110,9 @@ def get_device_clocking_power_consumption(device_id):
 @app.route('/devices/<device_id>/fabric_le', methods=['GET'], strict_slashes=False)
 def get_device_fabric_le_all(device_id):
     try:
-        fabric_les = devicemanager.get_device_fabric_le_all(device_id)
+        itemlist = devicemanager.get_all(ModuleType.FABRIC_LE, device_id)
         schema = FabricLogicElementSchema(many=True)
-        return schema.dump(fabric_les)
+        return schema.dump(itemlist)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -121,18 +120,17 @@ def get_device_fabric_le_all(device_id):
 def add_device_fabric_le(device_id):
     try:
         schema = FabricLogicElementSchema()
-        data = schema.load(request.json)
-        clock = devicemanager.add_device_fabric_le(device_id, data)
-        return schema.dump(clock)
+        item = devicemanager.add(ModuleType.FABRIC_LE, device_id, schema.load(request.json))
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/fabric_le/<int:row_number>', methods=['GET'], strict_slashes=False)
 def get_device_fabric_le(device_id, row_number):
     try:
-        fabric_le = devicemanager.get_device_fabric_le(device_id, row_number)
+        item = devicemanager.get(ModuleType.FABRIC_LE, device_id, row_number)
         schema = FabricLogicElementSchema()
-        return schema.dump(fabric_le)
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -140,31 +138,30 @@ def get_device_fabric_le(device_id, row_number):
 def update_device_fabric_le(device_id, row_number):
     try:
         schema = FabricLogicElementSchema()
-        data = schema.load(request.json)
-        fabric_le = devicemanager.update_device_fabric_le(device_id, row_number, data)
-        return schema.dump(fabric_le)
+        updated_item = devicemanager.update(ModuleType.FABRIC_LE, device_id, row_number, schema.load(request.json))
+        return schema.dump(updated_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/fabric_le/<int:row_number>', methods=['DELETE'], strict_slashes=False)
 def delete_device_fabric_le(device_id, row_number):
     try:
-        deleted_fabric_le = devicemanager.delete_device_fabric_le(device_id, row_number)
+        removed_item = devicemanager.remove(ModuleType.FABRIC_LE, device_id, row_number)
         schema = FabricLogicElementSchema()
-        return schema.dump(deleted_fabric_le)
+        return schema.dump(removed_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/fabric_le/consumption', methods=['GET'], strict_slashes=False)
 def get_device_fabric_le_power_consumption(device_id):
     try:
-        consumption = devicemanager.get_device_fabric_le_power_consumption(device_id)
-        res = devicemanager.get_device_fabric_le_resources(device_id)
+        consumption = devicemanager.get_power_consumption(ModuleType.FABRIC_LE, device_id)
+        res = devicemanager.get_resources(ModuleType.FABRIC_LE, device_id)
         data = {
-            "total_lut6_available": res[2],
+            "total_lut6_available": res[1],
             "total_lut6_used": res[0],
-            "total_flip_flop_available" : res[6],
-            "total_flip_flop_used" : res[4],
+            "total_flip_flop_available" : res[3],
+            "total_flip_flop_used" : res[2],
             "total_block_power": consumption[0],
             "total_interconnect_power": consumption[1]
         }
@@ -179,9 +176,9 @@ def get_device_fabric_le_power_consumption(device_id):
 @app.route('/devices/<device_id>/dsp', methods=['GET'], strict_slashes=False)
 def get_device_dsp_all(device_id):
     try:
-        dsplist = devicemanager.get_device_dsp_all(device_id)
+        itemlist = devicemanager.get_all(ModuleType.DSP, device_id)
         schema = DspSchema(many=True)
-        return schema.dump(dsplist)
+        return schema.dump(itemlist)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -189,18 +186,17 @@ def get_device_dsp_all(device_id):
 def add_device_dsp(device_id):
     try:
         schema = DspSchema()
-        data = schema.load(request.json)
-        dsp = devicemanager.add_device_dsp(device_id, data)
-        return schema.dump(dsp)
+        item = devicemanager.add(ModuleType.DSP, device_id, schema.load(request.json))
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/dsp/<int:row_number>', methods=['GET'], strict_slashes=False)
 def get_device_dsp(device_id, row_number):
     try:
-        dsp = devicemanager.get_device_dsp(device_id, row_number)
+        item = devicemanager.get(ModuleType.DSP, device_id, row_number)
         schema = DspSchema()
-        return schema.dump(dsp)
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -208,26 +204,25 @@ def get_device_dsp(device_id, row_number):
 def update_device_dsp(device_id, row_number):
     try:
         schema = DspSchema()
-        data = schema.load(request.json)
-        updated_dsp = devicemanager.update_device_dsp(device_id, row_number, data)
-        return schema.dump(updated_dsp)
+        updated_item = devicemanager.update(ModuleType.DSP, device_id, row_number, schema.load(request.json))
+        return schema.dump(updated_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/dsp/<int:row_number>', methods=['DELETE'], strict_slashes=False)
 def delete_device_dsp(device_id, row_number):
     try:
-        deleted_dsp = devicemanager.delete_device_dsp(device_id, row_number)
+        removed_item = devicemanager.remove(ModuleType.DSP, device_id, row_number)
         schema = DspSchema()
-        return schema.dump(deleted_dsp)
+        return schema.dump(removed_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/dsp/consumption', methods=['GET'], strict_slashes=False)
 def get_device_dsp_power_consumption(device_id):
     try:
-        consumption = devicemanager.get_device_dsp_power_consumption(device_id)
-        res = devicemanager.get_device_dsp_resources(device_id)
+        consumption = devicemanager.get_power_consumption(ModuleType.DSP, device_id)
+        res = devicemanager.get_resources(ModuleType.DSP, device_id)
         data = {
             "total_dsp_blocks_available": res[1],
             "total_dsp_blocks_used": res[0],
@@ -245,9 +240,9 @@ def get_device_dsp_power_consumption(device_id):
 @app.route('/devices/<device_id>/bram', methods=['GET'], strict_slashes=False)
 def get_device_bram_all(device_id):
     try:
-        bramlist = devicemanager.get_device_bram_all(device_id)
+        itemlist = devicemanager.get_all(ModuleType.BRAM, device_id)
         schema = BramSchema(many=True)
-        return schema.dump(bramlist)
+        return schema.dump(itemlist)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -255,18 +250,17 @@ def get_device_bram_all(device_id):
 def add_device_bram(device_id):
     try:
         schema = BramSchema()
-        data = schema.load(request.json)
-        bram = devicemanager.add_device_bram(device_id, data)
-        return schema.dump(bram)
+        item = devicemanager.add(ModuleType.BRAM, device_id, schema.load(request.json))
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/bram/<int:row_number>', methods=['GET'], strict_slashes=False)
 def get_device_bram(device_id, row_number):
     try:
-        bram = devicemanager.get_device_bram(device_id, row_number)
+        item = devicemanager.get(ModuleType.BRAM, device_id, row_number)
         schema = BramSchema()
-        return schema.dump(bram)
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
@@ -274,26 +268,25 @@ def get_device_bram(device_id, row_number):
 def update_device_bram(device_id, row_number):
     try:
         schema = BramSchema()
-        data = schema.load(request.json)
-        updated_bram = devicemanager.update_device_bram(device_id, row_number, data)
-        return schema.dump(updated_bram)
+        updated_item = devicemanager.update(ModuleType.BRAM, device_id, row_number, schema.load(request.json))
+        return schema.dump(updated_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/bram/<int:row_number>', methods=['DELETE'], strict_slashes=False)
 def delete_device_bram(device_id, row_number):
     try:
-        deleted_bram = devicemanager.delete_device_bram(device_id, row_number)
+        removed_item = devicemanager.remove(ModuleType.BRAM, device_id, row_number)
         schema = BramSchema()
-        return schema.dump(deleted_bram)
+        return schema.dump(removed_item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/bram/consumption', methods=['GET'], strict_slashes=False)
 def get_device_bram_power_consumption(device_id):
     try:
-        consumption = devicemanager.get_device_bram_power_consumption(device_id)
-        res = devicemanager.get_device_bram_resources(device_id)
+        consumption = devicemanager.get_power_consumption(ModuleType.BRAM, device_id)
+        res = devicemanager.get_device_resources(ModuleType.BRAM, device_id)
         data = {
             "total_18k_bram_available": res[1],
             "total_18k_bram_used": res[0],

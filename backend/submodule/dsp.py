@@ -93,14 +93,14 @@ class DSP_SubModule:
 
     def __init__(self, resources, dsplist):
         self.resources = resources
-        self.total_dsp_blocks = resources.get_num_DSP_BLOCKs()
+        self.total_dsp_blocks_available = resources.get_num_DSP_BLOCKs()
         self.dsplist = dsplist
 
     def get_resources(self):
         total_dsp_blocks_used = 0
         for dsp in self.dsplist:
             total_dsp_blocks_used += dsp.number_of_multipliers
-        return total_dsp_blocks_used, self.total_dsp_blocks
+        return total_dsp_blocks_used, self.total_dsp_blocks_available
 
     def get_power_consumption(self):
         # todo
@@ -131,5 +131,5 @@ class DSP_SubModule:
         else:
             raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
 
-    def compute_ouput_power(self):
+    def compute_output_power(self):
         pass

@@ -126,16 +126,19 @@ class RsDeviceResources:
         self.modules[modtype.value] = module
         return module
 
+    def get_modules(self):
+        return self.modules
+
     def get_module(self, modtype):
         return self.modules[modtype.value]
 
     def get_clocking_fanout(self, clkname):
         total_fanout = 0
-
+        # todo move to clock submodule
         # fabric logic element module
         fabric_le_module = self.get_module(ModuleType.FABRIC_LE)
         if fabric_le_module is not None:
-            for fle in fabric_le_module.get_fabric_les():
+            for fle in fabric_le_module.get_all():
                 if fle.clock == clkname:
                     total_fanout += fle.flip_flop
         
@@ -146,7 +149,7 @@ class RsDeviceResources:
     def get_clock(self, clkname):
         clock_module = self.get_module(ModuleType.CLOCKING)
         if clock_module != None:
-            for clock in clock_module.get_clocks():
+            for clock in clock_module.get_all():
                 if clock.port == clkname:
                     return clock
         return None
@@ -164,31 +167,33 @@ class RsDevice:
         self.temperature_grade = self.resources.get_temperature_grade()
 
         # fabric logic element module
-        self.fabric_le_module = self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
+        self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
             Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=20, flip_flop=50),
             Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=10, flip_flop=30)
         ]))
 
         # dsp module
-        self.dsp_module = self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
+        self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
             DSP(number_of_multipliers=11, enable=True, name="test test 1"),
             DSP(number_of_multipliers=12, enable=True, name="test test 2")
         ]))
 
         # bram module
-        self.bram_module = self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
+        self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
             BRAM(name="test 1", bram_used=11),
             BRAM(name="test 2", bram_used=17)
         ]))
 
         # clocking module
-        self.clock_module = self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, [
+        self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, [
             Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
             Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
 
         # perform initial calculation
-        self.fabric_le_module.compute_fabric_le_output_power()
-        self.clock_module.compute_clocks_output_power()
-        self.dsp_module.compute_ouput_power()
-        self.bram_module.compute_ouput_power()
+        for mod in self.resources.get_modules():
+            if mod is not None:
+                mod.compute_output_power()
+
+    def get_module(self, modtype):
+        return self.resources.get_module(modtype)

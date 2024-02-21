@@ -22,114 +22,32 @@ class DeviceManager:
                 return device
         raise ValueError(f"Device Id '{device_id}' not found")
 
-    def get_device_clocking_all(self, device_id):
-        device = self.get_device(device_id)
-        return device.clock_module.get_clocks()
+    def get_all(self, modtype, device_id):
+        return self.get_device(device_id).get_module(modtype).get_all()
 
-    def add_device_clocking(self, device_id, data):
-        device = self.get_device(device_id)
-        return device.clock_module.add_clock(data)
+    def add(self, modtype, device_id, data):
+        module = self.get_device(device_id).get_module(modtype)
+        item = module.add(data)
+        module.compute_output_power()
+        return item
 
-    def get_device_clocking(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.clock_module.get_clock(row_number)
+    def get(self, modtype, device_id, row_number):
+        return self.get_device(device_id).get_module(modtype).get(row_number)
 
-    def update_device_clocking(self, device_id, row_number, data):
-        device = self.get_device(device_id)
-        return device.clock_module.update_clock(row_number, data)
+    def update(self, modtype, device_id, row_number, data):
+        module = self.get_device(device_id).get_module(modtype)
+        updated_item = module.update(row_number, data)
+        module.compute_output_power()
+        return updated_item
 
-    def delete_device_clocking(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.clock_module.delete_clock(row_number)
+    def remove(self, modtype, device_id, row_number):
+        module = self.get_device(device_id).get_module(modtype)
+        removed_item = module.remove(row_number)
+        module.compute_output_power()
+        return removed_item
 
-    def get_device_clocking_power_consumption(self, device_id):
-        device = self.get_device(device_id)
-        return device.clock_module.compute_clocks_output_power()
+    def get_power_consumption(self, modtype, device_id):
+        return self.get_device(device_id).get_module(modtype).get_power_consumption()
 
-    def get_device_clocking_resources(self, device_id):
-        device = self.get_device(device_id)
-        return device.clock_module.get_clocking_resources()
-
-    def get_device_fabric_le_all(self, device_id):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.get_fabric_les()
-
-    def get_device_fabric_le(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.get_fabric_le(row_number)
-
-    def add_device_fabric_le(self, device_id, data):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.add_fabric_le(data)
-
-    def update_device_fabric_le(self, device_id, row_number, data):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.update_fabric_le(row_number, data)
-
-    def delete_device_fabric_le(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.delete_fabric_le(row_number)
-
-    def get_device_fabric_le_power_consumption(self, device_id):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.compute_fabric_le_output_power()
-
-    def get_device_fabric_le_resources(self, device_id):
-        device = self.get_device(device_id)
-        return device.fabric_le_module.get_fabric_le_resources()
-
-    def get_device_dsp_all(self, device_id):
-        device = self.get_device(device_id)
-        return device.dsp_module.get_all()
-
-    def get_device_dsp(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.dsp_module.get(row_number)
-
-    def add_device_dsp(self, device_id, data):
-        device = self.get_device(device_id)
-        return device.dsp_module.add(data)
-
-    def update_device_dsp(self, device_id, row_number, data):
-        device = self.get_device(device_id)
-        return device.dsp_module.update(row_number, data)
-
-    def delete_device_dsp(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.dsp_module.remove(row_number)
-
-    def get_device_dsp_power_consumption(self, device_id):
-        device = self.get_device(device_id)
-        return device.dsp_module.get_power_consumption()
-
-    def get_device_dsp_resources(self, device_id):
-        device = self.get_device(device_id)
-        return device.dsp_module.get_resources()
-
-    def get_device_bram_all(self, device_id):
-        device = self.get_device(device_id)
-        return device.bram_module.get_all()
-
-    def get_device_bram(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.bram_module.get(row_number)
-
-    def add_device_bram(self, device_id, data):
-        device = self.get_device(device_id)
-        return device.bram_module.add(data)
-
-    def update_device_bram(self, device_id, row_number, data):
-        device = self.get_device(device_id)
-        return device.bram_module.update(row_number, data)
-
-    def delete_device_bram(self, device_id, row_number):
-        device = self.get_device(device_id)
-        return device.bram_module.remove(row_number)
-
-    def get_device_bram_power_consumption(self, device_id):
-        device = self.get_device(device_id)
-        return device.bram_module.get_power_consumption()
-
-    def get_device_bram_resources(self, device_id):
-        device = self.get_device(device_id)
-        return device.bram_module.get_resources()
+    def get_resources(self, modtype, device_id):
+        return self.get_device(device_id).get_module(modtype).get_resources()

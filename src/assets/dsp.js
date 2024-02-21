@@ -5,8 +5,8 @@ export const dsp_mode = [
 ];
 
 export const pipelining = [
-    { id: 0, text: "INPUT_AND_OUTPUT" },
-    { id: 1, text: "INPUT_ONLY" },
-    { id: 2, text: "OUTPUT_ONLY" },
-    { id: 3, text: "NONE" },
+    { id: 0, text: "Input and Output" },
+    { id: 1, text: "Input-only" },
+    { id: 2, text: "Output-only" },
+    { id: 3, text: "None" },
 ];

@@ -90,45 +90,45 @@ class DSP:
 
 class DSP_SubModule:
 
-    def __init__(self, resources, dsplist):
+    def __init__(self, resources, itemlist):
         self.resources = resources
-        self.total_dsp_blocks = resources.get_num_DSP_BLOCKs()
-        self.dsplist = dsplist
+        self.total_dsp_blocks_available = resources.get_num_DSP_BLOCKs()
+        self.itemlist = itemlist
 
     def get_resources(self):
         total_dsp_blocks_used = 0
-        for dsp in self.dsplist:
+        for dsp in self.itemlist:
             total_dsp_blocks_used += dsp.number_of_multipliers
-        return total_dsp_blocks_used, self.total_dsp_blocks
+        return total_dsp_blocks_used, self.total_dsp_blocks_available
 
     def get_power_consumption(self):
         # todo
         return 0.123, 0.456
 
     def get_all(self):
-        return self.dsplist
+        return self.itemlist
 
     def get(self, idx):
-        if 0 <= idx < len(self.dsplist):
-            return self.dsplist[idx]
+        if 0 <= idx < len(self.itemlist):
+            return self.itemlist[idx]
         else:
             raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
 
     def add(self, data):
-        dsp = update_attributes(DSP(), data)
-        self.dsplist.append(dsp)
-        return dsp
+        item = update_attributes(DSP(), data)
+        self.itemlist.append(item)
+        return item
 
     def update(self, idx, data):
-        dsp = update_attributes(self.get(idx), data)
-        return dsp
+        item = update_attributes(self.get(idx), data)
+        return item
 
     def remove(self, idx):
-        if 0 <= idx < len(self.dsplist):
-            removed_dsp = self.dsplist.pop(idx)
-            return removed_dsp
+        if 0 <= idx < len(self.itemlist):
+            item = self.itemlist.pop(idx)
+            return item
         else:
             raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
 
-    def compute_ouput_power(self):
+    def compute_output_power(self):
         pass

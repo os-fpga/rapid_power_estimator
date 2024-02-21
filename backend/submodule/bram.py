@@ -81,20 +81,20 @@ class BRAM:
 
 class BRAM_SubModule:
 
-    def __init__(self, resources, bramlist):
+    def __init__(self, resources, itemlist):
         self.resources = resources
         self.total_18k_bram_available = resources.get_num_18K_BRAM()
         self.total_36k_bram_available = resources.get_num_36K_BRAM()
-        self.bramlist = bramlist
+        self.itemlist = itemlist
 
     def get_resources(self):
         total_18k_bram_used = 0
         total_36k_bram_used = 0
-        for bram in self.bramlist:
-            if (bram.type.value & 1) == 0:
-                total_18k_bram_used += bram.bram_used
+        for item in self.itemlist:
+            if (item.type.value & 1) == 0:
+                total_18k_bram_used += item.bram_used
             else:
-                total_36k_bram_used += bram.bram_used
+                total_36k_bram_used += item.bram_used
         return total_18k_bram_used, self.total_18k_bram_available, total_36k_bram_used, self.total_36k_bram_available
 
     def get_power_consumption(self):
@@ -102,29 +102,29 @@ class BRAM_SubModule:
         return 0.123, 0.456
 
     def get_all(self):
-        return self.bramlist
+        return self.itemlist
 
     def get(self, idx):
-        if 0 <= idx < len(self.bramlist):
-            return self.bramlist[idx]
+        if 0 <= idx < len(self.itemlist):
+            return self.itemlist[idx]
         else:
             raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
 
     def add(self, data):
-        bram = update_attributes(BRAM(), data)
-        self.bramlist.append(bram)
-        return bram
+        item = update_attributes(BRAM(), data)
+        self.itemlist.append(item)
+        return item
 
     def update(self, idx, data):
-        bram = update_attributes(self.get(idx), data)
-        return bram
+        item = update_attributes(self.get(idx), data)
+        return item
 
     def remove(self, idx):
-        if 0 <= idx < len(self.bramlist):
-            removed_bram = self.bramlist.pop(idx)
-            return removed_bram
+        if 0 <= idx < len(self.itemlist):
+            item = self.itemlist.pop(idx)
+            return item
         else:
             raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
 
-    def compute_ouput_power(self):
+    def compute_output_power(self):
         pass

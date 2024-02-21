@@ -4,7 +4,8 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from clock import Clock
+# from clock import Clock
+from utilities.common_utils import update_attributes
 
 class IO_Direction(Enum):
     INPUT = 0
@@ -33,7 +34,6 @@ class IO_Data_Type(Enum):
     DDR = 1
     Clock = 2
     Async = 3
-
 
 class IO_STANDARD(Enum):
     LVCMOS_1_2V = 0
@@ -107,7 +107,7 @@ class IO_output:
     bank_type : IO_Bank_Type = field(default=IO_Bank_Type.HP)
     bank_number : int = field(default=0)
     vccio_voltage : float = field(default=1.8)
-    io_signal_rate : float(default=0.0)
+    io_signal_rate : float = field(default=0.0)
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=100.0)
@@ -135,37 +135,31 @@ class IO_output:
 
 @dataclass
 class IO:
-    _id_counter = 0  # Class variable to keep track of IDs
-    id : int = field(init=False)
     enable : bool = field(default=False)
     name : str = field(default='')
     bus_width : int = field(default=1)
     direction : IO_Direction = field(default=IO_Direction.INPUT)
-    clock : Clock = field(default=None)
+    clock : str = field(default='')
     io_standard : IO_STANDARD = field(default=IO_STANDARD.LVCMOS_1_8V_HR)
     drive_strength : IO_Drive_Strength = field(default=IO_Drive_Strength.six)
     slew_rate : IO_Slew_Rate = field(default=IO_Slew_Rate.slow)
     diffrential_termination : IO_differential_termination = field(default=IO_differential_termination.OFF)
     io_data_type : IO_Data_Type = field(default=IO_Data_Type.Clock)
-    clock : Clock = field(default=None)
-    toggle_rate : float = field(default=12.5)
-    duty_cycle : float = field(default=50.0)
+    toggle_rate : float = field(default=0.125)
+    duty_cycle : float = field(default=0.5)
     synchronization : IO_Synchronization = field(default=IO_Synchronization.DDR_Register)
-    input_enable_rate : float = field(default=100.0)
+    input_enable_rate : float = field(default=1.0)
     output_enable_rate : float = field(default=0.0)
     io_pull_up_down : IO_Pull_up_down = field(default=IO_Pull_up_down.NONE)
-    estimated_power_output : IO_output = field(default=IO_output())
-
+    output : IO_output = field(default_factory=IO_output())
 
     def __init__(self, enable: bool = False, name: str = '', bus_width: int = 1, direction: IO_Direction = IO_Direction.INPUT,
-                 clock: Clock = None, io_standard: IO_STANDARD = IO_STANDARD.LVCMOS_1_8V_HR,
+                 clock: str = '', io_standard: IO_STANDARD = IO_STANDARD.LVCMOS_1_8V_HR,
                  drive_strength: IO_Drive_Strength = IO_Drive_Strength.six, slew_rate: IO_Slew_Rate = IO_Slew_Rate.slow,
                  differential_termination: IO_differential_termination = IO_differential_termination.OFF,
-                 io_data_type: IO_Data_Type = IO_Data_Type.Clock, toggle_rate: float = 12.5, duty_cycle: float = 50.0,
-                 synchronization: IO_Synchronization = IO_Synchronization.DDR_Register, input_enable_rate: float = 100.0,
-                 output_enable_rate: float = 0.0, io_pull_up_down: IO_Pull_up_down = IO_Pull_up_down.NONE,
-                 estimated_power_output: IO_output = IO_output()):
-        self.id = self._generate_unique_id()
+                 io_data_type: IO_Data_Type = IO_Data_Type.Clock, toggle_rate: float = 0.125, duty_cycle: float = 0.5,
+                 synchronization: IO_Synchronization = IO_Synchronization.DDR_Register, input_enable_rate: float = 1.0,
+                 output_enable_rate: float = 0.0, io_pull_up_down: IO_Pull_up_down = IO_Pull_up_down.NONE):
         self.enable = enable
         self.name = name
         self.bus_width = bus_width
@@ -182,13 +176,8 @@ class IO:
         self.input_enable_rate = input_enable_rate
         self.output_enable_rate = output_enable_rate
         self.io_pull_up_down = io_pull_up_down
-        self.estimated_power_output = estimated_power_output
+        self.output = IO_output()
 
-    @classmethod
-    def _generate_unique_id(cls):
-        cls._id_counter += 1
-        return cls._id_counter
-    
     def compute_dynamic_power(self):
         if self.enable:
             # todo
@@ -196,3 +185,45 @@ class IO:
         else:
             return 0
 
+class IO_SubModule:
+
+    def __init__(self, resources, itemlist):
+        # todo
+        self.resources = resources
+        self.itemlist = itemlist
+
+    def get_resources(self):
+        # todo
+        return 0, 0, 0, 0
+
+    def get_power_consumption(self):
+        # todo
+        return 0.123, 0.456
+
+    def get_all(self):
+        return self.itemlist
+
+    def get(self, idx):
+        if 0 <= idx < len(self.itemlist):
+            return self.itemlist[idx]
+        else:
+            raise ValueError("Invalid index. Item doesn't exist at the specified index.")
+
+    def add(self, data):
+        item = update_attributes(IO(), data)
+        self.itemlist.append(item)
+        return item
+
+    def update(self, idx, data):
+        item = update_attributes(self.get(idx), data)
+        return item
+
+    def remove(self, idx):
+        if 0 <= idx < len(self.itemlist):
+            item = self.itemlist.pop(idx)
+            return item
+        else:
+            raise ValueError("Invalid index. Item doesn't exist at the specified index.")
+
+    def compute_output_power(self):
+        pass

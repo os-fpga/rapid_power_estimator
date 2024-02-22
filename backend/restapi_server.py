@@ -5,8 +5,18 @@
 import argparse
 import os
 import sys
-from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device import ModuleType
+
+# specific the path solve the module load error
+myDir = os.getcwd()
+sys.path.append(myDir)
+from pathlib import Path
+path = Path(myDir)
+print(str(path.parent.absolute()))
+sys.path.append(str(path.parent.absolute()))
+
+from backend.submodule.rs_device_manager import RsDeviceManager
+from backend.submodule.rs_device import ModuleType
+
 from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema

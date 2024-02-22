@@ -6,10 +6,29 @@ from marshmallow import Schema, fields
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_STANDARD, IO_Synchronization, IO_Pull_up_down, IO_Bank_Type
 
+class IoOnDieTerminationSchema(Schema):
+    bank_number = fields.Int()
+    odt = fields.Bool()
+    power = fields.Number()
+
+class IoUsageAllocationSchema(Schema):
+    voltage = fields.Number()
+    banks_used = fields.Int()
+    io_used = fields.Int()
+    io_available = fields.Int()
+
+class IoUsageSchema(Schema):
+    type = fields.Str()
+    total_banks_available = fields.Int()
+    total_io_available = fields.Int()
+    usage = fields.Nested(IoUsageAllocationSchema, many=True)
+
 class IoResourcesConsumptionSchema(Schema):
-    # todo
     total_block_power = fields.Number()
     total_interconnect_power = fields.Number()
+    total_on_die_termination_power = fields.Number()
+    io_usage = fields.Nested(IoUsageSchema, many=True)
+    io_on_die_termination = fields.Nested(IoOnDieTerminationSchema, many=True)
 
 class IoOutputSchema(Schema):
     bank_type = fields.Enum(IO_Bank_Type, by_value=True)

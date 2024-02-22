@@ -33,7 +33,7 @@ function PowerTable({ title, total, resourcesHeaders, resources }) {
                     {
                         resources.map((item, index) => {
                             return <tr key={index}>
-                                <td className="innerHeader">{item[0]}</td>
+                                <td className="innerHeader no-wrap">{item[0]}</td>
                                 <td>{item[1]}</td>
                                 <td>{item[2]}</td>
                                 <td className="no-wrap">{item[3]}{item.length === 4 ? ' %' : ''}</td>

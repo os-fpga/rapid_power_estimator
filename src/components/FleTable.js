@@ -56,17 +56,10 @@ const FleTable = ({ device, totalPowerCallback }) => {
   }
 
   function modifyRow(index, row) {
-    let data = {};
-    data["name"] = row.name;
-    data["lut6"] = parseInt(row.lut6, 10);
-    data["flip_flop"] = parseInt(row.flip_flop, 10);
-    data["clock"] = row.clock;
-    data["toggle_rate"] = row.toggle_rate;
-    data["glitch_factor"] = parseInt(row.glitch_factor, 10);
     fetch(fle.index(device, index), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(row),
     }).then((response) => {
       if (response.ok) {
         fetchFleData(device);
@@ -88,19 +81,10 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
   function addRow(newData) {
     if (device === null) return;
-    let data = {
-      enable: true,
-      name: newData.name,
-      lut6: parseInt(newData.lut6, 10),
-      flip_flop: parseInt(newData.flip_flop, 10),
-      clock: newData.clock,
-      toggle_rate: newData.toggle_rate,
-      glitch_factor: parseInt(newData.glitch_factor, 10),
-    };
     fetch(fle.fetch(device), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(newData),
     }).then((response) => {
       if (response.ok) {
         fetchFleData(device);
@@ -176,14 +160,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
               setEditIndex(null);
             }}
             onSubmit={handleSubmit}
-            defaultValue={editIndex !== null && {
-              name: fleData[editIndex].name,
-              lut6: fleData[editIndex].lut6,
-              flip_flop: fleData[editIndex].flip_flop,
-              clock: fleData[editIndex].clock,
-              toggle_rate: fleData[editIndex].toggle_rate,
-              glitch_factor: fleData[editIndex].glitch_factor,
-            } || {
+            defaultValue={editIndex !== null && fleData[editIndex] || {
               name: '',
               lut6: 0,
               flip_flop: 0,

@@ -1,5 +1,5 @@
 import React from "react";
-import { Table } from "../assets/common";
+import { Table } from "../utils/common";
 
 import "./style/Peripherals.css"
 

@@ -2,13 +2,14 @@ import React from "react";
 import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
-import {FleModal} from "./FleModal";
-import { glitch_factor } from "../assets/fle"
+import FleModal from "../ModalWindows/FleModal";
+import { glitch_factor } from "../../utils/fle"
 import PowerTable from "./PowerTable";
-import { fle } from "./../assets/serverAPI"
-import { fixed, GetText, showFreq } from "../assets/common";
+import { fle } from "../../utils/serverAPI"
+import { fixed, GetText } from "../../utils/common";
+import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
 
-import "./style/ComponentTable.css"
+import "./../style/ComponentTable.css"
 
 const FleTable = ({ device, totalPowerCallback }) => {
   const [editIndex, setEditIndex] = React.useState(null);
@@ -135,12 +136,12 @@ const FleTable = ({ device, totalPowerCallback }) => {
                   <td>{row.lut6}</td>
                   <td>{row.flip_flop}</td>
                   <td>{row.clock}</td>
-                  <td>{row.toggle_rate} %</td>
+                  <PercentsCell val={row.toggle_rate} precition={1} />
                   <td>{GetText(row.glitch_factor, glitch_factor)}</td>
-                  <td>{showFreq(row.consumption.clock_frequency)}</td>
+                  <FrequencyCell val={row.consumption.clock_frequency} />
                   <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
-                  <td>{fixed(row.consumption.block_power)} W</td>
-                  <td>{fixed(row.consumption.interconnect_power)} W</td>
+                  <PowerCell val={row.consumption.block_power} />
+                  <PowerCell val={row.consumption.interconnect_power} />
                   <td>{fixed(row.consumption.percentage, 0)} %</td>
                   <td>
                     <span className="actions">

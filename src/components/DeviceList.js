@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as api from "./../assets/serverAPI"
+import * as api from "./../utils/serverAPI"
 
 import "./style/DeviceList.css"
 

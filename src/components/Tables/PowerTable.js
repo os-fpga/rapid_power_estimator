@@ -1,7 +1,7 @@
 import React from "react";
-import { fixed } from "../assets/common";
+import { fixed } from "../../utils/common";
 
-import "./style/PowerTable.css"
+import "./../style/PowerTable.css"
 
 function PowerTable({ title, total, resourcesHeaders, resources }) {
     return <div className="power-table-main">

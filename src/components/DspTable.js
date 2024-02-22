@@ -5,8 +5,9 @@ import { PiNotePencil } from "react-icons/pi";
 import { DspModal } from "./DspModal";
 import PowerTable from "./PowerTable";
 import { dsp } from "./../assets/serverAPI"
-import { fixed, GetText, showFreq } from "../assets/common";
+import { fixed, GetText, showFreq, FieldType } from "../assets/common";
 import { dsp_mode, pipelining } from "../assets/dsp";
+import ModalWindow from "./ModalWindow";
 
 import "./style/ComponentTable.css"
 
@@ -180,16 +181,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
                             setEditIndex(null);
                         }}
                         onSubmit={handleSubmit}
-                        defaultValue={editIndex !== null && {
-                            name: dspData[editIndex].name,
-                            number_of_multipliers: dspData[editIndex].number_of_multipliers,
-                            dsp_mode: dspData[editIndex].dsp_mode,
-                            a_input_width: dspData[editIndex].a_input_width,
-                            b_input_width: dspData[editIndex].b_input_width,
-                            clock: dspData[editIndex].clock,
-                            pipelining: dspData[editIndex].pipelining,
-                            toggle_rate: dspData[editIndex].toggle_rate,
-                        } || {
+                        defaultValue={editIndex !== null && dspData[editIndex] || {
                             name: '',
                             number_of_multipliers: 0,
                             dsp_mode: 0,

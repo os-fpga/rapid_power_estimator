@@ -12,7 +12,7 @@ class DspResourcesConsumptionSchema(Schema):
     total_dsp_interconnect_power = fields.Number()
 
 class DspOutputSchema(Schema):
-    dsp_blocks_used = fields.Int()
+    dsp_blocks_used = fields.Number()
     clock_frequency = fields.Int()
     output_signal_rate = fields.Number()
     block_power = fields.Number()

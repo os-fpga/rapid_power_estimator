@@ -4,7 +4,7 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from backend.utilities.common_utils import update_attributes
+from utilities.common_utils import update_attributes
 
 class Pipelining(Enum):
     INPUT_AND_OUTPUT = 0
@@ -19,31 +19,13 @@ class DSP_Mode(Enum):
 
 @dataclass
 class DSP_output:
-    dsp_blocks_used : int = field(default=0)
-    clock_frequency : int = field(default=100000000)
+    dsp_blocks_used : float = field(default=0.0)
+    clock_frequency : int = field(default=0)
     output_signal_rate : float = field(default=0.0)
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
     message : str = field(default='')
-
-    def __init__(
-        self,
-        dsp_blocks_used: int = 0,
-        clock_frequency: int = 100000000,
-        output_signal_rate: float = 0.0,
-        block_power: float = 0.0,
-        interconnect_power: float = 0.0,
-        percentage: float = 0.0,
-        message: str = '',
-    ):
-        self.dsp_blocks_used = dsp_blocks_used
-        self.clock_frequency = clock_frequency
-        self.output_signal_rate = output_signal_rate
-        self.block_power = block_power
-        self.interconnect_power = interconnect_power
-        self.percentage = percentage
-        self.message = message
 
 @dataclass
 class DSP:
@@ -56,54 +38,85 @@ class DSP:
     clock : str = field(default='')
     pipelining : Pipelining = field(default=Pipelining.INPUT_AND_OUTPUT)
     toggle_rate : float = field(default=0.125)
-    output : DSP_output = field(default_factory=DSP_output())
+    output : DSP_output = field(default_factory=DSP_output)
 
-    def __init__(
-        self,
-        enable: bool = False,
-        name: str = '',
-        number_of_multipliers: int = 0,
-        dsp_mode: DSP_Mode = DSP_Mode.MULTIPLY_ACCUMULATE,
-        a_input_width: int = 16,
-        b_input_width: int = 16,
-        clock: str = '',
-        pipelining: Pipelining = Pipelining.INPUT_AND_OUTPUT,
-        toggle_rate: float = 0.125
-    ):
-        self.enable = enable
-        self.name = name
-        self.number_of_multipliers = number_of_multipliers
-        self.dsp_mode = dsp_mode
-        self.a_input_width = a_input_width
-        self.b_input_width = b_input_width
-        self.clock = clock
-        self.pipelining = pipelining
-        self.toggle_rate = toggle_rate
-        self.output = DSP_output()
-
-    def compute_dynamic_power(self):
-        if self.enable:
-            # todo
-            pass
+    def compute_percentage(self, total_power):
+        if (total_power > 0):
+            self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
         else:
-            return 0
+            self.output.percentage = 0.0
+
+    def compute_dynamic_power(self, clock, VCC_CORE, DSP_MULT_CAP, DSP_INT_CAP):
+        if clock == None:
+            self.output.message = f"Invalid clock {self.clock}"
+            return
+
+        if self.enable:
+            # Calculate DSP blocks used
+            if self.a_input_width < 10 and self.b_input_width < 11:
+                self.output.dsp_blocks_used = self.number_of_multipliers * 0.5
+            else:
+                self.output.dsp_blocks_used = self.number_of_multipliers * 1.0
+
+            # Set clock frequency
+            self.output.clock_frequency = clock.frequency
+
+            # Calculate output signal rate
+            if self.pipelining in (Pipelining.INPUT_AND_OUTPUT, Pipelining.OUTPUT_ONLY) or self.dsp_mode == DSP_Mode.MULTIPLY_ACCUMULATE:
+                self.output.output_signal_rate = (self.output.clock_frequency / 1000000.0) * self.toggle_rate
+            elif self.pipelining == Pipelining.INPUT_ONLY:
+                self.output.output_signal_rate = (self.output.clock_frequency / 1000000.0) * self.toggle_rate * 1.15
+            else:
+                self.output.output_signal_rate = (self.output.clock_frequency / 1000000.0) * self.toggle_rate * 1.25
+
+            # Calculate intermediate values used in the power calculations below
+            multiplier_signal_rate = (self.output.clock_frequency / 1000000.0) * self.toggle_rate * (1.0 if self.pipelining in (Pipelining.INPUT_AND_OUTPUT, Pipelining.INPUT_ONLY) else 1.2)
+            block_factor = 2.0 if self.a_input_width <= 9 and self.b_input_width <= 10 else 1.0
+            factor = 1.15 if self.pipelining in (Pipelining.OUTPUT_ONLY, Pipelining.NONE) else 1.0
+
+            # Calculate block power
+            if self.dsp_mode == DSP_Mode.MULTIPLY:
+                # block power = VCC_CORE^2 * multiplier_signal_rate * DSP_MULT_CAP * no. of multipliers * (a-input width + b-input width) * factor / block_factor
+                self.output.block_power = VCC_CORE ** 2 * multiplier_signal_rate * DSP_MULT_CAP * self.number_of_multipliers * (self.a_input_width + self.b_input_width) * factor / block_factor
+            else:
+                # p1 = VCC_CORE^2 * multiplier_signal_rate * DSP_MULT_CAP * no. of multipliers * (a-input width + b-input width)
+                # p2 = no. of multipliers * clock_frequency * 0.00000007 * factor / block_factor
+                # block_power = p1 + p2
+                p1 = VCC_CORE ** 2 * multiplier_signal_rate * DSP_MULT_CAP * self.number_of_multipliers * (self.a_input_width + self.b_input_width)
+                # todo                                                                        |========|
+                p2 = self.number_of_multipliers * (self.output.clock_frequency / 1000000.0) * 0.00000007 * factor / block_factor
+                self.output.block_power = p1 + p2
+
+            # Calculate interconnect power
+            # interconnect_power = VCC_CORE^2 * output_signal_rate * no. of multipliers * (a-input width + b-input width) * DSP_INT_CAP
+            self.output.interconnect_power = VCC_CORE ** 2 * self.output.output_signal_rate * self.number_of_multipliers * (self.a_input_width + self.b_input_width) * DSP_INT_CAP
+        else:
+            self.output.dsp_blocks_used = 0.0
+            self.output.clock_frequency = 0
+            self.output.output_signal_rate = 0.0
+            self.output.block_power = 0.0
+            self.output.interconnect_power = 0.0
+            self.output.message = 'This DSP is disabled'
 
 class DSP_SubModule:
 
     def __init__(self, resources, itemlist):
         self.resources = resources
         self.total_dsp_blocks_available = resources.get_num_DSP_BLOCKs()
+        self.total_interconnect_power = 0.0
+        self.total_block_power = 0.0
         self.itemlist = itemlist
 
     def get_resources(self):
         total_dsp_blocks_used = 0
-        for dsp in self.itemlist:
-            total_dsp_blocks_used += dsp.number_of_multipliers
+        for item in self.itemlist:
+            if item.enable == True:
+                total_dsp_blocks_used += item.number_of_multipliers
         return total_dsp_blocks_used, self.total_dsp_blocks_available
 
     def get_power_consumption(self):
         # todo
-        return 0.123, 0.456
+        return self.total_block_power, self.total_interconnect_power
 
     def get_all(self):
         return self.itemlist
@@ -131,4 +144,22 @@ class DSP_SubModule:
             raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
 
     def compute_output_power(self):
-        pass
+        # Get power calculation coefficients
+        VCC_CORE     = self.resources.get_VCC_CORE()
+        DSP_MULT_CAP = self.resources.get_DSP_MULT_CAP()
+        DSP_INT_CAP  = self.resources.get_DSP_INT_CAP()
+
+        # Compute the total power consumption of all clocks
+        self.total_block_power = 0.0
+        self.total_interconnect_power = 0.0
+
+        # Compute the power consumption for each individual items
+        for item in self.itemlist:
+            item.compute_dynamic_power(self.resources.get_clock(item.clock), VCC_CORE, DSP_MULT_CAP, DSP_INT_CAP)
+            self.total_interconnect_power += item.output.interconnect_power
+            self.total_block_power += item.output.block_power
+
+        # update individual clock percentage
+        total_power = self.total_block_power + self.total_interconnect_power
+        for item in self.itemlist:
+            item.compute_percentage(total_power)

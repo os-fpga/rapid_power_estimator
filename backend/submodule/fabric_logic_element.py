@@ -4,7 +4,7 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-from backend.utilities.common_utils import update_attributes
+from utilities.common_utils import update_attributes
 
 class Glitch_Factor(Enum):
     TYPICAL = 0 

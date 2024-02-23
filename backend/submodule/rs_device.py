@@ -2,13 +2,12 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-from backend.submodule.rs_device_resources import RsDeviceResources, ModuleType
-from backend.submodule.clock import Clock_SubModule, Clock
-from backend.submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
-from backend.submodule.dsp import DSP_SubModule, DSP
-from backend.submodule.bram import BRAM_SubModule, BRAM
-from backend.submodule.io import IO_SubModule, IO
-
+from submodule.rs_device_resources import RsDeviceResources, ModuleType
+from submodule.clock import Clock_SubModule, Clock
+from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
+from submodule.dsp import DSP_SubModule, DSP
+from submodule.bram import BRAM_SubModule, BRAM
+from submodule.io import IO_SubModule, IO
 
 class RsDevice:
 
@@ -30,8 +29,8 @@ class RsDevice:
 
         # dsp module
         self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
-            DSP(number_of_multipliers=11, enable=True, name="test test 1"),
-            DSP(number_of_multipliers=12, enable=True, name="test test 2")
+            DSP(number_of_multipliers=11, enable=True, name="test test 1", clock='CLK_100'),
+            DSP(number_of_multipliers=12, enable=True, name="test test 2", clock='CLK_233')
         ]))
 
         # bram module

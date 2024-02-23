@@ -1,8 +1,7 @@
 import React from "react";
-import { Table, fixed } from "../assets/common";
+import { Table, fixed } from "../../utils/common";
 
-import "./style/FpgaTable.css"
-import { dsp } from "../assets/serverAPI";
+import "./../style/FpgaTable.css"
 
 function FpgaTable({ clocking, fle, dsp, bram, tableOpen }) {
     return <div className="fpga-main">

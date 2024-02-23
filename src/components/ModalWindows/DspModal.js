@@ -1,10 +1,10 @@
 import React from "react";
-import { dsp_mode, pipelining } from "../assets/dsp";
-import { FieldType } from "../assets/common";
+import { dsp_mode, pipelining } from "../../utils/dsp";
+import { FieldType } from "../../utils/common";
 
 import ModalWindow from "./ModalWindow";
 
-export const DspModal = ({ closeModal, onSubmit, defaultValue }) => {
+const DspModal = ({ closeModal, onSubmit, defaultValue }) => {
   return (
     <ModalWindow
       closeModal={closeModal}
@@ -56,9 +56,9 @@ export const DspModal = ({ closeModal, onSubmit, defaultValue }) => {
           values: pipelining
         },
         {
-          fieldType: FieldType.number,
+          fieldType: FieldType.float,
           id: "toggle_rate",
-          text: "Toggle Rate",
+          text: "Toggle Rate, %",
           value: defaultValue.toggle_rate
         },
       ]}

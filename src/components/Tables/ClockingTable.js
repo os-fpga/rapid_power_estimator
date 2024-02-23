@@ -2,13 +2,14 @@ import React from "react";
 import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
-import ClockingModal from "./ClockingModal";
-import { sources, states } from "../assets/clocking"
+import ClockingModal from "../ModalWindows/ClockingModal";
+import { sources, states } from "../../utils/clocking"
 import PowerTable from "./PowerTable";
-import { clocking } from "./../assets/serverAPI"
-import { fixed, GetText, showFreq } from "../assets/common";
+import { clocking } from "../../utils/serverAPI"
+import { fixed, GetText } from "../../utils/common";
+import { FrequencyCell, PowerCell } from "./TableCells"
 
-import "./style/ComponentTable.css"
+import "./../style/ComponentTable.css"
 
 const ClockingTable = ({ device, totalPowerCallback }) => {
   const [editIndex, setEditIndex] = React.useState(null);
@@ -134,11 +135,11 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
                   <td>{row.description}</td>
                   <td>{GetText(row.source, sources)}</td>
                   <td>{row.port}</td>
-                  <td>{showFreq(row.frequency)}</td>
+                  <FrequencyCell val={row.frequency} />
                   <td>{GetText(row.state, states)}</td>
                   <td>{row.consumption.fan_out}</td>
-                  <td>{fixed(row.consumption.block_power)} W</td>
-                  <td>{fixed(row.consumption.interconnect_power)} W</td>
+                  <PowerCell val={row.consumption.block_power} />
+                  <PowerCell val={row.consumption.interconnect_power} />
                   <td>{fixed(row.consumption.percentage, 0)} %</td>
                   <td>
                     <span className="actions">

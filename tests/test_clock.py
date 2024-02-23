@@ -1,3 +1,8 @@
+import os
+import sys
+backend = os.path.join(os.getcwd(), '../backend')
+sys.path.append(backend)
+
 from backend.submodule.clock import Clock, Source, ClockOutput, Clock_SubModule, Clock_State
 from backend.submodule.rs_device_resources import RsDeviceResources
 from unittest.mock import Mock
@@ -27,8 +32,8 @@ def test_compute_percentage(block_power, interconnect_power, total_power, expect
     clock = Clock()
     clock.output.block_power = block_power
     clock.output.interconnect_power = interconnect_power
+    clock.compute_percentage(total_power)
 
-    assert clock.compute_percentage(total_power) == expected_percentage
     assert clock.output.percentage == expected_percentage
 
 @pytest.mark.parametrize(

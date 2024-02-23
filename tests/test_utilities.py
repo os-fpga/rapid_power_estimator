@@ -1,3 +1,8 @@
+import os
+import sys
+backend = os.path.join(os.getcwd(), '../backend')
+sys.path.append(backend)
+
 from backend.utilities.common_utils import update_attributes
 
 # test_update_attributes.py

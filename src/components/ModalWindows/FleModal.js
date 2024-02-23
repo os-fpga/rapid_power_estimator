@@ -1,9 +1,9 @@
 import React from "react";
-import { glitch_factor } from "./../assets/fle"
-import { FieldType } from "../assets/common";
+import { glitch_factor } from "../../utils/fle"
+import { FieldType } from "../../utils/common";
 import ModalWindow from "./ModalWindow";
 
-export const FleModal = ({ closeModal, onSubmit, defaultValue }) => {
+const FleModal = ({ closeModal, onSubmit, defaultValue }) => {
   return (
     <ModalWindow
       closeModal={closeModal}
@@ -35,9 +35,10 @@ export const FleModal = ({ closeModal, onSubmit, defaultValue }) => {
           value: defaultValue.clock
         },
         {
-          fieldType: FieldType.number,
+          fieldType: FieldType.float,
+          step: "1",
           id: "toggle_rate",
-          text: "Toggle Rate",
+          text: "Toggle Rate, %",
           value: defaultValue.toggle_rate
         },
         {

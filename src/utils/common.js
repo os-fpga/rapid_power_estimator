@@ -30,16 +30,9 @@ export function GetText(id, map) {
   }
 }
 
-export function showFreq(value) {
-    if (value < 999)
-        return fixed(value, 0) + ' Hz';
-    if (value < 999999)
-        return fixed(value / 1000, 0) + ' kHz';
-    return fixed(value / 1000000, 0) + ' MHz';
-}
-
 export const FieldType = {
     textarea: 0,
     select: 1,
-    number: 2
+    number: 2,
+    float: 3,
 };

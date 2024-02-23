@@ -3,17 +3,18 @@ import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
 import PowerTable from "./PowerTable";
-import { bram } from "./../assets/serverAPI"
-import { fixed, GetText, showFreq } from "../assets/common";
-import BramModal from "./BramModal";
-import { bram_type } from "../assets/bram";
+import { bram } from "../../utils/serverAPI"
+import { fixed, GetText } from "../../utils/common";
+import BramModal from "../ModalWindows/BramModal";
+import { bram_type } from "../../utils/bram";
+import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
 
-import "./style/ComponentTable.css"
+import "./../style/ComponentTable.css"
 
 const BramTable = ({ device, totalPowerCallback }) => {
     const [editIndex, setEditIndex] = React.useState(null);
     const [modalOpen, setModalOpen] = React.useState(false);
-    const [bramDisplayData, setBramDisplayData] = React.useState([]);
+    const [bramData, setBramData] = React.useState([]);
     const [bramWindowData, setBramWindowData] = React.useState([]);
     const [powerTotal, setPowerTotal] = React.useState(0);
     const [powerTable, setPowerTable] = React.useState([]);
@@ -28,9 +29,9 @@ const BramTable = ({ device, totalPowerCallback }) => {
             fetch(bram.fetch(deviceId))
                 .then((response) => response.json())
                 .then((data) => {
-                    var newBramData = [];
+                    setBramData(data);
                     var newBramWindowData = [];
-                    data.map((item, index) => {
+                    data.map((item) => {
                         newBramWindowData.push({
                             enable: item.enable,
                             name: item.name,
@@ -47,11 +48,8 @@ const BramTable = ({ device, totalPowerCallback }) => {
                             port_b_read_enable_rate: item.port_b.read_enable_rate,
                             port_b_toggle_rate: item.port_b.toggle_rate,
                         });
-                        newBramData.push(item);
-                        newBramData.push(item);
                     });
                     setBramWindowData(newBramWindowData);
-                    setBramDisplayData(newBramData);
 
                     fetch(bram.consumption(deviceId))
                         .then((response) => response.json())
@@ -184,44 +182,43 @@ const BramTable = ({ device, totalPowerCallback }) => {
                     </thead>
                     <tbody>
                         {
-                            bramDisplayData.map((row, index) => {
-                                return (index % 2 === 0)
-                                    ?
-                                    <tr key={index}>
+                            bramData.map((row, index) => {
+                                return <React.Fragment key={index}>
+                                    <tr>
                                         <td rowSpan={2}>{row.name}</td>
                                         <td rowSpan={2}>{GetText(row.type, bram_type)}</td>
                                         <td rowSpan={2}>{row.bram_used}</td>
                                         <td>A - Write</td>
                                         <td>{row.port_a.clock}</td>
                                         <td>{row.port_a.width}</td>
-                                        <td>{row.port_a.write_enable_rate} %</td>
-                                        <td>{row.port_a.read_enable_rate} %</td>
-                                        <td>{row.port_a.toggle_rate} %</td>
-                                        <td>{showFreq(row.consumption.port_a.clock_frequency)}</td>
+                                        <PercentsCell val={row.port_a.write_enable_rate} />
+                                        <PercentsCell val={row.port_a.read_enable_rate} />
+                                        <PercentsCell val={row.port_a.toggle_rate} precition={1} />
+                                        <FrequencyCell val={row.consumption.port_a.clock_frequency} />
                                         <td>{fixed(row.consumption.port_a.output_signal_rate, 1)} MTr/S</td>
                                         <td>{row.consumption.port_a.ram_depth}</td>
-                                        <td rowSpan={2}>{fixed(row.consumption.block_power)} W</td>
-                                        <td rowSpan={2}>{fixed(row.consumption.interconnect_power)} W</td>
+                                        <PowerCell rowSpan={2} val={row.consumption.block_power} />
+                                        <PowerCell rowSpan={2} val={row.consumption.interconnect_power} />
                                         <td rowSpan={2}>{fixed(row.consumption.percentage, 0)} %</td>
                                         <td rowSpan={2}>
                                             <span className="actions">
-                                                <PiNotePencil className="edit" onClick={() => { setEditIndex(index / 2); setModalOpen(true) }} />
-                                                <BsFillTrashFill className="delete" onClick={() => deleteRow(index / 2)} />
+                                                <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true); }} />
+                                                <BsFillTrashFill className="delete" onClick={() => deleteRow(index)} />
                                             </span>
                                         </td>
                                     </tr>
-                                    :
-                                    <tr key={index}>
+                                    <tr>
                                         <td>B - Read</td>
                                         <td>{row.port_b.clock}</td>
                                         <td>{row.port_b.width}</td>
-                                        <td>{row.port_b.write_enable_rate} %</td>
-                                        <td>{row.port_b.read_enable_rate} %</td>
-                                        <td>{row.port_b.toggle_rate} %</td>
-                                        <td>{showFreq(row.consumption.port_b.clock_frequency)}</td>
+                                        <PercentsCell val={row.port_b.write_enable_rate} />
+                                        <PercentsCell val={row.port_b.read_enable_rate} />
+                                        <PercentsCell val={row.port_b.toggle_rate} precition={1} />
+                                        <FrequencyCell val={row.consumption.port_b.clock_frequency} />
                                         <td>{fixed(row.consumption.port_b.output_signal_rate, 1)} MTr/S</td>
                                         <td>{row.consumption.port_b.ram_depth}</td>
                                     </tr>
+                                </React.Fragment>
                             })
                         }
                     </tbody>

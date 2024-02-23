@@ -2,16 +2,16 @@ import React from "react";
 import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
-import { DspModal } from "./DspModal";
+import DspModal from "../ModalWindows/DspModal";
 import PowerTable from "./PowerTable";
-import { dsp } from "./../assets/serverAPI"
-import { fixed, GetText, showFreq, FieldType } from "../assets/common";
-import { dsp_mode, pipelining } from "../assets/dsp";
-import ModalWindow from "./ModalWindow";
+import { dsp } from "../../utils/serverAPI"
+import { fixed, GetText } from "../../utils/common";
+import { dsp_mode, pipelining } from "../../utils/dsp";
+import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
 
-import "./style/ComponentTable.css"
+import "./../style/ComponentTable.css"
 
-const FleTable = ({ device, totalPowerCallback }) => {
+const DspTable = ({ device, totalPowerCallback }) => {
     const [editIndex, setEditIndex] = React.useState(null);
     const [modalOpen, setModalOpen] = React.useState(false);
     const [dspData, setDspData] = React.useState([]);
@@ -51,19 +51,10 @@ const FleTable = ({ device, totalPowerCallback }) => {
     }
 
     function modifyRow(index, row) {
-        let data = {};
-        data["name"] = row.name;
-        data["number_of_multipliers"] = parseInt(row.number_of_multipliers, 10);
-        data["dsp_mode"] = parseInt(row.dsp_mode, 10);
-        data["a_input_width"] = parseInt(row.a_input_width, 10);
-        data["b_input_width"] = parseInt(row.b_input_width, 10);
-        data["clock"] = row.clock;
-        data["toggle_rate"] = row.toggle_rate;
-        data["pipelining"] = parseInt(row.pipelining, 10);
         fetch(dsp.index(device, index), {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify(row),
         }).then((response) => {
             if (response.ok) {
                 fetchDspData(device);
@@ -85,21 +76,10 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
     function addRow(newData) {
         if (device === null) return;
-        let data = {
-            enable: true,
-            name: newData.name,
-            number_of_multipliers: parseInt(newData.number_of_multipliers, 10),
-            dsp_mode: parseInt(newData.dsp_mode, 10),
-            a_input_width: parseInt(newData.a_input_width, 10),
-            b_input_width: parseInt(newData.b_input_width, 10),
-            clock: newData.clock,
-            pipelining: parseInt(newData.pipelining, 10),
-            toggle_rate: newData.toggle_rate,
-        };
         fetch(dsp.fetch(device), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify(newData),
         }).then((response) => {
             if (response.ok) {
                 fetchDspData(device);
@@ -156,12 +136,12 @@ const FleTable = ({ device, totalPowerCallback }) => {
                                     <td>{row.b_input_width}</td>
                                     <td>{row.clock}</td>
                                     <td>{GetText(row.pipelining, pipelining)}</td>
-                                    <td>{row.toggle_rate} %</td>
+                                    <PercentsCell val={row.toggle_rate} precition={1}/>
                                     <td>{row.consumption.dsp_blocks_used}</td>
-                                    <td>{showFreq(row.consumption.clock_frequency)}</td>
+                                    <FrequencyCell val={row.consumption.clock_frequency} />
                                     <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
-                                    <td>{fixed(row.consumption.block_power)} W</td>
-                                    <td>{fixed(row.consumption.interconnect_power)} W</td>
+                                    <PowerCell val={row.consumption.block_power} />
+                                    <PowerCell val={row.consumption.interconnect_power} />
                                     <td>{fixed(row.consumption.percentage, 0)} %</td>
                                     <td>
                                         <span className="actions">
@@ -203,4 +183,4 @@ const FleTable = ({ device, totalPowerCallback }) => {
     </div>
 }
 
-export default FleTable;
+export default DspTable;

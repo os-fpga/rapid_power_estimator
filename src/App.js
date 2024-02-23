@@ -1,13 +1,13 @@
 import React from "react";
 import DeviceList from "./components/DeviceList"
-import FpgaTable from "./components/FpgaTable"
-import ClockingTable from "./components/ClockingTable";
-import FleTable from "./components/FleTable";
-import DspTable from "./components/DspTable";
-import BramTable from "./components/BramTable";
-import { Table } from "./assets/common"
+import FpgaTable from "./components/Tables/FpgaTable"
+import ClockingTable from "./components/Tables/ClockingTable";
+import FleTable from "./components/Tables/FleTable";
+import DspTable from "./components/Tables/DspTable";
+import BramTable from "./components/Tables/BramTable";
+import { Table } from "./utils/common"
 import Peripherals from "./components/Peripherals";
-import { clocking, fle, dsp, bram, devices as getDeviceListApi } from "./assets/serverAPI"
+import { clocking, fle, dsp, bram, devices as getDeviceListApi } from "./utils/serverAPI"
 import CPUComponent from "./components/CPUComponent";
 
 const App = () => {

@@ -1,10 +1,9 @@
 import React from "react";
-import { sources, states } from "../assets/clocking"
-import { FieldType } from "../assets/common";
+import { sources, states } from "../../utils/clocking"
+import { FieldType } from "../../utils/common";
 import ModalWindow from "./ModalWindow";
 
-export const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
-
+const ClockingModal = ({ closeModal, onSubmit, defaultValue }) => {
   return (
     <ModalWindow
       closeModal={closeModal}

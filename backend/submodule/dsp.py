@@ -46,7 +46,7 @@ class DSP:
         else:
             self.output.percentage = 0.0
 
-    def compute_dynamic_power(self, clock, VCC_CORE, DSP_MULT_CAP, DSP_INT_CAP):
+    def compute_dynamic_power(self, clock, VCC_CORE, DSP_MULT_CAP, DSP_MULT_CAP2, DSP_INT_CAP):
         if clock == None:
             self.output.message = f"Invalid clock {self.clock}"
             return
@@ -80,11 +80,10 @@ class DSP:
                 self.output.block_power = VCC_CORE ** 2 * multiplier_signal_rate * DSP_MULT_CAP * self.number_of_multipliers * (self.a_input_width + self.b_input_width) * factor / block_factor
             else:
                 # p1 = VCC_CORE^2 * multiplier_signal_rate * DSP_MULT_CAP * no. of multipliers * (a-input width + b-input width)
-                # p2 = no. of multipliers * clock_frequency * 0.00000007 * factor / block_factor
+                # p2 = no. of multipliers * clock_frequency * DSP_MULT_CAP2 * factor / block_factor
                 # block_power = p1 + p2
                 p1 = VCC_CORE ** 2 * multiplier_signal_rate * DSP_MULT_CAP * self.number_of_multipliers * (self.a_input_width + self.b_input_width)
-                # todo                                                                        |========|
-                p2 = self.number_of_multipliers * (self.output.clock_frequency / 1000000.0) * 0.00000007 * factor / block_factor
+                p2 = self.number_of_multipliers * (self.output.clock_frequency / 1000000.0) * DSP_MULT_CAP2 * factor / block_factor
                 self.output.block_power = p1 + p2
 
             # Calculate interconnect power
@@ -145,9 +144,10 @@ class DSP_SubModule:
 
     def compute_output_power(self):
         # Get power calculation coefficients
-        VCC_CORE     = self.resources.get_VCC_CORE()
-        DSP_MULT_CAP = self.resources.get_DSP_MULT_CAP()
-        DSP_INT_CAP  = self.resources.get_DSP_INT_CAP()
+        VCC_CORE      = self.resources.get_VCC_CORE()
+        DSP_MULT_CAP  = self.resources.get_DSP_MULT_CAP()
+        DSP_MULT_CAP2 = self.resources.get_DSP_MULT_CAP2()
+        DSP_INT_CAP   = self.resources.get_DSP_INT_CAP()
 
         # Compute the total power consumption of all clocks
         self.total_block_power = 0.0
@@ -155,7 +155,7 @@ class DSP_SubModule:
 
         # Compute the power consumption for each individual items
         for item in self.itemlist:
-            item.compute_dynamic_power(self.resources.get_clock(item.clock), VCC_CORE, DSP_MULT_CAP, DSP_INT_CAP)
+            item.compute_dynamic_power(self.resources.get_clock(item.clock), VCC_CORE, DSP_MULT_CAP, DSP_MULT_CAP2, DSP_INT_CAP)
             self.total_interconnect_power += item.output.interconnect_power
             self.total_block_power += item.output.block_power
 

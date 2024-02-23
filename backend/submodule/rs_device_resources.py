@@ -110,6 +110,10 @@ class RsDeviceResources:
         # todo: read from power data. Coeffient to calculate DSP block power
         return 0.0000015
 
+    def get_DSP_MULT_CAP2(self) -> float:
+        # todo: read from power data. Coeffient to calculate DSP block power (only used for MULTIPLY_ACCUMULATE & MULTIPLY_ADD_SUB DSP Modes)
+        return 0.00000007
+
     def get_DSP_INT_CAP(self) -> float:
         # todo: read from power data. Coeffient to calculate DSP interconnect power
         return 0.0000001

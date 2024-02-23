@@ -11,7 +11,6 @@ myDir = os.getcwd()
 sys.path.append(myDir)
 from pathlib import Path
 path = Path(myDir)
-print(str(path.parent.absolute()))
 sys.path.append(str(path.parent.absolute()))
 
 from backend.submodule.rs_device_manager import RsDeviceManager

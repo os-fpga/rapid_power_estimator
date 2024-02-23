@@ -3,7 +3,7 @@ import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
 import PowerTable from "./PowerTable";
-import { bram } from "../../utils/serverAPI"
+import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import BramModal from "../ModalWindows/BramModal";
 import { bram_type } from "../../utils/bram";
@@ -26,7 +26,7 @@ const BramTable = ({ device, totalPowerCallback }) => {
 
     const fetchBramData = (deviceId) => {
         if (deviceId !== null) {
-            fetch(bram.fetch(deviceId))
+            fetch(api.fetch(Elem.bram, deviceId))
                 .then((response) => response.json())
                 .then((data) => {
                     setBramData(data);
@@ -51,7 +51,7 @@ const BramTable = ({ device, totalPowerCallback }) => {
                     });
                     setBramWindowData(newBramWindowData);
 
-                    fetch(bram.consumption(deviceId))
+                    fetch(api.consumption(Elem.bram, deviceId))
                         .then((response) => response.json())
                         .then((data) => {
                             const total = data.total_bram_block_power + data.total_bram_interconnect_power;
@@ -103,7 +103,7 @@ const BramTable = ({ device, totalPowerCallback }) => {
     }
 
     function modifyRow(index, row) {
-        fetch(bram.index(device, index), {
+        fetch(api.index(Elem.bram, device, index), {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(sendData(row)),
@@ -117,7 +117,7 @@ const BramTable = ({ device, totalPowerCallback }) => {
     }
 
     const deleteRow = (index) => {
-        fetch(bram.index(device, index), {
+        fetch(api.index(Elem.bram, device, index), {
             method: "DELETE",
         }).then((response) => {
             if (response.ok) {
@@ -130,7 +130,7 @@ const BramTable = ({ device, totalPowerCallback }) => {
 
     function addRow(newData) {
         if (device === null) return;
-        fetch(bram.fetch(device), {
+        fetch(api.fetch(Elem.bram, device), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(sendData(newData)),

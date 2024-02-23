@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
 import IOModal from "../ModalWindows/IOModal";
 import IOPowerTable from "./IOPowerTable";
-import { io } from "../../utils/serverAPI"
+import { api, Elem } from "../../utils/serverAPI"
 import { fixed } from "../../utils/common";
 import { PercentsCell, SelectionCell, PowerCell } from "./TableCells"
 
@@ -107,20 +107,18 @@ const IOTable = ({ device, totalPowerCallback }) => {
     }, [device]);
 
     const fetchIoData = (deviceId) => {
-        console.log('fetchIoData')
         if (deviceId !== null) {
-            fetch(io.fetch(deviceId))
+            fetch(api.fetch(Elem.io, deviceId))
                 .then((response) => response.json())
                 .then((data) => {
                     setIoData(data);
 
-                    fetch(io.consumption(deviceId))
+                    fetch(api.consumption(Elem.io, deviceId))
                         .then((response) => response.json())
                         .then((data) => {
                             const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
                             setPowerTotal(total);
                             totalPowerCallback(total);
-                            console.log(data)
                             setPowerTable(data);
                         });
                 });
@@ -129,7 +127,7 @@ const IOTable = ({ device, totalPowerCallback }) => {
     }
 
     function modifyRow(index, row) {
-        fetch(io.index(device, index), {
+        fetch(api.index(Elem.io, device, index), {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(row),
@@ -143,7 +141,7 @@ const IOTable = ({ device, totalPowerCallback }) => {
     }
 
     const deleteRow = (index) => {
-        fetch(io.index(device, index), {
+        fetch(api.index(Elem.io, device, index), {
             method: "DELETE",
         }).then((response) => {
             if (response.ok) {
@@ -154,7 +152,7 @@ const IOTable = ({ device, totalPowerCallback }) => {
 
     function addRow(newData) {
         if (device === null) return;
-        fetch(io.fetch(device), {
+        fetch(api.fetch(Elem.io, device), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newData),

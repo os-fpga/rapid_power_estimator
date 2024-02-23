@@ -5,9 +5,10 @@ import ClockingTable from "./components/Tables/ClockingTable";
 import FleTable from "./components/Tables/FleTable";
 import DspTable from "./components/Tables/DspTable";
 import BramTable from "./components/Tables/BramTable";
+import IOTable from "./components/Tables/IOTable";
 import { Table } from "./utils/common"
 import Peripherals from "./components/Peripherals";
-import { clocking, fle, dsp, bram, devices as getDeviceListApi } from "./utils/serverAPI"
+import { clocking, fle, dsp, bram, io, devices as getDeviceListApi } from "./utils/serverAPI"
 import CPUComponent from "./components/CPUComponent";
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
   const [flePower, setFlePower] = React.useState(0);
   const [dspPower, setDspPower] = React.useState(0);
   const [bramPower, setBramPower] = React.useState(0);
+  const [ioPower, setIoPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
 
   React.useEffect(() => {
@@ -53,6 +55,12 @@ const App = () => {
           const total = data.total_bram_block_power + data.total_bram_interconnect_power;
           setBramPower(total);
         });
+      fetch(io.consumption(device))
+        .then((response) => response.json())
+        .then((data) => {
+          const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
+          setIoPower(total);
+        });
     }
   }, [device]);
 
@@ -82,6 +90,7 @@ const App = () => {
                 fle={flePower}
                 dsp={dspPower}
                 bram={bramPower}
+                io={ioPower}
                 tableOpen={setOpenedTable} />
               </div>
               <div className="clickable top-l2-col2-elem" onClick={() => setOpenedTable(Table.Memory)}>Memory</div>
@@ -108,7 +117,7 @@ const App = () => {
       }
       {
         openedTable === Table.IO &&
-        <label>IO table</label>
+        <IOTable device={device} totalPowerCallback={setIoPower} />
       }
       {
         openedTable === Table.BRAM &&

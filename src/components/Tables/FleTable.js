@@ -114,7 +114,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
         <table className="table-style">
           <thead>
             <tr>
-              <th className="expand">Name/Hierarchy</th>
+              <th>Name/Hierarchy</th>
               <th>LUT6</th>
               <th>FF/Latch</th>
               <th>Clock</th>

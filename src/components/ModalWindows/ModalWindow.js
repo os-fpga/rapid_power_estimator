@@ -75,12 +75,12 @@ const ModalWindow = (props) => {
                     step={item.step ? item.step : 1}
                     name={item.id}
                     onChange={handleFloatChange}
-                    value={(formState[item.id] * 100).toFixed(1)}
+                    value={(formState[item.id] * 100).toFixed(item.step ? (item.step >= 1 ? 0 : 1) : 1)}
                 />
             </div>
         } else {
             return <div key={item.id} className="form-group">
-                <label htmlFor={item.id}>{item.name}</label>
+                <label htmlFor={item.id}>{item.text}</label>
                 <select name={item.id} onChange={handleSelectChange} value={formState[item.id]}>
                     {
                         item.values.map((it, idx) => (

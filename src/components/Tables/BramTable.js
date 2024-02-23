@@ -162,7 +162,7 @@ const BramTable = ({ device, totalPowerCallback }) => {
                 <table className="table-style">
                     <thead>
                         <tr>
-                            <th className="expand">Name/Hierarchy</th>
+                            <th>Name/Hierarchy</th>
                             <th>BRAM Type</th>
                             <th>Used</th>
                             <th>Port</th>

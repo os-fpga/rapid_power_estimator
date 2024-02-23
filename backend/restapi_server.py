@@ -362,11 +362,13 @@ def delete_device_io(device_id, row_number):
 def get_device_io_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.IO, device_id)
-        # todo
-        # res = devicemanager.get_device_resources(ModuleType.IO, device_id)
+        res = devicemanager.get_resources(ModuleType.IO, device_id)
         data = {
             "total_block_power" : consumption[0],
-            "total_interconnect_power" : consumption[1]
+            "total_interconnect_power" : consumption[1],
+            "total_on_die_termination_power" : consumption[1],
+            "io_usage" : res[0],
+            "io_on_die_termination": res[1]
         }
         schema = IoResourcesConsumptionSchema()
         return schema.dump(data)

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 # from clock import Clock
 from utilities.common_utils import update_attributes
+from typing import List
 
 class IO_Direction(Enum):
     INPUT = 0
@@ -185,20 +186,49 @@ class IO:
         else:
             return 0
 
+@dataclass
+class IO_Usage_Allocation:
+    voltage : float = field(default=0.0)
+    banks_used : int = field(default=0)
+    io_used : int = field(default=0)
+    io_available : int = field(default=0)
+
+@dataclass
+class IO_Usage:
+    type : str = field(default='')
+    total_banks_available : int = field(default=0)
+    total_io_available : int = field(default=0)
+    usage : List[IO_Usage_Allocation] = field(default_factory=list)
+
+@dataclass
+class IO_On_Die_Termination:
+    bank_number : int = field(default=0)
+    odt : bool = field(default=False)
+    power : float = field(default=0.0)
+
 class IO_SubModule:
 
     def __init__(self, resources, itemlist):
-        # todo
         self.resources = resources
+        self.total_block_power = 0.0
+        self.total_interconnect_power = 0.0
+        self.total_on_die_termination_power = 0.0
+        self.io_usage = [
+            IO_Usage(type="HP", usage=[IO_Usage_Allocation(voltage=1.2), IO_Usage_Allocation(voltage=1.5), IO_Usage_Allocation(voltage=1.8)]),
+            IO_Usage(type="HR", usage=[IO_Usage_Allocation(voltage=1.8), IO_Usage_Allocation(voltage=2.5), IO_Usage_Allocation(voltage=3.3)])
+        ]
+        self.io_on_die_termination = [
+            IO_On_Die_Termination(bank_number=1),
+            IO_On_Die_Termination(bank_number=2),
+            IO_On_Die_Termination(bank_number=3)
+        ]
         self.itemlist = itemlist
 
     def get_resources(self):
-        # todo
-        return 0, 0, 0, 0
+        return self.io_usage, self.io_on_die_termination
 
     def get_power_consumption(self):
-        # todo
-        return 0.123, 0.456
+        return self.total_block_power, self.total_interconnect_power, self.total_on_die_termination_power
 
     def get_all(self):
         return self.itemlist

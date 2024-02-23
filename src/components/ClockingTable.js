@@ -58,16 +58,10 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   }
 
   function modifyRow(index, row) {
-    let data = {};
-    data["description"] = row.description;
-    data["source"] = parseInt(row.source, 10);
-    data["port"] = row.port;
-    data["frequency"] = row.frequency;
-    data["state"] = parseInt(row.state, 10);
     fetch(clocking.index(device, index), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(row),
     }).then((response) => {
       if (response.ok) {
         fetchClockData(device);
@@ -89,18 +83,10 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
 
   function addRow(newData) {
     if (device === null) return;
-    let data = {
-      enable: true,
-      description: newData.description,
-      port: newData.port,
-      source: parseInt(newData.source, 10),
-      frequency: newData.frequency,
-      state: parseInt(newData.state)
-    };
     fetch(clocking.fetch(device), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(newData),
     }).then((response) => {
       if (response.ok) {
         fetchClockData(device);
@@ -172,13 +158,7 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
               setEditIndex(null);
             }}
             onSubmit={handleSubmit}
-            defaultValue={editIndex !== null && {
-              source: clockingData[editIndex].source,
-              description: clockingData[editIndex].description,
-              port: clockingData[editIndex].port,
-              frequency: clockingData[editIndex].frequency,
-              state: clockingData[editIndex].state
-            } ||
+            defaultValue={editIndex !== null && clockingData[editIndex] ||
             {
               source: 0,
               description: '',

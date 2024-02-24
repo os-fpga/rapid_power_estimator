@@ -2,12 +2,12 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-from submodule.rs_device_resources import RsDeviceResources, ModuleType
-from submodule.clock import Clock_SubModule, Clock
-from submodule.fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
-from submodule.dsp import DSP_SubModule, DSP
-from submodule.bram import BRAM_SubModule, BRAM
-from submodule.io import IO_SubModule, IO
+from .rs_device_resources import RsDeviceResources, ModuleType
+from .clock import Clock_SubModule, Clock
+from .fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
+from .dsp import DSP_SubModule, DSP
+from .bram import BRAM_SubModule, BRAM
+from .io import IO_SubModule, IO
 
 class RsDevice:
 

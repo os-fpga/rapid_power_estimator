@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import { PiNotePencil } from "react-icons/pi";
 import DspModal from "../ModalWindows/DspModal";
 import PowerTable from "./PowerTable";
-import { dsp } from "../../utils/serverAPI"
+import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { dsp_mode, pipelining } from "../../utils/dsp";
 import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
@@ -25,12 +25,12 @@ const DspTable = ({ device, totalPowerCallback }) => {
 
     const fetchDspData = (deviceId) => {
         if (deviceId !== null) {
-            fetch(dsp.fetch(deviceId))
+            fetch(api.fetch(Elem.dsp, deviceId))
                 .then((response) => response.json())
                 .then((data) => {
                     setDspData(data);
 
-                    fetch(dsp.consumption(deviceId))
+                    fetch(api.consumption(Elem.dsp, deviceId))
                         .then((response) => response.json())
                         .then((data) => {
                             const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
@@ -51,7 +51,7 @@ const DspTable = ({ device, totalPowerCallback }) => {
     }
 
     function modifyRow(index, row) {
-        fetch(dsp.index(device, index), {
+        fetch(api.index(Elem.dsp, device, index), {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(row),
@@ -65,7 +65,7 @@ const DspTable = ({ device, totalPowerCallback }) => {
     }
 
     const deleteRow = (index) => {
-        fetch(dsp.index(device, index), {
+        fetch(api.index(Elem.dsp, device, index), {
             method: "DELETE",
         }).then((response) => {
             if (response.ok) {
@@ -76,7 +76,7 @@ const DspTable = ({ device, totalPowerCallback }) => {
 
     function addRow(newData) {
         if (device === null) return;
-        fetch(dsp.fetch(device), {
+        fetch(api.fetch(Elem.dsp, device), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newData),
@@ -108,7 +108,7 @@ const DspTable = ({ device, totalPowerCallback }) => {
                 <table className="table-style">
                     <thead>
                         <tr>
-                            <th className="expand">Name/Hierarchy</th>
+                            <th>Name/Hierarchy</th>
                             <th>XX</th>
                             <th>DSP Mode</th>
                             <th className="no-wrap">A-W</th>

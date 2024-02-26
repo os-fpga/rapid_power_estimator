@@ -30,10 +30,6 @@
     background-color: #eee;
 }
 
-.expand {
-    width: 100%;
-}
-
 .actions {
     display: flex;
     justify-content: space-around;

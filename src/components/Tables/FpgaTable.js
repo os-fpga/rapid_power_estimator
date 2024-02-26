@@ -3,7 +3,7 @@ import { Table, fixed } from "../../utils/common";
 
 import "./../style/FpgaTable.css"
 
-function FpgaTable({ clocking, fle, dsp, bram, tableOpen }) {
+function FpgaTable({ clocking, fle, dsp, bram, io, tableOpen }) {
     return <div className="fpga-main">
         <div className="fpga-main-head">
             <div><label>FPGA</label></div>
@@ -20,7 +20,7 @@ function FpgaTable({ clocking, fle, dsp, bram, tableOpen }) {
             <div className="clickable" onClick={() => tableOpen(Table.DSP)}>DSP<br />{fixed(dsp)} W</div>
         </div>
         <div className="fpga-rowx">
-            <div className="clickable" id="io" onClick={() => tableOpen(Table.IO)}>IO</div>
+            <div className="clickable" id="io" onClick={() => tableOpen(Table.IO)}>IO<br/>{fixed(io)} W</div>
         </div>
     </div>;
 }

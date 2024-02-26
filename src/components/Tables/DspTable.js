@@ -1,13 +1,12 @@
 import React from "react";
-import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
-import { PiNotePencil } from "react-icons/pi";
 import DspModal from "../ModalWindows/DspModal";
 import PowerTable from "./PowerTable";
 import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { dsp_mode, pipelining } from "../../utils/dsp";
 import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
+import { TableBase, Actions } from "./TableBase";
 
 import "./../style/ComponentTable.css"
 
@@ -98,82 +97,64 @@ const DspTable = ({ device, totalPowerCallback }) => {
         "Used", "Available", "%"
     ];
 
+    const mainTableHeader = [
+        "Name/Hierarchy", "XX", "DSP Mode", { className: "no-wrap", text: "A-W" }, { className: "no-wrap", text: "B-W" },
+        "Clock", "Pipeline", "T-Rate",
+        "Block Used", "Clock Freq", "O/P Sig Rate", "Block Power", "Intc. Power", "%", "Action"
+    ]
+
     return <div className="component-table-head">
         <div className="main-block">
             <div className="layout-head">
                 <label>FPGA &gt; DSP</label>
                 <button className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
             </div>
-            <div className="table-wrapper">
-                <table className="table-style">
-                    <thead>
-                        <tr>
-                            <th>Name/Hierarchy</th>
-                            <th>XX</th>
-                            <th>DSP Mode</th>
-                            <th className="no-wrap">A-W</th>
-                            <th className="no-wrap">B-W</th>
-                            <th>Clock</th>
-                            <th>Pipeline</th>
-                            <th>T-Rate</th>
-                            <th>Block Used</th>
-                            <th>Clock Freq</th>
-                            <th>O/P Sig Rate</th>
-                            <th>Block Power</th>
-                            <th>Intc. Power</th>
-                            <th>%</th>
-                            <th>Action</th>
+            <TableBase
+                header={mainTableHeader}
+                data={
+                    dspData.map((row, index) => {
+                        return <tr key={index}>
+                            <td>{row.name}</td>
+                            <td>{row.number_of_multipliers}</td>
+                            <td>{GetText(row.dsp_mode, dsp_mode)}</td>
+                            <td>{row.a_input_width}</td>
+                            <td>{row.b_input_width}</td>
+                            <td>{row.clock}</td>
+                            <td>{GetText(row.pipelining, pipelining)}</td>
+                            <PercentsCell val={row.toggle_rate} precition={1} />
+                            <td>{row.consumption.dsp_blocks_used}</td>
+                            <FrequencyCell val={row.consumption.clock_frequency} />
+                            <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
+                            <PowerCell val={row.consumption.block_power} />
+                            <PowerCell val={row.consumption.interconnect_power} />
+                            <td>{fixed(row.consumption.percentage, 0)} %</td>
+                            <Actions
+                                onEditClick={() => { setEditIndex(index); setModalOpen(true) }}
+                                onDeleteClick={() => deleteRow(index)}
+                            />
                         </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            dspData.map((row, index) => {
-                                return <tr key={index}>
-                                    <td>{row.name}</td>
-                                    <td>{row.number_of_multipliers}</td>
-                                    <td>{GetText(row.dsp_mode, dsp_mode)}</td>
-                                    <td>{row.a_input_width}</td>
-                                    <td>{row.b_input_width}</td>
-                                    <td>{row.clock}</td>
-                                    <td>{GetText(row.pipelining, pipelining)}</td>
-                                    <PercentsCell val={row.toggle_rate} precition={1}/>
-                                    <td>{row.consumption.dsp_blocks_used}</td>
-                                    <FrequencyCell val={row.consumption.clock_frequency} />
-                                    <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
-                                    <PowerCell val={row.consumption.block_power} />
-                                    <PowerCell val={row.consumption.interconnect_power} />
-                                    <td>{fixed(row.consumption.percentage, 0)} %</td>
-                                    <td>
-                                        <span className="actions">
-                                            <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true) }} />
-                                            <BsFillTrashFill className="delete" onClick={() => deleteRow(index)} />
-                                        </span>
-                                    </td>
-                                </tr>
-                            })
-                        }
-                    </tbody>
-                </table>
-                {modalOpen && (
-                    <DspModal
-                        closeModal={() => {
-                            setModalOpen(false);
-                            setEditIndex(null);
-                        }}
-                        onSubmit={handleSubmit}
-                        defaultValue={editIndex !== null && dspData[editIndex] || {
-                            name: '',
-                            number_of_multipliers: 0,
-                            dsp_mode: 0,
-                            a_input_width: 0,
-                            b_input_width: 0,
-                            clock: '',
-                            pipelining: 0,
-                            toggle_rate: 0,
-                        }}
-                    />
-                )}
-            </div>
+                    })
+                }
+            />
+            {modalOpen && (
+                <DspModal
+                    closeModal={() => {
+                        setModalOpen(false);
+                        setEditIndex(null);
+                    }}
+                    onSubmit={handleSubmit}
+                    defaultValue={editIndex !== null && dspData[editIndex] || {
+                        name: '',
+                        number_of_multipliers: 0,
+                        dsp_mode: 0,
+                        a_input_width: 0,
+                        b_input_width: 0,
+                        clock: '',
+                        pipelining: 0,
+                        toggle_rate: 0,
+                    }}
+                />
+            )}
         </div>
         <div className="power-table-wrapper">
             <PowerTable title="DSP power"

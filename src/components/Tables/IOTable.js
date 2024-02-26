@@ -1,12 +1,11 @@
 import React from "react";
-import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
-import { PiNotePencil } from "react-icons/pi";
 import IOModal from "../ModalWindows/IOModal";
 import IOPowerTable from "./IOPowerTable";
 import { api, Elem } from "../../utils/serverAPI"
 import { fixed } from "../../utils/common";
 import { PercentsCell, SelectionCell, PowerCell } from "./TableCells"
+import { TableBase, Actions } from "./TableBase";
 
 import "./../style/ComponentTable.css"
 import {
@@ -170,89 +169,63 @@ const IOTable = ({ device, totalPowerCallback }) => {
             addRow(newRow);
     };
 
+    const mainTableHeader = [
+        "RTL Port Name", "Bus", "Dir", "IO Standard", "Drive Strength", "Slew Rate", "Differential Termination", "Data Type",
+        "Clock", "Toggle Rate", "Duty Cycle", "Sync", "Input En", "Output En", "Pullup / Pulldown", "Bank Type", "Bank #",
+        "VCCIO", "Signal Rate", "Block Power", "Intc. Power", "%", "Action",
+    ]
+
     return <div className="component-table-head">
         <div className="main-block">
             <div className="layout-head">
                 <label>FPGA &gt; IO</label>
                 <button className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
             </div>
-            <div className="table-wrapper">
-                <table className="table-style">
-                    <thead>
-                        <tr>
-                            <th>RTL Port Name</th>
-                            <th>Bus</th>
-                            <th>Dir</th>
-                            <th>IO Standard</th>
-                            <th>Drive Strength</th>
-                            <th>Slew Rate</th>
-                            <th>Differential Termination</th>
-                            <th>Data Type</th>
-                            <th>Clock</th>
-                            <th>Toggle Rate</th>
-                            <th>Duty Cycle</th>
-                            <th>Sync</th>
-                            <th>Input En</th>
-                            <th>Output En</th>
-                            <th>Pullup / Pulldown</th>
-                            <th>Bank Type</th>
-                            <th>Bank #</th>
-                            <th>VCCIO</th>
-                            <th>Signal Rate</th>
-                            <th>Block Power</th>
-                            <th>Intc. Power</th>
-                            <th>%</th>
-                            <th>Action</th>
+            <TableBase
+                header={mainTableHeader}
+                data={
+                    ioData.map((row, index) => {
+                        return <tr key={index}>
+                            <td>{row.name}</td>
+                            <td>{row.bus_width}</td>
+                            <SelectionCell val={row.direction} values={direction} />
+                            <SelectionCell val={row.io_standard} values={io_standard} />
+                            <SelectionCell val={row.drive_strength} values={drive_strength} />
+                            <SelectionCell val={row.slew_rate} values={slew_rate} />
+                            <SelectionCell val={row.differential_termination} values={differential_termination} />
+                            <SelectionCell val={row.io_data_type} values={io_data_type} />
+                            <td>{row.clock}</td>
+                            <PercentsCell val={row.toggle_rate} precition={1} />
+                            <PercentsCell val={row.duty_cycle} />
+                            <SelectionCell val={row.synchronization} values={synchronization} />
+                            <PercentsCell val={row.input_enable_rate} />
+                            <PercentsCell val={row.output_enable_rate} />
+                            <SelectionCell val={row.io_pull_up_down} values={io_pull_up_down} />
+                            <SelectionCell val={row.consumption.bank_type} values={bank_type} />
+                            <td>{row.consumption.bank_number}</td>
+                            <td>{row.consumption.vccio_voltage}</td>
+                            <PercentsCell val={row.consumption.io_signal_rate} />
+                            <PowerCell val={row.consumption.block_power} />
+                            <PowerCell val={row.consumption.interconnect_power} />
+                            <td>{fixed(row.consumption.percentage, 0)} %</td>
+                            <Actions
+                                onEditClick={() => { setEditIndex(index); setModalOpen(true) }}
+                                onDeleteClick={() => deleteRow(index)}
+                            />
                         </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            ioData.map((row, index) => {
-                                return <tr key={index}>
-                                    <td>{row.name}</td>
-                                    <td>{row.bus_width}</td>
-                                    <SelectionCell val={row.direction} values={direction} />
-                                    <SelectionCell val={row.io_standard} values={io_standard} />
-                                    <SelectionCell val={row.drive_strength} values={drive_strength} />
-                                    <SelectionCell val={row.slew_rate} values={slew_rate} />
-                                    <SelectionCell val={row.differential_termination} values={differential_termination} />
-                                    <SelectionCell val={row.io_data_type} values={io_data_type} />
-                                    <td>{row.clock}</td>
-                                    <PercentsCell val={row.toggle_rate} precition={1} />
-                                    <PercentsCell val={row.duty_cycle} />
-                                    <SelectionCell val={row.synchronization} values={synchronization} />
-                                    <PercentsCell val={row.input_enable_rate} />
-                                    <PercentsCell val={row.output_enable_rate} />
-                                    <SelectionCell val={row.io_pull_up_down} values={io_pull_up_down} />
-                                    <SelectionCell val={row.consumption.bank_type} values={bank_type} />
-                                    <td>{row.consumption.bank_number}</td>
-                                    <td>{row.consumption.vccio_voltage}</td>
-                                    <PercentsCell val={row.consumption.io_signal_rate} />
-                                    <PowerCell val={row.consumption.block_power} />
-                                    <PowerCell val={row.consumption.interconnect_power} />
-                                    <td>{fixed(row.consumption.percentage, 0)} %</td>
-                                    <td>
-                                        <span className="actions">
-                                            <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true) }} />
-                                            <BsFillTrashFill className="delete" onClick={() => deleteRow(index)} />
-                                        </span>
-                                    </td>
-                                </tr>
-                            })
-                        }
-                    </tbody>
-                </table>
-                {modalOpen && (
-                    <IOModal
-                        closeModal={() => {
-                            setModalOpen(false);
-                            setEditIndex(null);
-                        }}
-                        onSubmit={handleSubmit}
-                        defaultValue={editIndex !== null && ioData[editIndex] || defaultIOData}
-                    />
-                )}
-            </div>
+                    })
+                }
+            />
+            {modalOpen && (
+                <IOModal
+                    closeModal={() => {
+                        setModalOpen(false);
+                        setEditIndex(null);
+                    }}
+                    onSubmit={handleSubmit}
+                    defaultValue={editIndex !== null && ioData[editIndex] || defaultIOData}
+                />
+            )}
         </div>
         <div className="power-table-wrapper">
             <IOPowerTable title="IO power"

@@ -1,13 +1,12 @@
 import React from "react";
-import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
-import { PiNotePencil } from "react-icons/pi";
 import ClockingModal from "../ModalWindows/ClockingModal";
 import { sources, states } from "../../utils/clocking"
 import PowerTable from "./PowerTable";
 import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { FrequencyCell, PowerCell } from "./TableCells"
+import { TableBase, Actions } from "./TableBase";
 
 import "./../style/ComponentTable.css"
 
@@ -17,6 +16,11 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   const [clockingData, setClockingData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+
+  const mainTableHeader = [
+    "Description", "Source", "Port/Signal name", "Frequency", "Clock Control", "Fanout",
+    "Block Power", "Intc. Power", "%", "Action"
+  ]
 
   React.useEffect(() => {
     if (device !== null)
@@ -112,65 +116,46 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
         <label>FPGA &gt; Clocking</label>
         <button className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
       </div>
-      <div className="table-wrapper">
-        <table className="table-style">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Source</th>
-              <th>Port/Signal name</th>
-              <th>Frequency</th>
-              <th>Clock Control</th>
-              <th>Fanout</th>
-              <th>Block Power</th>
-              <th>Intc. Power</th>
-              <th>%</th>
-              <th>Action</th>
+      <TableBase
+        header={mainTableHeader}
+        data={
+          clockingData.map((row, index) => {
+            return <tr key={index}>
+              <td>{row.description}</td>
+              <td>{GetText(row.source, sources)}</td>
+              <td>{row.port}</td>
+              <FrequencyCell val={row.frequency} />
+              <td>{GetText(row.state, states)}</td>
+              <td>{row.consumption.fan_out}</td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>{fixed(row.consumption.percentage, 0)} %</td>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true) }}
+                onDeleteClick={() => deleteRow(index)}
+              />
             </tr>
-          </thead>
-          <tbody>
-            {
-              clockingData.map((row, index) => {
-                return <tr key={index}>
-                  <td>{row.description}</td>
-                  <td>{GetText(row.source, sources)}</td>
-                  <td>{row.port}</td>
-                  <FrequencyCell val={row.frequency} />
-                  <td>{GetText(row.state, states)}</td>
-                  <td>{row.consumption.fan_out}</td>
-                  <PowerCell val={row.consumption.block_power} />
-                  <PowerCell val={row.consumption.interconnect_power} />
-                  <td>{fixed(row.consumption.percentage, 0)} %</td>
-                  <td>
-                    <span className="actions">
-                      <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true) }} />
-                      <BsFillTrashFill className="delete" onClick={() => deleteRow(index)} />
-                    </span>
-                  </td>
-                </tr>
-              })
-            }
-          </tbody>
-        </table>
-        {modalOpen && (
-          <ClockingModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={editIndex !== null && clockingData[editIndex] ||
-            {
-              source: 0,
-              description: '',
-              port: '',
-              frequency: 1000000,
-              state: 1,
-            }
-            }
-          />
-        )}
-      </div>
+          })
+        }
+      />
+      {modalOpen && (
+        <ClockingModal
+          closeModal={() => {
+            setModalOpen(false);
+            setEditIndex(null);
+          }}
+          onSubmit={handleSubmit}
+          defaultValue={editIndex !== null && clockingData[editIndex] ||
+          {
+            source: 0,
+            description: '',
+            port: '',
+            frequency: 1000000,
+            state: 1,
+          }
+          }
+        />
+      )}
     </div>
     <div className="power-table-wrapper">
       <PowerTable title="Clock power"

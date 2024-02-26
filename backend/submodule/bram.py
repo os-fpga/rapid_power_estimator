@@ -182,9 +182,9 @@ class BRAM:
 
             block_power = (a_write + a_read + b_write + b_read) * self.bram_used
             interconnect_power = (a_int + b_int) * self.bram_used
+
             if "FIFO" in self.type.name:
                 block_power = block_power + fifo
-
 
             self.output.block_power = block_power
             self.output.interconnect_power = interconnect_power

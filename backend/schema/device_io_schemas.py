@@ -34,7 +34,7 @@ class IoOutputSchema(Schema):
     bank_type = fields.Enum(IO_Bank_Type, by_value=True)
     bank_number = fields.Int()
     vccio_voltage = fields.Number()
-    signal_rate = fields.Number()
+    io_signal_rate = fields.Number()
     block_power = fields.Number()
     interconnect_power = fields.Number()
     percentage = fields.Number()

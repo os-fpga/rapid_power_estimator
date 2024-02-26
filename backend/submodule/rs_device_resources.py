@@ -36,7 +36,7 @@ class RsDeviceResources:
 
     def get_num_DSP_BLOCKs(self) -> int:
         # return self.get_attr('dsp')
-        return 200 # overwrite for test purpose
+        return 176 # overwrite for test purpose
 
     def get_num_18K_BRAM(self) -> int:
         # return self.get_attr('bram')
@@ -105,6 +105,18 @@ class RsDeviceResources:
     def get_FF_INT_CAP(self) -> float:
         # todo: read from power data. Coeffient to calculate FLE interconnect power
         return 0.00000004
+
+    def get_DSP_MULT_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate DSP block power
+        return 0.0000015
+
+    def get_DSP_MULT_CAP2(self) -> float:
+        # todo: read from power data. Coeffient to calculate DSP block power (only used for MULTIPLY_ACCUMULATE & MULTIPLY_ADD_SUB DSP Modes)
+        return 0.00000007
+
+    def get_DSP_INT_CAP(self) -> float:
+        # todo: read from power data. Coeffient to calculate DSP interconnect power
+        return 0.0000001
 
     def get_VCC_CORE(self) -> float:
         # todo: should read from regulator module

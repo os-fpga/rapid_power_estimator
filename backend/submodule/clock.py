@@ -5,8 +5,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
 
-from backend.utilities.common_utils import update_attributes
-from backend.submodule.rs_device_resources import ModuleType
+from utilities.common_utils import update_attributes
+from submodule.rs_device_resources import ModuleType
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -61,13 +61,11 @@ class Clock:
         else:
             self.output.percentage = 0.0
 
-        return self.output.percentage
-
-    def compute_dynamic_power(self, fan_out, clock_cap_block, clock_cap_interconnect) -> float:
+    def compute_dynamic_power(self, fan_out, CLK_CAP, CLK_INT_CAP) -> float:
         if self.enable == True and self.state == Clock_State.ACTIVE:
             self.output.fan_out = fan_out # fan out calculate whether the clock is being used by other module
-            self.output.block_power = clock_cap_block * (self.frequency/1000000)
-            self.output.interconnect_power = self.output.fan_out * clock_cap_interconnect * (self.frequency/1000000)
+            self.output.block_power = CLK_CAP * (self.frequency/1000000)
+            self.output.interconnect_power = self.output.fan_out * CLK_INT_CAP * (self.frequency/1000000)
             self.output.message = ''
         else:
             self.output.fan_out = fan_out
@@ -81,13 +79,13 @@ class Clock_SubModule:
         self.resources = resources
         self.total_clock_available = resources.get_num_Clocks()
         self.total_pll_available = resources.get_num_PLLs()
-        self.total_clock_power = 0.0
+        self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
         self.total_pll_power = 0.0
         self.itemlist = itemlist
 
     def get_power_consumption(self):
-        return self.total_clock_power, self.total_interconnect_power, self.total_pll_power
+        return self.total_block_power, self.total_interconnect_power, self.total_pll_power
 
     def get_resources(self):
         return self.total_clock_available, self.total_pll_available, self.get_total_clock_used(), self.get_total_pll_used()
@@ -161,7 +159,7 @@ class Clock_SubModule:
         PLL_AUX     = self.resources.get_PLL_AUX()
 
         # Compute the total power consumption of all clocks
-        self.total_clock_power = 0.0
+        self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
 
         # Compute the total power consumption of all PLLs 
@@ -171,9 +169,9 @@ class Clock_SubModule:
         for item in self.itemlist:
             item.compute_dynamic_power(self.get_clock_fanout(item.port), CLK_CAP, CLK_INT_CAP)
             self.total_interconnect_power += item.output.interconnect_power
-            self.total_clock_power += item.output.block_power
+            self.total_block_power += item.output.block_power
 
         # update individual clock percentage
-        total_power = self.total_clock_power + self.total_interconnect_power + self.total_pll_power
+        total_power = self.total_block_power + self.total_interconnect_power + self.total_pll_power
         for item in self.itemlist:
             item.compute_percentage(total_power)

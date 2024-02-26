@@ -1,5 +1,9 @@
-from backend.submodule.clock import Clock, Source, ClockOutput, Clock_SubModule, Clock_State
-from backend.submodule.rs_device_resources import RsDeviceResources
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
+from submodule.clock import Clock, Source, ClockOutput, Clock_SubModule, Clock_State
+from submodule.rs_device_resources import RsDeviceResources
 from unittest.mock import Mock
 import pytest
 
@@ -27,8 +31,8 @@ def test_compute_percentage(block_power, interconnect_power, total_power, expect
     clock = Clock()
     clock.output.block_power = block_power
     clock.output.interconnect_power = interconnect_power
+    clock.compute_percentage(total_power)
 
-    assert clock.compute_percentage(total_power) == expected_percentage
     assert clock.output.percentage == expected_percentage
 
 @pytest.mark.parametrize(
@@ -46,7 +50,6 @@ def test_compute_dynamic_power(enable, frequency, fan_out, clock_cap_block, cloc
     assert clock.output.block_power == expected_block_power
     assert clock.output.interconnect_power == expected_interconnect_power
     assert clock.output.message == ''
-
 
 def test_clock_submodule_initialization():
     mock_resources = Mock(spec=RsDeviceResources)

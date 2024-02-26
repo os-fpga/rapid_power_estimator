@@ -1,4 +1,10 @@
-from backend.utilities.common_utils import update_attributes
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
+import pytest
+
+from utilities.common_utils import update_attributes
 
 # test_update_attributes.py
 class TestUpdateAttributes:
@@ -17,4 +23,3 @@ class TestUpdateAttributes:
         obj = type('Obj', (object,), {'attr': 'value'})()
         updated = update_attributes(obj, {})
         assert updated.attr == 'value'
-

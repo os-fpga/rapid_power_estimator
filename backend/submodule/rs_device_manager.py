@@ -3,7 +3,7 @@
 #  Authorized use only
 #
 from device.device_xml_parser import parse_device_xml, DeviceList
-from submodule.rs_device import RsDevice
+from .rs_device import RsDevice
 
 class RsDeviceManager:
 

@@ -23,7 +23,13 @@ export const fixed = (number, precition = 3) => {
 }
 
 export function GetText(id, map) {
-    return map.find((elem)=> { return elem.id === id }).text;
+    try {
+        var elem = map.find((elem) => { return elem.id === id });
+        if (elem) return elem.text;
+    } catch (error) {
+        return null
+    }
+    return null;
 }
 
 export const FieldType = {

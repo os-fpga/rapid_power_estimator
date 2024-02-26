@@ -3,9 +3,12 @@ import { Table } from "../utils/common";
 
 import "./style/Peripherals.css"
 
-function Peripherals({ setOpenedTable }) {
+function Peripherals({ setOpenedTable, power }) {
     return <div className="periph-top" onClick={() => setOpenedTable(Table.Peripherals)}>
-        <div className="periph-row-head">Peripherals</div>
+        <div className="periph-row-head">
+            <div>Peripherals</div>
+            <div id="peripherals-power" >{power} W</div>
+        </div>
         <div className="periph-row">
             <div className="periph-rowx">UART0</div>
             <div className="periph-rowx">UART1</div>

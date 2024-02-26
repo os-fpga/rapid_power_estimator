@@ -2,11 +2,11 @@ import React from "react";
 
 import "./style/CPUComponent.css"
 
-function CPUComponent({name}) {
+function CPUComponent({name, power}) {
     return <div className="cpu-component-top">
         <div className="cpu-component-l1">
             <div className="cpu-component-title">{name}</div>
-            <div className="cpu-component-power">X.XXX W</div>
+            <div className="cpu-component-power">{power} W</div>
         </div>
         <div className="cpu-component-l2">
             <div className="cpu-component-power">some text</div>

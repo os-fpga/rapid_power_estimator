@@ -7,6 +7,7 @@ import DspTable from "./components/Tables/DspTable";
 import BramTable from "./components/Tables/BramTable";
 import IOTable from "./components/Tables/IOTable";
 import { Table } from "./utils/common"
+import PeripheralsTable from "./components/Tables/PeripheralsTable";
 import Peripherals from "./components/Peripherals";
 import { api, Elem, devices as getDeviceListApi } from "./utils/serverAPI"
 import CPUComponent from "./components/CPUComponent";
@@ -19,6 +20,12 @@ const App = () => {
   const [dspPower, setDspPower] = React.useState(0);
   const [bramPower, setBramPower] = React.useState(0);
   const [ioPower, setIoPower] = React.useState(0);
+  const [peripheralsPower, setPeripheralsPower] = React.useState(0);
+  const [acpuPower, setAcpuPower] = React.useState(0);
+  const [bcpuPower, setBcpuPower] = React.useState(0);
+  const [memoryPower, setMemoryPower] = React.useState(0);
+  const [dmaPower, setDmaPower] = React.useState(0);
+  const [connectivityPower, setConnectivityPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
 
   React.useEffect(() => {
@@ -61,6 +68,16 @@ const App = () => {
           const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
           setIoPower(total);
         });
+      fetch(api.consumption(Elem.peripherals, device))
+        .then((response) => response.json())
+        .then((data) => {
+          setPeripheralsPower(data.total_peripherals_power);
+          setAcpuPower(data.total_acpu_power);
+          setBcpuPower(data.total_bcpu_power);
+          setMemoryPower(data.total_memory_power);
+          setDmaPower(data.total_dma_power);
+          setConnectivityPower(data.total_noc_interconnect_power);
+        });
     }
   }, [device]);
 
@@ -74,15 +91,15 @@ const App = () => {
           <div className="top-l2">
             <div className="top-l2-col1">
               <div className="top-l2-col1-row1">
-                <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.ACPU)}><CPUComponent name={"ACPU"} /></div>
-                <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.BCPU)}><CPUComponent name={"BCPU"} /></div>
+                <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.ACPU)}><CPUComponent name={"ACPU"} power={acpuPower}/></div>
+                <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.BCPU)}><CPUComponent name={"BCPU"} power={bcpuPower} /></div>
                 <div className="top-l2-col1-row1-elem">SOC</div>
               </div>
               <div className="top-l2-col1-row2">
                 <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.DMA)}>DMA</div>
                 <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.Connectivity)}>Connectivity</div>
               </div>
-              <Peripherals setOpenedTable={setOpenedTable} />
+              <Peripherals setOpenedTable={setOpenedTable} power={peripheralsPower} />
             </div>
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
@@ -150,7 +167,7 @@ const App = () => {
       }
       {
         openedTable === Table.Peripherals &&
-        <label>Peripherals table</label>
+        <PeripheralsTable device={device} totalPowerCallback={setPeripheralsPower} />
       }
     </div>
   );

@@ -4,11 +4,11 @@ import { PiNotePencil } from "react-icons/pi";
 
 import "./../style/ComponentTable.css"
 
-export const Actions = ({ onEditClick, onDeleteClick, rowSpan }) => {
+export const Actions = ({ onEditClick, onDeleteClick, rowSpan, showDelete = true }) => {
   return <td rowSpan={rowSpan}>
     <span className="actions">
       <PiNotePencil className="edit" onClick={() => { onEditClick() }} />
-      <BsFillTrashFill className="delete" onClick={() => onDeleteClick()} />
+      {showDelete && <BsFillTrashFill className="delete" onClick={() => onDeleteClick()} />}
     </span>
   </td>
 }

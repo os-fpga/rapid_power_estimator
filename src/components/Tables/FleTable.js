@@ -5,7 +5,7 @@ import { PiNotePencil } from "react-icons/pi";
 import FleModal from "../ModalWindows/FleModal";
 import { glitch_factor } from "../../utils/fle"
 import PowerTable from "./PowerTable";
-import { fle } from "../../utils/serverAPI"
+import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
 
@@ -25,12 +25,12 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
   const fetchFleData = (deviceId) => {
     if (deviceId !== null) {
-      fetch(fle.fetch(deviceId))
+      fetch(api.fetch(Elem.fle, deviceId))
         .then((response) => response.json())
         .then((data) => {
           setFleData(data);
 
-          fetch(fle.consumption(deviceId))
+          fetch(api.consumption(Elem.fle, deviceId))
             .then((response) => response.json())
             .then((data) => {
               const total = data.total_block_power + data.total_interconnect_power;
@@ -57,7 +57,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
   }
 
   function modifyRow(index, row) {
-    fetch(fle.index(device, index), {
+    fetch(api.index(Elem.fle, device, index), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(row),
@@ -71,7 +71,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
   }
 
   const deleteRow = (index) => {
-    fetch(fle.index(device, index), {
+    fetch(api.index(Elem.fle, device, index), {
       method: "DELETE",
     }).then((response) => {
       if (response.ok) {
@@ -82,7 +82,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
   function addRow(newData) {
     if (device === null) return;
-    fetch(fle.fetch(device), {
+    fetch(api.fetch(Elem.fle, device), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newData),
@@ -114,7 +114,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
         <table className="table-style">
           <thead>
             <tr>
-              <th className="expand">Name/Hierarchy</th>
+              <th>Name/Hierarchy</th>
               <th>LUT6</th>
               <th>FF/Latch</th>
               <th>Clock</th>

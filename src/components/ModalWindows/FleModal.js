@@ -36,7 +36,7 @@ const FleModal = ({ closeModal, onSubmit, defaultValue }) => {
         },
         {
           fieldType: FieldType.float,
-          step: "1",
+          step: "0.5",
           id: "toggle_rate",
           text: "Toggle Rate, %",
           value: defaultValue.toggle_rate

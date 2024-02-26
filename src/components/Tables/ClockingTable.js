@@ -5,7 +5,7 @@ import { PiNotePencil } from "react-icons/pi";
 import ClockingModal from "../ModalWindows/ClockingModal";
 import { sources, states } from "../../utils/clocking"
 import PowerTable from "./PowerTable";
-import { clocking } from "../../utils/serverAPI"
+import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { FrequencyCell, PowerCell } from "./TableCells"
 
@@ -25,12 +25,12 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
 
   const fetchClockData = (deviceId) => {
     if (deviceId !== null) {
-      fetch(clocking.fetch(deviceId))
+      fetch(api.fetch(Elem.clocking, deviceId))
         .then((response) => response.json())
         .then((data) => {
           setClockingData(data);
 
-          fetch(clocking.consumption(deviceId))
+          fetch(api.consumption(Elem.clocking, deviceId))
             .then((response) => response.json())
             .then((data) => {
               const total = data.total_clock_block_power + data.total_clock_interconnect_power + data.total_pll_power;
@@ -41,14 +41,14 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
                   "Clocks",
                   data.total_clocks_used,
                   data.total_clocks_available,
-                  fixed(data.total_clock_block_power + data.total_clock_interconnect_power),
+                  fixed(data.total_clock_block_power + data.total_clock_interconnect_power) + ' W',
                   fixed(data.total_clocks_used / data.total_clocks_available * 100, 0),
                 ],
                 [
                   "PLLs",
                   data.total_plls_used,
                   data.total_plls_available,
-                  fixed(data.total_pll_power),
+                  fixed(data.total_pll_power) + ' W',
                   fixed(data.total_plls_used / data.total_plls_available * 100, 0)
                 ]
               ]);
@@ -59,7 +59,7 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   }
 
   function modifyRow(index, row) {
-    fetch(clocking.index(device, index), {
+    fetch(api.index(Elem.clocking, device, index), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(row),
@@ -73,7 +73,7 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
   }
 
   const deleteRow = (index) => {
-    fetch(clocking.index(device, index), {
+    fetch(api.index(Elem.clocking, device, index), {
       method: "DELETE",
     }).then((response) => {
       if (response.ok) {
@@ -84,7 +84,7 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
 
   function addRow(newData) {
     if (device === null) return;
-    fetch(clocking.fetch(device), {
+    fetch(api.fetch(Elem.clocking, device), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newData),
@@ -116,7 +116,7 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
         <table className="table-style">
           <thead>
             <tr>
-              <th className="expand">Description</th>
+              <th>Description</th>
               <th>Source</th>
               <th>Port/Signal name</th>
               <th>Frequency</th>

@@ -5,14 +5,17 @@
 import argparse
 import os
 import sys
+from utilities.common_utils import get_enum_by_value
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device import ModuleType
+from submodule.peripherals import PeripheralType
 from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
 from schema.device_io_schemas import IoSchema, IoResourcesConsumptionSchema
+from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema, PeripheralConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -363,6 +366,69 @@ def get_device_io_power_consumption(device_id):
         }
         schema = IoResourcesConsumptionSchema()
         return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+#
+# Device Soc Peripheral REST APIs
+#
+@app.route('/devices/<device_id>/peripherals', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripherals(device_id):
+    try:
+        peripherals = devicemanager.get_all(ModuleType.SOC_PERIPHERALS, device_id)
+        peripherals_by_type = {}
+
+        # group peripherals by their type
+        for item in peripherals:
+            if item.peripheral_type.value in peripherals_by_type:
+                count = len(peripherals_by_type[item.peripheral_type.value])
+                peripherals_by_type[item.peripheral_type.value].append({ 'href': f'{item.peripheral_type.value}/{count}' })
+            else:
+                peripherals_by_type[item.peripheral_type.value] = [{ 'href': f'{item.peripheral_type.value}/0' }]
+
+        schema = PeripheralUrlSchema()
+        return schema.dump(peripherals_by_type)
+
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/peripherals/consumption', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripherals_consumption(device_id):
+    try:
+        consumption = devicemanager.get_power_consumption(ModuleType.SOC_PERIPHERALS, device_id)
+        res = devicemanager.get_resources(ModuleType.SOC_PERIPHERALS, device_id)
+        data = {
+            "total_memory_power" : consumption[0],
+            "total_peripherals_power" : consumption[1],
+            "total_acpu_power" : consumption[2],
+            "total_dma_power" : consumption[3],
+            "total_noc_interconnect_power" : consumption[4],
+            "total_bcpu_power" : consumption[5],
+            "total_soc_io_available" : res[0],
+            "total_soc_io_used" : res[1]
+        }
+        schema = PeripheralConsumptionSchema()
+        return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripheral(device_id, periph, row_number):
+    try:
+        peripheral_type = get_enum_by_value(PeripheralType, periph)
+        item = devicemanager.get_peripheral(device_id, peripheral_type, row_number)
+        schema = PeripheralSchema.create_schema(peripheral_type)
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['PATCH'], strict_slashes=False)
+def update_device_soc_peripheral(device_id, periph, row_number):
+    try:
+        peripheral_type = get_enum_by_value(PeripheralType, periph)
+        schema = PeripheralSchema.create_schema(peripheral_type)
+        item = devicemanager.update_peripheral(device_id, peripheral_type, row_number, schema.load(request.json))
+        return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 

@@ -19,6 +19,7 @@ class PeripheralType(Enum):
     GPIO = 'gpio'
     PWM  = 'pwm'
     MEMORY = 'memory'
+    DMA  = 'dma'
 
 class Peripherals_Usage(Enum):
     Boot  = 0
@@ -120,17 +121,18 @@ class Memory_Type(Enum):
     DDR4 = 2
 
 class Dma_Activity(Enum):
-    Idle = 'Idle'
-    Low = 'Low'
-    Medium = 'Medium'
-    High = 'High'
+    IDLE   = 0
+    LOW    = 1
+    MEDIUM = 2
+    HIGH   = 3
 
 class Dma_Source_Destination(Enum):
-    DDR = 'DDR'
-    OCM = 'OCM'
-    SPI_QSPI = 'SPI_QSPI'
-    I2C = 'I2C'
-    Fabric = 'Fabric'
+    NONE     = 0
+    DDR      = 1
+    OCM      = 2
+    SPI_QSPI = 3
+    I2C      = 4
+    FABRIC   = 5
 
 @dataclass
 class Peripheral_Output:
@@ -332,38 +334,49 @@ class A45_RISC_V_ACPU:
     data_path: List[A45_RISC_V_Data_Path] = field(default_factory=[])
 
 @dataclass
-class DMA:
+class DMA_Output:
+    calculated_bandwidth: float = field(default=0.0)
+    noc_power: float = field(default=0.0)
+    block_power: float = field(default=0.0)
+    percentage: float = field(default=0.0)
+    message: str = field(default='')
+
+@dataclass
+class DMA(PeripheralBase):
     channel: int = field(default=1)
-    used: bool = field(default=False)
-    _source: Dma_Source_Destination = field(default=None)
-    _destination: Dma_Source_Destination = field(default=None)
-    _initialized: InitVar[bool] = field(default=False)
-    activity: Dma_Activity = field(default=Dma_Activity.Medium)
-    read_write_rate_percentage: float = field(default=50.0)
-    toggle_rate: float = field(default=12.5)
+    source: Dma_Source_Destination = field(default=Dma_Source_Destination.NONE)
+    destination: Dma_Source_Destination = field(default=Dma_Source_Destination.NONE)
+    activity: Dma_Activity = field(default=Dma_Activity.MEDIUM)
+    read_write_rate: float = field(default=0.5)
+    toggle_rate: float = field(default=0.125)
+    output: DMA_Output = field(default_factory=DMA_Output)
 
-    @property
-    def source(self):
-        return self._source
+    # @property
+    # def source(self):
+    #     return self._source
 
-    @source.setter
-    def source(self, value):
-        if self._initialized and value is not None and self._destination is not None and value == self._destination:
-            raise ValueError("Source and destination cannot be the same.")
-        self._source = value
+    # @source.setter
+    # def source(self, value):
+    #     if self._initialized and value is not None and self._destination is not None and value == self._destination:
+    #         raise ValueError("Source and destination cannot be the same.")
+    #     self._source = value
 
-    @property
-    def destination(self):
-        return self._destination
+    # @property
+    # def destination(self):
+    #     return self._destination
 
-    @destination.setter
-    def destination(self, value):
-        if self._initialized and value is not None and self._source is not None and value == self._source:
-            raise ValueError("Source and destination cannot be the same.")
-        self._destination = value
+    # @destination.setter
+    # def destination(self, value):
+    #     if self._initialized and value is not None and self._source is not None and value == self._source:
+    #         raise ValueError("Source and destination cannot be the same.")
+    #     self._destination = value
 
-    def __post_init__(self, _initialized):
-        self._initialized = _initialized
+    def __post_init__(self):
+        self.peripheral_type = PeripheralType.DMA
+
+    def compute_dynamic_power(self):
+        # todo
+        pass
         
 class Peripheral_SubModule:
 
@@ -384,7 +397,11 @@ class Peripheral_SubModule:
             Gpio(enable=True, name="GPIO (Fabric)", io_type=Gpio_Type.FABRIC),
             Pwm(name="PWM"),
             Memory(name="DDR", memory_type=Memory_Type.DDR3, data_rate=1333),
-            Memory(enable=True, name="OCM", memory_type=Memory_Type.SRAM, data_rate=533)
+            Memory(enable=True, name="OCM", memory_type=Memory_Type.SRAM, data_rate=533),
+            DMA(name="Channel 1"),
+            DMA(name="Channel 2"),
+            DMA(name="Channel 3"),
+            DMA(name="Channel 4")
         ]
 
     def get_power_consumption(self):

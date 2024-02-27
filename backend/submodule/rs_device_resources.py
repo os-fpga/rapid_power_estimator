@@ -6,7 +6,7 @@ class ModuleType(Enum):
     DSP = 2
     BRAM = 3
     IO = 4
-    PERIPHERAL_PROCESSING = 5
+    SOC_PERIPHERALS = 5
     REGULATOR = 6
 
 class RsDeviceResources:

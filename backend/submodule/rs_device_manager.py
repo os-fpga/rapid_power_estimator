@@ -3,6 +3,9 @@
 #  Authorized use only
 #
 from device.device_xml_parser import parse_device_xml, DeviceList
+from utilities.common_utils import get_enum_by_value
+from .peripherals import PeripheralType
+from .rs_device_resources import ModuleType
 from .rs_device import RsDevice
 
 class RsDeviceManager:
@@ -51,3 +54,6 @@ class RsDeviceManager:
 
     def get_resources(self, modtype, device_id):
         return self.get_device(device_id).get_module(modtype).get_resources()
+
+    def get_peripheral(self, device_id, periph, row_number):
+        return self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_enum_by_value(PeripheralType, periph), row_number)

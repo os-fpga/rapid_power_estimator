@@ -13,6 +13,7 @@ from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema,
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
 from schema.device_io_schemas import IoSchema, IoResourcesConsumptionSchema
+from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -365,6 +366,46 @@ def get_device_io_power_consumption(device_id):
         return schema.dump(data)
     except ValueError as e:
         return f"Error: {e}", 404
+
+#
+# Device Soc Peripheral REST APIs
+#
+@app.route('/devices/<device_id>/peripherals', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripherals(device_id):
+    try:
+        peripherals = devicemanager.get_all(ModuleType.SOC_PERIPHERALS, device_id)
+        peripherals_by_type = {}
+
+        # group peripherals by their type
+        for item in peripherals:
+            if item.peripheral_type.value in peripherals_by_type:
+                count = len(peripherals_by_type[item.peripheral_type.value])
+                peripherals_by_type[item.peripheral_type.value].append(f'/devices/{device_id}/peripherals/{item.peripheral_type.value}/{count}')
+            else:
+                peripherals_by_type[item.peripheral_type.value] = [f'/devices/{device_id}/peripherals/{item.peripheral_type.value}/0']
+
+        schema = PeripheralUrlSchema()
+        return schema.dump(peripherals_by_type)
+
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/peripherals/consumption', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripherals_consumption(device_id):
+    pass
+
+@app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripheral(device_id, periph, row_number):
+    try:
+        item = devicemanager.get_peripheral(device_id, periph, row_number)
+        schema = PeripheralSchema()
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['PATCH'], strict_slashes=False)
+def update_device_soc_peripheral(device_id, periph, row_number):
+    pass
 
 #
 # Main entry point

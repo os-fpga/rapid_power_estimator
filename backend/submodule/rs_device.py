@@ -8,6 +8,7 @@ from .fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
 from .dsp import DSP_SubModule, DSP
 from .bram import BRAM_SubModule, BRAM
 from .io import IO_SubModule, IO
+from .peripherals import Peripheral_SubModule
 
 class RsDevice:
 
@@ -50,6 +51,9 @@ class RsDevice:
             Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
             Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
+
+        # soc peripherals module
+        self.resources.register_module(ModuleType.SOC_PERIPHERALS, Peripheral_SubModule(self.resources))
 
         # perform initial calculation
         self.compute_output_power()

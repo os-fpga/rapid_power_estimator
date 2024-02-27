@@ -7,3 +7,9 @@ def update_attributes(target, props):
             if hasattr(target, key):
                 setattr(target, key, value)
     return target
+
+def get_enum_by_value(enum_class, value):
+    for enum_member in enum_class:
+        if enum_member.value == value:
+            return enum_member
+    return None

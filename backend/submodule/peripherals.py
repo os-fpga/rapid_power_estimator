@@ -18,6 +18,7 @@ class PeripheralType(Enum):
     GIGE = 'gige'
     GPIO = 'gpio'
     PWM  = 'pwm'
+    MEMORY = 'memory'
 
 class Peripherals_Usage(Enum):
     Boot  = 0
@@ -114,8 +115,9 @@ class Fpga_Complex_Activity(Enum):
     High = 'High'
 
 class Memory_Type(Enum):
-    DDR3 = 'DDR3'
-    DDR4 = 'DDR4'
+    SRAM = 0
+    DDR3 = 1
+    DDR4 = 2
 
 class Dma_Activity(Enum):
     Idle = 'Idle'
@@ -245,6 +247,28 @@ class Pwm(PeripheralBase):
         pass
 
 @dataclass
+class Memory_Output:
+    write_bandwidth: float = field(default=0.0)
+    read_bandwidth: float = field(default=0.0)
+    block_power: float = field(default=0.0)
+    percentage: float = field(default=0.0)
+    message: str = field(default='')
+
+@dataclass
+class Memory(PeripheralBase):
+    memory_type: Memory_Type = field(default=Memory_Type.DDR3)
+    data_rate: int = field(default=1333)
+    width: int = field(default=32)
+    output: Memory_Output = field(default_factory=Memory_Output)
+
+    def __post_init__(self):
+        self.peripheral_type = PeripheralType.MEMORY
+
+    def compute_dynamic_power(self):
+        # todo
+        pass
+
+@dataclass
 class N22_RISC_V_Port_Output:
     calculated_bandwidth: float = field(default=0.0)
     noc_power: float = field(default=0.0)
@@ -284,31 +308,6 @@ class Fpga_Complex:
     read_write_rate_percentage: float = field(default=50.0)
     toggle_rate: float = field(default=12.5)
     output : Fpga_Complex_Output = field(default_factory=Fpga_Complex_Output)
-
-@dataclass
-class Memory_Output:
-    write_bandwidth_MBps: float = field(default=0.0)
-    read_bandwidth_MBps: float = field(default=0.0)
-    block_power: float = field(default=0.0)
-    percentage: float = field(default=0.0)
-
-@dataclass
-class Memory_DDR:
-    used: bool = field(default=False)
-    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
-    type: Memory_Type = field(default=Memory_Type.DDR3)
-    data_rate: int = field(default=1066)
-    width: int = field(default=32)
-    output: Memory_Output = field(default_factory=Memory_Output)
-
-@dataclass
-class Memory_OCM:
-    used: bool = field(default=False)
-    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
-    type: str = 'SRAM'
-    data_rate: int = 533
-    width: int = 32
-    output: Memory_Output = field(default_factory=Memory_Output)
 
 @dataclass
 class A45_RISC_V_Port_Output:
@@ -383,7 +382,9 @@ class Peripheral_SubModule:
             Gpio(enable=True, name="GPIO (BCPU)", io_type=Gpio_Type.BCPU),
             Gpio(enable=True, name="GPIO (ACPU)", io_type=Gpio_Type.ACPU),
             Gpio(enable=True, name="GPIO (Fabric)", io_type=Gpio_Type.FABRIC),
-            Pwm(name="PWM")
+            Pwm(name="PWM"),
+            Memory(name="DDR", memory_type=Memory_Type.DDR3, data_rate=1333),
+            Memory(enable=True, name="OCM", memory_type=Memory_Type.SRAM, data_rate=533)
         ]
 
     def get_power_consumption(self):

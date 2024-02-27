@@ -4,7 +4,7 @@
 #
 from marshmallow import Schema, fields
 from submodule.peripherals import PeripheralType, Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, \
-    I2c_Speed, Baud_Rate, Cpu, Usb_Speed, Gige_Speed, Gpio_Type, GpioStandard
+    I2c_Speed, Baud_Rate, Cpu, Usb_Speed, Gige_Speed, Gpio_Type, GpioStandard, Memory_Type
 
 class HrefSchema(Schema):
     href = fields.Str()
@@ -18,6 +18,7 @@ class PeripheralUrlSchema(Schema):
     gige = fields.Nested(HrefSchema, many=True)
     gpio = fields.Nested(HrefSchema, many=True)
     pwm  = fields.Nested(HrefSchema, many=True)
+    memory  = fields.Nested(HrefSchema, many=True)
 
 class PeripheralConsumptionSchema(Schema):
     total_memory_power = fields.Number()
@@ -59,6 +60,8 @@ class PeripheralSchema(Schema):
             return GpioSchema()
         elif peripheral_type == PeripheralType.PWM:
             return PwmSchema()
+        elif peripheral_type == PeripheralType.MEMORY:
+            return MemorySchema()
         else:
             return PeripheralSchema()
 
@@ -89,3 +92,16 @@ class GpioSchema(PeripheralSchema):
 class PwmSchema(PeripheralSchema):
     io_used = fields.Int()
     io_standard = fields.Enum(GpioStandard, by_value=True)
+
+class MemoryOutputSchema(Schema):
+    write_bandwidth = fields.Number()
+    read_bandwidth = fields.Number()
+    block_power = fields.Number()
+    percentage = fields.Number()
+    message = fields.Str()
+
+class MemorySchema(PeripheralSchema):
+    memory_type = fields.Enum(Memory_Type, by_value=True)
+    data_rate = fields.Int()
+    width = fields.Int()
+    output = fields.Nested(MemoryOutputSchema, data_key="consumption")

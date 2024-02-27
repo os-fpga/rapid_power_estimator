@@ -380,9 +380,9 @@ def get_device_soc_peripherals(device_id):
         for item in peripherals:
             if item.peripheral_type.value in peripherals_by_type:
                 count = len(peripherals_by_type[item.peripheral_type.value])
-                peripherals_by_type[item.peripheral_type.value].append(f'/devices/{device_id}/peripherals/{item.peripheral_type.value}/{count}')
+                peripherals_by_type[item.peripheral_type.value].append({ 'href': f'{item.peripheral_type.value}/{count}' })
             else:
-                peripherals_by_type[item.peripheral_type.value] = [f'/devices/{device_id}/peripherals/{item.peripheral_type.value}/0']
+                peripherals_by_type[item.peripheral_type.value] = [{ 'href': f'{item.peripheral_type.value}/0' }]
 
         schema = PeripheralUrlSchema()
         return schema.dump(peripherals_by_type)
@@ -414,7 +414,7 @@ def get_device_soc_peripherals_consumption(device_id):
 def get_device_soc_peripheral(device_id, periph, row_number):
     try:
         item = devicemanager.get_peripheral(device_id, periph, row_number)
-        schema = PeripheralSchema()
+        schema = PeripheralSchema.create_schema(item.peripheral_type)
         return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404

@@ -233,6 +233,7 @@ class Gpio(PeripheralBase):
 
 @dataclass
 class Pwm(PeripheralBase):
+    io_used: int = field(default=0)
     io_standard: GpioStandard = field(default=GpioStandard.SSTL_1_8V_Class_I_HR)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
 

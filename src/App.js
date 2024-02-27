@@ -5,9 +5,10 @@ import ClockingTable from "./components/Tables/ClockingTable";
 import FleTable from "./components/Tables/FleTable";
 import DspTable from "./components/Tables/DspTable";
 import BramTable from "./components/Tables/BramTable";
+import IOTable from "./components/Tables/IOTable";
 import { Table } from "./utils/common"
 import Peripherals from "./components/Peripherals";
-import { clocking, fle, dsp, bram, devices as getDeviceListApi } from "./utils/serverAPI"
+import { api, Elem, devices as getDeviceListApi } from "./utils/serverAPI"
 import CPUComponent from "./components/CPUComponent";
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
   const [flePower, setFlePower] = React.useState(0);
   const [dspPower, setDspPower] = React.useState(0);
   const [bramPower, setBramPower] = React.useState(0);
+  const [ioPower, setIoPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
 
   React.useEffect(() => {
@@ -29,29 +31,35 @@ const App = () => {
 
   React.useEffect(() => {
     if (device !== null) {
-      fetch(clocking.consumption(device))
+      fetch(api.consumption(Elem.clocking, device))
         .then((response) => response.json())
         .then((data) => {
           const total = data.total_clock_block_power + data.total_clock_interconnect_power + data.total_pll_power;
           setClockingPower(total);
         });
-      fetch(fle.consumption(device))
+      fetch(api.consumption(Elem.fle, device))
         .then((response) => response.json())
         .then((data) => {
           const total = data.total_block_power + data.total_interconnect_power;
           setFlePower(total);
         });
-      fetch(dsp.consumption(device))
+      fetch(api.consumption(Elem.dsp, device))
         .then((response) => response.json())
         .then((data) => {
           const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
           setDspPower(total);
         });
-      fetch(bram.consumption(device))
+      fetch(api.consumption(Elem.bram, device))
         .then((response) => response.json())
         .then((data) => {
           const total = data.total_bram_block_power + data.total_bram_interconnect_power;
           setBramPower(total);
+        });
+      fetch(api.consumption(Elem.io, device))
+        .then((response) => response.json())
+        .then((data) => {
+          const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
+          setIoPower(total);
         });
     }
   }, [device]);
@@ -77,12 +85,14 @@ const App = () => {
               <Peripherals setOpenedTable={setOpenedTable} />
             </div>
             <div className="top-l2-col2">
-              <div className="top-l2-col2-elem"><FpgaTable
-                clocking={clockingPower}
-                fle={flePower}
-                dsp={dspPower}
-                bram={bramPower}
-                tableOpen={setOpenedTable} />
+              <div className="top-l2-col2-elem">
+                <FpgaTable
+                  clocking={clockingPower}
+                  fle={flePower}
+                  dsp={dspPower}
+                  bram={bramPower}
+                  io={ioPower}
+                  tableOpen={setOpenedTable} />
               </div>
               <div className="clickable top-l2-col2-elem" onClick={() => setOpenedTable(Table.Memory)}>Memory</div>
             </div>
@@ -108,7 +118,7 @@ const App = () => {
       }
       {
         openedTable === Table.IO &&
-        <label>IO table</label>
+        <IOTable device={device} totalPowerCallback={setIoPower} />
       }
       {
         openedTable === Table.BRAM &&

@@ -1,13 +1,12 @@
 import React from "react";
-import { BsFillTrashFill } from "react-icons/bs"
 import { FaPlus } from "react-icons/fa6";
-import { PiNotePencil } from "react-icons/pi";
 import FleModal from "../ModalWindows/FleModal";
 import { glitch_factor } from "../../utils/fle"
 import PowerTable from "./PowerTable";
-import { fle } from "../../utils/serverAPI"
+import { api, Elem } from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
+import { TableBase, Actions } from "./TableBase";
 
 import "./../style/ComponentTable.css"
 
@@ -25,12 +24,12 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
   const fetchFleData = (deviceId) => {
     if (deviceId !== null) {
-      fetch(fle.fetch(deviceId))
+      fetch(api.fetch(Elem.fle, deviceId))
         .then((response) => response.json())
         .then((data) => {
           setFleData(data);
 
-          fetch(fle.consumption(deviceId))
+          fetch(api.consumption(Elem.fle, deviceId))
             .then((response) => response.json())
             .then((data) => {
               const total = data.total_block_power + data.total_interconnect_power;
@@ -57,7 +56,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
   }
 
   function modifyRow(index, row) {
-    fetch(fle.index(device, index), {
+    fetch(api.index(Elem.fle, device, index), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(row),
@@ -71,7 +70,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
   }
 
   const deleteRow = (index) => {
-    fetch(fle.index(device, index), {
+    fetch(api.index(Elem.fle, device, index), {
       method: "DELETE",
     }).then((response) => {
       if (response.ok) {
@@ -82,7 +81,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
   function addRow(newData) {
     if (device === null) return;
-    fetch(fle.fetch(device), {
+    fetch(api.fetch(Elem.fle, device), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newData),
@@ -104,74 +103,55 @@ const FleTable = ({ device, totalPowerCallback }) => {
     "Used", "Available", "%"
   ];
 
+  const mainTableHeader = [
+    "Name/Hierarchy", "LUT6", "FF/Latch", "Clock", "Toggle Rate", "Glitch Factor",
+    "Clock Freq", "O/P Sig Rate", "Block Power", "Intc. Power", "%", "Action"
+  ]
+
   return <div className="component-table-head">
     <div className="main-block">
       <div className="layout-head">
         <label>FPGA &gt; FLE</label>
         <button className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
       </div>
-      <div className="table-wrapper">
-        <table className="table-style">
-          <thead>
-            <tr>
-              <th className="expand">Name/Hierarchy</th>
-              <th>LUT6</th>
-              <th>FF/Latch</th>
-              <th>Clock</th>
-              <th>Toggle Rate</th>
-              <th>Glitch Factor</th>
-              <th>Clock Freq</th>
-              <th>O/P Sig Rate</th>
-              <th>Block Power</th>
-              <th>Intc. Power</th>
-              <th>%</th>
-              <th>Action</th>
+      <TableBase
+        header={mainTableHeader}
+        data={
+          fleData.map((row, index) => {
+            return <tr key={index}>
+              <td>{row.name}</td>
+              <td>{row.lut6}</td>
+              <td>{row.flip_flop}</td>
+              <td>{row.clock}</td>
+              <PercentsCell val={row.toggle_rate} precition={1} />
+              <td>{GetText(row.glitch_factor, glitch_factor)}</td>
+              <FrequencyCell val={row.consumption.clock_frequency} />
+              <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>{fixed(row.consumption.percentage, 0)} %</td>
+              <Actions onEditClick={() => { setEditIndex(index); setModalOpen(true) }} onDeleteClick={() => deleteRow(index)} />
             </tr>
-          </thead>
-          <tbody>
-            {
-              fleData.map((row, index) => {
-                return <tr key={index}>
-                  <td>{row.name}</td>
-                  <td>{row.lut6}</td>
-                  <td>{row.flip_flop}</td>
-                  <td>{row.clock}</td>
-                  <PercentsCell val={row.toggle_rate} precition={1} />
-                  <td>{GetText(row.glitch_factor, glitch_factor)}</td>
-                  <FrequencyCell val={row.consumption.clock_frequency} />
-                  <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
-                  <PowerCell val={row.consumption.block_power} />
-                  <PowerCell val={row.consumption.interconnect_power} />
-                  <td>{fixed(row.consumption.percentage, 0)} %</td>
-                  <td>
-                    <span className="actions">
-                      <PiNotePencil className="edit" onClick={() => { setEditIndex(index); setModalOpen(true) }} />
-                      <BsFillTrashFill className="delete" onClick={() => deleteRow(index)} />
-                    </span>
-                  </td>
-                </tr>
-              })
-            }
-          </tbody>
-        </table>
-        {modalOpen && (
-          <FleModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={editIndex !== null && fleData[editIndex] || {
-              name: '',
-              lut6: 0,
-              flip_flop: 0,
-              clock: '',
-              toggle_rate: 0,
-              glitch_factor: 0,
-            }}
-          />
-        )}
-      </div>
+          })
+        }
+      />
+      {modalOpen && (
+        <FleModal
+          closeModal={() => {
+            setModalOpen(false);
+            setEditIndex(null);
+          }}
+          onSubmit={handleSubmit}
+          defaultValue={editIndex !== null && fleData[editIndex] || {
+            name: '',
+            lut6: 0,
+            flip_flop: 0,
+            clock: '',
+            toggle_rate: 0,
+            glitch_factor: 0,
+          }}
+        />
+      )}
     </div>
     <div className="power-table-wrapper">
       <PowerTable title="FLE power"

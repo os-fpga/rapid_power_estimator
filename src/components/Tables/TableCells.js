@@ -1,5 +1,5 @@
 import React from "react";
-import { fixed } from "../../utils/common";
+import { fixed, GetText } from "../../utils/common";
 
 function showFreq(value) {
     if (value < 999)
@@ -19,4 +19,8 @@ export function FrequencyCell(props) {
 
 export function PowerCell(props) {
     return <td rowSpan={props.rowSpan}>{fixed(props.val, 3)} W</td>;
+}
+
+export function SelectionCell(props) {
+    return <td>{GetText(props.val, props.values)}</td>;
 }

@@ -100,7 +100,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
   };
 
   const resourcesHeaders = [
-    "Used", "Available", "%"
+    "Used", "Total", "%"
   ];
 
   const mainTableHeader = [

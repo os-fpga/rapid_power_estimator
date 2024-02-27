@@ -9,6 +9,13 @@
 }
 
 .periph-row-head {
+    display: flex;
+    flex-direction: row;
+}
+
+#peripherals-power {
+    text-align: right;
+    width: 100%;
 }
 
 .periph-row {

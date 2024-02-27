@@ -5,6 +5,10 @@ const port = config.port;
 
 export const devices = formatString("{0}:{1}/devices", server, port)
 
+export function peripheralPath(deviceId, url) {
+    return formatString("{0}/{1}/peripherals/{2}", devices, deviceId, url)
+}
+
 export function deviceInfo(deviceId) {
     return formatString("{0}/{1}", devices, deviceId);
 }
@@ -15,6 +19,7 @@ export const Elem = {
     bram: 'bram',
     dsp: 'dsp',
     fle: 'fabric_le',
+    peripherals: 'peripherals',
 };
 
 export let api = {

@@ -126,6 +126,22 @@ class RsDeviceResources:
         # todo: should read from regulator module
         return 1.8
 
+    def get_BRAM_INT_CAP(self) -> float:
+        # todo: should read from power data
+        return 0.00000035
+    
+    def get_BRAM_WRITE_CAP(self) -> float:
+        # todo: should read from power data
+        return 0.000002
+
+    def get_BRAM_READ_CAP(self) -> float:
+        # todo: should read from power data
+        return 0.0000025
+
+    def get_BRAM_FIFO_CAP(self) -> float:
+        # todo: should read from power data
+        return 0.0000007
+
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module
         return module

@@ -15,8 +15,18 @@ class PeripheralUrlSchema(Schema):
     gpio = fields.List(fields.Str())
     pwm = fields.List(fields.Str())
 
+class PeripheralConsumptionSchema(Schema):
+    total_memory_power = fields.Number()
+    total_peripherals_power = fields.Number()
+    total_acpu_power = fields.Number()
+    total_dma_power = fields.Number()
+    total_noc_interconnect_power = fields.Number()
+    total_bcpu_power = fields.Number()
+    total_soc_io_available = fields.Int()
+    total_soc_io_used = fields.Int()
+
 class PeripheralSchema(Schema):
     enable = fields.Bool()
     name = fields.Str()
-    # peripheral_type = fields.Enum(PeripheralType)
+    # todo
     usage = fields.Enum(Peripherals_Usage, by_value=True)

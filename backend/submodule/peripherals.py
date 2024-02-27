@@ -386,10 +386,12 @@ class Peripheral_SubModule:
         ]
 
     def get_power_consumption(self):
-        return 0, 0, 0, 0
+        # todo
+        return 0.347, 0.024, 0.013, 0.001, 0.0001, 0.003
 
     def get_resources(self):
-        return 0, 0
+        # todo
+        return 20, 40
 
     def get_all(self):
         return self.peripherals
@@ -408,8 +410,11 @@ class Peripheral_SubModule:
         pass
 
     def update_peripheral(self, periph_type, idx, data):
-        item = update_attributes(self.get_peripheral(periph_type, idx), data)
-        return item
+        # todo
+        # item = update_attributes(self.get_peripheral(periph_type, idx), data)
+        # return item
+        pass
 
     def compute_output_power(self):
+        # todo
         pass

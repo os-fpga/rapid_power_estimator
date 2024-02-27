@@ -13,7 +13,7 @@ from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema,
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
 from schema.device_io_schemas import IoSchema, IoResourcesConsumptionSchema
-from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema
+from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema, PeripheralConsumptionSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -392,7 +392,23 @@ def get_device_soc_peripherals(device_id):
 
 @app.route('/devices/<device_id>/peripherals/consumption', methods=['GET'], strict_slashes=False)
 def get_device_soc_peripherals_consumption(device_id):
-    pass
+    try:
+        consumption = devicemanager.get_power_consumption(ModuleType.SOC_PERIPHERALS, device_id)
+        res = devicemanager.get_resources(ModuleType.SOC_PERIPHERALS, device_id)
+        data = {
+            "total_memory_power" : consumption[0],
+            "total_peripherals_power" : consumption[1],
+            "total_acpu_power" : consumption[2],
+            "total_dma_power" : consumption[3],
+            "total_noc_interconnect_power" : consumption[4],
+            "total_bcpu_power" : consumption[5],
+            "total_soc_io_available" : res[0],
+            "total_soc_io_used" : res[1]
+        }
+        schema = PeripheralConsumptionSchema()
+        return schema.dump(data)
+    except ValueError as e:
+        return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['GET'], strict_slashes=False)
 def get_device_soc_peripheral(device_id, periph, row_number):

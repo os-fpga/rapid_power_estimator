@@ -3,10 +3,10 @@
 #  Authorized use only
 #
 from dataclasses import dataclass, field, InitVar
+from utilities.common_utils import update_attributes
 from .clock import Clock
 from typing import List
 from enum import Enum
-import sys
 
 class PeripheralType(Enum):
     NONE = 'none'
@@ -380,9 +380,9 @@ class Peripheral_SubModule:
             Uart(name="UART (ACPU)", cpu=Cpu.ACPU),
             Usb2(name="USB 2.0"),
             Gige(name="GigE"),
-            Gpio(name="GPIO (BCPU)", io_type=Gpio_Type.BCPU),
-            Gpio(name="GPIO (ACPU)", io_type=Gpio_Type.ACPU),
-            Gpio(name="GPIO (Fabric)", io_type=Gpio_Type.FABRIC),
+            Gpio(enable=True, name="GPIO (BCPU)", io_type=Gpio_Type.BCPU),
+            Gpio(enable=True, name="GPIO (ACPU)", io_type=Gpio_Type.ACPU),
+            Gpio(enable=True, name="GPIO (Fabric)", io_type=Gpio_Type.FABRIC),
             Pwm(name="PWM")
         ]
 
@@ -408,13 +408,10 @@ class Peripheral_SubModule:
             return items[idx]
         else:
             raise ValueError("Invalid index. Item doesn't exist at the specified index.")
-        pass
 
     def update_peripheral(self, periph_type, idx, data):
-        # todo
-        # item = update_attributes(self.get_peripheral(periph_type, idx), data)
-        # return item
-        pass
+        item = update_attributes(self.get_peripheral(periph_type, idx), data)
+        return item
 
     def compute_output_power(self):
         # todo

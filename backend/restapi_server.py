@@ -5,8 +5,10 @@
 import argparse
 import os
 import sys
+from utilities.common_utils import get_enum_by_value
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device import ModuleType
+from submodule.peripherals import PeripheralType
 from schema.device_schemas import DeviceSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
@@ -413,15 +415,22 @@ def get_device_soc_peripherals_consumption(device_id):
 @app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['GET'], strict_slashes=False)
 def get_device_soc_peripheral(device_id, periph, row_number):
     try:
-        item = devicemanager.get_peripheral(device_id, periph, row_number)
-        schema = PeripheralSchema.create_schema(item.peripheral_type)
+        peripheral_type = get_enum_by_value(PeripheralType, periph)
+        item = devicemanager.get_peripheral(device_id, peripheral_type, row_number)
+        schema = PeripheralSchema.create_schema(peripheral_type)
         return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
 @app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>', methods=['PATCH'], strict_slashes=False)
 def update_device_soc_peripheral(device_id, periph, row_number):
-    pass
+    try:
+        peripheral_type = get_enum_by_value(PeripheralType, periph)
+        schema = PeripheralSchema.create_schema(peripheral_type)
+        item = devicemanager.update_peripheral(device_id, peripheral_type, row_number, schema.load(request.json))
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
 
 #
 # Main entry point

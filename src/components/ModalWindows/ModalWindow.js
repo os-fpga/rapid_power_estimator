@@ -83,7 +83,7 @@ const ModalWindow = (props) => {
                 <label htmlFor={item.id}>{item.text}</label>
                 <select name={item.id} onChange={handleSelectChange} value={formState[item.id]}>
                     {
-                        item.values.map((it, idx) => (
+                        item.values.map((it) => (
                             <option key={it.id} value={it.id}>{it.text}</option>
                         ))
                     }
@@ -101,6 +101,11 @@ const ModalWindow = (props) => {
         >
             <div className="modal">
                 <form>
+                    {props.title &&
+                        <div className="form-group">
+                            <label id='form-group-header'>{props.title}</label>
+                        </div>
+                    }
                     {
                         props.fields.map((item) => {
                             if (item.hasOwnProperty('internal')) {

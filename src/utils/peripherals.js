@@ -90,7 +90,7 @@ export let gpio_pwm = {
         { id: 1, text: "Debug" },
         { id: 2, text: "Application" },
     ],
-    io_type: [
+    io_standard: [
         { id: 0, text: "LVCMOS 1.8V (HR)" },
         { id: 1, text: "LVCMOS 2.5V" },
         { id: 2, text: "LVCMOS 3.3V" },

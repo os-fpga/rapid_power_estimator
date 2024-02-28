@@ -41,7 +41,7 @@ class DSP:
     output : DSP_output = field(default_factory=DSP_output)
 
     def compute_percentage(self, total_power):
-        if (total_power > 0):
+        if total_power > 0:
             self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
         else:
             self.output.percentage = 0.0
@@ -109,12 +109,11 @@ class DSP_SubModule:
     def get_resources(self):
         total_dsp_blocks_used = 0
         for item in self.itemlist:
-            if item.enable == True:
+            if item.enable:
                 total_dsp_blocks_used += item.number_of_multipliers
         return total_dsp_blocks_used, self.total_dsp_blocks_available
 
     def get_power_consumption(self):
-        # todo
         return self.total_block_power, self.total_interconnect_power
 
     def get_all(self):

@@ -6,7 +6,7 @@ from .rs_device_resources import RsDeviceResources, ModuleType
 from .clock import Clock_SubModule, Clock
 from .fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
 from .dsp import DSP_SubModule, DSP
-from .bram import BRAM_SubModule, BRAM
+from .bram import BRAM_SubModule, BRAM, BRAM_Type, PortProperties
 from .io import IO_SubModule, IO
 from .peripherals import Peripheral_SubModule
 
@@ -36,8 +36,8 @@ class RsDevice:
 
         # bram module
         self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
-            BRAM(name="test 1", bram_used=11),
-            BRAM(name="test 2", bram_used=17)
+            BRAM(name="test 1", bram_used=16, enable=True, type=BRAM_Type.BRAM_18k_TDP, port_a=PortProperties(clock='CLK_100'), port_b=PortProperties(clock='CLK_233')),
+            BRAM(name="test 2", bram_used=17, enable=True, type=BRAM_Type.BRAM_18k_TDP)
         ]))
 
         # io module

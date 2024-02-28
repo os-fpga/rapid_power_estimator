@@ -147,8 +147,12 @@ class BRAM:
                 b_int = 0.0
                 fifo = 0.0
 
+            if "SDP" in self.type.name or "FIFO" in self.type.name:
+                interconnect_power = (a_int + b_int) * self.bram_used
+            else:
+                interconnect_power = 0
+
             block_power = (a_write + a_read + b_write + b_read) * self.bram_used
-            interconnect_power = (a_int + b_int) * self.bram_used
 
             if "FIFO" in self.type.name:
                 block_power = block_power + fifo

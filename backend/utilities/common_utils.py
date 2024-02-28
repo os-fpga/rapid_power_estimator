@@ -4,7 +4,10 @@
 #
 def update_attributes(target, props):
     for key, value in props.items():
-            if hasattr(target, key):
+        if hasattr(target, key):
+            if type(value) is dict:
+                update_attributes(getattr(target, key), value)
+            else:
                 setattr(target, key, value)
     return target
 

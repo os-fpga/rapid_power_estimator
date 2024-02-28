@@ -13,20 +13,12 @@ class Glitch_Factor(Enum):
 
 @dataclass
 class Fabric_LE_output:
-    clock_frequency : int = field(default=100000000)
+    clock_frequency : int = field(default=0)
     output_signal_rate : float = field(default=0.0)
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
-    percentage : float = field(default=100.0)
+    percentage : float = field(default=0.0)
     message : str = field(default='')
-
-    def __init__(self, clock_frequency=100000000, output_signal_rate=0.0, block_power=0.0, interconnect_power=0.0, percentage=100.0, message='') -> None:
-        self.clock_frequency = clock_frequency
-        self.output_signal_rate = output_signal_rate
-        self.block_power = block_power
-        self.interconnect_power = interconnect_power
-        self.percentage = percentage
-        self.message = message
 
 @dataclass
 class Fabric_LE:
@@ -35,21 +27,10 @@ class Fabric_LE:
     lut6 : int = field(default=0)
     flip_flop : int = field(default=0)
     clock : str = field(default='')
-    toggle_rate : float = field(default=12.5)
+    toggle_rate : float = field(default=0.125)
     glitch_factor : Glitch_Factor = field(default=Glitch_Factor.TYPICAL)
-    percentage : float = field(default=100.0)
-    output : Fabric_LE_output = field(default_factory=Fabric_LE_output())
-
-    def __init__(self, enable=False, name='', lut6=0, flip_flop=0, clock='', toggle_rate=0.125, glitch_factor=Glitch_Factor.VERY_HIGH, clock_enable_rate=0.5) -> None:
-        self.enable = enable
-        self.name = name
-        self.lut6 = lut6
-        self.flip_flop = flip_flop
-        self.clock = clock
-        self.toggle_rate = toggle_rate
-        self.glitch_factor = glitch_factor
-        self.clock_enable_rate = clock_enable_rate
-        self.output = Fabric_LE_output()
+    clock_enable_rate : float = field(default=0.5)
+    output : Fabric_LE_output = field(default_factory=Fabric_LE_output)
 
     def compute_percentage(self, total_power):
         if (total_power > 0):

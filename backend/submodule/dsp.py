@@ -114,7 +114,6 @@ class DSP_SubModule:
         return total_dsp_blocks_used, self.total_dsp_blocks_available
 
     def get_power_consumption(self):
-        # todo
         return self.total_block_power, self.total_interconnect_power
 
     def get_all(self):

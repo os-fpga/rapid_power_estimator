@@ -29,13 +29,6 @@ class ClockOutput:
     percentage : float = field(default=0.0)
     message : str = field(default='')
 
-    def __init__(self, fan_out=0, block_power=0.0, interconnect_power=0.0, percentage=0.0, message=''):
-        self.fan_out = fan_out
-        self.block_power = block_power
-        self.interconnect_power = interconnect_power
-        self.percentage = percentage
-        self.message = message
-
 @dataclass
 class Clock:
     enable : bool = field(default=False)
@@ -44,16 +37,7 @@ class Clock:
     port : str = field(default='')
     frequency : int = field(default=100000000)
     state : Clock_State = field(default=Clock_State.ACTIVE)
-    output : ClockOutput = field(default_factory=ClockOutput())
-
-    def __init__(self, enable=False, description='', source=Source.IO, port='', frequency=100000000, state=Clock_State.ACTIVE):
-        self.enable = enable
-        self.description = description
-        self.source = source
-        self.port = port
-        self.frequency = frequency
-        self.state = state
-        self.output = ClockOutput()
+    output : ClockOutput = field(default_factory=ClockOutput)
 
     def compute_percentage(self, total_power):
         if (total_power > 0):

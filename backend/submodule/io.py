@@ -4,7 +4,6 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-# from clock import Clock
 from utilities.common_utils import update_attributes
 from typing import List
 
@@ -104,35 +103,14 @@ class IO_Bank_Type(Enum):
 
 @dataclass
 class IO_output:
-
     bank_type : IO_Bank_Type = field(default=IO_Bank_Type.HP)
     bank_number : int = field(default=0)
     vccio_voltage : float = field(default=1.8)
     io_signal_rate : float = field(default=0.0)
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
-    percentage : float = field(default=100.0)
+    percentage : float = field(default=0.0)
     message : str = field(default='')
-
-    def __init__(
-        self,
-        bank_type: IO_Bank_Type = IO_Bank_Type.HP,
-        bank_number: int = 0,
-        vccio_voltage: float = 1.8,
-        io_signal_rate: float = 0.0,
-        block_power: float = 0.0,
-        interconnect_power: float = 0.0,
-        percentage: float = 100.0,
-        message: str = '',
-    ):
-        self.bank_type = bank_type
-        self.bank_number = bank_number
-        self.vccio_voltage = vccio_voltage
-        self.io_signal_rate = io_signal_rate
-        self.block_power = block_power
-        self.interconnect_power = interconnect_power
-        self.percentage = percentage
-        self.message = message
 
 @dataclass
 class IO:
@@ -144,7 +122,7 @@ class IO:
     io_standard : IO_STANDARD = field(default=IO_STANDARD.LVCMOS_1_8V_HR)
     drive_strength : IO_Drive_Strength = field(default=IO_Drive_Strength.six)
     slew_rate : IO_Slew_Rate = field(default=IO_Slew_Rate.slow)
-    diffrential_termination : IO_differential_termination = field(default=IO_differential_termination.OFF)
+    differential_termination : IO_differential_termination = field(default=IO_differential_termination.OFF)
     io_data_type : IO_Data_Type = field(default=IO_Data_Type.Clock)
     toggle_rate : float = field(default=0.125)
     duty_cycle : float = field(default=0.5)
@@ -152,39 +130,11 @@ class IO:
     input_enable_rate : float = field(default=1.0)
     output_enable_rate : float = field(default=0.0)
     io_pull_up_down : IO_Pull_up_down = field(default=IO_Pull_up_down.NONE)
-    output : IO_output = field(default_factory=IO_output())
-
-    def __init__(self, enable: bool = False, name: str = '', bus_width: int = 1, direction: IO_Direction = IO_Direction.INPUT,
-                 clock: str = '', io_standard: IO_STANDARD = IO_STANDARD.LVCMOS_1_8V_HR,
-                 drive_strength: IO_Drive_Strength = IO_Drive_Strength.six, slew_rate: IO_Slew_Rate = IO_Slew_Rate.slow,
-                 differential_termination: IO_differential_termination = IO_differential_termination.OFF,
-                 io_data_type: IO_Data_Type = IO_Data_Type.Clock, toggle_rate: float = 0.125, duty_cycle: float = 0.5,
-                 synchronization: IO_Synchronization = IO_Synchronization.DDR_Register, input_enable_rate: float = 1.0,
-                 output_enable_rate: float = 0.0, io_pull_up_down: IO_Pull_up_down = IO_Pull_up_down.NONE):
-        self.enable = enable
-        self.name = name
-        self.bus_width = bus_width
-        self.direction = direction
-        self.clock = clock
-        self.io_standard = io_standard
-        self.drive_strength = drive_strength
-        self.slew_rate = slew_rate
-        self.differential_termination = differential_termination
-        self.io_data_type = io_data_type
-        self.toggle_rate = toggle_rate
-        self.duty_cycle = duty_cycle
-        self.synchronization = synchronization
-        self.input_enable_rate = input_enable_rate
-        self.output_enable_rate = output_enable_rate
-        self.io_pull_up_down = io_pull_up_down
-        self.output = IO_output()
+    output : IO_output = field(default_factory=IO_output)
 
     def compute_dynamic_power(self):
-        if self.enable:
-            # todo
-            pass
-        else:
-            return 0
+        # todo
+        pass
 
 @dataclass
 class IO_Usage_Allocation:

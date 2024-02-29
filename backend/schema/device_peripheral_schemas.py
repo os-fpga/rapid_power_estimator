@@ -180,3 +180,15 @@ class BcpuSchema(PeripheralSchema):
     clock = fields.Enum(N22_RISC_V_Clock, by_value=True)
     ports = EndpointUrlField()
     output = fields.Nested(BcpuOutputSchema, data_key="consumption")
+
+class EndpointOutputSchema(Schema):
+    calculated_bandwidth = fields.Number()
+    noc_power = fields.Number()
+    message = fields.Str()
+
+class EndpointSchema(Schema):
+    name = fields.Str()
+    activity = fields.Enum(Port_Activity, by_value=True)
+    read_write_rate = fields.Number()
+    toggle_rate = fields.Number()
+    output = fields.Nested(EndpointOutputSchema, data_key="consumption")

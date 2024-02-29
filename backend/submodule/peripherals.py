@@ -458,9 +458,16 @@ class Peripheral_SubModule:
         item = update_attributes(self.get_peripheral(periph_type, idx), data)
         return item
 
+    def get_endpoint(self, periph_type, idx, endpoint_idx):
+        item = self.get_peripheral(periph_type, idx)
+        if 0 <= endpoint_idx < len(item.ports):
+            return item.ports[endpoint_idx]
+        else:
+            raise ValueError("Invalid index. Endpoint doesn't exist at the specified index.")
+
     def update_endpoint(self, periph_type, idx, endpoint_idx, data):
-        # todo
-        pass
+        item = update_attributes(self.get_endpoint(periph_type, idx, endpoint_idx), data)
+        return item
 
     def compute_output_power(self):
         # todo

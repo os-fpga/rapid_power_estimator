@@ -58,3 +58,11 @@ class RsDeviceManager:
 
     def update_peripheral(self, device_id, peripheral_type, row_number, data):
         return self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).update_peripheral(peripheral_type, row_number, data)
+
+    def get_endpoint(self, device_id, peripheral_type, row_number, endpoint_idx):
+        module = self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS)
+        return module.get_endpoint(peripheral_type, row_number, endpoint_idx)
+
+    def update_endpoint(self, device_id, peripheral_type, row_number, endpoint_idx, data):
+        module = self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS)
+        return module.update_endpoint(peripheral_type, row_number, endpoint_idx, data)

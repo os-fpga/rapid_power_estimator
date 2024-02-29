@@ -75,6 +75,8 @@ class PeripheralSchema(Schema):
             return BcpuSchema()
         elif peripheral_type == PeripheralType.ACPU:
             return AcpuSchema()
+        elif peripheral_type == PeripheralType.FPGA_COMPLEX:
+            return FpgaComplexSchema()
         else:
             return PeripheralSchema()
 
@@ -195,6 +197,14 @@ class EndpointSchema(Schema):
     toggle_rate = fields.Number()
     output = fields.Nested(EndpointOutputSchema, data_key="consumption")
 
+class FpgaComplexEndpointOutputSchema(EndpointOutputSchema):
+    clock_frequency = fields.Int()
+    percentage = fields.Number()
+
+class FpgaComplexEndpointSchema(EndpointSchema):
+    clock = fields.Str()
+    output = fields.Nested(FpgaComplexEndpointOutputSchema)
+
 class AcpuOutputSchema(Schema):
     block_power = fields.Number()
 
@@ -204,3 +214,6 @@ class AcpuSchema(PeripheralSchema):
     load = fields.Enum(A45_Load, by_value=True)
     ports = EndpointUrlField()
     output = fields.Nested(AcpuOutputSchema, data_key="consumption")
+
+class FpgaComplexSchema(PeripheralSchema):
+    ports = EndpointUrlField()

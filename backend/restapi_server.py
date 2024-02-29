@@ -15,7 +15,8 @@ from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema,
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
 from schema.device_io_schemas import IoSchema, IoResourcesConsumptionSchema
-from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema, PeripheralConsumptionSchema, EndpointSchema
+from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema, PeripheralConsumptionSchema, \
+    EndpointSchema, FpgaComplexEndpointSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -442,7 +443,10 @@ def get_device_soc_peripheral_endpoint(device_id, periph, row_number, n):
         if peripheral_type not in (PeripheralType.BCPU, PeripheralType.ACPU, PeripheralType.FPGA_COMPLEX):
             raise ValueError("Invalid peripheral type.")
         item = devicemanager.get_endpoint(device_id, peripheral_type, row_number, n)
-        schema = EndpointSchema()
+        if peripheral_type == PeripheralType.FPGA_COMPLEX:
+            schema = FpgaComplexEndpointSchema()
+        else:
+            schema = EndpointSchema()
         return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
@@ -453,7 +457,10 @@ def update_device_soc_peripheral_endpoint(device_id, periph, row_number, n):
         peripheral_type = get_enum_by_value(PeripheralType, periph)
         if peripheral_type not in (PeripheralType.BCPU, PeripheralType.ACPU, PeripheralType.FPGA_COMPLEX):
             raise ValueError("Invalid peripheral type.")
-        schema = EndpointSchema()
+        if peripheral_type == PeripheralType.FPGA_COMPLEX:
+            schema = FpgaComplexEndpointSchema()
+        else:
+            schema = EndpointSchema()
         item = devicemanager.update_endpoint(device_id, peripheral_type, row_number, n, schema.load(request.json))
         return schema.dump(item)
     except ValueError as e:

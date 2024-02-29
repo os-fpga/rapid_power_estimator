@@ -5,7 +5,7 @@
 from marshmallow import Schema, fields
 from submodule.peripherals import PeripheralType, Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, \
     I2c_Speed, Baud_Rate, Cpu, Usb_Speed, Gige_Speed, Gpio_Type, GpioStandard, Memory_Type, \
-    Dma_Source_Destination, Dma_Activity, N22_RISC_V_Clock, Port_Activity
+    Dma_Source_Destination, Dma_Activity, N22_RISC_V_Clock, Port_Activity, A45_Load
 
 class UrlField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -73,6 +73,8 @@ class PeripheralSchema(Schema):
             return DmaSchema()
         elif peripheral_type == PeripheralType.BCPU:
             return BcpuSchema()
+        elif peripheral_type == PeripheralType.ACPU:
+            return AcpuSchema()
         else:
             return PeripheralSchema()
 
@@ -192,3 +194,13 @@ class EndpointSchema(Schema):
     read_write_rate = fields.Number()
     toggle_rate = fields.Number()
     output = fields.Nested(EndpointOutputSchema, data_key="consumption")
+
+class AcpuOutputSchema(Schema):
+    block_power = fields.Number()
+
+class AcpuSchema(PeripheralSchema):
+    enable = fields.Bool()
+    frequency = fields.Int()
+    load = fields.Enum(A45_Load, by_value=True)
+    ports = EndpointUrlField()
+    output = fields.Nested(AcpuOutputSchema, data_key="consumption")

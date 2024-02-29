@@ -101,10 +101,10 @@ class Port_Activity(Enum):
     HIGH   = 3
 
 class A45_Load(Enum):
-    Idle = 'Idle'
-    Low = 'Low'
-    Medium = 'Medium'
-    High = 'High'
+    IDLE   = 0
+    LOW    = 1
+    MEDIUM = 2
+    HIGH   = 3
 
 class Fpga_Complex_End_Points(Enum):
     DDR = 'DDR'
@@ -341,25 +341,22 @@ class Fpga_Complex:
 
 @dataclass
 class A45_RISC_V_Port_Output:
-    calculated_bandwidth: float = field(default=0.0)
-    noc_power: float = field(default=0.0)
     block_power: float = field(default=0.0)
-    message: str = field(default='')
 
 @dataclass
-class A45_RISC_V_Data_Path:
-    end_point: str = field(default='') # valid values: jtag, spi_qspi, uart0, ddr, ocm, gpio
-    activity: Port_Activity = field(default=Port_Activity.MEDIUM)
-    read_write_rate_percentage: float = field(default=50.0)
-    toggle_rate_percentage: float = field(default=12.5)
+class A45_RISC_V_ACPU(PeripheralBase):
+    enable: bool = field(default=False)
+    frequency: int = field(default=0)
+    load: A45_Load = field(default=A45_Load.MEDIUM)
+    ports: List[Endpoint] = field(default_factory=List)
     output: A45_RISC_V_Port_Output = field(default_factory=A45_RISC_V_Port_Output)
 
-@dataclass
-class A45_RISC_V_ACPU:
-    used: bool = field(default=False)
-    frequency: int = field(default=533000000)
-    load : A45_Load = field(default=A45_Load.Medium)
-    data_path: List[A45_RISC_V_Data_Path] = field(default_factory=[])
+    def __post_init__(self):
+        self.peripheral_type = PeripheralType.ACPU
+
+    def compute_dynamic_power(self):
+        # todo
+        pass
 
 @dataclass
 class DMA_Output:
@@ -379,26 +376,6 @@ class DMA(PeripheralBase):
     read_write_rate: float = field(default=0.5)
     toggle_rate: float = field(default=0.125)
     output: DMA_Output = field(default_factory=DMA_Output)
-
-    # @property
-    # def source(self):
-    #     return self._source
-
-    # @source.setter
-    # def source(self, value):
-    #     if self._initialized and value is not None and self._destination is not None and value == self._destination:
-    #         raise ValueError("Source and destination cannot be the same.")
-    #     self._source = value
-
-    # @property
-    # def destination(self):
-    #     return self._destination
-
-    # @destination.setter
-    # def destination(self, value):
-    #     if self._initialized and value is not None and self._source is not None and value == self._source:
-    #         raise ValueError("Source and destination cannot be the same.")
-    #     self._destination = value
 
     def __post_init__(self):
         self.peripheral_type = PeripheralType.DMA
@@ -431,7 +408,8 @@ class Peripheral_SubModule:
             DMA(name="Channel 2"),
             DMA(name="Channel 3"),
             DMA(name="Channel 4"),
-            N22_RISC_V_BCPU(name='N22 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()])
+            N22_RISC_V_BCPU(name='N22 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()]),
+            A45_RISC_V_ACPU(name='A45 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()])
         ]
 
     def get_power_consumption(self):

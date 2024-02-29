@@ -52,8 +52,9 @@ class Baud_Rate(Enum):
     Baud_Rate_9600   = 0
     Baud_Rate_19200  = 1
     Baud_Rate_28800  = 2
-    Baud_Rate_115200 = 3
-    Baud_Rate_128000 = 4
+    Baud_Rate_57600  = 3
+    Baud_Rate_115200 = 4
+    Baud_Rate_128000 = 5
 
 class I2c_Speed(Enum):
     Standard_100Kbps = 0

@@ -20,6 +20,9 @@ class PeripheralType(Enum):
     PWM  = 'pwm'
     MEMORY = 'memory'
     DMA  = 'dma'
+    BCPU = 'bcpu'
+    ACPU = 'acpu'
+    FPGA_COMPLEX = 'fpga_complex'
 
 class Peripherals_Usage(Enum):
     Boot  = 0
@@ -49,8 +52,9 @@ class Baud_Rate(Enum):
     Baud_Rate_9600   = 0
     Baud_Rate_19200  = 1
     Baud_Rate_28800  = 2
-    Baud_Rate_115200 = 3
-    Baud_Rate_128000 = 4
+    Baud_Rate_57600  = 3
+    Baud_Rate_115200 = 4
+    Baud_Rate_128000 = 5
 
 class I2c_Speed(Enum):
     Standard_100Kbps = 0
@@ -86,21 +90,21 @@ class Gpio_Type(Enum):
     FABRIC = 2
 
 class N22_RISC_V_Clock(Enum):
-    PLL_233MHz = 'PLL_233MHz'
-    BOOT_Clock_40MHz = 'BOOT_Clock_40MHz'
-    RC_OSC_50MHz = 'RC_OSC_50MHz'
+    PLL_233MHz       = 0
+    BOOT_Clock_40MHz = 1
+    RC_OSC_50MHz     = 2
 
 class Port_Activity(Enum):
-    Idle = 'Idle'
-    Low = 'Low'
-    Medium = 'Medium'
-    High = 'High'
+    IDLE   = 0
+    LOW    = 1
+    MEDIUM = 2
+    HIGH   = 3
 
 class A45_Load(Enum):
-    Idle = 'Idle'
-    Low = 'Low'
-    Medium = 'Medium'
-    High = 'High'
+    IDLE   = 0
+    LOW    = 1
+    MEDIUM = 2
+    HIGH   = 3
 
 class Fpga_Complex_End_Points(Enum):
     DDR = 'DDR'
@@ -143,13 +147,13 @@ class Peripheral_Output:
 
 @dataclass
 class PeripheralBase:
-    enable: bool = field(default=False) 
     name : str = field(default='')
     peripheral_type : PeripheralType = field(default=PeripheralType.NONE)
-    usage: Peripherals_Usage = field(default=Peripherals_Usage.Boot)
 
 @dataclass
 class Qspi(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.Boot)
     clock_frequency: Qspi_Performance_Mbps = field(default=Qspi_Performance_Mbps.SPI_1Mbps)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
 
@@ -162,6 +166,8 @@ class Qspi(PeripheralBase):
 
 @dataclass
 class Jtag(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.Debug)
     clock_frequency : Jtag_Clock_Frequency = field(default=Jtag_Clock_Frequency.JTAG_10Mbps)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
 
@@ -174,6 +180,8 @@ class Jtag(PeripheralBase):
 
 @dataclass
 class Uart(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.Debug)
     baudrate : Baud_Rate = field(default=Baud_Rate.Baud_Rate_115200)
     cpu : Cpu = field(default=Cpu.ACPU)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
@@ -187,6 +195,8 @@ class Uart(PeripheralBase):
 
 @dataclass
 class I2c(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
     clock_frequency : I2c_Speed = field(default=I2c_Speed.Standard_100Kbps)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
 
@@ -199,6 +209,8 @@ class I2c(PeripheralBase):
 
 @dataclass
 class Usb2(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
     bit_rate : Usb_Speed = field(default=Usb_Speed.Full_Speed_480Mbps)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
 
@@ -211,8 +223,10 @@ class Usb2(PeripheralBase):
 
 @dataclass
 class Gige(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
     bit_rate: Gige_Speed = field(default=Gige_Speed.Gige_100Mbps)
-    power_output: Peripheral_Output = field(default_factory=Peripheral_Output)
+    output: Peripheral_Output = field(default_factory=Peripheral_Output)
 
     def __post_init__(self):
         self.peripheral_type = PeripheralType.GIGE
@@ -223,6 +237,7 @@ class Gige(PeripheralBase):
 
 @dataclass
 class Gpio(PeripheralBase):
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
     io_used: int = field(default=0)
     io_type: Gpio_Type = field(default=Gpio_Type.BCPU)
     io_standard: GpioStandard = field(default=GpioStandard.SSTL_1_8V_Class_I_HR)
@@ -237,6 +252,7 @@ class Gpio(PeripheralBase):
 
 @dataclass
 class Pwm(PeripheralBase):
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
     io_used: int = field(default=0)
     io_standard: GpioStandard = field(default=GpioStandard.SSTL_1_8V_Class_I_HR)
     output: Peripheral_Output = field(default_factory=Peripheral_Output)
@@ -258,6 +274,8 @@ class Memory_Output:
 
 @dataclass
 class Memory(PeripheralBase):
+    enable: bool = field(default=False)
+    usage: Peripherals_Usage = field(default=Peripherals_Usage.App)
     memory_type: Memory_Type = field(default=Memory_Type.DDR3)
     data_rate: int = field(default=1333)
     width: int = field(default=32)
@@ -271,28 +289,38 @@ class Memory(PeripheralBase):
         pass
 
 @dataclass
-class N22_RISC_V_Port_Output:
+class Endpoint_Output:
     calculated_bandwidth: float = field(default=0.0)
     noc_power: float = field(default=0.0)
+    message: str = field(default='')
+
+@dataclass
+class Endpoint:
+    name: str = field(default='')
+    activity: Port_Activity = field(default=Port_Activity.IDLE)
+    read_write_rate: float = field(default=0.5)
+    toggle_rate: float = field(default=0.125)
+    output: Endpoint_Output = field(default_factory=Endpoint_Output)
+
+@dataclass
+class N22_RISC_V_BCPU_Output:
+    boot_mode: str = field(default='')
     active_power: float = field(default=0.0)
     boot_power: float = field(default=0.0)
-    message: str = field(default='')
 
 @dataclass
-class N22_RISC_V_Port:
-    end_point: str = field(default='') # valid values: jtag, spi_qspi, uart0, ddr, ocm, gpio
-    activity: Port_Activity = field(default=Port_Activity.Medium)
-    read_write_rate_percentage: float = field(default=50.0)
-    toggle_rate_percentage: float = field(default=12.5)
-    output: N22_RISC_V_Port_Output = field(default_factory=N22_RISC_V_Port_Output)
-    message: str = field(default='')
-
-@dataclass
-class N22_RISC_V_BCPU:
-    boot_mode: str = field(default='QSPI')
-    used_encryption: bool = field(default=True)
+class N22_RISC_V_BCPU(PeripheralBase):
+    encryption_used: bool = field(default=True)
     clock: N22_RISC_V_Clock = field(default=N22_RISC_V_Clock.PLL_233MHz)
-    port: List[N22_RISC_V_Port] = field(default_factory=[])
+    ports: List[Endpoint] = field(default=List)
+    output: N22_RISC_V_BCPU_Output = field(default_factory=N22_RISC_V_BCPU_Output)
+
+    def __post_init__(self):
+        self.peripheral_type = PeripheralType.BCPU
+
+    def compute_dynamic_power(self):
+        # todo
+        pass
 
 @dataclass
 class Fpga_Complex_Output:
@@ -313,25 +341,22 @@ class Fpga_Complex:
 
 @dataclass
 class A45_RISC_V_Port_Output:
-    calculated_bandwidth: float = field(default=0.0)
-    noc_power: float = field(default=0.0)
     block_power: float = field(default=0.0)
-    message: str = field(default='')
 
 @dataclass
-class A45_RISC_V_Data_Path:
-    end_point: str = field(default='') # valid values: jtag, spi_qspi, uart0, ddr, ocm, gpio
-    activity: Port_Activity = field(default=Port_Activity.Medium)
-    read_write_rate_percentage: float = field(default=50.0)
-    toggle_rate_percentage: float = field(default=12.5)
+class A45_RISC_V_ACPU(PeripheralBase):
+    enable: bool = field(default=False)
+    frequency: int = field(default=0)
+    load: A45_Load = field(default=A45_Load.MEDIUM)
+    ports: List[Endpoint] = field(default_factory=List)
     output: A45_RISC_V_Port_Output = field(default_factory=A45_RISC_V_Port_Output)
 
-@dataclass
-class A45_RISC_V_ACPU:
-    used: bool = field(default=False)
-    frequency: int = field(default=533000000)
-    load : A45_Load = field(default=A45_Load.Medium)
-    data_path: List[A45_RISC_V_Data_Path] = field(default_factory=[])
+    def __post_init__(self):
+        self.peripheral_type = PeripheralType.ACPU
+
+    def compute_dynamic_power(self):
+        # todo
+        pass
 
 @dataclass
 class DMA_Output:
@@ -343,6 +368,7 @@ class DMA_Output:
 
 @dataclass
 class DMA(PeripheralBase):
+    enable: bool = field(default=False)
     channel: int = field(default=1)
     source: Dma_Source_Destination = field(default=Dma_Source_Destination.NONE)
     destination: Dma_Source_Destination = field(default=Dma_Source_Destination.NONE)
@@ -350,26 +376,6 @@ class DMA(PeripheralBase):
     read_write_rate: float = field(default=0.5)
     toggle_rate: float = field(default=0.125)
     output: DMA_Output = field(default_factory=DMA_Output)
-
-    # @property
-    # def source(self):
-    #     return self._source
-
-    # @source.setter
-    # def source(self, value):
-    #     if self._initialized and value is not None and self._destination is not None and value == self._destination:
-    #         raise ValueError("Source and destination cannot be the same.")
-    #     self._source = value
-
-    # @property
-    # def destination(self):
-    #     return self._destination
-
-    # @destination.setter
-    # def destination(self, value):
-    #     if self._initialized and value is not None and self._source is not None and value == self._source:
-    #         raise ValueError("Source and destination cannot be the same.")
-    #     self._destination = value
 
     def __post_init__(self):
         self.peripheral_type = PeripheralType.DMA
@@ -382,7 +388,7 @@ class Peripheral_SubModule:
 
     def __init__(self, resources):
         self.resources = resources
-        # todo: add peripherals for testing. actual configration should be retrieved from device.xml when 
+        # todo: add peripherals for testing. actual configuration should be retrieved from device.xml when 
         # this data is availiable
         self.peripherals = [
             Qspi(enable=True, name="SPI/QSPI", usage=Peripherals_Usage.Boot),
@@ -392,16 +398,18 @@ class Peripheral_SubModule:
             Uart(name="UART (ACPU)", cpu=Cpu.ACPU),
             Usb2(name="USB 2.0"),
             Gige(name="GigE"),
-            Gpio(enable=True, name="GPIO (BCPU)", io_type=Gpio_Type.BCPU),
-            Gpio(enable=True, name="GPIO (ACPU)", io_type=Gpio_Type.ACPU),
-            Gpio(enable=True, name="GPIO (Fabric)", io_type=Gpio_Type.FABRIC),
+            Gpio(name="GPIO (BCPU)", io_type=Gpio_Type.BCPU),
+            Gpio(name="GPIO (ACPU)", io_type=Gpio_Type.ACPU),
+            Gpio(name="GPIO (Fabric)", io_type=Gpio_Type.FABRIC),
             Pwm(name="PWM"),
             Memory(name="DDR", memory_type=Memory_Type.DDR3, data_rate=1333),
             Memory(enable=True, name="OCM", memory_type=Memory_Type.SRAM, data_rate=533),
             DMA(name="Channel 1"),
             DMA(name="Channel 2"),
             DMA(name="Channel 3"),
-            DMA(name="Channel 4")
+            DMA(name="Channel 4"),
+            N22_RISC_V_BCPU(name='N22 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()]),
+            A45_RISC_V_ACPU(name='A45 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()])
         ]
 
     def get_power_consumption(self):
@@ -416,8 +424,6 @@ class Peripheral_SubModule:
         return self.peripherals
 
     def get_peripherals_by_type(self, periph_type):
-        if periph_type is None:
-            raise ValueError("Invalid peripheral type.")
         return [item for item in self.peripherals if item.peripheral_type == periph_type]
 
     def get_peripheral(self, periph_type, idx):
@@ -429,6 +435,17 @@ class Peripheral_SubModule:
 
     def update_peripheral(self, periph_type, idx, data):
         item = update_attributes(self.get_peripheral(periph_type, idx), data)
+        return item
+
+    def get_endpoint(self, periph_type, idx, endpoint_idx):
+        item = self.get_peripheral(periph_type, idx)
+        if 0 <= endpoint_idx < len(item.ports):
+            return item.ports[endpoint_idx]
+        else:
+            raise ValueError("Invalid index. Endpoint doesn't exist at the specified index.")
+
+    def update_endpoint(self, periph_type, idx, endpoint_idx, data):
+        item = update_attributes(self.get_endpoint(periph_type, idx, endpoint_idx), data)
         return item
 
     def compute_output_power(self):

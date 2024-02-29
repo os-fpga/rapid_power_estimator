@@ -15,7 +15,7 @@ from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema,
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
 from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
 from schema.device_io_schemas import IoSchema, IoResourcesConsumptionSchema
-from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema, PeripheralConsumptionSchema
+from schema.device_peripheral_schemas import PeripheralUrlSchema, PeripheralSchema, PeripheralConsumptionSchema, EndpointSchema
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -381,10 +381,9 @@ def get_device_soc_peripherals(device_id):
         # group peripherals by their type
         for item in peripherals:
             if item.peripheral_type.value in peripherals_by_type:
-                count = len(peripherals_by_type[item.peripheral_type.value])
-                peripherals_by_type[item.peripheral_type.value].append({ 'href': f'{item.peripheral_type.value}/{count}' })
+                peripherals_by_type[item.peripheral_type.value].append(item)
             else:
-                peripherals_by_type[item.peripheral_type.value] = [{ 'href': f'{item.peripheral_type.value}/0' }]
+                peripherals_by_type[item.peripheral_type.value] = [item]
 
         schema = PeripheralUrlSchema()
         return schema.dump(peripherals_by_type)
@@ -416,6 +415,8 @@ def get_device_soc_peripherals_consumption(device_id):
 def get_device_soc_peripheral(device_id, periph, row_number):
     try:
         peripheral_type = get_enum_by_value(PeripheralType, periph)
+        if peripheral_type is None:
+            raise ValueError("Invalid peripheral type.")
         item = devicemanager.get_peripheral(device_id, peripheral_type, row_number)
         schema = PeripheralSchema.create_schema(peripheral_type)
         return schema.dump(item)
@@ -426,12 +427,37 @@ def get_device_soc_peripheral(device_id, periph, row_number):
 def update_device_soc_peripheral(device_id, periph, row_number):
     try:
         peripheral_type = get_enum_by_value(PeripheralType, periph)
+        if peripheral_type is None:
+            raise ValueError("Invalid peripheral type.")
         schema = PeripheralSchema.create_schema(peripheral_type)
         item = devicemanager.update_peripheral(device_id, peripheral_type, row_number, schema.load(request.json))
         return schema.dump(item)
     except ValueError as e:
         return f"Error: {e}", 404
 
+@app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>/ep/<int:n>', methods=['GET'], strict_slashes=False)
+def get_device_soc_peripheral_endpoint(device_id, periph, row_number, n):
+    try:
+        peripheral_type = get_enum_by_value(PeripheralType, periph)
+        if peripheral_type not in (PeripheralType.BCPU, PeripheralType.ACPU, PeripheralType.FPGA_COMPLEX):
+            raise ValueError("Invalid peripheral type.")
+        item = devicemanager.get_endpoint(device_id, peripheral_type, row_number, n)
+        schema = EndpointSchema()
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/peripherals/<periph>/<int:row_number>/ep/<int:n>', methods=['PATCH'], strict_slashes=False)
+def update_device_soc_peripheral_endpoint(device_id, periph, row_number, n):
+    try:
+        peripheral_type = get_enum_by_value(PeripheralType, periph)
+        if peripheral_type not in (PeripheralType.BCPU, PeripheralType.ACPU, PeripheralType.FPGA_COMPLEX):
+            raise ValueError("Invalid peripheral type.")
+        schema = EndpointSchema()
+        item = devicemanager.update_endpoint(device_id, peripheral_type, row_number, n, schema.load(request.json))
+        return schema.dump(item)
+    except ValueError as e:
+        return f"Error: {e}", 404
 #
 # Main entry point
 #

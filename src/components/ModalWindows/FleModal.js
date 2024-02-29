@@ -48,6 +48,13 @@ const FleModal = ({ closeModal, onSubmit, defaultValue }) => {
           value: defaultValue.glitch_factor,
           values: glitch_factor
         },
+        {
+          fieldType: FieldType.float,
+          step: "1",
+          id: "clock_enable_rate",
+          text: "Clock Enable, %",
+          value: defaultValue.clock_enable_rate
+        },
       ]}
     />
   );

@@ -104,7 +104,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
   ];
 
   const mainTableHeader = [
-    "Name/Hierarchy", "LUT6", "FF/Latch", "Clock", "Toggle Rate", "Glitch Factor",
+    "Name/Hierarchy", "LUT6", "FF/Latch", "Clock", "Toggle Rate", "Glitch Factor", "Clock Enable",
     "Clock Freq", "O/P Sig Rate", "Block Power", "Intc. Power", "%", "Action"
   ]
 
@@ -125,6 +125,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
               <td>{row.clock}</td>
               <PercentsCell val={row.toggle_rate} precition={1} />
               <td>{GetText(row.glitch_factor, glitch_factor)}</td>
+              <PercentsCell val={row.clock_enable_rate} />
               <FrequencyCell val={row.consumption.clock_frequency} />
               <td>{fixed(row.consumption.output_signal_rate, 1)} MTr/S</td>
               <PowerCell val={row.consumption.block_power} />
@@ -149,6 +150,7 @@ const FleTable = ({ device, totalPowerCallback }) => {
             clock: '',
             toggle_rate: 0,
             glitch_factor: 0,
+            clock_enable_rate: 0.0,
           }}
         />
       )}

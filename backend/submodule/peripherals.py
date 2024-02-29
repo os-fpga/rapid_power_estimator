@@ -106,19 +106,6 @@ class A45_Load(Enum):
     MEDIUM = 2
     HIGH   = 3
 
-class Fpga_Complex_End_Points(Enum):
-    DDR = 'DDR'
-    OCM = 'OCM'
-    SPI_QSPI = 'SPI_QSPI'
-    I2C = 'I2C'
-    GIGE = 'GigE'
-
-class Fpga_Complex_Activity(Enum):
-    Idle = 'Idle'
-    Low = 'Low'
-    Medium = 'Medium'
-    High = 'High'
-
 class Memory_Type(Enum):
     SRAM = 0
     DDR3 = 1
@@ -291,6 +278,8 @@ class Memory(PeripheralBase):
 @dataclass
 class Endpoint_Output:
     calculated_bandwidth: float = field(default=0.0)
+    clock_frequency: int = field(default=0) # specific to FPGA_Complex only
+    percentage: float = field(default=0.0) # specific to FPGA_Complex only
     noc_power: float = field(default=0.0)
     message: str = field(default='')
 
@@ -300,6 +289,7 @@ class Endpoint:
     activity: Port_Activity = field(default=Port_Activity.IDLE)
     read_write_rate: float = field(default=0.5)
     toggle_rate: float = field(default=0.125)
+    clock: str = field(default='') # specific to FPGA_Complex only
     output: Endpoint_Output = field(default_factory=Endpoint_Output)
 
 @dataclass
@@ -323,21 +313,15 @@ class N22_RISC_V_BCPU(PeripheralBase):
         pass
 
 @dataclass
-class Fpga_Complex_Output:
-    calculated_bandwidth: float = field(default=0.0)
-    noc_power: float = field(default=0.0)
-    percentage: float = field(default=0.0)
-    message: str = field(default='')
+class Fpga_Complex(PeripheralBase):
+    ports: List[Endpoint] = field(default=List)
 
-@dataclass
-class Fpga_Complex:
-    clock : Clock = field(default=None)
-    frequency : int = field(default=0)
-    end_point : Fpga_Complex_End_Points = field(default=None)
-    activity : Fpga_Complex_Activity = field(default=Fpga_Complex_Activity.Medium)
-    read_write_rate_percentage: float = field(default=50.0)
-    toggle_rate: float = field(default=12.5)
-    output : Fpga_Complex_Output = field(default_factory=Fpga_Complex_Output)
+    def __post_init__(self):
+        self.peripheral_type = PeripheralType.FPGA_COMPLEX
+
+    def compute_dynamic_power(self):
+        # todo
+        pass
 
 @dataclass
 class A45_RISC_V_Port_Output:
@@ -408,8 +392,9 @@ class Peripheral_SubModule:
             DMA(name="Channel 2"),
             DMA(name="Channel 3"),
             DMA(name="Channel 4"),
-            N22_RISC_V_BCPU(name='N22 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()]),
-            A45_RISC_V_ACPU(name='A45 RISC-V', ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()])
+            N22_RISC_V_BCPU(name="N22 RISC-V", ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()]),
+            A45_RISC_V_ACPU(name="A45 RISC-V", ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()]),
+            Fpga_Complex(name="FPGA Complex", ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()])
         ]
 
     def get_power_consumption(self):

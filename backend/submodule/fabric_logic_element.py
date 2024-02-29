@@ -33,7 +33,7 @@ class Fabric_LE:
     output : Fabric_LE_output = field(default_factory=Fabric_LE_output)
 
     def compute_percentage(self, total_power):
-        if (total_power > 0):
+        if total_power > 0:
             self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
         else:
             self.output.percentage = 0.0

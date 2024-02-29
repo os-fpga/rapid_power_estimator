@@ -4,9 +4,8 @@
 #
 from dataclasses import dataclass, field
 from enum import Enum
-
 from utilities.common_utils import update_attributes
-from submodule.rs_device_resources import ModuleType
+from .rs_device_resources import ModuleType
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -40,7 +39,7 @@ class Clock:
     output : ClockOutput = field(default_factory=ClockOutput)
 
     def compute_percentage(self, total_power):
-        if (total_power > 0):
+        if total_power > 0:
             self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
         else:
             self.output.percentage = 0.0
@@ -123,14 +122,24 @@ class Clock_SubModule:
         total_fanout = 0
 
         # fabric logic element
-        mod = self.resources.get_module(ModuleType.FABRIC_LE)
-        if mod is not None:
-            for item in mod.get_all():
-                if item.clock == clock:
-                    total_fanout += item.flip_flop
-        
-        # todo: other modules
-        
+        if (mod := self.resources.get_module(ModuleType.FABRIC_LE)) is not None:
+            total_fanout += sum(item.flip_flop for item in mod.get_all() \
+                if item.clock == clock)
+
+        # bram
+        if (mod := self.resources.get_module(ModuleType.BRAM)) is not None:
+            total_fanout += sum(item.bram_used for item in mod.get_all() if item.port_a.clock == clock \
+                or item.port_b.clock == clock)
+
+        # dsp
+        if (mod := self.resources.get_module(ModuleType.DSP)) is not None:
+            total_fanout += sum(item.number_of_multipliers for item in mod.get_all() \
+                if item.clock == clock)
+
+        # io
+
+        # peripheral
+
         return total_fanout
 
     def compute_output_power(self):

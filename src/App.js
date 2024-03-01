@@ -99,7 +99,7 @@ const App = () => {
                 <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.DMA)}>DMA</div>
                 <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.Connectivity)}>Connectivity</div>
               </div>
-              <Peripherals setOpenedTable={setOpenedTable} power={peripheralsPower} />
+              <Peripherals setOpenedTable={setOpenedTable} power={peripheralsPower} device={device} />
             </div>
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">

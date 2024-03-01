@@ -30,3 +30,12 @@
     background-color: #9fdda9;
     padding: 4px;
 }
+
+.periph-internal-font {
+    color: #727e74;
+    font-size: smaller;
+}
+
+.periph-internal-font-header {
+    font-weight: bold;
+}

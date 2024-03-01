@@ -1,6 +1,7 @@
 import React from "react";
 import { BsFillTrashFill } from "react-icons/bs"
 import { PiNotePencil } from "react-icons/pi";
+import { FaPlus } from "react-icons/fa6";
 
 import "./../style/ComponentTable.css"
 
@@ -34,5 +35,28 @@ export const TableBase = ({ header, data }) => {
         }
       </tbody>
     </table>
+  </div>
+}
+
+export const TableBaseWrapper = ({ title, onPlusClick, content, powerTable, modalContent }) => {
+  const [modalOpen, setModalOpen] = React.useState(false);
+  return <div className="component-table-head">
+    <div className="main-block">
+      <div className="layout-head">
+        <label>{title}</label>
+        <button className="plus-button" onClick={setModalOpen(true)}><FaPlus /></button>
+      </div>
+      {
+        content
+      }
+      {modalOpen &&
+        (modalContent)
+      }
+    </div>
+    <div className="power-table-wrapper">
+      {
+        powerTable
+      }
+    </div>
   </div>
 }

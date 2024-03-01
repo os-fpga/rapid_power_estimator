@@ -2,7 +2,7 @@ import React from "react";
 import { FaPlus } from "react-icons/fa6";
 import IOModal from "../ModalWindows/IOModal";
 import IOPowerTable from "./IOPowerTable";
-import { api, Elem } from "../../utils/serverAPI"
+import * as server from "../../utils/serverAPI"
 import { fixed } from "../../utils/common";
 import { PercentsCell, SelectionCell, PowerCell } from "./TableCells"
 import { TableBase, Actions } from "./TableBase";
@@ -107,59 +107,33 @@ const IOTable = ({ device, totalPowerCallback }) => {
 
     const fetchIoData = (deviceId) => {
         if (deviceId !== null) {
-            fetch(api.fetch(Elem.io, deviceId))
-                .then((response) => response.json())
-                .then((data) => {
-                    setIoData(data);
-
-                    fetch(api.consumption(Elem.io, deviceId))
-                        .then((response) => response.json())
-                        .then((data) => {
-                            const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
-                            setPowerTotal(total);
-                            totalPowerCallback(total);
-                            setPowerTable(data);
-                        });
-                });
+            server.GET(server.api.fetch(server.Elem.io, deviceId), (data) => {
+                setIoData(data);
+                server.GET(server.api.consumption(server.Elem.io, deviceId), (data) => {
+                    const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
+                    setPowerTotal(total);
+                    totalPowerCallback(total);
+                    setPowerTable(data);
+                })
+            })
         } else {
         }
     }
 
     function modifyRow(index, row) {
-        fetch(api.index(Elem.io, device, index), {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(row),
-        }).then((response) => {
-            if (response.ok) {
-                fetchIoData(device);
-            } else {
-                //
-            }
-        });
+        server.PATCH(server.api.index(server.Elem.io, device, index), row,
+            () => fetchIoData(device))
     }
 
     const deleteRow = (index) => {
-        fetch(api.index(Elem.io, device, index), {
-            method: "DELETE",
-        }).then((response) => {
-            if (response.ok) {
-                fetchIoData(device);
-            }
-        });
+        server.DELETE(server.api.index(server.Elem.io, device, index),
+            () => fetchIoData(device))
     }
 
     function addRow(newData) {
-        if (device === null) return;
-        fetch(api.fetch(Elem.io, device), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newData),
-        }).then((response) => {
-            if (response.ok) {
-                fetchIoData(device);
-            }
-        });
+        if (device !== null) {
+            server.POST(server.api.fetch(server.Elem.io, device), newData, () => fetchIoData(device))
+        }
     }
 
     const handleSubmit = (newRow) => {

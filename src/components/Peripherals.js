@@ -1,6 +1,6 @@
 import React from "react";
 import { Table, fixed } from "../utils/common";
-import { api, Elem, peripheralPath } from "../utils/serverAPI";
+import * as server from "../utils/serverAPI";
 
 import "./style/Peripherals.css"
 
@@ -16,44 +16,39 @@ function Peripherals({ setOpenedTable, power, device }) {
     const [gpio, setGPIO] = React.useState(0);
 
     function fetchPeripherals(deviceId, key, url) {
-        console.log(key)
-        fetch(peripheralPath(deviceId, url))
-            .then((response) => response.json())
-            .then((data) => {
-                if (key === 'i2c')
-                    setI2c(data.consumption.block_power)
-                if (key === 'spi')
-                    setSpi(data.consumption.block_power)
-                if (key === 'pwm')
-                    setPWM(data.consumption.block_power)
-                if (key === 'usb2')
-                    setUsb2(data.consumption.block_power)
-                if (key === 'jtag')
-                    setJtag(data.consumption.block_power)
-                if (key === 'gige')
-                    setGige(data.consumption.block_power)
-                if (key === 'uart') {
-                    if (url.slice(-1) === '0')
-                        setUart0(data.consumption.block_power)
-                    else
-                        setUart1(data.consumption.block_power)
-                }
-                if (key === 'gpio')
-                    setGPIO((prev) => prev + data.consumption.block_power)
-            })
+        server.GET(server.peripheralPath(deviceId, url), (data) => {
+            if (key === 'i2c')
+                setI2c(data.consumption.block_power)
+            if (key === 'spi')
+                setSpi(data.consumption.block_power)
+            if (key === 'pwm')
+                setPWM(data.consumption.block_power)
+            if (key === 'usb2')
+                setUsb2(data.consumption.block_power)
+            if (key === 'jtag')
+                setJtag(data.consumption.block_power)
+            if (key === 'gige')
+                setGige(data.consumption.block_power)
+            if (key === 'uart') {
+                if (url.slice(-1) === '0')
+                    setUart0(data.consumption.block_power)
+                else
+                    setUart1(data.consumption.block_power)
+            }
+            if (key === 'gpio')
+                setGPIO((prev) => prev + data.consumption.block_power)
+        })
     }
     React.useEffect(() => {
         if (device !== null) {
             setGPIO(0)
-            fetch(api.fetch(Elem.peripherals, device))
-                .then((response) => response.json())
-                .then((data) => {
-                    for (var key of Object.keys(data)) {
-                        for (var item in data[key]) {
-                            fetchPeripherals(device, key, data[key][item].href)
-                        }
+            server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+                for (var key of Object.keys(data)) {
+                    for (var item in data[key]) {
+                        fetchPeripherals(device, key, data[key][item].href)
                     }
-                });
+                }
+            })
         }
     }, [device]);
 

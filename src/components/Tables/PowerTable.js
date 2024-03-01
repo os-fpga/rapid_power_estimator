@@ -11,7 +11,7 @@ function PowerTable({ title, total, resourcesHeaders, resources }) {
                 <tbody>
                     <tr>
                         <td>Total</td>
-                        <td>{fixed(parseFloat(total))} W</td>
+                        <td className="no-wrap">{fixed(parseFloat(total))} W</td>
                     </tr>
                 </tbody>
             </table>

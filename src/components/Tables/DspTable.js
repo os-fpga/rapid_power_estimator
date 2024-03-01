@@ -2,7 +2,7 @@ import React from "react";
 import { FaPlus } from "react-icons/fa6";
 import DspModal from "../ModalWindows/DspModal";
 import PowerTable from "./PowerTable";
-import { api, Elem } from "../../utils/serverAPI"
+import * as server from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { dsp_mode, pipelining } from "../../utils/dsp";
 import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
@@ -24,66 +24,41 @@ const DspTable = ({ device, totalPowerCallback }) => {
 
     const fetchDspData = (deviceId) => {
         if (deviceId !== null) {
-            fetch(api.fetch(Elem.dsp, deviceId))
-                .then((response) => response.json())
-                .then((data) => {
-                    setDspData(data);
-
-                    fetch(api.consumption(Elem.dsp, deviceId))
-                        .then((response) => response.json())
-                        .then((data) => {
-                            const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
-                            setPowerTotal(total);
-                            totalPowerCallback(total);
-                            setPowerTable([
-                                [
-                                    "DSP Blocks",
-                                    data.total_dsp_blocks_used,
-                                    data.total_dsp_blocks_available,
-                                    fixed(data.total_dsp_blocks_used / data.total_dsp_blocks_available * 100, 0),
-                                ],
-                            ]);
-                        });
-                });
+            server.GET(server.api.fetch(server.Elem.dsp, deviceId), (data) => {
+                setDspData(data);
+                server.GET(server.api.consumption(server.Elem.dsp, deviceId), (data) => {
+                    const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
+                    setPowerTotal(total);
+                    totalPowerCallback(total);
+                    setPowerTable([
+                        [
+                            "DSP Blocks",
+                            data.total_dsp_blocks_used,
+                            data.total_dsp_blocks_available,
+                            fixed(data.total_dsp_blocks_used / data.total_dsp_blocks_available * 100, 0),
+                        ],
+                    ]);
+                })
+            })
         } else {
         }
     }
 
     function modifyRow(index, row) {
-        fetch(api.index(Elem.dsp, device, index), {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(row),
-        }).then((response) => {
-            if (response.ok) {
-                fetchDspData(device);
-            } else {
-                //
-            }
-        });
+        server.PATCH(server.api.index(server.Elem.dsp, device, index), row,
+            () => fetchDspData(device))
     }
 
     const deleteRow = (index) => {
-        fetch(api.index(Elem.dsp, device, index), {
-            method: "DELETE",
-        }).then((response) => {
-            if (response.ok) {
-                fetchDspData(device);
-            }
-        });
+        server.DELETE(server.api.index(server.Elem.dsp, device, index),
+            () => fetchDspData(device))
     }
 
     function addRow(newData) {
-        if (device === null) return;
-        fetch(api.fetch(Elem.dsp, device), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newData),
-        }).then((response) => {
-            if (response.ok) {
-                fetchDspData(device);
-            }
-        });
+        if (device !== null) {
+            server.POST(server.api.fetch(server.Elem.dsp, device), newData,
+                () => fetchDspData(device))
+        }
     }
 
     const handleSubmit = (newRow) => {
@@ -160,7 +135,8 @@ const DspTable = ({ device, totalPowerCallback }) => {
             <PowerTable title="DSP power"
                 total={powerTotal}
                 resourcesHeaders={resourcesHeaders}
-                resources={powerTable} /></div>
+                resources={powerTable} />
+        </div>
     </div>
 }
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { FaPlus } from "react-icons/fa6";
 import PowerTable from "./PowerTable";
-import { api, Elem } from "../../utils/serverAPI"
+import * as server from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import BramModal from "../ModalWindows/BramModal";
 import { bram_type } from "../../utils/bram";
@@ -25,53 +25,48 @@ const BramTable = ({ device, totalPowerCallback }) => {
 
     const fetchBramData = (deviceId) => {
         if (deviceId !== null) {
-            fetch(api.fetch(Elem.bram, deviceId))
-                .then((response) => response.json())
-                .then((data) => {
-                    setBramData(data);
-                    var newBramWindowData = [];
-                    data.map((item) => {
-                        newBramWindowData.push({
-                            enable: item.enable,
-                            name: item.name,
-                            type: item.type,
-                            bram_used: item.bram_used,
-                            port_a_clock: item.port_a.clock,
-                            port_a_width: item.port_a.width,
-                            port_b_clock: item.port_b.clock,
-                            port_b_width: item.port_b.width,
-                            port_a_write_enable_rate: item.port_a.write_enable_rate,
-                            port_a_read_enable_rate: item.port_a.read_enable_rate,
-                            port_a_toggle_rate: item.port_a.toggle_rate,
-                            port_b_write_enable_rate: item.port_b.write_enable_rate,
-                            port_b_read_enable_rate: item.port_b.read_enable_rate,
-                            port_b_toggle_rate: item.port_b.toggle_rate,
-                        });
+            server.GET(server.api.fetch(server.Elem.bram, deviceId), (data) => {
+                setBramData(data);
+                var newBramWindowData = [];
+                data.map((item) => {
+                    newBramWindowData.push({
+                        enable: item.enable,
+                        name: item.name,
+                        type: item.type,
+                        bram_used: item.bram_used,
+                        port_a_clock: item.port_a.clock,
+                        port_a_width: item.port_a.width,
+                        port_b_clock: item.port_b.clock,
+                        port_b_width: item.port_b.width,
+                        port_a_write_enable_rate: item.port_a.write_enable_rate,
+                        port_a_read_enable_rate: item.port_a.read_enable_rate,
+                        port_a_toggle_rate: item.port_a.toggle_rate,
+                        port_b_write_enable_rate: item.port_b.write_enable_rate,
+                        port_b_read_enable_rate: item.port_b.read_enable_rate,
+                        port_b_toggle_rate: item.port_b.toggle_rate,
                     });
-                    setBramWindowData(newBramWindowData);
-
-                    fetch(api.consumption(Elem.bram, deviceId))
-                        .then((response) => response.json())
-                        .then((data) => {
-                            const total = data.total_bram_block_power + data.total_bram_interconnect_power;
-                            setPowerTotal(total);
-                            totalPowerCallback(total);
-                            setPowerTable([
-                                [
-                                    "18K BRAM",
-                                    data.total_18k_bram_used,
-                                    data.total_18k_bram_available,
-                                    fixed(data.total_18k_bram_used / data.total_18k_bram_available * 100, 0),
-                                ],
-                                [
-                                    "36K BRAM",
-                                    data.total_36k_bram_used,
-                                    data.total_36k_bram_available,
-                                    fixed(data.total_36k_bram_used / data.total_36k_bram_available * 100, 0),
-                                ],
-                            ]);
-                        });
                 });
+                setBramWindowData(newBramWindowData);
+                server.GET(server.api.consumption(server.Elem.bram, deviceId), (data) => {
+                    const total = data.total_bram_block_power + data.total_bram_interconnect_power;
+                    setPowerTotal(total);
+                    totalPowerCallback(total);
+                    setPowerTable([
+                        [
+                            "18K BRAM",
+                            data.total_18k_bram_used,
+                            data.total_18k_bram_available,
+                            fixed(data.total_18k_bram_used / data.total_18k_bram_available * 100, 0),
+                        ],
+                        [
+                            "36K BRAM",
+                            data.total_36k_bram_used,
+                            data.total_36k_bram_available,
+                            fixed(data.total_36k_bram_used / data.total_36k_bram_available * 100, 0),
+                        ],
+                    ]);
+                })
+            })
         } else {
         }
     }
@@ -102,42 +97,20 @@ const BramTable = ({ device, totalPowerCallback }) => {
     }
 
     function modifyRow(index, row) {
-        fetch(api.index(Elem.bram, device, index), {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(sendData(row)),
-        }).then((response) => {
-            if (response.ok) {
-                fetchBramData(device);
-            } else {
-                //
-            }
-        });
+        server.PATCH(server.api.index(server.Elem.bram, device, index), sendData(row),
+            () => fetchBramData(device))
     }
 
     const deleteRow = (index) => {
-        fetch(api.index(Elem.bram, device, index), {
-            method: "DELETE",
-        }).then((response) => {
-            if (response.ok) {
-                fetchBramData(device);
-            } else {
-                console.log('Error deleting row');
-            }
-        });
+        server.DELETE(server.api.index(server.Elem.bram, device, index),
+            () => fetchBramData(device))
     }
 
     function addRow(newData) {
-        if (device === null) return;
-        fetch(api.fetch(Elem.bram, device), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(sendData(newData)),
-        }).then((response) => {
-            if (response.ok) {
-                fetchBramData(device);
-            }
-        });
+        if (device !== null) {
+            server.POST(server.api.fetch(server.Elem.bram, device), sendData(newData),
+                () => fetchBramData(device))
+        }
     }
 
     const handleSubmit = (newRow) => {

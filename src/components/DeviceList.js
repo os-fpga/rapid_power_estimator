@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as api from "./../utils/serverAPI"
+import * as server from "./../utils/serverAPI"
 
 import "./style/DeviceList.css"
 
@@ -7,11 +7,7 @@ function DeviceList({devices, setDevice}) {
   const [deviceInfo, setDeviceInfo] = React.useState({});
 
   function get_device_info(id) {
-    fetch(api.deviceInfo(id))
-      .then((response) => response.json())
-      .then((data) => {
-        setDeviceInfo(data);
-      });
+    server.GET(server.deviceInfo(id), (data) => setDeviceInfo(data))
   }
 
   function Device_OnChange(event) {

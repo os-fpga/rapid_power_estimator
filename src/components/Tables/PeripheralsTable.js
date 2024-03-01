@@ -1,6 +1,6 @@
 import React from "react";
 import PeripheralsModal from "../ModalWindows/PeripheralsModal";
-import { api, Elem, peripheralPath } from "../../utils/serverAPI"
+import * as server from "../../utils/serverAPI"
 import { fixed } from "../../utils/common";
 import { PowerCell, SelectionCell } from "./TableCells"
 import { TableBase, Actions } from "./TableBase";
@@ -135,36 +135,27 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
     }
 
     function fetchPeripherals(deviceId, key, url) {
-        fetch(peripheralPath(deviceId, url))
-            .then((response) => response.json())
-            .then((data) => {
-                peripheralMatch(key, data, url);
-            })
+        server.GET(server.peripheralPath(deviceId, url),
+            (data) => peripheralMatch(key, data, url))
     }
 
     const fetchData = (deviceId) => {
         if (deviceId !== null) {
             setAllComponents([])
-            fetch(api.fetch(Elem.peripherals, deviceId))
-                .then((response) => response.json())
-                .then((data) => {
-                    delete data['dma'];
-                    delete data['memory'];
-                    delete data['acpu'];
-                    delete data['bcpu'];
-                    for (var key of Object.keys(data)) {
-                        for (var item in data[key]) {
-                            fetchPeripherals(deviceId, key, data[key][item].href)
-                        }
+            server.GET(server.api.fetch(server.Elem.peripherals, deviceId), (data) => {
+                delete data['dma'];
+                delete data['memory'];
+                delete data['acpu'];
+                delete data['bcpu'];
+                for (var key of Object.keys(data)) {
+                    for (var item in data[key]) {
+                        fetchPeripherals(deviceId, key, data[key][item].href)
                     }
-                })
-
-            fetch(api.consumption(Elem.peripherals, device))
-                .then((response) => response.json())
-                .then((data) => {
-                    totalPowerCallback(data.total_peripherals_power);
-                });
-        } else {
+                }
+            })
+            server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
+                totalPowerCallback(data.total_peripherals_power)
+            })
         }
     }
 
@@ -191,17 +182,7 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
                 io_standard: row.performance
             }
         else return
-        fetch(peripheralPath(device, row.url), {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        }).then((response) => {
-            if (response.ok) {
-                fetchData(device);
-            } else {
-                //
-            }
-        });
+        server.PATCH(server.peripheralPath(device, row.url), data, () => fetchData(device))
     }
 
     const handleSubmit = (newRow) => {

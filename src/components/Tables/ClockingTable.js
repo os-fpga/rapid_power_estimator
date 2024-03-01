@@ -3,7 +3,7 @@ import { FaPlus } from "react-icons/fa6";
 import ClockingModal from "../ModalWindows/ClockingModal";
 import { sources, states } from "../../utils/clocking"
 import PowerTable from "./PowerTable";
-import { api, Elem } from "../../utils/serverAPI"
+import * as server from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { FrequencyCell, PowerCell } from "./TableCells"
 import { TableBase, Actions } from "./TableBase";
@@ -29,74 +29,48 @@ const ClockingTable = ({ device, totalPowerCallback }) => {
 
   const fetchClockData = (deviceId) => {
     if (deviceId !== null) {
-      fetch(api.fetch(Elem.clocking, deviceId))
-        .then((response) => response.json())
-        .then((data) => {
-          setClockingData(data);
-
-          fetch(api.consumption(Elem.clocking, deviceId))
-            .then((response) => response.json())
-            .then((data) => {
-              const total = data.total_clock_block_power + data.total_clock_interconnect_power + data.total_pll_power;
-              setPowerTotal(total);
-              totalPowerCallback(total);
-              setPowerTable([
-                [
-                  "Clocks",
-                  data.total_clocks_used,
-                  data.total_clocks_available,
-                  fixed(data.total_clock_block_power + data.total_clock_interconnect_power) + ' W',
-                  fixed(data.total_clocks_used / data.total_clocks_available * 100, 0),
-                ],
-                [
-                  "PLLs",
-                  data.total_plls_used,
-                  data.total_plls_available,
-                  fixed(data.total_pll_power) + ' W',
-                  fixed(data.total_plls_used / data.total_plls_available * 100, 0)
-                ]
-              ]);
-            });
-        });
+      server.GET(server.api.fetch(server.Elem.clocking, deviceId), (data) => {
+        setClockingData(data);
+        server.GET(server.api.consumption(server.Elem.clocking, deviceId), (data) => {
+          const total = data.total_clock_block_power + data.total_clock_interconnect_power + data.total_pll_power;
+          setPowerTotal(total);
+          totalPowerCallback(total);
+          setPowerTable([
+            [
+              "Clocks",
+              data.total_clocks_used,
+              data.total_clocks_available,
+              fixed(data.total_clock_block_power + data.total_clock_interconnect_power) + ' W',
+              fixed(data.total_clocks_used / data.total_clocks_available * 100, 0),
+            ],
+            [
+              "PLLs",
+              data.total_plls_used,
+              data.total_plls_available,
+              fixed(data.total_pll_power) + ' W',
+              fixed(data.total_plls_used / data.total_plls_available * 100, 0)
+            ]
+          ]);
+        })
+      })
     } else {
     }
   }
 
   function modifyRow(index, row) {
-    fetch(api.index(Elem.clocking, device, index), {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(row),
-    }).then((response) => {
-      if (response.ok) {
-        fetchClockData(device);
-      } else {
-        //
-      }
-    });
+    server.PATCH(server.api.index(server.Elem.clocking, device, index), row,
+      () => fetchClockData(device))
   }
 
   const deleteRow = (index) => {
-    fetch(api.index(Elem.clocking, device, index), {
-      method: "DELETE",
-    }).then((response) => {
-      if (response.ok) {
-        fetchClockData(device);
-      }
-    });
+    server.DELETE(server.api.index(server.Elem.clocking, device, index),
+      () => fetchClockData(device))
   }
 
   function addRow(newData) {
-    if (device === null) return;
-    fetch(api.fetch(Elem.clocking, device), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newData),
-    }).then((response) => {
-      if (response.ok) {
-        fetchClockData(device);
-      }
-    });
+    if (device !== null) {
+      server.POST(server.api.fetch(server.Elem.clocking, device), newData, () => fetchClockData(device))
+    }
   }
 
   const handleSubmit = (newRow) => {

@@ -35,3 +35,47 @@ export let api = {
         return formatString("{0}/{1}/{2}/{3}", devices, deviceId, func, index);
     },
 }
+
+export function POST(url, data, callback) {
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    }).then((response) => {
+        if (response.ok) {
+            if (callback) callback()
+        }
+    });
+}
+
+export function DELETE(url, callback) {
+    fetch(url, {
+        method: "DELETE",
+    }).then((response) => {
+        if (response.ok) {
+            if (callback) callback()
+        }
+    });
+}
+
+export function PATCH(url, data, callback) {
+    fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    }).then((response) => {
+        if (response.ok) {
+            if (callback) callback()
+        } else {
+            // todo handle error
+        }
+    });
+}
+
+export function GET(url, callback) {
+    fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+            if (callback) callback(data)
+        });
+}

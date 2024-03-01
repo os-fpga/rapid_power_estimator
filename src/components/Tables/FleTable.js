@@ -3,7 +3,7 @@ import { FaPlus } from "react-icons/fa6";
 import FleModal from "../ModalWindows/FleModal";
 import { glitch_factor } from "../../utils/fle"
 import PowerTable from "./PowerTable";
-import { api, Elem } from "../../utils/serverAPI"
+import * as server from "../../utils/serverAPI"
 import { fixed, GetText } from "../../utils/common";
 import { PercentsCell, FrequencyCell, PowerCell } from "./TableCells"
 import { TableBase, Actions } from "./TableBase";
@@ -24,72 +24,47 @@ const FleTable = ({ device, totalPowerCallback }) => {
 
   const fetchFleData = (deviceId) => {
     if (deviceId !== null) {
-      fetch(api.fetch(Elem.fle, deviceId))
-        .then((response) => response.json())
-        .then((data) => {
-          setFleData(data);
-
-          fetch(api.consumption(Elem.fle, deviceId))
-            .then((response) => response.json())
-            .then((data) => {
-              const total = data.total_block_power + data.total_interconnect_power;
-              setPowerTotal(total);
-              totalPowerCallback(total);
-              setPowerTable([
-              [
-                "LUT6",
-                data.total_lut6_used,
-                data.total_lut6_available,
-                fixed(data.total_lut6_used / data.total_lut6_available * 100, 0),
-              ],
-              [
-                "FF/Latch",
-                data.total_flip_flop_used,
-                data.total_flip_flop_available,
-                fixed(data.total_flip_flop_used / data.total_flip_flop_available * 100, 0),
-              ]
-            ]);
-            });
-        });
+      server.GET(server.api.fetch(server.Elem.fle, deviceId), (data) => {
+        setFleData(data);
+        server.GET(server.api.consumption(server.Elem.fle, deviceId), (data) => {
+          const total = data.total_block_power + data.total_interconnect_power;
+          setPowerTotal(total);
+          totalPowerCallback(total);
+          setPowerTable([
+            [
+              "LUT6",
+              data.total_lut6_used,
+              data.total_lut6_available,
+              fixed(data.total_lut6_used / data.total_lut6_available * 100, 0),
+            ],
+            [
+              "FF/Latch",
+              data.total_flip_flop_used,
+              data.total_flip_flop_available,
+              fixed(data.total_flip_flop_used / data.total_flip_flop_available * 100, 0),
+            ]
+          ]);
+        })
+      })
     } else {
     }
   }
 
   function modifyRow(index, row) {
-    fetch(api.index(Elem.fle, device, index), {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(row),
-    }).then((response) => {
-      if (response.ok) {
-        fetchFleData(device);
-      } else {
-        //
-      }
-    });
+    server.PATCH(server.api.index(server.Elem.fle, device, index), row,
+      () => fetchFleData(device))
   }
 
   const deleteRow = (index) => {
-    fetch(api.index(Elem.fle, device, index), {
-      method: "DELETE",
-    }).then((response) => {
-      if (response.ok) {
-        fetchFleData(device);
-      }
-    });
+    server.DELETE(server.api.index(server.Elem.fle, device, index),
+      () => fetchFleData(device))
   }
 
   function addRow(newData) {
-    if (device === null) return;
-    fetch(api.fetch(Elem.fle, device), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newData),
-    }).then((response) => {
-      if (response.ok) {
-        fetchFleData(device);
-      }
-    });
+    if (device !== null) {
+      server.POST(server.api.fetch(server.Elem.fle, device), newData,
+        () => fetchFleData(device))
+    }
   }
 
   const handleSubmit = (newRow) => {
@@ -159,7 +134,8 @@ const FleTable = ({ device, totalPowerCallback }) => {
       <PowerTable title="FLE power"
         total={powerTotal}
         resourcesHeaders={resourcesHeaders}
-        resources={powerTable} /></div>
+        resources={powerTable} />
+    </div>
   </div>
 }
 

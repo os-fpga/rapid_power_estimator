@@ -11,6 +11,7 @@
 .cpu-component-l2 {
     padding-top: 10px;
     padding-bottom: 10px;
+    min-height: 18px;
 }
 
 .cpu-component-l1,
@@ -27,4 +28,11 @@
 
 .cpu-component-power {
     display: inline;
+    white-space: nowrap;
+}
+
+.cpu-component-power-val {
+    display: inline;
+    text-align: right;
+    width: 100%;
 }

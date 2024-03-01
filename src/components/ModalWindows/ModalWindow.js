@@ -6,17 +6,8 @@ import "./../style/Modal.css";
 
 const ModalWindow = (props) => {
     const [formState, setFormState] = useState(props.defaultValue);
-
-    const handleChange = (e) => {
-        setFormState({ ...formState, [e.target.name]: e.target.value });
-    };
-
-    const handleFloatChange = (e) => {
-        setFormState({ ...formState, [e.target.name]: e.target.value / 100 });
-    };
-
-    const handleSelectChange = (e) => {
-        setFormState({ ...formState, [e.target.name]: parseInt(e.target.value) });
+    const handleChange = (name, val) => {
+        setFormState({ ...formState, [name]: val });
     };
 
     const handleSubmit = (e) => {
@@ -49,39 +40,36 @@ const ModalWindow = (props) => {
     function generateField(item) {
         if (item.fieldType === FieldType.textarea) {
             return <div key={item.id} className="form-group">
-                <label htmlFor={item.id}>{item.text}</label>
+                <label>{item.text}</label>
                 <input
                     type="text"
-                    name={item.id}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
                     value={formState[item.id]}
                 />
             </div>
         } else if (item.fieldType === FieldType.number) {
             return <div key={item.id} className="form-group">
-                <label htmlFor={item.id}>{item.text}</label>
+                <label>{item.text}</label>
                 <input
                     type="number"
-                    name={item.id}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange(item.id, e.target.value)}
                     value={formState[item.id]}
                 />
             </div>
         } else if (item.fieldType === FieldType.float) {
             return <div key={item.id} className="form-group">
-                <label htmlFor={item.id}>{item.text}</label>
+                <label>{item.text}</label>
                 <input
                     type="number"
                     step={item.step ? item.step : 1}
-                    name={item.id}
-                    onChange={handleFloatChange}
+                    onChange={(e) => item.handleChange(item.id, e.target.value / 100)}
                     value={(formState[item.id] * 100).toFixed(item.step ? (item.step >= 1 ? 0 : 1) : 1)}
                 />
             </div>
         } else {
             return <div key={item.id} className="form-group">
-                <label htmlFor={item.id}>{item.text}</label>
-                <select name={item.id} onChange={handleSelectChange} value={formState[item.id]}>
+                <label>{item.text}</label>
+                <select onChange={(e) => handleChange(item.id, parseInt(e.target.value))} value={formState[item.id]}>
                     {
                         item.values.map((it) => (
                             <option key={it.id} value={it.id}>{it.text}</option>

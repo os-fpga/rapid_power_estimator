@@ -6,7 +6,11 @@
     background-color: #efefef;
 }
 
-.fpga-main-head {}
+.fpga-main-head {
+    row-gap: 5px;
+    display: flex;
+    flex-direction: column;
+}
 
 .fpga-rowx {
     display: flex;
@@ -24,4 +28,42 @@
 
 #io {
     width: 100%;
+}
+
+.bold-text {
+    font-weight: bold;
+    color: black;
+    font-size: 14px;
+}
+
+.bold-text-title {
+    font-weight: bold;
+    color: black;
+}
+
+.grayed-text {
+    color: #7c7c7c;
+    font-size: 0.9em;
+}
+
+.row-container {
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+    color: black;
+}
+
+.label-value {
+    width: 100%;
+    text-align: right;
+}
+
+.label-percent {
+    max-width: 50px;
+}
+
+.blocks-row {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
 }

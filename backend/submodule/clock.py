@@ -119,6 +119,7 @@ class Clock_SubModule:
         return total_pll_used
 
     def get_clock_fanout(self, clock):
+        # calculate total fanout from other modules
         total_fanout = 0
 
         # fabric logic element
@@ -128,8 +129,10 @@ class Clock_SubModule:
 
         # bram
         if (mod := self.resources.get_module(ModuleType.BRAM)) is not None:
-            total_fanout += sum(item.bram_used for item in mod.get_all() if item.port_a.clock == clock \
-                or item.port_b.clock == clock)
+            total_fanout += sum(item.bram_used for item in mod.get_all() \
+                if item.port_a.clock == clock)
+            total_fanout += sum(item.bram_used for item in mod.get_all() \
+                if item.port_b.clock == clock)
 
         # dsp
         if (mod := self.resources.get_module(ModuleType.DSP)) is not None:
@@ -137,8 +140,14 @@ class Clock_SubModule:
                 if item.clock == clock)
 
         # io
+        # todo: There is an excel formula logical error to calculate the fanout.
+        #       The condition will never satisfy
+        #       Futher discussion needed.
 
         # peripheral
+        # todo: There seems to be an excel logical error that double the fanout.
+        #       This could be due to merged cell
+        #       Futher discussion needed.
 
         return total_fanout
 

@@ -27,25 +27,22 @@ class RsDeviceManager:
         return self.get_device(device_id).get_module(modtype).get_all()
 
     def add(self, modtype, device_id, data):
-        module = self.get_device(device_id).get_module(modtype)
-        item = module.add(data)
-        module.compute_output_power()
+        item = self.get_device(device_id).get_module(modtype).add(data)
+        self.get_device(device_id).compute_output_power()
         return item
 
     def get(self, modtype, device_id, row_number):
         return self.get_device(device_id).get_module(modtype).get(row_number)
 
     def update(self, modtype, device_id, row_number, data):
-        module = self.get_device(device_id).get_module(modtype)
-        updated_item = module.update(row_number, data)
-        module.compute_output_power()
-        return updated_item
+        item = self.get_device(device_id).get_module(modtype).update(row_number, data)
+        self.get_device(device_id).compute_output_power()
+        return item
 
     def remove(self, modtype, device_id, row_number):
-        module = self.get_device(device_id).get_module(modtype)
-        removed_item = module.remove(row_number)
-        module.compute_output_power()
-        return removed_item
+        item = self.get_device(device_id).get_module(modtype).remove(row_number)
+        self.get_device(device_id).compute_output_power()
+        return item
 
     def get_power_consumption(self, modtype, device_id):
         return self.get_device(device_id).get_module(modtype).get_power_consumption()
@@ -57,12 +54,15 @@ class RsDeviceManager:
         return self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(peripheral_type, row_number)
 
     def update_peripheral(self, device_id, peripheral_type, row_number, data):
-        return self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).update_peripheral(peripheral_type, row_number, data)
+        peripheral = self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).update_peripheral(peripheral_type, row_number, data)
+        self.get_device(device_id).compute_output_power()
+        return peripheral
 
     def get_endpoint(self, device_id, peripheral_type, row_number, endpoint_idx):
         module = self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS)
         return module.get_endpoint(peripheral_type, row_number, endpoint_idx)
 
     def update_endpoint(self, device_id, peripheral_type, row_number, endpoint_idx, data):
-        module = self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS)
-        return module.update_endpoint(peripheral_type, row_number, endpoint_idx, data)
+        ep = self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).update_endpoint(peripheral_type, row_number, endpoint_idx, data)
+        self.get_device(device_id).compute_output_power()
+        return ep

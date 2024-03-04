@@ -3,6 +3,7 @@
     padding: 0.4rem;
     border-radius: 10px;
     max-width: min-content;
+    height: fit-content;
 }
 
 .total-table {

@@ -62,7 +62,7 @@ const ModalWindow = (props) => {
                 <input
                     type="number"
                     step={item.step ? item.step : 1}
-                    onChange={(e) => item.handleChange(item.id, e.target.value / 100)}
+                    onChange={(e) => handleChange(item.id, e.target.value / 100)}
                     value={(formState[item.id] * 100).toFixed(item.step ? (item.step >= 1 ? 0 : 1) : 1)}
                 />
             </div>

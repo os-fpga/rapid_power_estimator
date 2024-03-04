@@ -21,3 +21,14 @@
     padding: 0.2rem;
     font-size: 1rem;
 }
+
+.cpu-container {
+    padding: 10px;
+    display: inline-flex;
+    gap: 10px;
+}
+
+.acpu-group-container {
+    border-right: 1px solid #e3e3e3;
+    padding-right: 10px;
+}

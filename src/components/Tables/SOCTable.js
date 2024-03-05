@@ -3,8 +3,7 @@ import CPUComponent from "../CPUComponent";
 import Peripherals from "../Peripherals";
 import { Table } from "../../utils/common";
 import TitleComponent from "../TitleComponent";
-import ACPUComponent from "../ACPUComponent";
-import BCPUComponent from "../BCPUComponent";
+import ABCPUComponent from "../ABCPUComponent";
 
 import "./../style/SOCTable.css"
 
@@ -20,10 +19,20 @@ function SOCTable({ device, setOpenedTable, power, acpuStateChanged, bcpuStateCh
     return <div className="top-l2-col1">
         <div className="top-l2-col1-row1">
             <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.ACPU)}>
-                <ACPUComponent device={device} power={power} stateChanged={acpuStateChanged} />
+                <ABCPUComponent
+                    device={device}
+                    title={'ACPU'}
+                    index={'acpu'}
+                    power={power.acpu}
+                    stateChanged={acpuStateChanged} />
             </div>
             <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.BCPU)}>
-                <BCPUComponent device={device} power={power} stateChanged={bcpuStateChanged} />
+                <ABCPUComponent
+                    device={device}
+                    title={'BCPU'}
+                    index={'bcpu'}
+                    power={power.bcpu}
+                    stateChanged={bcpuStateChanged} />
             </div>
             <div className="top-l2-col1-row1-elem-text">
                 <TitleComponent

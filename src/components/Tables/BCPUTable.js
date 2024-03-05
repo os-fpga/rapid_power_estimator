@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import * as server from "../../utils/serverAPI"
 import { bcpu_name, clock, load_activity } from "../../utils/cpu"
 import { TableBase, Actions, Checkbox } from "./TableBase";
-import ACPUModal from "../ModalWindows/ACPUModal";
+import ABCPUModal from "../ModalWindows/ABCPUModal";
 import { PowerCell, SelectionCell, PercentsCell } from "./TableCells"
 import { GetText } from "../../utils/common";
 
@@ -205,7 +205,7 @@ function BCPUTable({ device, onDataChanged }) {
                     }
                 />
                 {modalOpen &&
-                    <ACPUModal
+                    <ABCPUModal
                         closeModal={() => {
                             setModalOpen(false);
                             setEditIndex(null);
@@ -222,7 +222,7 @@ function BCPUTable({ device, onDataChanged }) {
                             "read_write_rate": 0.5,
                             "toggle_rate": 0.125,
                         }}
-                        names={bcpu_name}
+                        endpoints={bcpu_name}
                     />}
             </div>
         </div>

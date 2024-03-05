@@ -1,10 +1,10 @@
 import React from "react";
-import { load_activity, acpu_name } from "../../utils/cpu";
+import { load_activity } from "../../utils/cpu";
 import { FieldType } from "../../utils/common"
 
 import ModalWindow from "./ModalWindow"
 
-const ACPUModal = ({ closeModal, onSubmit, defaultValue, names }) => {
+const ABCPUModal = ({ closeModal, onSubmit, defaultValue, endpoints }) => {
     return (
         <ModalWindow
             closeModal={closeModal}
@@ -16,7 +16,7 @@ const ACPUModal = ({ closeModal, onSubmit, defaultValue, names }) => {
                     id: "name",
                     text: "Endpoint",
                     value: defaultValue.name,
-                    values: names,
+                    values: endpoints,
                 },
                 {
                     fieldType: FieldType.select,
@@ -44,4 +44,4 @@ const ACPUModal = ({ closeModal, onSubmit, defaultValue, names }) => {
     );
 };
 
-export default ACPUModal;
+export default ABCPUModal;

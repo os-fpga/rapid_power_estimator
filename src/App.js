@@ -62,16 +62,18 @@ const App = () => {
   }, [device]);
 
   function updateSocPower() {
-    server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-      setSOCPower({
-        acpu: data.total_acpu_power,
-        bcpu: data.total_bcpu_power,
-        peripherals: data.total_peripherals_power,
-        dma: data.total_dma_power,
-        interconnect: data.total_noc_interconnect_power,
-        memory: data.total_memory_power
+    if (device !== null) {
+      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
+        setSOCPower({
+          acpu: data.total_acpu_power,
+          bcpu: data.total_bcpu_power,
+          peripherals: data.total_peripherals_power,
+          dma: data.total_dma_power,
+          interconnect: data.total_noc_interconnect_power,
+          memory: data.total_memory_power
+        })
       })
-    })
+    }
   }
 
   function onACPUDataChanged() {

@@ -2,7 +2,7 @@ import React from "react";
 import CPUComponent from "./CPUComponent";
 import * as server from "./../utils/serverAPI"
 
-function ACPUComponent({ device, title, index, power, stateChanged }) {
+function ABCPUComponent({ device, title, index, power, stateChanged }) {
     const [name, setName] = React.useState('')
     const [ep0, setEp0] = React.useState(0)
     const [ep1, setEp1] = React.useState(0)
@@ -32,4 +32,4 @@ function ACPUComponent({ device, title, index, power, stateChanged }) {
     return <CPUComponent title={title} power={power} name={name} ep0={ep0} ep1={ep1} ep2={ep2} ep3={ep3} />
 }
 
-export default ACPUComponent;
+export default ABCPUComponent;

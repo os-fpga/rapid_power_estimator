@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import * as server from "../../utils/serverAPI"
 import { acpu_name, load_activity } from "./../../utils/cpu"
 import { TableBase, Actions } from "./TableBase";
-import ACPUModal from "../ModalWindows/ACPUModal";
+import ABCPUModal from "../ModalWindows/ABCPUModal";
 import { PowerCell, SelectionCell, PercentsCell } from "./TableCells"
 import { GetText } from "../../utils/common";
 
@@ -186,7 +186,7 @@ function ACPUTable({ device, onDataChanged }) {
                     }
                 />
                 {modalOpen &&
-                    <ACPUModal
+                    <ABCPUModal
                         closeModal={() => {
                             setModalOpen(false);
                             setEditIndex(null);
@@ -203,7 +203,7 @@ function ACPUTable({ device, onDataChanged }) {
                             "read_write_rate": 0.5,
                             "toggle_rate": 0.125,
                         }}
-                        names={acpu_name}
+                        endpoints={acpu_name}
                     />}
             </div>
         </div>

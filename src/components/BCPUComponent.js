@@ -2,7 +2,7 @@ import React from "react";
 import CPUComponent from "./CPUComponent";
 import * as server from "./../utils/serverAPI"
 
-function ACPUComponent({ device, power, stateChanged }) {
+function BCPUComponent({ device, power, stateChanged }) {
     const [name, setName] = React.useState('')
     const [ep0, setEp0] = React.useState(0)
     const [ep1, setEp1] = React.useState(0)
@@ -16,8 +16,8 @@ function ACPUComponent({ device, power, stateChanged }) {
     React.useEffect(() => {
         if (device !== null) {
             server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-                if (data['acpu'] !== null) {
-                    let href = data['acpu'][0].href
+                if (data['bcpu'] !== null) {
+                    let href = data['bcpu'][0].href
                     server.GET(server.peripheralPath(device, href), (data) => {
                         setName(data.name)
                         fetchEndPoint(href + '/' + data.ports[0].href, setEp0)
@@ -29,7 +29,7 @@ function ACPUComponent({ device, power, stateChanged }) {
             })
         }
     }, [stateChanged, device])
-    return <CPUComponent title={'ACPU'} power={power.acpu} name={name} ep0={ep0} ep1={ep1} ep2={ep2} ep3={ep3} />
+    return <CPUComponent title={'BCPU'} power={power.bcpu} name={name} ep0={ep0} ep1={ep1} ep2={ep2} ep3={ep3} />
 }
 
-export default ACPUComponent;
+export default BCPUComponent;

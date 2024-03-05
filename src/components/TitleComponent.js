@@ -17,12 +17,12 @@ function TitleComponent({ title, staticText, dynamicPower, staticPower }) {
         <div className="row-container">
             <div className="grayed-text">Dynamic</div>
             <div className="grayed-text label-value">{fixed(dynamicPower)} W</div>
-            <div className="grayed-text label-value label-percent">{fixed(dynamicPower / getTotal() * 100, 0)} %</div>
+            <div className="grayed-text label-value label-percent">{fixed(getTotal() ? (dynamicPower / getTotal() * 100) : 0, 0)} %</div>
         </div>
         <div className="row-container">
             <div className="grayed-text">{staticText}</div>
             <div className="grayed-text label-value">{fixed(staticPower)} W</div>
-            <div className="grayed-text label-value label-percent">{fixed(staticPower / getTotal() * 100, 0)} %</div>
+            <div className="grayed-text label-value label-percent">{fixed(getTotal() ? (staticPower / getTotal() * 100) : 0, 0)} %</div>
         </div>
     </React.Fragment>
 }

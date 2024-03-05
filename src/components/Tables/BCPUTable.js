@@ -2,23 +2,27 @@ import React from "react";
 import PowerTable from "./PowerTable";
 import { FaPlus } from "react-icons/fa6";
 import * as server from "../../utils/serverAPI"
-import { acpu_name, load_activity } from "./../../utils/cpu"
-import { TableBase, Actions } from "./TableBase";
+import { bcpu_name, clock, load_activity } from "../../utils/cpu"
+import { TableBase, Actions, Checkbox } from "./TableBase";
 import ACPUModal from "../ModalWindows/ACPUModal";
 import { PowerCell, SelectionCell, PercentsCell } from "./TableCells"
 import { GetText } from "../../utils/common";
 
 import "./../style/ACPUTable.css"
 
-function ACPUTable({ device, onDataChanged }) {
+function BCPUTable({ device, onDataChanged }) {
     const [editIndex, setEditIndex] = React.useState(null);
     const [modalOpen, setModalOpen] = React.useState(false);
-    const [powerData, setPowerData] = React.useState([['Block Power', 0, 0]])
-    const [acpuData, setAcpuData] = React.useState({
+    const [powerData, setPowerData] = React.useState([
+        ['Active Power', 0, 0],
+        ['Boot Power', 0, 0]
+    ])
+    const [bcpuData, setBcpuData] = React.useState({
         name: '',
-        frequency: 0,
-        load: 0
+        encryption_used: false,
+        clock: 0
     })
+    const [bootMode, setBootMode] = React.useState(0)
     const [endpoints, setEndpoints] = React.useState([])
     const [endpointsToDisplay, setEndpointsToDisplay] = React.useState([])
     const [href, setHref] = React.useState('')
@@ -26,7 +30,7 @@ function ACPUTable({ device, onDataChanged }) {
 
     function fetchData(device) {
         server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-            let href = data['acpu'][0].href;
+            let href = data['bcpu'][0].href;
             setHref(href)
         })
     }
@@ -54,17 +58,19 @@ function ACPUTable({ device, onDataChanged }) {
         if (href !== '') {
             server.GET(server.peripheralPath(device, href), (data) => {
                 // resolve cycling
-                if (data.name !== acpuData.name ||
-                    data.frequency !== acpuData.frequency ||
-                    data.load !== acpuData.load) {
-                    setAcpuData({
+                setBootMode(data.consumption.boot_mode)
+                if (data.name !== bcpuData.name ||
+                    data.encryption_used !== bcpuData.encryption_used ||
+                    data.clock !== bcpuData.clock) {
+                    setBcpuData({
                         name: data.name,
-                        frequency: data.frequency,
-                        load: data.load
+                        encryption_used: data.encryption_used,
+                        clock: data.clock
                     })
                 }
                 setPowerData([
-                    ['Block Power', data.consumption.block_power, 0],
+                    ['Active Power', data.consumption.active_power, 0],
+                    ['Boot Power', data.consumption.boot_power, 0]
                 ])
                 setEndpoints([])
                 for (let port of data.ports) {
@@ -86,12 +92,12 @@ function ACPUTable({ device, onDataChanged }) {
 
     React.useEffect(() => {
         if (device !== null && href !== '') {
-            server.PATCH(server.peripheralPath(device, href), acpuData, fetchAcpuData)
+            server.PATCH(server.peripheralPath(device, href), bcpuData, fetchAcpuData)
         }
-    }, [acpuData])
+    }, [bcpuData])
 
     const handleChange = (name, val) => {
-        setAcpuData({ ...acpuData, [name]: val })
+        setBcpuData({ ...bcpuData, [name]: val })
         onDataChanged()
     };
 
@@ -99,7 +105,7 @@ function ACPUTable({ device, onDataChanged }) {
 
     function modifyRow(index, row) {
         var data = row;
-        data.name = GetText(row.name, acpu_name)
+        data.name = GetText(row.name, bcpu_name)
         server.PATCH(server.peripheralPath(device, href + '/ep/' + endpoints[index].ep), data, fetchAcpuData)
     }
 
@@ -125,7 +131,7 @@ function ACPUTable({ device, onDataChanged }) {
     function addRow(newData) {
         if (device !== null) {
             var data = newData;
-            data.name = GetText(newData.name, acpu_name)
+            data.name = GetText(newData.name, bcpu_name)
             server.PATCH(server.peripheralPath(device, href + '/ep/' + findEvailableIndex()), data, fetchAcpuData)
         }
     }
@@ -138,28 +144,41 @@ function ACPUTable({ device, onDataChanged }) {
         onDataChanged()
     };
 
+    function encryptionHandler(state) {
+        setBcpuData({ ...bcpuData, ['encryption_used']: state })
+        onDataChanged()
+    }
+
     const powerHeader = ['Power', '%']
     return <div className="acpu-container">
         <div className="main-block">
             <div className="layout-head">
-                <label>FPGA &gt; ACPU</label>
+                <label>FPGA &gt; BCPU</label>
                 <button disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
             </div>
             <div className="cpu-container">
                 <div className="acpu-group-container">
                     <div className="acpu-group">
-                        <label>ACPU name</label>
-                        <input type={'text'} onChange={(e) => handleChange('name', e.target.value)} value={acpuData.name}></input>
+                        <label>BCPU name</label>
+                        <input type={'text'} onChange={(e) => handleChange('name', e.target.value)} value={bcpuData.name}></input>
                     </div>
                     <div className="acpu-group">
-                        <label>Frequency</label>
-                        <input type={'number'} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency}></input>
+                        <Checkbox
+                            isChecked={bcpuData.encryption_used}
+                            label={'Encryption'}
+                            checkHandler={encryptionHandler}
+                            id={'encryption'}
+                        />
                     </div>
                     <div className="acpu-group">
-                        <label>Load</label>
-                        <select type={'text'} value={acpuData.load} onChange={(e) => handleChange('load', parseInt(e.target.value))}>
+                        <label>Boot Mode</label>
+                        <input type={'text'} value={bootMode} disabled></input>
+                    </div>
+                    <div className="acpu-group">
+                        <label>Clock</label>
+                        <select type={'text'} value={bcpuData.clock} onChange={(e) => handleChange('clock', parseInt(e.target.value))}>
                             {
-                                load_activity.map((it) => (
+                                clock.map((it) => (
                                     <option key={it.id} value={it.id}>{it.text}</option>
                                 ))
                             }
@@ -193,7 +212,7 @@ function ACPUTable({ device, onDataChanged }) {
                         }}
                         onSubmit={handleSubmit}
                         defaultValue={editIndex !== null && {
-                            "name": acpu_name.indexOf(acpu_name.find(elem => elem.text == endpoints[editIndex].data.name)),
+                            "name": bcpu_name.indexOf(bcpu_name.find(elem => elem.text == endpoints[editIndex].data.name)),
                             "activity": endpoints[editIndex].data.activity,
                             "read_write_rate": endpoints[editIndex].data.read_write_rate,
                             "toggle_rate": endpoints[editIndex].data.toggle_rate,
@@ -203,11 +222,11 @@ function ACPUTable({ device, onDataChanged }) {
                             "read_write_rate": 0.5,
                             "toggle_rate": 0.125,
                         }}
-                        names={acpu_name}
+                        names={bcpu_name}
                     />}
             </div>
         </div>
-        <PowerTable title={'ACPU power'}
+        <PowerTable title={'BCPU power'}
             total={null}
             resourcesHeaders={powerHeader}
             resources={powerData}
@@ -215,4 +234,4 @@ function ACPUTable({ device, onDataChanged }) {
     </div>
 }
 
-export default ACPUTable;
+export default BCPUTable;

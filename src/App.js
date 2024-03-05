@@ -7,6 +7,7 @@ import DspTable from "./components/Tables/DspTable";
 import BramTable from "./components/Tables/BramTable";
 import IOTable from "./components/Tables/IOTable";
 import ACPUTable from "./components/Tables/ACPUTable";
+import BCPUTable from "./components/Tables/BCPUTable";
 import { Table } from "./utils/common"
 import PeripheralsTable from "./components/Tables/PeripheralsTable";
 import * as server from "./utils/serverAPI"
@@ -20,13 +21,17 @@ const App = () => {
   const [dspPower, setDspPower] = React.useState(0);
   const [bramPower, setBramPower] = React.useState(0);
   const [ioPower, setIoPower] = React.useState(0);
-  const [peripheralsPower, setPeripheralsPower] = React.useState(0);
-  const [bcpuPower, setBcpuPower] = React.useState(0);
-  const [memoryPower, setMemoryPower] = React.useState(0);
-  const [dmaPower, setDmaPower] = React.useState(0);
-  const [connectivityPower, setConnectivityPower] = React.useState(0);
+  const [socPower, setSOCPower] = React.useState({
+    acpu: 0,
+    bcpu: 0,
+    peripherals: 0,
+    dma: 0,
+    interconnect: 0,
+    memory: 0
+  });
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
   const [acpuState, setAcpuState] = React.useState(false);
+  const [bcpuState, setBcpuState] = React.useState(false);
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
 
@@ -52,19 +57,31 @@ const App = () => {
         const total = data.total_block_power + data.total_interconnect_power + data.total_on_die_termination_power;
         setIoPower(total);
       })
-      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-        setPeripheralsPower(data.total_peripherals_power);
-        setBcpuPower(data.total_bcpu_power);
-        setMemoryPower(data.total_memory_power);
-        setDmaPower(data.total_dma_power);
-        setConnectivityPower(data.total_noc_interconnect_power);
-      })
+      updateSocPower()
     }
   }, [device]);
+
+  function updateSocPower() {
+    server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
+      setSOCPower({
+        acpu: data.total_acpu_power,
+        bcpu: data.total_bcpu_power,
+        peripherals: data.total_peripherals_power,
+        dma: data.total_dma_power,
+        interconnect: data.total_noc_interconnect_power,
+        memory: data.total_memory_power
+      })
+    })
+  }
 
   function onACPUDataChanged() {
     // toggle data changed
     setAcpuState((prev) => !prev)
+  }
+
+  function onBCPUDataChanged() {
+    // toggle data changed
+    setBcpuState((prev) => !prev)
   }
 
   return (
@@ -77,9 +94,9 @@ const App = () => {
           <div className="top-l2">
             <SOCTable device={device}
               setOpenedTable={setOpenedTable}
-              bcpuPower={bcpuPower}
-              peripheralsPower={peripheralsPower}
-              stateChanged={acpuState}
+              power={socPower}
+              acpuStateChanged={acpuState}
+              bcpuStateChanged={bcpuState}
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
@@ -131,7 +148,7 @@ const App = () => {
       }
       {
         openedTable === Table.BCPU &&
-        <label>BCPU table</label>
+        <BCPUTable device={device} onDataChanged={onBCPUDataChanged} />
       }
       {
         openedTable === Table.Connectivity &&
@@ -147,7 +164,7 @@ const App = () => {
       }
       {
         openedTable === Table.Peripherals &&
-        <PeripheralsTable device={device} totalPowerCallback={setPeripheralsPower} />
+        <PeripheralsTable device={device} totalPowerCallback={updateSocPower} />
       }
     </div>
   );

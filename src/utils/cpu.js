@@ -14,3 +14,17 @@ export let acpu_name = [
     { id: 5, text: 'JTAG' },
     { id: 6, text: 'I2C' },
 ]
+
+export let bcpu_name = [
+    { id: 0, text: 'DDR' },
+    { id: 1, text: 'UART0 (BCPU)' },
+    { id: 2, text: 'SPI/QSPI' },
+    { id: 3, text: 'JTAG' },
+]
+
+
+export let clock = [
+    { id: 0, text: 'PLL (233 MHz)' },
+    { id: 1, text: 'BOOT_CLK (40 MHz)' },
+    { id: 2, text: 'RC OSC (50 MHz)' },
+]

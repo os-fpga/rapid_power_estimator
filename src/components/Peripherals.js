@@ -48,8 +48,7 @@ function Peripherals({ setOpenedTable, power, device }) {
         <div>Peripherals</div>
         <div id="peripherals-power">
           {fixed(power)}
-          {' '}
-          W
+          {' W'}
         </div>
       </div>
       <div className="periph-row">
@@ -57,24 +56,21 @@ function Peripherals({ setOpenedTable, power, device }) {
           <div className="periph-internal-font-header">UART0</div>
           <div className="periph-internal-font">
             {fixed(uart0)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="periph-rowx">
           <div className="periph-internal-font-header">UART1</div>
           <div className="periph-internal-font">
             {fixed(uart1)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="periph-rowx">
           <div className="periph-internal-font-header">USB 2.0</div>
           <div className="periph-internal-font">
             {fixed(usb2)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
       </div>
@@ -83,23 +79,21 @@ function Peripherals({ setOpenedTable, power, device }) {
           <div className="periph-internal-font-header">I2C</div>
           <div className="periph-internal-font">
             {fixed(i2c)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="periph-rowx">
           <div className="periph-internal-font-header">GPIO</div>
           <div className="periph-internal-font">
             {fixed(gpio)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="periph-rowx">
           <div className="periph-internal-font-header">PWM</div>
           <div className="periph-internal-font">
             {fixed(pwm)}
-            W
+            {' W'}
           </div>
         </div>
       </div>
@@ -108,23 +102,21 @@ function Peripherals({ setOpenedTable, power, device }) {
           <div className="periph-internal-font-header">SPI/QSPI</div>
           <div className="periph-internal-font">
             {fixed(spi)}
-            W
+            {' W'}
           </div>
         </div>
         <div className="periph-rowx">
           <div className="periph-internal-font-header">JTAG</div>
           <div className="periph-internal-font">
             {fixed(jtag)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="periph-rowx">
           <div className="periph-internal-font-header">GigI</div>
           <div className="periph-internal-font">
             {fixed(gige)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
       </div>

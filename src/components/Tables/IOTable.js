@@ -87,7 +87,7 @@ function IOTable({ device, totalPowerCallback }) {
     bus_width: 0,
     direction: 0,
     io_standard: 0,
-    driveStrength: 2,
+    drive_strength: 2,
     clock: '',
     toggle_rate: 0,
     duty_cycle: 0,
@@ -162,12 +162,13 @@ function IOTable({ device, totalPowerCallback }) {
           header={mainTableHeader}
           data={
             ioData.map((row, index) => (
-              <tr key={row.name}>
+              // eslint-disable-next-line react/no-array-index-key
+              <tr key={index}>
                 <td>{row.name}</td>
                 <td>{row.bus_width}</td>
                 <SelectionCell val={row.direction} values={direction} />
                 <SelectionCell val={row.io_standard} values={ioStandard} />
-                <SelectionCell val={row.driveStrength} values={driveStrength} />
+                <SelectionCell val={row.drive_strength} values={driveStrength} />
                 <SelectionCell val={row.slew_rate} values={slewRate} />
                 <SelectionCell
                   val={row.differential_termination}
@@ -189,8 +190,7 @@ function IOTable({ device, totalPowerCallback }) {
                 <PowerCell val={row.consumption.interconnect_power} />
                 <td>
                   {fixed(row.consumption.percentage, 0)}
-                  {' '}
-                  %
+                  {' %'}
                 </td>
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}

@@ -44,21 +44,21 @@ export function TableBase({ header, data }) {
         <thead>
           <tr>
             {
-            header.map((item, index) => {
-              if (item.className) {
+              header.map((item, index) => {
+                if (item.className) {
+                  // eslint-disable-next-line react/no-array-index-key
+                  return <th key={index} className={item.className}>{item.text}</th>;
+                }
                 // eslint-disable-next-line react/no-array-index-key
-                return <th key={index} className={item.className}>{item}</th>;
-              }
-              // eslint-disable-next-line react/no-array-index-key
-              return <th key={index}>{item}</th>;
-            })
-          }
+                return <th key={index}>{item}</th>;
+              })
+            }
           </tr>
         </thead>
         <tbody>
           {
-          data
-        }
+            data
+          }
         </tbody>
       </table>
     </div>
@@ -77,15 +77,15 @@ export function TableBaseWrapper({
           <button name="plus-button" aria-label="Add" type="button" className="plus-button" onClick={setModalOpen(true)}><FaPlus /></button>
         </div>
         {
-        content
-      }
+          content
+        }
         {modalOpen
-        && (modalContent)}
+          && (modalContent)}
       </div>
       <div className="power-table-wrapper">
         {
-        powerTable
-      }
+          powerTable
+        }
       </div>
     </div>
   );

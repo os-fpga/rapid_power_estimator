@@ -15,8 +15,7 @@ function IOPowerTable({ title, total, resources }) {
               <td>Total</td>
               <td>
                 {fixed(parseFloat(total))}
-                {' '}
-                W
+                {' W'}
               </td>
             </tr>
           </tbody>
@@ -44,32 +43,32 @@ function IOPowerTable({ title, total, resources }) {
           </thead>
           <tbody>
             {
-                        resources.io_usage.map((elem) => (
-                          <React.Fragment key={elem.type}>
-                            <tr>
-                              <td className="innerHeader no-wrap" rowSpan={3}>{elem.type}</td>
-                              <td>{elem.usage[0].voltage}</td>
-                              <td>{elem.usage[0].banks_used}</td>
-                              <td rowSpan={3}>{elem.total_banks_available}</td>
-                              <td>{elem.usage[0].io_used}</td>
-                              <td>{elem.usage[0].io_available}</td>
-                              <td rowSpan={3}>{elem.total_io_available}</td>
-                            </tr>
-                            <tr>
-                              <td>{elem.usage[1].voltage}</td>
-                              <td>{elem.usage[1].banks_used}</td>
-                              <td>{elem.usage[1].io_used}</td>
-                              <td>{elem.usage[1].io_available}</td>
-                            </tr>
-                            <tr>
-                              <td>{elem.usage[2].voltage}</td>
-                              <td>{elem.usage[2].banks_used}</td>
-                              <td>{elem.usage[2].io_used}</td>
-                              <td>{elem.usage[2].io_available}</td>
-                            </tr>
-                          </React.Fragment>
-                        ))
-                    }
+              resources.io_usage.map((elem) => (
+                <React.Fragment key={elem.type}>
+                  <tr>
+                    <td className="innerHeader no-wrap" rowSpan={3}>{elem.type}</td>
+                    <td>{elem.usage[0].voltage}</td>
+                    <td>{elem.usage[0].banks_used}</td>
+                    <td rowSpan={3}>{elem.total_banks_available}</td>
+                    <td>{elem.usage[0].io_used}</td>
+                    <td>{elem.usage[0].io_available}</td>
+                    <td rowSpan={3}>{elem.total_io_available}</td>
+                  </tr>
+                  <tr>
+                    <td>{elem.usage[1].voltage}</td>
+                    <td>{elem.usage[1].banks_used}</td>
+                    <td>{elem.usage[1].io_used}</td>
+                    <td>{elem.usage[1].io_available}</td>
+                  </tr>
+                  <tr>
+                    <td>{elem.usage[2].voltage}</td>
+                    <td>{elem.usage[2].banks_used}</td>
+                    <td>{elem.usage[2].io_used}</td>
+                    <td>{elem.usage[2].io_available}</td>
+                  </tr>
+                </React.Fragment>
+              ))
+            }
           </tbody>
         </table>
       </div>

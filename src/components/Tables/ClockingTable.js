@@ -55,7 +55,7 @@ function ClockingTable({ device, totalPowerCallback }) {
 
   React.useEffect(() => {
     if (device !== null) fetchClockData(device);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
   function modifyRow(index, row) {
@@ -102,45 +102,43 @@ function ClockingTable({ device, totalPowerCallback }) {
         <TableBase
           header={mainTableHeader}
           data={
-          clockingData.map((row, index) => (
-            <tr key={row.description}>
-              <td>{row.description}</td>
-              <td>{GetText(row.source, sources)}</td>
-              <td>{row.port}</td>
-              <FrequencyCell val={row.frequency} />
-              <td>{GetText(row.state, states)}</td>
-              <td>{row.consumption.fan_out}</td>
-              <PowerCell val={row.consumption.block_power} />
-              <PowerCell val={row.consumption.interconnect_power} />
-              <td>
-                {fixed(row.consumption.percentage, 0)}
-                {' '}
-                %
-              </td>
-              <Actions
-                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                onDeleteClick={() => deleteRow(index)}
-              />
-            </tr>
-          ))
-        }
+            clockingData.map((row, index) => (
+              <tr key={row.description}>
+                <td>{row.description}</td>
+                <td>{GetText(row.source, sources)}</td>
+                <td>{row.port}</td>
+                <FrequencyCell val={row.frequency} />
+                <td>{GetText(row.state, states)}</td>
+                <td>{row.consumption.fan_out}</td>
+                <PowerCell val={row.consumption.block_power} />
+                <PowerCell val={row.consumption.interconnect_power} />
+                <td>
+                  {fixed(row.consumption.percentage, 0)}
+                  {' %'}
+                </td>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
+              </tr>
+            ))
+          }
         />
         {modalOpen && (
-        <ClockingModal
-          closeModal={() => {
-            setModalOpen(false);
-            setEditIndex(null);
-          }}
-          onSubmit={handleSubmit}
-          defaultValue={(editIndex !== null && clockingData[editIndex])
-          || {
-            source: 0,
-            description: '',
-            port: '',
-            frequency: 1000000,
-            state: 1,
-          }}
-        />
+          <ClockingModal
+            closeModal={() => {
+              setModalOpen(false);
+              setEditIndex(null);
+            }}
+            onSubmit={handleSubmit}
+            defaultValue={(editIndex !== null && clockingData[editIndex]) || {
+              source: 0,
+              description: '',
+              port: '',
+              frequency: 1000000,
+              state: 1,
+            }}
+          />
         )}
       </div>
       <div className="power-table-wrapper">

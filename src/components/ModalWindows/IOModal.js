@@ -60,9 +60,9 @@ function IOModal({ closeModal, onSubmit, defaultValue }) {
         },
         {
           fieldType: FieldType.select,
-          id: 'driveStrength',
+          id: 'drive_strength',
           text: 'Drive Strength',
-          value: defaultValue.driveStrength,
+          value: defaultValue.drive_strength,
           values: driveStrength,
         },
         {

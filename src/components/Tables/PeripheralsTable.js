@@ -146,7 +146,7 @@ function PeripheralsTable({ device, totalPowerCallback }) {
           return a_id - b_id;
         }
         return elements.indexOf(elements.find((elem) => elem.id === a.id))
-                        - elements.indexOf(elements.find((elem) => elem.id === b.id));
+          - elements.indexOf(elements.find((elem) => elem.id === b.id));
       });
       for (const id of elements) {
         tmp.map((elem) => {
@@ -216,58 +216,57 @@ function PeripheralsTable({ device, totalPowerCallback }) {
         <TableBase
           header={mainTableHeader}
           data={
-                    peripherals.map((row, index) => (
-                      <tr key={index}>
-                        <td>
-                          <Checkbox
-                            disabled={row.enable === 3}
-                            isChecked={row.enable === 3 ? true : row.enable}
-                            label=""
-                            checkHandler={(state) => enableChanged(index, state)}
-                            id={index}
-                          />
-                        </td>
-                        <td className="innerHeader">{row.name}</td>
-                        <SelectionCell val={row.usage} values={row.usage_values} />
-                        <SelectionCell val={row.performance} values={row.performance_values} />
-                        <td>
-                          {row.calculated_bandwidth}
-                          {' MB/s'}
-                        </td>
-                        <PowerCell val={row.block_power} />
-                        <td>
-                          {fixed(parseFloat(row.percentage), 0)}
-                          {' '}
-                          %
-                        </td>
-                        <Actions
-                          onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                          showDelete={false}
-                        />
-                      </tr>
-                    ))
-                }
+            peripherals.map((row, index) => (
+              <tr key={index}>
+                <td>
+                  <Checkbox
+                    disabled={row.enable === 3}
+                    isChecked={row.enable === 3 ? true : row.enable}
+                    label=""
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
+                <td className="innerHeader">{row.name}</td>
+                <SelectionCell val={row.usage} values={row.usage_values} />
+                <SelectionCell val={row.performance} values={row.performance_values} />
+                <td>
+                  {row.calculated_bandwidth}
+                  {' MB/s'}
+                </td>
+                <PowerCell val={row.block_power} />
+                <td>
+                  {fixed(parseFloat(row.percentage), 0)}
+                  {' %'}
+                </td>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  showDelete={false}
+                />
+              </tr>
+            ))
+          }
         />
         {modalOpen && (
-        <PeripheralsModal
-          closeModal={() => {
-            setModalOpen(false);
-            setEditIndex(null);
-          }}
-          onSubmit={handleSubmit}
-          defaultValue={editIndex !== null && peripherals[editIndex]
-                    || {
-                      enable: true,
-                      name: '',
-                      usage: 0,
-                      usage_values: [],
-                      performance: 0,
-                      performance_values: [],
-                      calculated_bandwidth: 0,
-                      block_power: 0,
-                      percentage: 0,
-                    }}
-        />
+          <PeripheralsModal
+            closeModal={() => {
+              setModalOpen(false);
+              setEditIndex(null);
+            }}
+            onSubmit={handleSubmit}
+            defaultValue={editIndex !== null && peripherals[editIndex]
+              || {
+              enable: true,
+              name: '',
+              usage: 0,
+              usage_values: [],
+              performance: 0,
+              performance_values: [],
+              calculated_bandwidth: 0,
+              block_power: 0,
+              percentage: 0,
+            }}
+          />
         )}
       </div>
     </div>

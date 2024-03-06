@@ -10,19 +10,19 @@ function PowerTable({
     <div className="power-table-main">
       <div className="header">{title}</div>
       {total !== null && (
-      <div>
-        <table className="total-table header">
-          <tbody>
-            <tr>
-              <td>Total</td>
-              <td className="no-wrap">
-                {fixed(parseFloat(total))}
-                {' W'}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <div>
+          <table className="total-table header">
+            <tbody>
+              <tr>
+                <td>Total</td>
+                <td className="no-wrap">
+                  {fixed(parseFloat(total))}
+                  {' W'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       )}
       <div className="header">{subHeader}</div>
       <div>

@@ -47,7 +47,7 @@ function FleTable({ device, totalPowerCallback }) {
 
   React.useEffect(() => {
     if (device !== null) fetchFleData(device);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
   function modifyRow(index, row) {
@@ -99,51 +99,51 @@ function FleTable({ device, totalPowerCallback }) {
         <TableBase
           header={mainTableHeader}
           data={
-          fleData.map((row, index) => (
-            <tr key={row.name}>
-              <td>{row.name}</td>
-              <td>{row.lut6}</td>
-              <td>{row.flip_flop}</td>
-              <td>{row.clock}</td>
-              <PercentsCell val={row.toggle_rate} precition={1} />
-              <td>{GetText(row.glitch_factor, glitchFactor)}</td>
-              <PercentsCell val={row.clock_enable_rate} />
-              <FrequencyCell val={row.consumption.clock_frequency} />
-              <td>
-                {fixed(row.consumption.output_signal_rate, 1)}
-                {' MTr/S'}
-              </td>
-              <PowerCell val={row.consumption.block_power} />
-              <PowerCell val={row.consumption.interconnect_power} />
-              <td>
-                {fixed(row.consumption.percentage, 0)}
-                {' %'}
-              </td>
-              <Actions
-                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                onDeleteClick={() => deleteRow(index)}
-              />
-            </tr>
-          ))
-        }
+            fleData.map((row, index) => (
+              <tr key={row.name}>
+                <td>{row.name}</td>
+                <td>{row.lut6}</td>
+                <td>{row.flip_flop}</td>
+                <td>{row.clock}</td>
+                <PercentsCell val={row.toggle_rate} precition={1} />
+                <td>{GetText(row.glitch_factor, glitchFactor)}</td>
+                <PercentsCell val={row.clock_enable_rate} />
+                <FrequencyCell val={row.consumption.clock_frequency} />
+                <td>
+                  {fixed(row.consumption.output_signal_rate, 1)}
+                  {' MTr/S'}
+                </td>
+                <PowerCell val={row.consumption.block_power} />
+                <PowerCell val={row.consumption.interconnect_power} />
+                <td>
+                  {fixed(row.consumption.percentage, 0)}
+                  {' %'}
+                </td>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
+              </tr>
+            ))
+          }
         />
         {modalOpen && (
-        <FleModal
-          closeModal={() => {
-            setModalOpen(false);
-            setEditIndex(null);
-          }}
-          onSubmit={handleSubmit}
-          defaultValue={(editIndex !== null && fleData[editIndex]) || {
-            name: '',
-            lut6: 0,
-            flip_flop: 0,
-            clock: '',
-            toggle_rate: 0,
-            glitch_factor: 0,
-            clock_enable_rate: 0.0,
-          }}
-        />
+          <FleModal
+            closeModal={() => {
+              setModalOpen(false);
+              setEditIndex(null);
+            }}
+            onSubmit={handleSubmit}
+            defaultValue={(editIndex !== null && fleData[editIndex]) || {
+              name: '',
+              lut6: 0,
+              flip_flop: 0,
+              clock: '',
+              toggle_rate: 0,
+              glitch_factor: 0,
+              clock_enable_rate: 0.0,
+            }}
+          />
         )}
       </div>
       <div className="power-table-wrapper">

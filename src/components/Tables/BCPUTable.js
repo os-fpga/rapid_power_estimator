@@ -38,7 +38,7 @@ function BCPUTable({ device, onDataChanged }) {
     if (device !== null) {
       fetchData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
   React.useEffect(() => {
@@ -82,7 +82,7 @@ function BCPUTable({ device, onDataChanged }) {
     if (device !== null) {
       fetchAcpuData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [href]);
 
   React.useEffect(() => {
@@ -93,7 +93,7 @@ function BCPUTable({ device, onDataChanged }) {
     if (device !== null && href !== '') {
       server.PATCH(server.peripheralPath(device, href), bcpuData, fetchAcpuData);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bcpuData]);
 
   const handleChange = (name, val) => {

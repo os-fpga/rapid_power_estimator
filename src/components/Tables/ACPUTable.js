@@ -34,7 +34,7 @@ function ACPUTable({ device, onDataChanged }) {
     if (device !== null) {
       fetchData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
   React.useEffect(() => {
@@ -55,8 +55,8 @@ function ACPUTable({ device, onDataChanged }) {
       server.GET(server.peripheralPath(device, href), (data) => {
         // resolve cycling
         if (data.name !== acpuData.name
-                    || data.frequency !== acpuData.frequency
-                    || data.load !== acpuData.load) {
+          || data.frequency !== acpuData.frequency
+          || data.load !== acpuData.load) {
           setAcpuData({
             name: data.name,
             frequency: data.frequency,
@@ -76,7 +76,7 @@ function ACPUTable({ device, onDataChanged }) {
     if (device !== null) {
       fetchAcpuData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [href]);
 
   React.useEffect(() => {
@@ -87,7 +87,7 @@ function ACPUTable({ device, onDataChanged }) {
     if (device !== null && href !== '') {
       server.PATCH(server.peripheralPath(device, href), acpuData, fetchAcpuData);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acpuData]);
 
   const handleChange = (name, val) => {
@@ -157,57 +157,57 @@ function ACPUTable({ device, onDataChanged }) {
               <label>Load</label>
               <select type="text" value={acpuData.load} onChange={(e) => handleChange('load', parseInt(e.target.value, 10))}>
                 {
-                                loadActivity.map((it) => (
-                                  <option key={it.id} value={it.id}>{it.text}</option>
-                                ))
-                            }
+                  loadActivity.map((it) => (
+                    <option key={it.id} value={it.id}>{it.text}</option>
+                  ))
+                }
               </select>
             </div>
           </div>
           <TableBase
             header={header}
             data={
-                        endpointsToDisplay.map((row, index) => (
-                          // eslint-disable-next-line react/no-array-index-key
-                          <tr key={index}>
-                            <td>{row.data.name}</td>
-                            <SelectionCell val={row.data.activity} values={loadActivity} />
-                            <PercentsCell val={row.data.read_write_rate} />
-                            <PercentsCell val={row.data.toggle_rate} precition={1} />
-                            <PowerCell val={row.data.consumption.calculated_bandwidth} />
-                            <PowerCell val={row.data.consumption.noc_power} />
-                            <Actions
-                              onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                              onDeleteClick={() => deleteRow(index)}
-                            />
-                          </tr>
-                        ))
-                    }
+              endpointsToDisplay.map((row, index) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <tr key={index}>
+                  <td>{row.data.name}</td>
+                  <SelectionCell val={row.data.activity} values={loadActivity} />
+                  <PercentsCell val={row.data.read_write_rate} />
+                  <PercentsCell val={row.data.toggle_rate} precition={1} />
+                  <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                  <PowerCell val={row.data.consumption.noc_power} />
+                  <Actions
+                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                    onDeleteClick={() => deleteRow(index)}
+                  />
+                </tr>
+              ))
+            }
           />
           {modalOpen
-                    && (
-                    <ABCPUModal
-                      closeModal={() => {
-                        setModalOpen(false);
-                        setEditIndex(null);
-                      }}
-                      onSubmit={handleSubmit}
-                      defaultValue={(editIndex !== null && {
-                        name: acpuNames.indexOf(acpuNames.find(
-                          (elem) => elem.text === endpoints[editIndex].data.name,
-                        )),
-                        activity: endpoints[editIndex].data.activity,
-                        read_write_rate: endpoints[editIndex].data.read_write_rate,
-                        toggle_rate: endpoints[editIndex].data.toggle_rate,
-                      }) || {
-                        name: 0,
-                        activity: 0,
-                        read_write_rate: 0.5,
-                        toggle_rate: 0.125,
-                      }}
-                      endpoints={acpuNames}
-                    />
-                    )}
+            && (
+              <ABCPUModal
+                closeModal={() => {
+                  setModalOpen(false);
+                  setEditIndex(null);
+                }}
+                onSubmit={handleSubmit}
+                defaultValue={(editIndex !== null && {
+                  name: acpuNames.indexOf(acpuNames.find(
+                    (elem) => elem.text === endpoints[editIndex].data.name,
+                  )),
+                  activity: endpoints[editIndex].data.activity,
+                  read_write_rate: endpoints[editIndex].data.read_write_rate,
+                  toggle_rate: endpoints[editIndex].data.toggle_rate,
+                }) || {
+                  name: 0,
+                  activity: 0,
+                  read_write_rate: 0.5,
+                  toggle_rate: 0.125,
+                }}
+                endpoints={acpuNames}
+              />
+            )}
         </div>
       </div>
       <PowerTable

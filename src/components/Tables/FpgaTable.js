@@ -29,16 +29,14 @@ function FpgaTable({
           <div className="bold-text-title">Clocking</div>
           <div className="grayed-text">
             {fixed(clocking)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="clickable blocks-row" onClick={() => tableOpen(Table.FLE)}>
           <div className="bold-text-title">FLE</div>
           <div className="grayed-text">
             {fixed(fle)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
       </div>
@@ -47,16 +45,14 @@ function FpgaTable({
           <div className="bold-text-title">BRAM</div>
           <div className="grayed-text">
             {fixed(bram)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
         <div className="clickable blocks-row" onClick={() => tableOpen(Table.DSP)}>
           <div className="bold-text-title">DSP</div>
           <div className="grayed-text">
             {fixed(dsp)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
       </div>
@@ -65,8 +61,7 @@ function FpgaTable({
           <div className="bold-text-title">IO</div>
           <div className="grayed-text">
             {fixed(io)}
-            {' '}
-            W
+            {' W'}
           </div>
         </div>
       </div>

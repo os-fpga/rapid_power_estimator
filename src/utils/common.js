@@ -18,8 +18,8 @@ export const fixed = (number, precition = 3) => number.toFixed(precition);
 
 export function GetText(id, map) {
   try {
-    // eslint-disable-next-line react/destructuring-assignment
-    const elem = map.find((item) => item.id === id);
+    const tmp = map;
+    const elem = tmp.find((item) => item.id === id);
     if (elem) return elem.text;
   } catch (error) {
     return null;

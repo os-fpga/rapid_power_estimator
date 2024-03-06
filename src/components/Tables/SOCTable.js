@@ -13,7 +13,7 @@ function SOCTable({
 }) {
   function getDynamic() {
     return power.acpu + power.bcpu + power.peripherals
-    + power.dma + power.interconnect + power.memory;
+      + power.dma + power.interconnect + power.memory;
   }
   function getStatic() {
     // TODO, calculated at backend

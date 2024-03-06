@@ -3,7 +3,7 @@ import PeripheralsModal from "../ModalWindows/PeripheralsModal";
 import * as server from "../../utils/serverAPI"
 import { fixed } from "../../utils/common";
 import { PowerCell, SelectionCell } from "./TableCells"
-import { TableBase, Actions } from "./TableBase";
+import { TableBase, Actions, Checkbox } from "./TableBase";
 import * as per from "../../utils/peripherals"
 
 import "./../style/ComponentTable.css"
@@ -16,7 +16,7 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
     const [allComponents, setAllComponents] = React.useState([]);
 
     const mainTableHeader = [
-        "", "Usage", "Performance", "Bandwidth", "Block Power", "%", "Action"
+        "", "", "Usage", "Performance", "Bandwidth", "Block Power", "%", "Action"
     ]
 
     const elements = [
@@ -67,12 +67,12 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
             fetchData(device)
     }, [device]);
 
-    function getTableObject(id, url, name, usage, usage_values, performance, performance_values,
+    function getTableObject(id, url, enable, name, usage, usage_values, performance, performance_values,
         calculated_bandwidth, block_power, percentage) {
         return {
             id: id,
             url: url,
-            enable: true,
+            enable: enable,
             name: name,
             usage: usage,
             usage_values: usage_values,
@@ -88,6 +88,7 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
         return getTableObject(
             elem,
             url,
+            object.hasOwnProperty('enable') ? (object.enable ? 1 : 0) : 3,
             object.name,
             object.usage,
             item.usage,
@@ -153,9 +154,7 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
                     }
                 }
             })
-            server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-                totalPowerCallback(data.total_peripherals_power)
-            })
+            totalPowerCallback()
         }
     }
 
@@ -190,6 +189,13 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
             modifyRow(editIndex, newRow);
     };
 
+    function enableChanged(index, state) {
+        let data = {
+            enable: state,
+        }
+        server.PATCH(server.peripheralPath(device, peripherals[index].url), data, () => fetchData(device))
+    }
+
     return <div className="component-table-head">
         <div className="main-block">
             <div className="layout-head">
@@ -200,6 +206,14 @@ const PeripheralsTable = ({ device, totalPowerCallback }) => {
                 data={
                     peripherals.map((row, index) => {
                         return <tr key={index}>
+                            <td>
+                                <Checkbox
+                                    disabled={row.enable === 3 ? true : false}
+                                    isChecked={row.enable === 3 ? true : row.enable}
+                                    label={''}
+                                    checkHandler={(state) => enableChanged(index, state)}
+                                    id={index} />
+                            </td>
                             <td className="innerHeader">{row.name}</td>
                             <SelectionCell val={row.usage} values={row.usage_values} />
                             <SelectionCell val={row.performance} values={row.performance_values} />

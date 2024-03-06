@@ -3,10 +3,10 @@ import { fixed } from "../../utils/common";
 
 import "./../style/PowerTable.css"
 
-function PowerTable({ title, total, resourcesHeaders, resources }) {
+function PowerTable({ title, total, resourcesHeaders, resources, subHeader = 'Resources' }) {
     return <div className="power-table-main">
         <div className="header">{title}</div>
-        <div>
+        {total !== null && <div>
             <table className="total-table header">
                 <tbody>
                     <tr>
@@ -16,7 +16,8 @@ function PowerTable({ title, total, resourcesHeaders, resources }) {
                 </tbody>
             </table>
         </div>
-        <div className="header">Resources</div>
+        }
+        <div className="header">{subHeader}</div>
         <div>
             <table className="resources-table">
                 <thead>
@@ -35,7 +36,7 @@ function PowerTable({ title, total, resourcesHeaders, resources }) {
                             return <tr key={index}>
                                 <td className="innerHeader no-wrap">{item[0]}</td>
                                 <td>{item[1]}</td>
-                                <td>{item[2]}</td>
+                                <td className="no-wrap">{item[2]}{item.length === 3 ? ' %' : ''}</td>
                                 <td className="no-wrap">{item[3]}{item.length === 4 ? ' %' : ''}</td>
                                 <td className="no-wrap">{item[4]}{item.length === 5 ? ' %' : ''}</td>
                             </tr>

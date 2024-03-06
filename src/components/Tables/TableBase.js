@@ -14,6 +14,23 @@ export const Actions = ({ onEditClick, onDeleteClick, rowSpan, showDelete = true
   </td>
 }
 
+export const Checkbox = ({ isChecked, label, checkHandler, id, disabled }) => {
+  const checkboxRef = React.useRef(null)
+  return (
+      <div>
+          <input
+              type="checkbox"
+              id={id}
+              checked={isChecked}
+              onChange={() => checkHandler(checkboxRef.current.checked)}
+              ref={checkboxRef}
+              disabled={disabled}
+          />
+          <label htmlFor={id}>{label}</label>
+      </div>
+  )
+}
+
 export const TableBase = ({ header, data }) => {
   return <div className="table-wrapper">
     <table className="table-style">

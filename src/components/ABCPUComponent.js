@@ -2,9 +2,8 @@ import React from "react";
 import CPUComponent from "./CPUComponent";
 import * as server from "./../utils/serverAPI"
 
-function ACPUComponent({ device, stateChanged }) {
+function ABCPUComponent({ device, title, index, power, stateChanged }) {
     const [name, setName] = React.useState('')
-    const [power, setPower] = React.useState(0);
     const [ep0, setEp0] = React.useState(0)
     const [ep1, setEp1] = React.useState(0)
     const [ep2, setEp2] = React.useState(0)
@@ -17,8 +16,8 @@ function ACPUComponent({ device, stateChanged }) {
     React.useEffect(() => {
         if (device !== null) {
             server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-                if (data['acpu'] !== null) {
-                    let href = data['acpu'][0].href
+                if (data[index] !== null) {
+                    let href = data[index][0].href
                     server.GET(server.peripheralPath(device, href), (data) => {
                         setName(data.name)
                         fetchEndPoint(href + '/' + data.ports[0].href, setEp0)
@@ -28,11 +27,9 @@ function ACPUComponent({ device, stateChanged }) {
                     })
                 }
             })
-            server.GET(server.api.consumption(server.Elem.peripherals, device),
-                (data) => setPower(data.total_acpu_power))
         }
     }, [stateChanged, device])
-    return <CPUComponent title={'ACPU'} power={power} name={name} ep0={ep0} ep1={ep1} ep2={ep2} ep3={ep3} />
+    return <CPUComponent title={title} power={power} name={name} ep0={ep0} ep1={ep1} ep2={ep2} ep3={ep3} />
 }
 
-export default ACPUComponent;
+export default ABCPUComponent;

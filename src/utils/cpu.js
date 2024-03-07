@@ -27,3 +27,12 @@ export const clock = [
   { id: 1, text: 'BOOT_CLK (40 MHz)' },
   { id: 2, text: 'RC OSC (50 MHz)' },
 ];
+
+export const source = [
+  { id: 0, text: 'NONE' },
+  { id: 1, text: 'DDR' },
+  { id: 2, text: 'OCM' },
+  { id: 3, text: 'SPI_QSPI' },
+  { id: 4, text: 'I2C' },
+  { id: 5, text: 'Fabric' },
+];

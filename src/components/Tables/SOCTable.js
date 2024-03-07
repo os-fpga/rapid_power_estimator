@@ -5,11 +5,12 @@ import Peripherals from '../Peripherals';
 import { Table } from '../../utils/common';
 import TitleComponent from '../TitleComponent';
 import ABCPUComponent from '../ABCPUComponent';
+import DMAComponent from '../DMAComponent';
 
 import '../style/SOCTable.css';
 
 function SOCTable({
-  device, setOpenedTable, power, acpuStateChanged, bcpuStateChanged,
+  device, setOpenedTable, power, acpuStateChanged, bcpuStateChanged, dmaStateChanged,
 }) {
   function getDynamic() {
     return power.acpu + power.bcpu + power.peripherals
@@ -52,7 +53,11 @@ function SOCTable({
       </div>
       <div className="top-l2-col1-row2">
         <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.DMA)}>
-          <CPUComponent title="DMA" power={power.dma} />
+          <DMAComponent
+            device={device}
+            power={power.dma}
+            stateChanged={dmaStateChanged}
+          />
         </div>
         <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.Connectivity)}>
           <CPUComponent title="Connectivity" power={power.interconnect} />
@@ -71,6 +76,7 @@ SOCTable.propTypes = {
   ]),
   acpuStateChanged: PropTypes.bool.isRequired,
   bcpuStateChanged: PropTypes.bool.isRequired,
+  dmaStateChanged: PropTypes.bool.isRequired,
 };
 
 SOCTable.defaultProps = {

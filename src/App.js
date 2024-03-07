@@ -8,6 +8,7 @@ import BramTable from './components/Tables/BramTable';
 import IOTable from './components/Tables/IOTable';
 import ACPUTable from './components/Tables/ACPUTable';
 import BCPUTable from './components/Tables/BCPUTable';
+import DMATable from './components/Tables/DMATable';
 import { Table } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
@@ -32,10 +33,11 @@ function App() {
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
   const [acpuState, setAcpuState] = React.useState(false);
   const [bcpuState, setBcpuState] = React.useState(false);
+  const [dmaState, setDmaState] = React.useState(false);
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
 
-  function updateSocPower() {
+  const updateSocPower = React.useCallback(() => {
     if (device !== null) {
       server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
         setSOCPower({
@@ -48,7 +50,7 @@ function App() {
         });
       });
     }
-  }
+  }, [device]);
 
   React.useEffect(() => {
     if (device !== null) {
@@ -78,7 +80,7 @@ function App() {
       });
       updateSocPower();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
   function onACPUDataChanged() {
@@ -90,6 +92,12 @@ function App() {
     // toggle data changed
     setBcpuState((prev) => !prev);
   }
+
+  const onDMADataChanged = React.useCallback(() => {
+    // toggle data changed
+    setDmaState((prev) => !prev);
+    updateSocPower();
+  }, [setDmaState, updateSocPower]);
 
   return (
     <div>
@@ -105,6 +113,7 @@ function App() {
               power={socPower}
               acpuStateChanged={acpuState}
               bcpuStateChanged={bcpuState}
+              dmaStateChanged={dmaState}
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
@@ -171,11 +180,15 @@ function App() {
       }
       {
         openedTable === Table.DMA
-        && <label>DMA table</label>
+        && (
+          <DMATable
+            device={device}
+            onDataChanged={onDMADataChanged}
+          />
+        )
       }
       {
         openedTable === Table.Peripherals
-        // eslint-disable-next-line react/jsx-no-bind
         && <PeripheralsTable device={device} totalPowerCallback={updateSocPower} />
       }
     </div>

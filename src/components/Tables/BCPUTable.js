@@ -141,10 +141,10 @@ function BCPUTable({ device, onDataChanged }) {
     onDataChanged();
   };
 
-  function encryptionHandler(state) {
+  const encryptionHandler = React.useCallback((state) => {
     setBcpuData({ ...bcpuData, encryption_used: state });
     onDataChanged();
-  }
+  }, [bcpuData, onDataChanged]);
 
   const powerHeader = ['Power', '%'];
   return (
@@ -164,7 +164,6 @@ function BCPUTable({ device, onDataChanged }) {
               <Checkbox
                 isChecked={bcpuData.encryption_used}
                 label="Encryption"
-                // eslint-disable-next-line react/jsx-no-bind
                 checkHandler={encryptionHandler}
                 id="encryption"
               />

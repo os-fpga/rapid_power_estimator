@@ -203,7 +203,7 @@ class FpgaComplexEndpointOutputSchema(EndpointOutputSchema):
 
 class FpgaComplexEndpointSchema(EndpointSchema):
     clock = fields.Str()
-    output = fields.Nested(FpgaComplexEndpointOutputSchema)
+    output = fields.Nested(FpgaComplexEndpointOutputSchema, data_key="consumption")
 
 class AcpuOutputSchema(Schema):
     block_power = fields.Number()

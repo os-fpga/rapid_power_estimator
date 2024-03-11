@@ -1,9 +1,10 @@
 import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
+import { subscribe, unsubscribe } from '../utils/events';
 
 function ABCPUComponent({
-  device, title, index, power, stateChanged,
+  device, title, index, power,
 }) {
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
@@ -15,23 +16,39 @@ function ABCPUComponent({
     server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
   }
 
+  function update() {
+    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+      if (data[index] !== null) {
+        const { href } = data[index][0];
+        server.GET(server.peripheralPath(device, href), (cpuData) => {
+          setName(cpuData.name);
+          fetchEndPoint(`${href}/${cpuData.ports[0].href}`, setEp0);
+          fetchEndPoint(`${href}/${cpuData.ports[1].href}`, setEp1);
+          fetchEndPoint(`${href}/${cpuData.ports[2].href}`, setEp2);
+          fetchEndPoint(`${href}/${cpuData.ports[3].href}`, setEp3);
+        });
+      }
+    });
+  }
+
+  function cpuChanged(cpuChangedData) {
+    if (cpuChangedData) {
+      const { detail } = cpuChangedData;
+      if (detail === index) update();
+    }
+  }
+
+  React.useEffect(() => {
+    subscribe('cpuChanged', cpuChanged);
+    return () => { unsubscribe('cpuChanged', cpuChanged); };
+  });
+
   React.useEffect(() => {
     if (device !== null) {
-      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        if (data[index] !== null) {
-          const { href } = data[index][0];
-          server.GET(server.peripheralPath(device, href), (cpuData) => {
-            setName(cpuData.name);
-            fetchEndPoint(`${href}/${cpuData.ports[0].href}`, setEp0);
-            fetchEndPoint(`${href}/${cpuData.ports[1].href}`, setEp1);
-            fetchEndPoint(`${href}/${cpuData.ports[2].href}`, setEp2);
-            fetchEndPoint(`${href}/${cpuData.ports[3].href}`, setEp3);
-          });
-        }
-      });
+      update();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stateChanged, device]);
+  }, [device]);
 
   return (
     <CPUComponent

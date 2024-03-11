@@ -5,10 +5,11 @@ import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import * as per from '../../utils/peripherals';
+import { publish } from '../../utils/events';
 
 import '../style/ComponentTable.css';
 
-function PeripheralsTable({ device, totalPowerCallback }) {
+function PeripheralsTable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [peripherals, setPeripherals] = React.useState([]);
@@ -62,76 +63,66 @@ function PeripheralsTable({ device, totalPowerCallback }) {
     },
   ];
 
+  function peripheralMatch(component, data, url) {
+    setAllComponents((oldValues) => [...oldValues, { id: component, url, data }]);
+  }
+
+  function fetchPeripherals(deviceId, key, url) {
+    server.GET(
+      server.peripheralPath(deviceId, url),
+      (data) => peripheralMatch(key, data, url),
+    );
+  }
+
   const fetchData = (deviceId) => {
     if (deviceId !== null) {
       setAllComponents([]);
       server.GET(server.api.fetch(server.Elem.peripherals, deviceId), (data) => {
-        delete data.dma;
-        delete data.memory;
-        delete data.acpu;
-        delete data.bcpu;
-        for (const key of Object.keys(data)) {
-          for (const item in data[key]) {
-            fetchPeripherals(deviceId, key, data[key][item].href);
-          }
-        }
+        const peripheralData = data;
+        delete peripheralData.dma;
+        delete peripheralData.memory;
+        delete peripheralData.acpu;
+        delete peripheralData.bcpu;
+        Object.entries(peripheralData).forEach((elem) => {
+          const [key, values] = elem;
+          Object.entries(values).forEach((val) => {
+            const [, obj] = val;
+            fetchPeripherals(deviceId, key, obj.href);
+          });
+        });
       });
-      totalPowerCallback();
     }
   };
 
   React.useEffect(() => {
     if (device !== null) fetchData(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
-  function getTableObject(
-    id,
-    url,
-    enable,
-    name,
-    usage,
-    usage_values,
-    performance,
-    performance_values,
-    calculated_bandwidth,
-    block_power,
-    percentage,
-  ) {
-    return {
-      id,
-      url,
-      enable,
-      name,
-      usage,
-      usage_values,
-      performance,
-      performance_values,
-      calculated_bandwidth,
-      block_power,
-      percentage,
-    };
+  function getPerformance(object) {
+    if (object.clock_frequency) return object.clock_frequency;
+    if (object.baudrate) return object.baudrate;
+    if (object.bit_rate) return object.bit_rate;
+    if (object.io_standard) return object.io_standard;
+    return 0;
   }
+
   function toTableObject(object, elem, url) {
-    const item = elements.find((item) => item.id === elem);
-    return getTableObject(
-      elem,
+    const found = elements.find((item) => item.id === elem);
+    return {
+      id: elem,
       url,
-      object.hasOwnProperty('enable') ? (object.enable ? 1 : 0) : 3,
-      object.name,
-      object.usage,
-      item.usage,
-      object.clock_frequency ? object.clock_frequency : (
-        object.baudrate ? object.baudrate : (
-          object.bit_rate ? object.bit_rate : (
-            object.io_standard ? object.io_standard : 0
-          )
-        )
-      ),
-      item.performance,
-      object.consumption ? object.consumption.calculated_bandwidth : 0,
-      object.consumption ? object.consumption.block_power : 0,
-      object.consumption ? object.consumption.percentage : 0,
-    );
+      // eslint-disable-next-line no-nested-ternary
+      enable: Object.prototype.hasOwnProperty.call(object, 'enable') ? (object.enable ? 1 : 0) : 3,
+      name: object.name,
+      usage: object.usage,
+      usage_values: found.usage,
+      performance: getPerformance(object),
+      performance_values: found.performance,
+      calculated_bandwidth: object.consumption ? object.consumption.calculated_bandwidth : 0,
+      block_power: object.consumption ? object.consumption.block_power : 0,
+      percentage: object.consumption ? object.consumption.percentage : 0,
+    };
   }
 
   React.useEffect(() => {
@@ -141,34 +132,24 @@ function PeripheralsTable({ device, totalPowerCallback }) {
       // sort for corrrect table order since we receive data async
       tmp.sort((a, b) => {
         if (a.id === b.id) {
-          const a_id = a.url.slice(-1);
-          const b_id = b.url.slice(-1);
-          return a_id - b_id;
+          const aId = a.url.slice(-1);
+          const bId = b.url.slice(-1);
+          return aId - bId;
         }
         return elements.indexOf(elements.find((elem) => elem.id === a.id))
           - elements.indexOf(elements.find((elem) => elem.id === b.id));
       });
-      for (const id of elements) {
-        tmp.map((elem) => {
-          if (elem.id === id.id) {
+      elements.forEach((i) => {
+        tmp.forEach((elem) => {
+          if (elem.id === i.id) {
             data.push(toTableObject(elem.data, elem.id, elem.url));
           }
         });
-      }
+      });
       setPeripherals(data);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allComponents]);
-
-  function peripheralMatch(component, data, url) {
-    setAllComponents((allComponents) => [...allComponents, { id: component, url, data }]);
-  }
-
-  function fetchPeripherals(deviceId, key, url) {
-    server.GET(
-      server.peripheralPath(deviceId, url),
-      (data) => peripheralMatch(key, data, url),
-    );
-  }
 
   function modifyRow(index, row) {
     let data = {};
@@ -193,7 +174,10 @@ function PeripheralsTable({ device, totalPowerCallback }) {
         io_standard: row.performance,
       };
     } else return;
-    server.PATCH(server.peripheralPath(device, row.url), data, () => fetchData(device));
+    server.PATCH(server.peripheralPath(device, row.url), data, () => {
+      fetchData(device);
+      publish('peripheralsChanged');
+    });
   }
 
   const handleSubmit = (newRow) => {
@@ -204,7 +188,10 @@ function PeripheralsTable({ device, totalPowerCallback }) {
     const data = {
       enable: state,
     };
-    server.PATCH(server.peripheralPath(device, peripherals[index].url), data, () => fetchData(device));
+    server.PATCH(server.peripheralPath(device, peripherals[index].url), data, () => {
+      fetchData(device);
+      publish('peripheralsChanged');
+    });
   }
 
   return (
@@ -217,6 +204,7 @@ function PeripheralsTable({ device, totalPowerCallback }) {
           header={mainTableHeader}
           data={
             peripherals.map((row, index) => (
+              // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
                 <td>
                   <Checkbox
@@ -254,18 +242,18 @@ function PeripheralsTable({ device, totalPowerCallback }) {
               setEditIndex(null);
             }}
             onSubmit={handleSubmit}
-            defaultValue={editIndex !== null && peripherals[editIndex]
+            defaultValue={(editIndex !== null && peripherals[editIndex])
               || {
-              enable: true,
-              name: '',
-              usage: 0,
-              usage_values: [],
-              performance: 0,
-              performance_values: [],
-              calculated_bandwidth: 0,
-              block_power: 0,
-              percentage: 0,
-            }}
+                enable: true,
+                name: '',
+                usage: 0,
+                usage_values: [],
+                performance: 0,
+                performance_values: [],
+                calculated_bandwidth: 0,
+                block_power: 0,
+                percentage: 0,
+              }}
           />
         )}
       </div>

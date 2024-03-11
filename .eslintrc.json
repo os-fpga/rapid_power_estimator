@@ -41,6 +41,5 @@
         "react/prop-types": 0, // temporary disabled because too many warnings
         "jsx-a11y/label-has-associated-control": 0,
         "jsx-a11y/control-has-associated-label": 0
-    },
-    "ignorePatterns": ["PeripheralsTable.js"] // temporary
+    }
 }

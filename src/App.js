@@ -1,6 +1,6 @@
 import React from 'react';
 import DeviceList from './components/DeviceList';
-import FpgaTable from './components/Tables/FpgaTable';
+import FpgaComponent from './components/FpgaComponent';
 import ClockingTable from './components/Tables/ClockingTable';
 import FleTable from './components/Tables/FleTable';
 import DspTable from './components/Tables/DspTable';
@@ -8,6 +8,8 @@ import BramTable from './components/Tables/BramTable';
 import IOTable from './components/Tables/IOTable';
 import ACPUTable from './components/Tables/ACPUTable';
 import BCPUTable from './components/Tables/BCPUTable';
+import DMATable from './components/Tables/DMATable';
+import ConnectivityTable from './components/Tables/ConnectivityTable';
 import { Table } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
@@ -21,34 +23,9 @@ function App() {
   const [dspPower, setDspPower] = React.useState(0);
   const [bramPower, setBramPower] = React.useState(0);
   const [ioPower, setIoPower] = React.useState(0);
-  const [socPower, setSOCPower] = React.useState({
-    acpu: 0,
-    bcpu: 0,
-    peripherals: 0,
-    dma: 0,
-    interconnect: 0,
-    memory: 0,
-  });
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
-  const [acpuState, setAcpuState] = React.useState(false);
-  const [bcpuState, setBcpuState] = React.useState(false);
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
-
-  function updateSocPower() {
-    if (device !== null) {
-      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-        setSOCPower({
-          acpu: data.total_acpu_power,
-          bcpu: data.total_bcpu_power,
-          peripherals: data.total_peripherals_power,
-          dma: data.total_dma_power,
-          interconnect: data.total_noc_interconnect_power,
-          memory: data.total_memory_power,
-        });
-      });
-    }
-  }
 
   React.useEffect(() => {
     if (device !== null) {
@@ -76,20 +53,9 @@ function App() {
           + data.total_on_die_termination_power;
         setIoPower(total);
       });
-      updateSocPower();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
-
-  function onACPUDataChanged() {
-    // toggle data changed
-    setAcpuState((prev) => !prev);
-  }
-
-  function onBCPUDataChanged() {
-    // toggle data changed
-    setBcpuState((prev) => !prev);
-  }
 
   return (
     <div>
@@ -102,13 +68,10 @@ function App() {
             <SOCTable
               device={device}
               setOpenedTable={setOpenedTable}
-              power={socPower}
-              acpuStateChanged={acpuState}
-              bcpuStateChanged={bcpuState}
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
-                <FpgaTable
+                <FpgaComponent
                   clocking={clockingPower}
                   fle={flePower}
                   dsp={dspPower}
@@ -153,17 +116,15 @@ function App() {
       }
       {
         openedTable === Table.ACPU
-        // eslint-disable-next-line react/jsx-no-bind
-        && <ACPUTable device={device} onDataChanged={onACPUDataChanged} />
+        && <ACPUTable device={device} />
       }
       {
         openedTable === Table.BCPU
-        // eslint-disable-next-line react/jsx-no-bind
-        && <BCPUTable device={device} onDataChanged={onBCPUDataChanged} />
+        && <BCPUTable device={device} />
       }
       {
         openedTable === Table.Connectivity
-        && <label>Connectivity table</label>
+        && <ConnectivityTable device={device} />
       }
       {
         openedTable === Table.Memory
@@ -171,12 +132,11 @@ function App() {
       }
       {
         openedTable === Table.DMA
-        && <label>DMA table</label>
+        && <DMATable device={device} />
       }
       {
         openedTable === Table.Peripherals
-        // eslint-disable-next-line react/jsx-no-bind
-        && <PeripheralsTable device={device} totalPowerCallback={updateSocPower} />
+        && <PeripheralsTable device={device} />
       }
     </div>
   );

@@ -7,10 +7,11 @@ import { TableBase, Actions } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
+import { publish } from '../../utils/events';
 
 import '../style/ACPUTable.css';
 
-function ACPUTable({ device, onDataChanged }) {
+function ACPUTable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerData, setPowerData] = React.useState([['Block Power', 0, 0]]);
@@ -92,7 +93,7 @@ function ACPUTable({ device, onDataChanged }) {
 
   const handleChange = (name, val) => {
     setAcpuData({ ...acpuData, [name]: val });
-    onDataChanged();
+    publish('cpuChanged', 'acpu');
   };
 
   const header = ['Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power', 'Action'];
@@ -108,16 +109,16 @@ function ACPUTable({ device, onDataChanged }) {
     const val = endpoints[index].data;
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchAcpuData);
-    onDataChanged();
+    publish('cpuChanged', 'acpu');
   };
 
   function findEvailableIndex() {
     let index = 0;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const ep of endpoints) {
-      if (index < ep.ep) return index;
+    endpoints.find((item) => {
+      if (index < item.ep) return true;
       index += 1;
-    }
+      return false;
+    });
     return index;
   }
 
@@ -132,7 +133,7 @@ function ACPUTable({ device, onDataChanged }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    onDataChanged();
+    publish('cpuChanged', 'acpu');
   };
 
   const powerHeader = ['Power', '%'];

@@ -22,35 +22,9 @@ function App() {
   const [dspPower, setDspPower] = React.useState(0);
   const [bramPower, setBramPower] = React.useState(0);
   const [ioPower, setIoPower] = React.useState(0);
-  const [socPower, setSOCPower] = React.useState({
-    acpu: 0,
-    bcpu: 0,
-    peripherals: 0,
-    dma: 0,
-    interconnect: 0,
-    memory: 0,
-  });
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
-  const [acpuState, setAcpuState] = React.useState(false);
-  const [bcpuState, setBcpuState] = React.useState(false);
-  const [dmaState, setDmaState] = React.useState(false);
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
-
-  const updateSocPower = React.useCallback(() => {
-    if (device !== null) {
-      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-        setSOCPower({
-          acpu: data.total_acpu_power,
-          bcpu: data.total_bcpu_power,
-          peripherals: data.total_peripherals_power,
-          dma: data.total_dma_power,
-          interconnect: data.total_noc_interconnect_power,
-          memory: data.total_memory_power,
-        });
-      });
-    }
-  }, [device]);
 
   React.useEffect(() => {
     if (device !== null) {
@@ -78,26 +52,9 @@ function App() {
           + data.total_on_die_termination_power;
         setIoPower(total);
       });
-      updateSocPower();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
-
-  function onACPUDataChanged() {
-    // toggle data changed
-    setAcpuState((prev) => !prev);
-  }
-
-  function onBCPUDataChanged() {
-    // toggle data changed
-    setBcpuState((prev) => !prev);
-  }
-
-  const onDMADataChanged = React.useCallback(() => {
-    // toggle data changed
-    setDmaState((prev) => !prev);
-    updateSocPower();
-  }, [setDmaState, updateSocPower]);
 
   return (
     <div>
@@ -110,10 +67,6 @@ function App() {
             <SOCTable
               device={device}
               setOpenedTable={setOpenedTable}
-              power={socPower}
-              acpuStateChanged={acpuState}
-              bcpuStateChanged={bcpuState}
-              dmaStateChanged={dmaState}
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
@@ -162,13 +115,11 @@ function App() {
       }
       {
         openedTable === Table.ACPU
-        // eslint-disable-next-line react/jsx-no-bind
-        && <ACPUTable device={device} onDataChanged={onACPUDataChanged} />
+        && <ACPUTable device={device} />
       }
       {
         openedTable === Table.BCPU
-        // eslint-disable-next-line react/jsx-no-bind
-        && <BCPUTable device={device} onDataChanged={onBCPUDataChanged} />
+        && <BCPUTable device={device} />
       }
       {
         openedTable === Table.Connectivity
@@ -180,16 +131,11 @@ function App() {
       }
       {
         openedTable === Table.DMA
-        && (
-          <DMATable
-            device={device}
-            onDataChanged={onDMADataChanged}
-          />
-        )
+        && <DMATable device={device} />
       }
       {
         openedTable === Table.Peripherals
-        && <PeripheralsTable device={device} totalPowerCallback={updateSocPower} />
+        && <PeripheralsTable device={device} />
       }
     </div>
   );

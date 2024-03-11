@@ -7,10 +7,11 @@ import { TableBase, Actions, Checkbox } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
+import { publish } from '../../utils/events';
 
 import '../style/ACPUTable.css';
 
-function BCPUTable({ device, onDataChanged }) {
+function BCPUTable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerData, setPowerData] = React.useState([
@@ -98,7 +99,7 @@ function BCPUTable({ device, onDataChanged }) {
 
   const handleChange = (name, val) => {
     setBcpuData({ ...bcpuData, [name]: val });
-    onDataChanged();
+    publish('cpuChanged', 'bcpu');
   };
 
   const header = ['Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power', 'Action'];
@@ -114,16 +115,16 @@ function BCPUTable({ device, onDataChanged }) {
     const val = endpoints[index].data;
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchAcpuData);
-    onDataChanged();
+    publish('cpuChanged', 'bcpu');
   };
 
   function findEvailableIndex() {
     let index = 0;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const ep of endpoints) {
-      if (index < ep.ep) return index;
+    endpoints.find((item) => {
+      if (index < item.ep) return true;
       index += 1;
-    }
+      return false;
+    });
     return index;
   }
 
@@ -138,13 +139,13 @@ function BCPUTable({ device, onDataChanged }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    onDataChanged();
+    publish('cpuChanged', 'bcpu');
   };
 
   const encryptionHandler = React.useCallback((state) => {
     setBcpuData({ ...bcpuData, encryption_used: state });
-    onDataChanged();
-  }, [bcpuData, onDataChanged]);
+    publish('cpuChanged', 'bcpu');
+  }, [bcpuData]);
 
   const powerHeader = ['Power', '%'];
   return (

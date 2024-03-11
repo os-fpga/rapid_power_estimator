@@ -8,10 +8,11 @@ import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PercentsCell, PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { publish } from '../../utils/events';
 
 import '../style/ComponentTable.css';
 
-function DMATable({ device, onDataChanged }) {
+function DMATable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerTotal, setPowerTotal] = React.useState(0);
@@ -83,7 +84,7 @@ function DMATable({ device, onDataChanged }) {
   const deleteRow = (index) => {
     const data = { enable: false };
     server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, fetchData);
-    onDataChanged();
+    publish('dmaChanged');
   };
 
   function addRow(newData) {
@@ -98,7 +99,7 @@ function DMATable({ device, onDataChanged }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    onDataChanged();
+    publish('dmaChanged');
   };
 
   const resourcesHeaders = [
@@ -173,7 +174,6 @@ function DMATable({ device, onDataChanged }) {
 
 DMATable.propTypes = {
   device: PropTypes.string,
-  onDataChanged: PropTypes.func.isRequired,
 };
 
 DMATable.defaultProps = {

@@ -5,10 +5,11 @@ import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import * as per from '../../utils/peripherals';
+import { publish } from '../../utils/events';
 
 import '../style/ComponentTable.css';
 
-function PeripheralsTable({ device, totalPowerCallback }) {
+function PeripheralsTable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [peripherals, setPeripherals] = React.useState([]);
@@ -76,7 +77,6 @@ function PeripheralsTable({ device, totalPowerCallback }) {
           }
         }
       });
-      totalPowerCallback();
     }
   };
 
@@ -193,7 +193,10 @@ function PeripheralsTable({ device, totalPowerCallback }) {
         io_standard: row.performance,
       };
     } else return;
-    server.PATCH(server.peripheralPath(device, row.url), data, () => fetchData(device));
+    server.PATCH(server.peripheralPath(device, row.url), data, () => {
+      fetchData(device);
+      publish('peripheralsChanged');
+    });
   }
 
   const handleSubmit = (newRow) => {
@@ -204,7 +207,10 @@ function PeripheralsTable({ device, totalPowerCallback }) {
     const data = {
       enable: state,
     };
-    server.PATCH(server.peripheralPath(device, peripherals[index].url), data, () => fetchData(device));
+    server.PATCH(server.peripheralPath(device, peripherals[index].url), data, () => {
+      fetchData(device);
+      publish('peripheralsChanged');
+    });
   }
 
   return (

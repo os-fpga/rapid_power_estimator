@@ -4,7 +4,7 @@ import * as server from '../utils/serverAPI';
 
 import './style/Peripherals.css';
 
-function Peripherals({ setOpenedTable, power, device }) {
+function PeripheralsComponent({ setOpenedTable, device }) {
   const [i2c, setI2c] = React.useState(0);
   const [spi, setSpi] = React.useState(0);
   const [pwm, setPWM] = React.useState(0);
@@ -14,6 +14,7 @@ function Peripherals({ setOpenedTable, power, device }) {
   const [uart0, setUart0] = React.useState(0);
   const [uart1, setUart1] = React.useState(0);
   const [gpio, setGPIO] = React.useState(0);
+  const [power, setPower] = React.useState(0);
 
   function fetchPeripherals(deviceId, key, url) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
@@ -32,6 +33,9 @@ function Peripherals({ setOpenedTable, power, device }) {
   }
   React.useEffect(() => {
     if (device !== null) {
+      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
+        setPower(data.total_peripherals_power);
+      });
       setGPIO(0);
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         // eslint-disable-next-line no-restricted-syntax
@@ -124,4 +128,4 @@ function Peripherals({ setOpenedTable, power, device }) {
   );
 }
 
-export default Peripherals;
+export default PeripheralsComponent;

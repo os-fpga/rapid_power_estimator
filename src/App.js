@@ -1,6 +1,6 @@
 import React from 'react';
 import DeviceList from './components/DeviceList';
-import FpgaTable from './components/Tables/FpgaTable';
+import FpgaComponent from './components/FpgaComponent';
 import ClockingTable from './components/Tables/ClockingTable';
 import FleTable from './components/Tables/FleTable';
 import DspTable from './components/Tables/DspTable';
@@ -70,7 +70,7 @@ function App() {
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
-                <FpgaTable
+                <FpgaComponent
                   clocking={clockingPower}
                   fle={flePower}
                   dsp={dspPower}

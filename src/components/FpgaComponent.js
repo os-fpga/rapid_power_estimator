@@ -1,10 +1,10 @@
 import React from 'react';
-import { Table, fixed } from '../../utils/common';
-import TitleComponent from '../TitleComponent';
+import { Table, fixed } from '../utils/common';
+import TitleComponent from './TitleComponent';
 
-import '../style/FpgaTable.css';
+import './style/FpgaComponent.css';
 
-function FpgaTable({
+function FpgaComponent({
   clocking, fle, dsp, bram, io, staticPower = 0, tableOpen,
 }) {
   function getDynamic() {
@@ -69,4 +69,4 @@ function FpgaTable({
   );
 }
 
-export default FpgaTable;
+export default FpgaComponent;

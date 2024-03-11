@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import CPUComponent from '../CPUComponent';
 import PeripheralsComponent from '../PeripheralsComponent';
 import { Table } from '../../utils/common';
 import TitleComponent from '../TitleComponent';
 import ABCPUComponent from '../ABCPUComponent';
 import DMAComponent from '../DMAComponent';
+import ConnectivityComponent from '../ConnectivityComponent';
 import { subscribe, unsubscribe } from '../../utils/events';
 import * as server from '../../utils/serverAPI';
 
@@ -38,10 +38,12 @@ function SOCTable({ device, setOpenedTable }) {
     subscribe('cpuChanged', componentChanged);
     subscribe('dmaChanged', componentChanged);
     subscribe('peripheralsChanged', componentChanged);
+    subscribe('interconnectChanged', componentChanged);
     return () => {
       unsubscribe('cpuChanged', componentChanged);
       unsubscribe('dmaChanged', componentChanged);
       unsubscribe('peripheralsChanged', componentChanged);
+      unsubscribe('interconnectChanged', componentChanged);
     };
   });
 
@@ -83,7 +85,7 @@ function SOCTable({ device, setOpenedTable }) {
           <DMAComponent device={device} />
         </div>
         <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.Connectivity)}>
-          <CPUComponent title="Connectivity" power={0} />
+          <ConnectivityComponent device={device} />
         </div>
       </div>
       <PeripheralsComponent setOpenedTable={setOpenedTable} device={device} />

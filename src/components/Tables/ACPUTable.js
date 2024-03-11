@@ -2,7 +2,7 @@ import React from 'react';
 import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { acpuNames, loadActivity } from '../../utils/cpu';
+import { acpuNames, loadActivity, portsLimit } from '../../utils/cpu';
 import { TableBase, Actions } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
@@ -81,7 +81,7 @@ function ACPUTable({ device }) {
   }, [href]);
 
   React.useEffect(() => {
-    setAddButtonDisable(endpoints.length >= 4);
+    setAddButtonDisable(endpoints.length >= portsLimit);
   }, [endpoints]);
 
   React.useEffect(() => {

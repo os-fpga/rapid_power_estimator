@@ -9,6 +9,7 @@ import IOTable from './components/Tables/IOTable';
 import ACPUTable from './components/Tables/ACPUTable';
 import BCPUTable from './components/Tables/BCPUTable';
 import DMATable from './components/Tables/DMATable';
+import ConnectivityTable from './components/Tables/ConnectivityTable';
 import { Table } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
@@ -123,7 +124,7 @@ function App() {
       }
       {
         openedTable === Table.Connectivity
-        && <label>Connectivity table</label>
+        && <ConnectivityTable device={device} />
       }
       {
         openedTable === Table.Memory

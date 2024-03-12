@@ -14,7 +14,7 @@ import MemoryTable from './components/Tables/MemoryTable';
 import { Table } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
-import SOCTable from './components/Tables/SOCTable';
+import SOCComponent from './components/SOCComponent';
 import MemoryComponent from './components/MemoryComponent';
 
 function App() {
@@ -67,7 +67,7 @@ function App() {
             <DeviceList devices={devices} setDevice={setDevice} />
           </div>
           <div className="top-l2">
-            <SOCTable
+            <SOCComponent
               device={device}
               setOpenedTable={setOpenedTable}
             />

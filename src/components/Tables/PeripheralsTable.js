@@ -229,7 +229,6 @@ function PeripheralsTable({ device }) {
                 </td>
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  showDelete={false}
                 />
               </tr>
             ))

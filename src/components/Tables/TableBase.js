@@ -5,14 +5,12 @@ import { FaPlus } from 'react-icons/fa6';
 
 import '../style/ComponentTable.css';
 
-export function Actions({
-  onEditClick, onDeleteClick, rowSpan, showDelete = true,
-}) {
+export function Actions({ onEditClick, onDeleteClick, rowSpan }) {
   return (
     <td rowSpan={rowSpan}>
       <span className="actions">
         <PiNotePencil className="edit" onClick={() => { onEditClick(); }} />
-        {showDelete && <BsFillTrashFill className="delete" onClick={() => onDeleteClick()} />}
+        {onDeleteClick && <BsFillTrashFill className="delete" onClick={() => onDeleteClick()} />}
       </span>
     </td>
   );

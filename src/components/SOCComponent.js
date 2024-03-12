@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import PeripheralsComponent from '../PeripheralsComponent';
-import { Table } from '../../utils/common';
-import TitleComponent from '../TitleComponent';
-import ABCPUComponent from '../ABCPUComponent';
-import DMAComponent from '../DMAComponent';
-import ConnectivityComponent from '../ConnectivityComponent';
-import { subscribe, unsubscribe } from '../../utils/events';
-import * as server from '../../utils/serverAPI';
+import PeripheralsComponent from './PeripheralsComponent';
+import { Table } from '../utils/common';
+import TitleComponent from './TitleComponent';
+import ABCPUComponent from './ABCPUComponent';
+import DMAComponent from './DMAComponent';
+import ConnectivityComponent from './ConnectivityComponent';
+import { subscribe, unsubscribe } from '../utils/events';
+import * as server from '../utils/serverAPI';
 
-import '../style/SOCTable.css';
+import './style/SOCTable.css';
 
 function SOCTable({ device, setOpenedTable }) {
   const [dynamicPower, setDynamicPower] = React.useState(0);
@@ -39,11 +39,13 @@ function SOCTable({ device, setOpenedTable }) {
     subscribe('dmaChanged', componentChanged);
     subscribe('peripheralsChanged', componentChanged);
     subscribe('interconnectChanged', componentChanged);
+    subscribe('memoryChanged', componentChanged);
     return () => {
       unsubscribe('cpuChanged', componentChanged);
       unsubscribe('dmaChanged', componentChanged);
       unsubscribe('peripheralsChanged', componentChanged);
       unsubscribe('interconnectChanged', componentChanged);
+      unsubscribe('memoryChanged', componentChanged);
     };
   });
 

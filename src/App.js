@@ -10,10 +10,12 @@ import ACPUTable from './components/Tables/ACPUTable';
 import BCPUTable from './components/Tables/BCPUTable';
 import DMATable from './components/Tables/DMATable';
 import ConnectivityTable from './components/Tables/ConnectivityTable';
+import MemoryTable from './components/Tables/MemoryTable';
 import { Table } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
-import SOCTable from './components/Tables/SOCTable';
+import SOCComponent from './components/SOCComponent';
+import MemoryComponent from './components/MemoryComponent';
 
 function App() {
   const [devices, setDevices] = React.useState([]);
@@ -65,7 +67,7 @@ function App() {
             <DeviceList devices={devices} setDevice={setDevice} />
           </div>
           <div className="top-l2">
-            <SOCTable
+            <SOCComponent
               device={device}
               setOpenedTable={setOpenedTable}
             />
@@ -80,7 +82,9 @@ function App() {
                   tableOpen={setOpenedTable}
                 />
               </div>
-              <div className="clickable top-l2-col2-elem" onClick={() => setOpenedTable(Table.Memory)}>Memory</div>
+              <div className="clickable top-l2-col2-elem" onClick={() => setOpenedTable(Table.Memory)}>
+                <MemoryComponent device={device} />
+              </div>
             </div>
           </div>
         </div>
@@ -128,7 +132,7 @@ function App() {
       }
       {
         openedTable === Table.Memory
-        && <label>Memory table</label>
+        && <MemoryTable device={device} />
       }
       {
         openedTable === Table.DMA

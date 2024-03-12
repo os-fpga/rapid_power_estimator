@@ -14,7 +14,7 @@ function CPUComponent({
     <div className="cpu-component-top">
       <div className="cpu-component-l1">
         <div className="cpu-component-title">{title}</div>
-        <div className="cpu-component-power">
+        <div className="cpu-component-power grayed-text">
           {fixed(power, 3)}
           {' W'}
         </div>

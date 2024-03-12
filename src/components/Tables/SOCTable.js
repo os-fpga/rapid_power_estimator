@@ -39,11 +39,13 @@ function SOCTable({ device, setOpenedTable }) {
     subscribe('dmaChanged', componentChanged);
     subscribe('peripheralsChanged', componentChanged);
     subscribe('interconnectChanged', componentChanged);
+    subscribe('memoryChanged', componentChanged);
     return () => {
       unsubscribe('cpuChanged', componentChanged);
       unsubscribe('dmaChanged', componentChanged);
       unsubscribe('peripheralsChanged', componentChanged);
       unsubscribe('interconnectChanged', componentChanged);
+      unsubscribe('memoryChanged', componentChanged);
     };
   });
 

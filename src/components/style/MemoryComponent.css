@@ -1,0 +1,22 @@
+.mem-container {
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+    height: 100%;
+    row-gap: 5px;
+}
+
+.mem-line {
+    display: flex;
+    flex-direction: row;
+}
+
+.mem-value {
+    width: 100%;
+    text-align: right;
+}
+
+.mem-name {
+    width: 100%;
+    text-align: left;
+}

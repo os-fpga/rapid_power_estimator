@@ -105,3 +105,15 @@ export const gpioPwm = {
     { id: 11, text: 'SSTL 3.3V Class-II' },
   ],
 };
+
+export const memory = {
+  usage: [
+    { id: 1, text: 'Debug' },
+    { id: 2, text: 'Application' },
+  ],
+  memory_type: [
+    { id: 0, text: 'SRAM' },
+    { id: 1, text: 'DDR3' },
+    { id: 2, text: 'DDR4' },
+  ],
+};

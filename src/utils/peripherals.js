@@ -117,3 +117,11 @@ export const memory = {
     { id: 2, text: 'DDR4' },
   ],
 };
+
+export function getPerformance(object) {
+  if (object.clock_frequency) return object.clock_frequency;
+  if (object.baudrate) return object.baudrate;
+  if (object.bit_rate) return object.bit_rate;
+  if (object.io_standard) return object.io_standard;
+  return 0;
+}

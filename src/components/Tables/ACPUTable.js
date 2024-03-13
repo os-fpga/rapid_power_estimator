@@ -2,7 +2,7 @@ import React from 'react';
 import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { acpuNames, loadActivity, portsLimit } from '../../utils/cpu';
+import { acpuNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
@@ -21,7 +21,6 @@ function ACPUTable({ device }) {
     load: 0,
   });
   const [endpoints, setEndpoints] = React.useState([]);
-  const [endpointsToDisplay, setEndpointsToDisplay] = React.useState([]);
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
 
@@ -38,16 +37,13 @@ function ACPUTable({ device }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
-  React.useEffect(() => {
-    endpoints.sort((a, b) => a.ep - b.ep);
-    setEndpointsToDisplay(endpoints);
-  }, [endpoints]);
-
   function fetchPort(port) {
     server.GET(server.peripheralPath(device, `${href}/${port.href}`), (data) => {
-      if (data.name !== '') {
-        setEndpoints((prevVal) => [...prevVal, { ep: port.href.slice(-1), data }]);
-      }
+      const ep = parseInt(port.href.slice(-1), 10);
+      const newData = endpoints;
+      while (newData.length < (ep + 1)) newData.push({});
+      newData[ep] = { ep, data };
+      setEndpoints([...newData]);
     });
   }
 
@@ -67,7 +63,6 @@ function ACPUTable({ device }) {
         setPowerData([
           ['Block Power', data.consumption.block_power, 0],
         ]);
-        setEndpoints([]);
         data.ports.forEach((port) => fetchPort(port));
       });
     }
@@ -81,7 +76,8 @@ function ACPUTable({ device }) {
   }, [href]);
 
   React.useEffect(() => {
-    setAddButtonDisable(endpoints.length >= portsLimit);
+    const found = endpoints.find((it) => it.data !== undefined && it.data.name === '');
+    setAddButtonDisable(found === undefined);
   }, [endpoints]);
 
   React.useEffect(() => {
@@ -112,21 +108,11 @@ function ACPUTable({ device }) {
     publish('cpuChanged', 'acpu');
   };
 
-  function findEvailableIndex() {
-    let index = 0;
-    endpoints.find((item) => {
-      if (index < item.ep) return true;
-      index += 1;
-      return false;
-    });
-    return index;
-  }
-
   function addRow(newData) {
     if (device !== null) {
       const data = newData;
       data.name = GetText(newData.name, acpuNames);
-      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex()}`), data, fetchAcpuData);
+      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, fetchAcpuData);
     }
   }
 
@@ -168,9 +154,10 @@ function ACPUTable({ device }) {
           <TableBase
             header={header}
             data={
-              endpointsToDisplay.map((row, index) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <tr key={index}>
+              endpoints.map((row, index) => (
+                (row.data !== undefined && row.data.name !== '')
+                && (
+                <tr key={row.ep}>
                   <td>{row.data.name}</td>
                   <SelectionCell val={row.data.activity} values={loadActivity} />
                   <PercentsCell val={row.data.read_write_rate} />
@@ -182,6 +169,7 @@ function ACPUTable({ device }) {
                     onDeleteClick={() => deleteRow(index)}
                   />
                 </tr>
+                )
               ))
             }
           />

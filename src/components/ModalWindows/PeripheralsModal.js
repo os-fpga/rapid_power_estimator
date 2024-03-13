@@ -1,28 +1,31 @@
 import React from 'react';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
+import { getPerformance } from '../../utils/peripherals';
 
-function PeripheralsModal({ closeModal, onSubmit, defaultValue }) {
+function PeripheralsModal({
+  closeModal, onSubmit, defaultValue, index,
+}) {
   return (
     <ModalWindow
       closeModal={closeModal}
       onSubmit={onSubmit}
-      defaultValue={defaultValue}
-      title={defaultValue.name}
+      defaultValue={defaultValue.data[index].data}
+      title={defaultValue.data[index].data.name}
       fields={[
         {
           fieldType: FieldType.select,
           id: 'usage',
           text: 'Usage',
-          value: defaultValue.usage,
-          values: defaultValue.usage_values,
+          value: defaultValue.data[index].data.usage,
+          values: defaultValue.usage,
         },
         {
           fieldType: FieldType.select,
-          id: 'performance',
+          id: defaultValue.performance_id,
           text: 'Performance',
-          value: defaultValue.performance,
-          values: defaultValue.performance_values,
+          value: getPerformance(defaultValue.data[index].data),
+          values: defaultValue.performance,
         },
       ]}
     />

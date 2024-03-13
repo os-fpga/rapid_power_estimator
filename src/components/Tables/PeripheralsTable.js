@@ -12,59 +12,89 @@ import '../style/ComponentTable.css';
 function PeripheralsTable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [peripherals, setPeripherals] = React.useState([]);
-
-  const [allComponents, setAllComponents] = React.useState([]);
-
-  const mainTableHeader = [
-    '', '', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%', 'Action',
-  ];
-
-  const elements = [
+  const [peripherals, setPeripherals] = React.useState([
     {
       id: 'spi',
       usage: per.spi.usage,
       performance: per.spi.clock_frequency,
+      performance_id: 'clock_frequency',
+      url: '',
+      data: [],
     },
     {
       id: 'jtag',
       usage: per.jtag.usage,
       performance: per.jtag.clock_frequency,
+      performance_id: 'clock_frequency',
+      url: '',
+      data: [],
     },
     {
       id: 'i2c',
       usage: per.i2c.usage,
       performance: per.i2c.clock_frequency,
+      performance_id: 'clock_frequency',
+      url: '',
+      data: [],
     },
     {
       id: 'uart',
       usage: per.uart.usage,
       performance: per.uart.baudrate,
+      performance_id: 'baudrate',
+      url: '',
+      data: [],
     },
     {
       id: 'usb2',
       usage: per.usb2.usage,
       performance: per.usb2.bit_rate,
+      performance_id: 'bit_rate',
+      url: '',
+      data: [],
     },
     {
       id: 'gige',
       usage: per.gige.usage,
       performance: per.gige.bit_rate,
+      performance_id: 'bit_rate',
+      url: '',
+      data: [],
     },
     {
       id: 'gpio',
       usage: per.gpioPwm.usage,
       performance: per.gpioPwm.io_standard,
+      performance_id: 'io_standard',
+      url: '',
+      data: [],
     },
     {
       id: 'pwm',
       usage: per.gpioPwm.usage,
       performance: per.gpioPwm.io_standard,
+      performance_id: 'io_standard',
+      url: '',
+      data: [],
     },
+  ]);
+
+  const mainTableHeader = [
+    '', '', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%', 'Action',
   ];
 
   function peripheralMatch(component, data, url) {
-    setAllComponents((oldValues) => [...oldValues, { id: component, url, data }]);
+    const newData = peripherals.map((item) => {
+      if (item.id === component) {
+        const index = parseInt(url.slice(-1), 10);
+        const i = item;
+        while (i.data.length < (index + 1)) i.data.push({});
+        i.data[index] = { url, data };
+        return i;
+      }
+      return item;
+    });
+    setPeripherals(newData);
   }
 
   function fetchPeripherals(deviceId, key, url) {
@@ -76,7 +106,6 @@ function PeripheralsTable({ device }) {
 
   const fetchData = (deviceId) => {
     if (deviceId !== null) {
-      setAllComponents([]);
       server.GET(server.api.fetch(server.Elem.peripherals, deviceId), (data) => {
         const peripheralData = data;
         delete peripheralData.dma;
@@ -99,82 +128,13 @@ function PeripheralsTable({ device }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
-  function getPerformance(object) {
-    if (object.clock_frequency) return object.clock_frequency;
-    if (object.baudrate) return object.baudrate;
-    if (object.bit_rate) return object.bit_rate;
-    if (object.io_standard) return object.io_standard;
-    return 0;
-  }
-
-  function toTableObject(object, elem, url) {
-    const found = elements.find((item) => item.id === elem);
-    return {
-      id: elem,
-      url,
-      // eslint-disable-next-line no-nested-ternary
-      enable: Object.prototype.hasOwnProperty.call(object, 'enable') ? (object.enable ? 1 : 0) : 3,
-      name: object.name,
-      usage: object.usage,
-      usage_values: found.usage,
-      performance: getPerformance(object),
-      performance_values: found.performance,
-      calculated_bandwidth: object.consumption ? object.consumption.calculated_bandwidth : 0,
-      block_power: object.consumption ? object.consumption.block_power : 0,
-      percentage: object.consumption ? object.consumption.percentage : 0,
-    };
-  }
-
-  React.useEffect(() => {
-    if (device !== null) {
-      const data = [];
-      const tmp = allComponents;
-      // sort for corrrect table order since we receive data async
-      tmp.sort((a, b) => {
-        if (a.id === b.id) {
-          const aId = a.url.slice(-1);
-          const bId = b.url.slice(-1);
-          return aId - bId;
-        }
-        return elements.indexOf(elements.find((elem) => elem.id === a.id))
-          - elements.indexOf(elements.find((elem) => elem.id === b.id));
-      });
-      elements.forEach((i) => {
-        tmp.forEach((elem) => {
-          if (elem.id === i.id) {
-            data.push(toTableObject(elem.data, elem.id, elem.url));
-          }
-        });
-      });
-      setPeripherals(data);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allComponents]);
-
   function modifyRow(index, row) {
-    let data = {};
-    if (row.id === 'i2c' || row.id === 'spi' || row.id === 'jtag') {
-      data = {
-        usage: row.usage,
-        clock_frequency: row.performance,
-      };
-    } else if (row.id === 'uart') {
-      data = {
-        usage: row.usage,
-        baudrate: row.performance,
-      };
-    } else if (row.id === 'usb2' || row.id === 'gige') {
-      data = {
-        usage: row.usage,
-        bit_rate: row.performance,
-      };
-    } else if (row.id === 'gpio' || row.id === 'pwm') {
-      data = {
-        usage: row.usage,
-        io_standard: row.performance,
-      };
-    } else return;
-    server.PATCH(server.peripheralPath(device, row.url), data, () => {
+    const data = {
+      usage: row.usage,
+    };
+    data[peripherals[index.main].performance_id] = per.getPerformance(row);
+    const { url } = peripherals[index.main].data[index.inner];
+    server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
       publish('peripheralsChanged');
     });
@@ -184,11 +144,12 @@ function PeripheralsTable({ device }) {
     if (editIndex !== null) modifyRow(editIndex, newRow);
   };
 
-  function enableChanged(index, state) {
+  function enableChanged(index, idx, state) {
     const data = {
       enable: state,
     };
-    server.PATCH(server.peripheralPath(device, peripherals[index].url), data, () => {
+    const { url } = peripherals[index].data[idx];
+    server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
       publish('peripheralsChanged');
     });
@@ -203,35 +164,40 @@ function PeripheralsTable({ device }) {
         <TableBase
           header={mainTableHeader}
           data={
-            peripherals.map((row, index) => (
+            peripherals.map((row, index) => row.data.map((i, idx) => (
+              i.data !== undefined && (
               // eslint-disable-next-line react/no-array-index-key
-              <tr key={index}>
+              <tr key={`${index}.${idx}`}>
                 <td>
                   <Checkbox
-                    disabled={row.enable === 3}
-                    isChecked={row.enable === 3 ? true : row.enable}
+                    disabled={i.data.enable === undefined}
+                    isChecked={i.data.enable === undefined || i.data.enable}
                     label=""
-                    checkHandler={(state) => enableChanged(index, state)}
+                    checkHandler={(state) => enableChanged(index, idx, state)}
                     id={index}
                   />
                 </td>
-                <td className="innerHeader">{row.name}</td>
-                <SelectionCell val={row.usage} values={row.usage_values} />
-                <SelectionCell val={row.performance} values={row.performance_values} />
+                <td className="innerHeader">{i.data.name}</td>
+                <SelectionCell val={i.data.usage} values={row.usage} />
+                <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
                 <td>
-                  {row.calculated_bandwidth}
+                  {i.data.consumption.calculated_bandwidth}
                   {' MB/s'}
                 </td>
-                <PowerCell val={row.block_power} />
+                <PowerCell val={i.data.consumption.block_power} />
                 <td>
-                  {fixed(parseFloat(row.percentage), 0)}
+                  {fixed(parseFloat(i.data.consumption.percentage), 0)}
                   {' %'}
                 </td>
                 <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onEditClick={() => {
+                    setEditIndex({ main: index, inner: idx });
+                    setModalOpen(true);
+                  }}
                 />
               </tr>
-            ))
+              )
+            )))
           }
         />
         {modalOpen && (
@@ -241,18 +207,8 @@ function PeripheralsTable({ device }) {
               setEditIndex(null);
             }}
             onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && peripherals[editIndex])
-              || {
-                enable: true,
-                name: '',
-                usage: 0,
-                usage_values: [],
-                performance: 0,
-                performance_values: [],
-                calculated_bandwidth: 0,
-                block_power: 0,
-                percentage: 0,
-              }}
+            defaultValue={peripherals[editIndex.main]}
+            index={editIndex.inner}
           />
         )}
       </div>

@@ -40,7 +40,8 @@ const startFlaskServer = () => {
 
 const createWindow = () => {
   const win = new BrowserWindow({ width: 1100, height: 700 });
-  win.loadFile("dist/index.html");
+  const indexPath = path.join(app.getAppPath(), 'build/index.html');
+  win.loadURL(`file://${indexPath}`);
 };
 
 let child = null;

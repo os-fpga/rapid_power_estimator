@@ -2,7 +2,7 @@ import React from 'react';
 import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { connectivityNames, loadActivity, portsLimit } from '../../utils/cpu';
+import { connectivityNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
@@ -19,9 +19,8 @@ function ConnectivityTable({ device }) {
   const [powerData, setPowerData] = React.useState([['NOC Interconnect', 0, 0]]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [endpoints, setEndpoints] = React.useState([]);
-  const [endpointsToDisplay, setEndpointsToDisplay] = React.useState([]);
   const [href, setHref] = React.useState('');
-  const [addButtonDisable, setAddButtonDisable] = React.useState(true);
+  const [addButtonDisable, setAddButtonDisable] = React.useState(false);
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -35,24 +34,16 @@ function ConnectivityTable({ device }) {
     ]);
   }, [powerTotal]);
 
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
-
-  React.useEffect(() => {
-    endpoints.sort((a, b) => a.ep - b.ep);
-    setEndpointsToDisplay(endpoints);
-  }, [endpoints]);
-
   function fetchPort(port) {
     server.GET(server.peripheralPath(device, `${href}/${port.href}`), (data) => {
       if (data.name !== '') {
         setPowerTotal((prev) => prev + data.consumption.noc_power);
-        setEndpoints((prevVal) => [...prevVal, { ep: port.href.slice(-1), data }]);
       }
+      const ep = parseInt(port.href.slice(-1), 10);
+      const newData = endpoints;
+      while (newData.length < (ep + 1)) newData.push({});
+      newData[ep] = { ep, data };
+      setEndpoints([...newData]);
     });
   }
 
@@ -60,11 +51,17 @@ function ConnectivityTable({ device }) {
     if (href !== '') {
       server.GET(server.peripheralPath(device, href), (data) => {
         setPowerTotal(0);
-        setEndpoints([]);
         data.ports.forEach((port) => fetchPort(port));
       });
     }
   }
+
+  React.useEffect(() => {
+    if (device !== null) {
+      fetchData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [device]);
 
   React.useEffect(() => {
     if (device !== null) {
@@ -74,7 +71,8 @@ function ConnectivityTable({ device }) {
   }, [href]);
 
   React.useEffect(() => {
-    setAddButtonDisable(endpoints.length >= portsLimit);
+    const found = endpoints.find((it) => it.data !== undefined && it.data.name === '');
+    setAddButtonDisable(found === undefined);
   }, [endpoints]);
 
   const header = ['Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
@@ -95,21 +93,11 @@ function ConnectivityTable({ device }) {
     publish('interconnectChanged');
   };
 
-  function findEvailableIndex() {
-    let index = 0;
-    endpoints.find((item) => {
-      if (index < item.ep) return true;
-      index += 1;
-      return false;
-    });
-    return index;
-  }
-
   function addRow(newData) {
     if (device !== null) {
       const data = newData;
       data.name = GetText(newData.name, connectivityNames);
-      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex()}`), data, fetchConnectivityData);
+      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, fetchConnectivityData);
     }
   }
 
@@ -131,9 +119,9 @@ function ConnectivityTable({ device }) {
           <TableBase
             header={header}
             data={
-              endpointsToDisplay.map((row, index) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <tr key={index}>
+              endpoints.map((row, index) => (
+                (row.data !== undefined && row.data.name !== '') && (
+                <tr key={row.ep}>
                   <td>{row.data.clock}</td>
                   <FrequencyCell val={row.data.consumption.clock_frequency} />
                   <td>{row.data.name}</td>
@@ -151,6 +139,7 @@ function ConnectivityTable({ device }) {
                     onDeleteClick={() => deleteRow(index)}
                   />
                 </tr>
+                )
               ))
             }
           />

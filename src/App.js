@@ -1,4 +1,8 @@
 import React from 'react';
+import moment from 'moment';
+import { FiSave } from 'react-icons/fi';
+import { PiNotepad } from 'react-icons/pi';
+import Switch from 'react-switch';
 import DeviceList from './components/DeviceList';
 import FpgaComponent from './components/FpgaComponent';
 import ClockingTable from './components/Tables/ClockingTable';
@@ -16,8 +20,13 @@ import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
 import SOCComponent from './components/SOCComponent';
 import MemoryComponent from './components/MemoryComponent';
+import FPGASummaryComponent from './components/FPGASummaryComponent';
+import SOCSummaryComponent from './components/SOCSummaryComponent';
+import TypicalWorstComponent from './components/TypicalWorstComponent';
+import Notes from './components/Notes';
 
 function App() {
+  const timeFormat = 'MMM DD, YYYY h:mm:ss a';
   const [devices, setDevices] = React.useState([]);
   const [device, setDevice] = React.useState(null);
   const [clockingPower, setClockingPower] = React.useState(0);
@@ -26,6 +35,12 @@ function App() {
   const [bramPower, setBramPower] = React.useState(0);
   const [ioPower, setIoPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
+  const [time, setTime] = React.useState(moment().format(timeFormat));
+  const [mode, setMode] = React.useState(false);
+  const [autoSave, setAutoSave] = React.useState(false);
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [notes, setNotes] = React.useState('');
+  const [topLevel, setTopLevel] = React.useState('');
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
 
@@ -59,6 +74,15 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
+  const handleNotesChange = (data) => {
+    setNotes(data);
+  };
+
+  const handleLangChange = (val) => {
+    // implementation TBD
+    console.log(val);
+  };
+
   return (
     <div>
       <div className="app-main-container">
@@ -88,13 +112,61 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="power-tables">
-          <div className="placeholder">placeholder</div>
-          <div className="placeholder">FPGA Complex and Core Power (placeholder)</div>
+        <div className="power-tables pt-group">
+          <div className="edit-line">
+            <div className="grayed-text no-wrap">Last Edited</div>
+            <div className="last-time">{time}</div>
+            <div className="save-icon" onClick={() => setTime(moment().format(timeFormat))}><FiSave /></div>
+          </div>
+          <input type="text" placeholder="Top level name" value={topLevel} onChange={(e) => setTopLevel(e.target.value)} />
+          <select value={0} onChange={handleLangChange}>
+            <option value={0} disabled>HDL lang</option>
+            <option value={1}>Verilog</option>
+            <option value={2}>HDL</option>
+          </select>
+          <FPGASummaryComponent
+            device={device}
+            clocking={clockingPower}
+            fle={flePower}
+            dsp={dspPower}
+            bram={bramPower}
+            io={ioPower}
+          />
         </div>
         <div className="power-tables">
-          <div className="placeholder">placeholder</div>
-          <div className="placeholder">Processing Complex (SOC) Power (placeholder)</div>
+          <div className="switches-container">
+            <div className="row">
+              <div className="switch">Auto save</div>
+              <Switch
+                checked={autoSave}
+                onChange={setAutoSave}
+                onColor="#f11f5e"
+                uncheckedIcon={false}
+                checkedIcon={false}
+                boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                height={20}
+                width={40}
+              />
+            </div>
+            <div className="row">
+              <div className="switch">Auto Mode</div>
+              <Switch
+                checked={mode}
+                onChange={setMode}
+                onColor="#f11f5e"
+                uncheckedIcon={false}
+                checkedIcon={false}
+                boxShadow="0px 1px 5px rgba(0, 0, 0, 0.6)"
+                activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
+                height={20}
+                width={40}
+              />
+            </div>
+            <div className="notes" onClick={() => setModalOpen(true)}><PiNotepad size="28px" /></div>
+          </div>
+          <TypicalWorstComponent />
+          <SOCSummaryComponent device={device} />
         </div>
       </div>
       <div className="hspacer" />
@@ -142,6 +214,15 @@ function App() {
         openedTable === Table.Peripherals
         && <PeripheralsTable device={device} />
       }
+      {modalOpen && (
+      <Notes
+        defaultValue={notes}
+        closeModal={() => {
+          setModalOpen(false);
+        }}
+        onSubmit={handleNotesChange}
+      />
+      )}
     </div>
   );
 }

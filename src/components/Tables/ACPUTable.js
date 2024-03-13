@@ -138,7 +138,7 @@ function ACPUTable({ device }) {
             </div>
             <div className="acpu-group">
               <label>Frequency</label>
-              <input type="number" step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} />
+              <input type="number" min={0} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} />
             </div>
             <div className="acpu-group">
               <label>Load</label>

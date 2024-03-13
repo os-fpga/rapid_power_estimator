@@ -56,6 +56,7 @@ function ModalWindow({
           <label>{item.text}</label>
           <input
             type="number"
+            min={0}
             onChange={(e) => handleChange(item.id, e.target.value)}
             value={formState[item.id]}
           />
@@ -68,6 +69,7 @@ function ModalWindow({
           <input
             type="number"
             step={item.step ? item.step : 1}
+            min={0}
             onChange={(e) => handleChange(item.id, e.target.value / 100)}
             // eslint-disable-next-line no-nested-ternary
             value={(formState[item.id] * 100).toFixed(item.step ? (item.step >= 1 ? 0 : 1) : 1)}

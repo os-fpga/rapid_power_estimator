@@ -42,6 +42,7 @@ function ConnectivityModal({
         },
         {
           fieldType: FieldType.float,
+          step: 0.5,
           id: 'toggle_rate',
           text: 'Toggle Rate',
           value: defaultValue.toggle_rate,

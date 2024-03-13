@@ -44,4 +44,8 @@ export const source = [
   { id: 5, text: 'Fabric' },
 ];
 
-export const portsLimit = 4;
+export function findEvailableIndex(array) {
+  const found = array.find((item) => item.data !== undefined && item.data.name === '');
+  if (found) return found.ep;
+  return 0;
+}

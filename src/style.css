@@ -47,11 +47,54 @@
 .power-tables {
     display: flex;
     flex-direction: column;
+    row-gap: 10px;
 }
 
-.placeholder {
-    border: 1px solid;
-    min-height: 100px;
-    text-align: center;
-    flex-grow: 1;
+.pt-group input,
+.pt-group textarea,
+.pt-group select {
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.3rem;
+  /* font-size: 1rem; */
+}
+
+.last-time {
+    width: 100%;
+    text-align: right;
+}
+
+.save-icon {
+    cursor: pointer;
+}
+
+.edit-line {
+    display: flex;
+    flex-direction: row;
+    column-gap: 5px;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.switches-container {
+    display: flex;
+    flex-direction: row;
+}
+.switches-container-col {
+}
+
+.switch {
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.notes {
+    cursor: pointer;
+    font-size: 1.5em;
 }

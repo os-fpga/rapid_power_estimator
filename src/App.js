@@ -1,4 +1,9 @@
 import React from 'react';
+import { FiSave } from 'react-icons/fi';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Time from 'react-time';
+import { PiNotepad } from 'react-icons/pi';
+import Switch from 'react-switch';
 import DeviceList from './components/DeviceList';
 import FpgaComponent from './components/FpgaComponent';
 import ClockingTable from './components/Tables/ClockingTable';
@@ -16,6 +21,9 @@ import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
 import SOCComponent from './components/SOCComponent';
 import MemoryComponent from './components/MemoryComponent';
+import FPGASummaryComponent from './components/FPGASummaryComponent';
+import SOCSummaryComponent from './components/SOCSummaryComponent';
+import TypicalWorstComponent from './components/TypicalWorstComponent';
 
 function App() {
   const [devices, setDevices] = React.useState([]);
@@ -26,6 +34,7 @@ function App() {
   const [bramPower, setBramPower] = React.useState(0);
   const [ioPower, setIoPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
+  const [time, setTime] = React.useState(new Date());
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
 
@@ -88,13 +97,38 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="power-tables">
-          <div className="placeholder">placeholder</div>
-          <div className="placeholder">FPGA Complex and Core Power (placeholder)</div>
+        <div className="power-tables pt-group">
+          <div className="edit-line">
+            <div className="grayed-text no-wrap">Last Edited</div>
+            <div className="last-time"><Time value={time} format="MMM DD, YYYY hh:mm a" /></div>
+            <div className="save-icon" onClick={() => setTime(new Date())}><FiSave /></div>
+          </div>
+          <input type="test" placeholder="Top level name" />
+          <select>
+            <option value="" disabled selected>HDL lang</option>
+            <option value={0}>Verilog</option>
+            <option value={1}>HDL</option>
+          </select>
+          <FPGASummaryComponent
+            device={device}
+            clocking={clockingPower}
+            fle={flePower}
+            dsp={dspPower}
+            bram={bramPower}
+            io={ioPower}
+          />
         </div>
         <div className="power-tables">
-          <div className="placeholder">placeholder</div>
-          <div className="placeholder">Processing Complex (SOC) Power (placeholder)</div>
+          <div className="switches-container">
+            <div className="row">
+              <div className="switch">Auto save</div>
+              <Switch />
+            </div>
+            <div className="switch">Mode</div>
+            <div className="notes"><PiNotepad /></div>
+          </div>
+          <TypicalWorstComponent />
+          <SOCSummaryComponent device={device} />
         </div>
       </div>
       <div className="hspacer" />

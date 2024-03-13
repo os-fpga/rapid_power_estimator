@@ -33,3 +33,7 @@ export const FieldType = {
   number: 2,
   float: 3,
 };
+
+export function percentage(val, sum) {
+  return fixed((val / sum) * 100, 0);
+}

@@ -2,7 +2,7 @@
   "name": "rapid_power_estimator",
   "version": "0.0.1",
   "description": "Rapid Power Estimation Tool allows you to estimate power consumption at various stages of your design cycle. It simplifies the input of design information through intuitive wizards and delivers comprehensive power and thermal data analysis.",
-  "author": "rapidsilicon.com",
+  "author": "Rapid Silicon",
   "main": "main.js",
   "scripts": {
     "start": "webpack --mode development && electron .",
@@ -14,7 +14,7 @@
   "build": {
     "appId": "org.rapidsilicon.rapid_power_estimator",
     "copyright": "©2024 Rapid Silicon, Inc.",
-   "files": [
+    "files": [
       "build/**/*",
       "src/**/*",
       "main.js",
@@ -22,7 +22,7 @@
       "node_modules/**/*",
       "package.json"
     ],
-   "directories": {
+    "directories": {
       "buildResources": "resources"
     },
     "extraFiles": [
@@ -30,21 +30,21 @@
         "from": "backend/restapi_server.exe",
         "to": "./backend/restapi_server.exe"
       },
-       {
+      {
         "from": "backend/etc/device.xml",
         "to": "./backend/etc/device.xml"
       }
     ],
     "linux": {
       "category": "FPGA,DigitalLogicDesign,PowerEstimator",
-      "description": "Rapid Silicon FPGA RPE for Linux",      
+      "description": "Rapid Silicon FPGA RPE for Linux",
       "target": [
-	"tar.gz",
-	"AppImage"
+        "tar.gz",
+        "AppImage"
       ],
-    "artifactName": "${name}_linux"
+      "artifactName": "${name}_linux"
     },
-     "win": {
+    "win": {
       "target": [
         {
           "target": "tar.gz",
@@ -52,7 +52,7 @@
             "x64"
           ]
         }
-      ],	
+      ],
       "publisherName": "Rapid Silicon, Inc.",
       "artifactName": "${name}_windows.${ext}"
     },
@@ -70,7 +70,6 @@
     }
   },
   "keywords": [],
-  "author": "Rapid Silicon",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -89,13 +88,15 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "moment": "^2.30.1",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^5.0.1"
+    "react-icons": "^5.0.1",
+    "react-switch": "^7.0.0",
+    "react-time": "^4.3.0"
   },
   "files": [
-    "build/**/*"  
+    "build/**/*"
   ]
 }
-

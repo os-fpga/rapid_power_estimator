@@ -22,7 +22,7 @@ export function FrequencyCell({ rowSpan, val }) {
 
 export function PowerCell({ rowSpan, val }) {
   return (
-    <td rowSpan={rowSpan}>
+    <td className="no-wrap" rowSpan={rowSpan}>
       {fixed(val, 3)}
       {' W'}
     </td>

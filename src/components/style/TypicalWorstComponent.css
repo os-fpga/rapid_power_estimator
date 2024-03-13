@@ -1,0 +1,39 @@
+.twc-main {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 8px;
+}
+
+.big-font {
+    font-size: 1.5rem;
+}
+
+.column {
+    width: 100%;
+}
+
+.power-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.thunder {
+    color: #2170e6;
+}
+
+.indicator {
+    background-color: green;
+    width: 5px;
+}
+
+.column-h2 {
+    display: flex;
+    flex-direction: row;
+    column-gap: 12px;
+}
+
+.title-div {
+    margin-bottom: 5px;
+}

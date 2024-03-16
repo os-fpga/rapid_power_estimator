@@ -12,6 +12,12 @@
     "dist": "webpack && electron-builder"
   },
   "build": {
+    "appId": "org.rapid_power_estimator.rapidsilicon",
+    "copyright": "©2024 Rapid Silicon, Inc.",
+    "asar": true,
+    "asarUnpack": [
+      "backend/**/*"
+    ],	  
    "files": [
       "build/**/*",
       "src/**/*",
@@ -26,9 +32,23 @@
     },
     "linux": {
       "target": [
-        "AppImage",
-        "tar.gz"
-      ]
+        "AppImage"
+      ],
+    "artifactName": "${name}"
+    },
+     "win": {
+      "target": [
+        {
+          "target": "msi",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "publisherName": "Rapid Silicon, Inc."
+    },
+    "msi": {
+      "artifactName": "${name}_${arch}.${ext}"
     }
   },
   "keywords": [],

@@ -14,18 +14,13 @@
   "build": {
     "appId": "org.rapid_power_estimator.rapidsilicon",
     "copyright": "©2024 Rapid Silicon, Inc.",
-    "asar": true,
-    "asarUnpack": [
-      "backend/**/*"
-    ],	  
    "files": [
       "build/**/*",
       "src/**/*",
       "main.js",
       "rpe.config.json",
       "node_modules/**/*",
-      "package.json",
-      "backend/**/*"
+      "package.json"
     ],
    "directories": {
       "buildResources": "resources"
@@ -39,12 +34,12 @@
      "win": {
       "target": [
         {
-          "target": "msi",
+          "target": "nsis",
           "arch": [
             "x64"
           ]
         }
-      ],
+      ],	
       "publisherName": "Rapid Silicon, Inc."
     },
     "msi": {

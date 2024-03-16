@@ -10,7 +10,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest,ubuntu-22.04,macos-latest,windows-latest]
+        os: 
+          - ubuntu-latest
+          - ubuntu-22.04 # This is CentOS 7 under the hood
+          - macos-latest
+          - windows-latest
     runs-on: ${{ matrix.os }}
     env:
       MODE: ${{ matrix.os }}        
@@ -66,7 +70,7 @@ jobs:
             npm install
             python3 -m pip install -r requirements.txt
 
-      - name: Run ESLint
+      - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
             npx eslint src/
@@ -84,8 +88,31 @@ jobs:
                 python3 -m pip install -r requirements.txt
                 python3 -m pytest
 
-      - name: Run pytest
+      - name: Run pytest on ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: python3 -m pytest
+
+
+      - name: Install packages centos 7 & Create Linux Relase
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: addnab/docker-run-action@v3
+        with:
+          shell: bash
+          image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
+          options: -v ${{ github.workspace }}:/work
+          run: |
+                cd /work
+                npm install
+                python3 -m pip install -r requirements.txt
+                npm run dist
+      
+      - name: Upload Binaries Linux
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: actions/upload-artifact@v3
+        with:
+              name: rapid_power_estimator_x86_64
+              path: dist/rapid_power_estimator-*.tar.gz    
+     
+
 
 

@@ -2,13 +2,34 @@
   "name": "rapid_power_estimator",
   "version": "0.0.1",
   "description": "Rapid Power Estimation Tool allows you to estimate power consumption at various stages of your design cycle. It simplifies the input of design information through intuitive wizards and delivers comprehensive power and thermal data analysis.",
+  "author": "rapidsilicon.com",
   "main": "main.js",
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
     "start": "webpack --mode development && electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "electron-builder install-app-deps",
+    "pack": "electron-builder --dir",
+    "dist": "webpack && electron-builder"
+  },
+  "build": {
+   "files": [
+      "build/**/*",
+      "src/**/*",
+      "main.js",
+      "rpe.config.json",
+      "node_modules/**/*",
+      "package.json",
+      "backend/**/*"
+    ],
+   "directories": {
+      "buildResources": "resources"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ]
+    }
   },
   "keywords": [],
   "author": "Rapid Silicon",
@@ -20,6 +41,7 @@
     "babel-loader": "^9.1.3",
     "css-loader": "^6.10.0",
     "electron": "^28.2.2",
+    "electron-builder": "^24.13.3",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-react": "^7.34.0",
@@ -33,5 +55,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1"
-  }
+  },
+  "files": [
+    "build/**/*"  
+  ]
 }
+

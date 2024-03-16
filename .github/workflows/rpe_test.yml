@@ -118,7 +118,14 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
              npm run dist
-             dir dist  
+
+      - name: Upload Binaries Win
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+              name: rapid_power_estimator_win
+              path: dist/rapid_power_estimator*.exe
+ 
      
 
 

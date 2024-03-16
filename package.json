@@ -12,7 +12,7 @@
     "dist": "webpack && electron-builder"
   },
   "build": {
-    "appId": "org.rapid_power_estimator.rapidsilicon",
+    "appId": "org.rapidsilicon.rapid_power_estimator",
     "copyright": "©2024 Rapid Silicon, Inc.",
    "files": [
       "build/**/*",
@@ -42,7 +42,7 @@
       ],	
       "publisherName": "Rapid Silicon, Inc."
     },
-    "msi": {
+    "nsis": {
       "artifactName": "${name}_${arch}.${ext}"
     }
   },

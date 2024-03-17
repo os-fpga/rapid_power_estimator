@@ -104,7 +104,7 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/upload-artifact@v3
         with:
-            name: rapid_power_estimator_${matrix.os}
+            name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.7z*
  
      

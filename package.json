@@ -25,9 +25,19 @@
    "directories": {
       "buildResources": "resources"
     },
+    "extraFiles": [
+      {
+        "from": "backend/restapi_server",
+        "to": "./backend/restapi_server"
+      },
+       {
+        "from": "backend/etc/device.xml",
+        "to": "./backend/etc/device.xml"
+      }
+    ],
     "linux": {
       "target": [
-        "AppImage"
+	"7z"
       ],
     "artifactName": "${name}"
     },

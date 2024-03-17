@@ -13,6 +13,7 @@ package-lock.json
 __pycache__/
 *.py[cod]
 *$py.class
+restapi_server.spec
 
 # C extensions
 *.so

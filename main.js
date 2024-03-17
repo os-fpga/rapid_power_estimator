@@ -1,19 +1,25 @@
 const { app, BrowserWindow } = require("electron");
 const { spawn } = require("child_process");
 const path = require("node:path");
-
+const fs = require('fs');
 const config = require("./rpe.config.json")
 
 const startFlaskServer = () => {
+  let apiServer ;
+  const RestAPIscript = path.join(__dirname, "backend/restapi_server.py");
+  const restAPIexe = path.join(app.getAppPath(),"..","..", 'backend', 'restapi_server');
 
-  const device_xml = path.join(__dirname, config.device_xml);
   var args = [
-    path.join(__dirname, "backend/restapi_server.py"),
-    device_xml, "--port", config.port
+     "--port", config.port
   ];
   if (config.debug === 1)
-    args.push("--debug");
-  const apiServer = spawn(`python`, args);
+        args.push("--debug");
+
+  if (fs.existsSync(RestAPIscript)) {
+    apiServer = spawn(`python`, [RestAPIscript, path.join(__dirname,config.device_xml), ...args ]);
+  } else {
+    apiServer = spawn(restAPIexe, [path.join(app.getAppPath(),"..","..",config.device_xml), ...args]);
+  }
 
   apiServer.stdout.on("data", (data) => {
     console.log(`stdout:\n${data}`);

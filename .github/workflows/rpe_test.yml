@@ -5,6 +5,10 @@ on:
 #    branches: [ "main" ]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     strategy:
@@ -17,11 +21,7 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     env:
-      MODE: ${{ matrix.os }}        
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+      MODE: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4

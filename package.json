@@ -36,6 +36,8 @@
       }
     ],
     "linux": {
+      "category": "FPGA,DigitalLogicDesign,PowerEstimator",
+      "description": "Rapid Silicon FPGA RPE for Linux",      
       "target": [
 	"7z"
       ],
@@ -44,7 +46,7 @@
      "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "7z",
           "arch": [
             "x64"
           ]
@@ -52,8 +54,17 @@
       ],	
       "publisherName": "Rapid Silicon, Inc."
     },
-    "nsis": {
-      "artifactName": "${name}_${arch}.${ext}"
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "7z",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${name}.${ext}"
     }
   },
   "keywords": [],

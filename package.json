@@ -39,7 +39,7 @@
       "category": "FPGA,DigitalLogicDesign,PowerEstimator",
       "description": "Rapid Silicon FPGA RPE for Linux",      
       "target": [
-	"7z",
+	"tar.gz",
 	"AppImage"
       ],
     "artifactName": "${name}"
@@ -47,7 +47,7 @@
      "win": {
       "target": [
         {
-          "target": "7z",
+          "target": "tar.gz",
           "arch": [
             "x64"
           ]
@@ -60,7 +60,7 @@
       "category": "public.app-category.productivity",
       "target": [
         {
-          "target": "7z",
+          "target": "tar.gz",
           "arch": [
             "x64"
           ]

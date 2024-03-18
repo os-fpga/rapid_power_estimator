@@ -97,7 +97,7 @@ jobs:
         run: python3 -m pytest
 
       - name: Create Package on ${{ matrix.os }}
-        if: ${{ matrix.os == 'macos-latest' && matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'windows-latest' }}
         run: |
              pyinstaller --distpath backend --workpath dist -y --clean --onefile  backend/restapi_server.py
              npm run dist

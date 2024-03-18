@@ -101,12 +101,14 @@ jobs:
         run: |
              pyinstaller --distpath backend --workpath dist -y --clean --onefile  backend/restapi_server.py
              npm run dist
-             if [[ ${{ matrix.os  }} == 'ubuntu-latest'  ]]
-             then
-                cd dist/linux-unpacked && tar -cvzf rapid_power_estimator.tar.gz .
-             fi
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Archive on ubuntu-latest
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+             tar -czvf rapid_power_estimator.tar.gz -C dist/linux-unpacked .
+             mv rapid_power_estimator.tar.gz dist
 
       - name: Upload Package
         if: ${{ matrix.os != 'ubuntu-22.04' }}

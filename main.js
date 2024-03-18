@@ -7,7 +7,7 @@ const config = require("./rpe.config.json")
 const startFlaskServer = () => {
   let apiServer ;
   const RestAPIscript = path.join(__dirname, "backend/restapi_server.py");
-  const restAPIexe = path.join(app.getAppPath(),"..","..", 'backend', 'restapi_server');
+  const restAPIexe = path.join(app.getAppPath(),"..","..", 'backend', 'restapi_server.exe');
 
   var args = [
      "--port", config.port

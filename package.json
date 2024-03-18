@@ -27,8 +27,8 @@
     },
     "extraFiles": [
       {
-        "from": "backend/restapi_server",
-        "to": "./backend/restapi_server"
+        "from": "backend/restapi_server.exe",
+        "to": "./backend/restapi_server.exe"
       },
        {
         "from": "backend/etc/device.xml",

@@ -124,7 +124,7 @@ jobs:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Package
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        if: ${{ matrix.os != 'ubuntu-latest' }}
         uses: actions/upload-artifact@v3
         with:
             name: rapid_power_estimator_${{ matrix.os }}

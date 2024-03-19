@@ -78,6 +78,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
             npx eslint src/
+            echo 
 
       - name: Install packages centos 7 & Run pytest
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -130,6 +131,10 @@ jobs:
 #            name: rapid_power_estimator_${{ matrix.os }}
 #            path: dist/rapid_power_estimator*.tar.gz*
  
+      - name: Run on refs/tags only
+        if: ${{ github.ref == 'refs/tags/*' }}
+        run: |
+            echo ${{ github.ref }}
      
 
 

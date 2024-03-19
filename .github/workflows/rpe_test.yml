@@ -137,7 +137,109 @@ jobs:
 #        if: ${{ github.ref == 'refs/tags/*' }}
         run: |
             echo ${{ github.ref }}
-     
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build 	
+    strategy:
+      fail-fast: false
+      matrix:
+        os: 
+          - ubuntu-22.04 # This is CentOS 7 under the hood
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    env:
+      MODE: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+    
+      - name: Setup Node.js ${{ matrix.os }}
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.11 #if update this then also update in Dockerfile for centos
+
+      - name: Setup Python
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        uses: actions/setup-python@v5.0.0
+        with:
+          python-version: 3.8 #if update this then also update in Dockerfile for centos
+
+      - name: Login to the Container registry
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}          
+
+      - name: Pull the CentOS image
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        run: docker pull ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
+
+      - name: Shell configuration on ${{ matrix.os }} 
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: |
+              node --version
+              python3 -V
+
+      - name: Shell configuration on centos 7
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: addnab/docker-run-action@v3
+        with:
+          shell: bash
+          image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
+          run: |
+                source /opt/rh/devtoolset-11/enable
+                cmake --version
+                node --version
+                python3 -V
+        
+      - name: Install packages ${{ matrix.os }}
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: |
+            npm install
+            python3 -m pip install -r requirements.txt
+
+      - name: Create Package on ${{ matrix.os }}
+        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'windows-latest' }}
+        run: |
+             pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py
+             npm run dist
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Package on Linux
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        uses: addnab/docker-run-action@v3
+        with:
+          shell: bash
+          image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
+          options: -v ${{ github.workspace }}:/work
+          run: |
+                cd /work
+                npm install
+                python3 -m pip install -r requirements.txt
+                pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py
+                npm run dist
+                ls dist
+                tar -czvf rapid_power_estimator.tar.gz -C dist/linux-unpacked .
+                mv rapid_power_estimator.tar.gz dist
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#      - name: Upload Package
+#        if: ${{ matrix.os != 'ubuntu-latest' }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#            name: rapid_power_estimator_${{ matrix.os }}
+#            path: dist/rapid_power_estimator*.tar.gz*
+ 
+      - name: Run on refs/tags only
+        run: |
+            echo ${{ github.ref }}     
 
 
 

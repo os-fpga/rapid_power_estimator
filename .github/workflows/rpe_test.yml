@@ -97,7 +97,7 @@ jobs:
         run: python3 -m pytest
 
       - name: Create Package on ${{ matrix.os }}
-        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'windows-latest' }}
+        if: ${{ (matrix.os == 'macos-latest' || matrix.os == 'windows-latest')  && github.ref == 'refs/tags/*' }}
         run: |
              pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py
              npm run dist
@@ -105,7 +105,7 @@ jobs:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Package on Linux
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' && github.ref == 'refs/tags/*' }}
         uses: addnab/docker-run-action@v3
         with:
           shell: bash
@@ -123,12 +123,12 @@ jobs:
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Package
-        if: ${{ matrix.os != 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v3
-        with:
-            name: rapid_power_estimator_${{ matrix.os }}
-            path: dist/rapid_power_estimator*.tar.gz*
+#      - name: Upload Package
+#        if: ${{ matrix.os != 'ubuntu-latest' }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#            name: rapid_power_estimator_${{ matrix.os }}
+#            path: dist/rapid_power_estimator*.tar.gz*
  
      
 

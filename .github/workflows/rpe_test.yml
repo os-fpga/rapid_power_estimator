@@ -134,7 +134,7 @@ jobs:
 #            path: dist/rapid_power_estimator*.tar.gz*
  
       - name: Run on refs/tags only
-        if: ${{ github.ref == 'refs/tags/*' }}
+#        if: ${{ github.ref == 'refs/tags/*' }}
         run: |
             echo ${{ github.ref }}
      

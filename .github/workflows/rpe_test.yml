@@ -81,7 +81,7 @@ jobs:
         run: |
             npx eslint src/
 
-     - name: Install packages centos 7 & Run pytest
+      - name: Install packages centos 7 & Run pytest
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:

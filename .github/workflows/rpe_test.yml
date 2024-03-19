@@ -201,5 +201,9 @@ jobs:
         run: |
             echo ${{ github.ref }}     
 
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        with:
+            files: dist/rapid_power_estimator*.tar.gz*
 
 

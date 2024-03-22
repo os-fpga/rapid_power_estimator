@@ -47,11 +47,69 @@
 .power-tables {
     display: flex;
     flex-direction: column;
+    row-gap: 10px;
 }
 
-.placeholder {
-    border: 1px solid;
-    min-height: 100px;
+.pt-group input,
+.pt-group textarea,
+.pt-group select {
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.3rem;
+  /* font-size: 1rem; */
+}
+
+.last-time {
+    width: 100%;
+    text-align: right;
+}
+
+.save-icon {
+    cursor: pointer;
+}
+
+.edit-line {
+    display: flex;
+    flex-direction: row;
+    column-gap: 5px;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.switches-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
     text-align: center;
-    flex-grow: 1;
+    vertical-align: middle;
+}
+
+.switch {
+    width: 100%;
+    white-space: nowrap;
+    /* border: 1px solid red; */
+    text-align: center;
+    vertical-align: middle;
+    justify-content: center;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    column-gap: 2px;
+    border-left: 1px solid #828282;
+    padding-left: 2px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    /* border: 1px solid red; */
+}
+
+.notes {
+    cursor: pointer;
+    align-content: center;
+    border-left: 1px solid #828282;
+    padding-left: 2px;
 }

@@ -15,7 +15,7 @@
   border-radius: 5px;
   padding: 2rem;
   background-color: white;
-  width: 25em;
+  min-width: 25em;
 }
 
 .modal .btn {
@@ -27,6 +27,16 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
+}
+
+.form-group-row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+}
+
+.close-btn {
+  cursor: pointer;
 }
 
 .form-group input,
@@ -55,4 +65,14 @@
 
 #form-group-header {
   font-weight: bold;
+}
+
+#form-group-header-note {
+  font-weight: bold;
+  width: 100%;
+}
+
+.notes-input {
+  min-height: 200px;
+  min-width: 25em;
 }

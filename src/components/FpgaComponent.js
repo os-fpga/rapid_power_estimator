@@ -1,6 +1,7 @@
 import React from 'react';
-import { Table, fixed } from '../utils/common';
+import { Table } from '../utils/common';
 import TitleComponent from './TitleComponent';
+import FpgaCell from './FpgaCell';
 
 import './style/FpgaComponent.css';
 
@@ -14,6 +15,9 @@ function FpgaComponent({
     return staticPower;
   }
 
+  const warn = 0.003; // TBD
+  const error = 0.016; // TBD
+
   return (
     <div className="fpga-main">
       <div className="fpga-main-head">
@@ -25,44 +29,49 @@ function FpgaComponent({
         />
       </div>
       <div className="fpga-rowx">
-        <div className="clickable blocks-row" onClick={() => tableOpen(Table.Clocking)}>
-          <div className="bold-text-title">Clocking</div>
-          <div className="grayed-text">
-            {fixed(clocking)}
-            {' W'}
-          </div>
+        <div className="blocks-row" onClick={() => tableOpen(Table.Clocking)}>
+          <FpgaCell
+            title="Clocking"
+            power={clocking}
+            powerErr={error}
+            powerWarm={warn}
+          />
         </div>
-        <div className="clickable blocks-row" onClick={() => tableOpen(Table.FLE)}>
-          <div className="bold-text-title">FLE</div>
-          <div className="grayed-text">
-            {fixed(fle)}
-            {' W'}
-          </div>
-        </div>
-      </div>
-      <div className="fpga-rowx">
-        <div className="clickable blocks-row" onClick={() => tableOpen(Table.BRAM)}>
-          <div className="bold-text-title">BRAM</div>
-          <div className="grayed-text">
-            {fixed(bram)}
-            {' W'}
-          </div>
-        </div>
-        <div className="clickable blocks-row" onClick={() => tableOpen(Table.DSP)}>
-          <div className="bold-text-title">DSP</div>
-          <div className="grayed-text">
-            {fixed(dsp)}
-            {' W'}
-          </div>
+        <div className="blocks-row" onClick={() => tableOpen(Table.FLE)}>
+          <FpgaCell
+            title="FLE"
+            power={fle}
+            powerErr={error}
+            powerWarm={warn}
+          />
         </div>
       </div>
       <div className="fpga-rowx">
-        <div className="clickable" id="io" onClick={() => tableOpen(Table.IO)}>
-          <div className="bold-text-title">IO</div>
-          <div className="grayed-text">
-            {fixed(io)}
-            {' W'}
-          </div>
+        <div className="blocks-row" onClick={() => tableOpen(Table.BRAM)}>
+          <FpgaCell
+            title="BRAM"
+            power={bram}
+            powerErr={error}
+            powerWarm={warn}
+          />
+        </div>
+        <div className="blocks-row" onClick={() => tableOpen(Table.DSP)}>
+          <FpgaCell
+            title="DSP"
+            power={dsp}
+            powerErr={error}
+            powerWarm={warn}
+          />
+        </div>
+      </div>
+      <div className="fpga-rowx" onClick={() => tableOpen(Table.IO)}>
+        <div id="io">
+          <FpgaCell
+            title="IO"
+            power={io}
+            powerErr={error}
+            powerWarm={warn}
+          />
         </div>
       </div>
     </div>

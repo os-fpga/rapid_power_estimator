@@ -97,9 +97,8 @@ function MemoryTable({ device }) {
         <div className="layout-head">
           <label>FPGA &gt; Memory</label>
         </div>
-        <TableBase
-          header={mainTableHeader}
-          data={
+        <TableBase header={mainTableHeader}>
+          {
             memoryData.map((row, index) => (
               row.data.enable !== undefined && (
                 <tr key={row.id}>
@@ -131,7 +130,7 @@ function MemoryTable({ device }) {
               )
             ))
           }
-        />
+        </TableBase>
         {modalOpen && (
         <MemoryModal
           closeModal={() => {

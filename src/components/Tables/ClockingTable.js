@@ -99,9 +99,8 @@ function ClockingTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; Clocking</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase
-          header={mainTableHeader}
-          data={
+        <TableBase header={mainTableHeader}>
+          {
             clockingData.map((row, index) => (
               <tr key={row.description}>
                 <td>{row.description}</td>
@@ -122,8 +121,8 @@ function ClockingTable({ device, totalPowerCallback }) {
                 />
               </tr>
             ))
-          }
-        />
+        }
+        </TableBase>
         {modalOpen && (
           <ClockingModal
             closeModal={() => {

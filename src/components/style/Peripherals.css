@@ -1,3 +1,5 @@
+@import './base.css';
+
 .periph-top {
     display: flex;
     height: 100%;
@@ -27,7 +29,6 @@
 
 .periph-rowx {
     width: 100%;
-    background-color: #9fdda9;
     padding: 4px;
 }
 

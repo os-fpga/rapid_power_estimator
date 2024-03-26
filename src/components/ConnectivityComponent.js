@@ -2,6 +2,7 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
+import { State } from '../utils/common';
 
 function ConnectivityComponent({ device }) {
   const [name, setName] = React.useState('');
@@ -44,17 +45,22 @@ function ConnectivityComponent({ device }) {
     if (device !== null) update();
   }, [device, update]);
 
+  const warn = 0.003; // TBD
+  const error = 0.016; // TBD
+
   return (
-    <CPUComponent
-      title="Connectivity"
-      power={power}
-      name={name}
-      ep0={ep0}
-      ep1={ep1}
-      ep2={ep2}
-      ep3={ep3}
-      endpointText={endpoints}
-    />
+    <State refValue={power} warn={warn} err={error}>
+      <CPUComponent
+        title="Connectivity"
+        power={power}
+        name={name}
+        ep0={ep0}
+        ep1={ep1}
+        ep2={ep2}
+        ep3={ep3}
+        endpointText={endpoints}
+      />
+    </State>
   );
 }
 

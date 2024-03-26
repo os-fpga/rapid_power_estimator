@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { PowerCell } from './TableCells';
-import { fixed } from '../../utils/common';
+import { fixed, State } from '../../utils/common';
 
 import '../style/PowerSummaryTable.css';
 
 function PowerSummaryTable({
   title, data, total, percent,
 }) {
+  const warn = 0.001; // TBD
+  const error = 0.016; // TBD
   return (
     <div className="pst-container">
       <div className="no-wrap pst-title bold-text-title">{title}</div>
@@ -18,6 +20,7 @@ function PowerSummaryTable({
             data.map((item, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
+                <td className="dot-td"><State refValue={item.power} err={error} warn={warn} baseClass="dot" /></td>
                 <td className="no-wrap">{item.text}</td>
                 <PowerCell val={item.power} />
                 <td className="no-wrap">

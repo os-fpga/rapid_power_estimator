@@ -2,6 +2,7 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
+import { State } from '../utils/common';
 
 function DMAComponent({ device }) {
   const [ep0, setEp0] = React.useState(0);
@@ -42,17 +43,22 @@ function DMAComponent({ device }) {
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ];
 
+  const warn = 0.001; // TBD
+  const error = 0.016; // TBD
+
   return (
-    <CPUComponent
-      title="DMA"
-      power={power}
-      name={null}
-      ep0={ep0}
-      ep1={ep1}
-      ep2={ep2}
-      ep3={ep3}
-      endpointText={dmaEndpoints}
-    />
+    <State refValue={power} warn={warn} err={error}>
+      <CPUComponent
+        title="DMA"
+        power={power}
+        name={null}
+        ep0={ep0}
+        ep1={ep1}
+        ep2={ep2}
+        ep3={ep3}
+        endpointText={dmaEndpoints}
+      />
+    </State>
   );
 }
 

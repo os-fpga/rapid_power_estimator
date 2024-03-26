@@ -161,9 +161,8 @@ function PeripheralsTable({ device }) {
         <div className="layout-head">
           <label>FPGA &gt; Peripherals</label>
         </div>
-        <TableBase
-          header={mainTableHeader}
-          data={
+        <TableBase header={mainTableHeader}>
+          {
             peripherals.map((row, index) => row.data.map((i, idx) => (
               i.data !== undefined && (
               // eslint-disable-next-line react/no-array-index-key
@@ -199,7 +198,7 @@ function PeripheralsTable({ device }) {
               )
             )))
           }
-        />
+        </TableBase>
         {modalOpen && (
           <PeripheralsModal
             closeModal={() => {

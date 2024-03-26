@@ -151,9 +151,8 @@ function ACPUTable({ device }) {
               </select>
             </div>
           </div>
-          <TableBase
-            header={header}
-            data={
+          <TableBase header={header}>
+            {
               endpoints.map((row, index) => (
                 (row.data !== undefined && row.data.name !== '')
                 && (
@@ -172,7 +171,7 @@ function ACPUTable({ device }) {
                 )
               ))
             }
-          />
+          </TableBase>
           {modalOpen
             && (
               <ABCPUModal

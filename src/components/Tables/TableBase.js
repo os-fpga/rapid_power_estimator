@@ -35,7 +35,7 @@ export function Checkbox({
   );
 }
 
-export function TableBase({ header, data }) {
+export function TableBase({ header, children }) {
   return (
     <div className="table-wrapper">
       <table className="table-style">
@@ -55,7 +55,7 @@ export function TableBase({ header, data }) {
         </thead>
         <tbody>
           {
-            data
+            children
           }
         </tbody>
       </table>

@@ -17,7 +17,7 @@ function FleTable({ device, totalPowerCallback }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
 
-  const fetchFleData = (deviceId) => {
+  const fetchFleData = React.useCallback((deviceId) => {
     if (deviceId !== null) {
       server.GET(server.api.fetch(server.Elem.fle, deviceId), (data) => {
         setFleData(data);
@@ -43,12 +43,11 @@ function FleTable({ device, totalPowerCallback }) {
         });
       });
     }
-  };
+  }, [totalPowerCallback]);
 
   React.useEffect(() => {
     if (device !== null) fetchFleData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }, [device, fetchFleData]);
 
   function modifyRow(index, row) {
     server.PATCH(
@@ -96,9 +95,8 @@ function FleTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; FLE</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase
-          header={mainTableHeader}
-          data={
+        <TableBase header={mainTableHeader}>
+          {
             fleData.map((row, index) => (
               <tr key={row.name}>
                 <td>{row.name}</td>
@@ -126,7 +124,7 @@ function FleTable({ device, totalPowerCallback }) {
               </tr>
             ))
           }
-        />
+        </TableBase>
         {modalOpen && (
           <FleModal
             closeModal={() => {

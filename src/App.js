@@ -44,35 +44,35 @@ function App() {
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
 
-  React.useEffect(() => {
-    if (device !== null) {
-      server.GET(server.api.consumption(server.Elem.clocking, device), (data) => {
+  const deviceChanged = (newDevice) => {
+    setDevice(newDevice);
+    if (newDevice !== null) {
+      server.GET(server.api.consumption(server.Elem.clocking, newDevice), (data) => {
         const total = data.total_clock_block_power
           + data.total_clock_interconnect_power
           + data.total_pll_power;
         setClockingPower(total);
       });
-      server.GET(server.api.consumption(server.Elem.fle, device), (data) => {
+      server.GET(server.api.consumption(server.Elem.fle, newDevice), (data) => {
         const total = data.total_block_power + data.total_interconnect_power;
         setFlePower(total);
       });
-      server.GET(server.api.consumption(server.Elem.dsp, device), (data) => {
+      server.GET(server.api.consumption(server.Elem.dsp, newDevice), (data) => {
         const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
         setDspPower(total);
       });
-      server.GET(server.api.consumption(server.Elem.bram, device), (data) => {
+      server.GET(server.api.consumption(server.Elem.bram, newDevice), (data) => {
         const total = data.total_bram_block_power + data.total_bram_interconnect_power;
         setBramPower(total);
       });
-      server.GET(server.api.consumption(server.Elem.io, device), (data) => {
+      server.GET(server.api.consumption(server.Elem.io, newDevice), (data) => {
         const total = data.total_block_power
           + data.total_interconnect_power
           + data.total_on_die_termination_power;
         setIoPower(total);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  };
 
   const handleNotesChange = (data) => {
     setNotes(data);
@@ -88,7 +88,7 @@ function App() {
       <div className="app-main-container">
         <div className="top-container">
           <div className="top-l1">
-            <DeviceList devices={devices} setDevice={setDevice} />
+            <DeviceList devices={devices} setDevice={deviceChanged} />
           </div>
           <div className="top-l2">
             <SOCComponent
@@ -106,7 +106,7 @@ function App() {
                   tableOpen={setOpenedTable}
                 />
               </div>
-              <div className="clickable top-l2-col2-elem" onClick={() => setOpenedTable(Table.Memory)}>
+              <div onClick={() => setOpenedTable(Table.Memory)}>
                 <MemoryComponent device={device} />
               </div>
             </div>

@@ -158,9 +158,8 @@ function IOTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; IO</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase
-          header={mainTableHeader}
-          data={
+        <TableBase header={mainTableHeader}>
+          {
             ioData.map((row, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
@@ -199,7 +198,7 @@ function IOTable({ device, totalPowerCallback }) {
               </tr>
             ))
           }
-        />
+        </TableBase>
         {modalOpen && (
           <IOModal
             closeModal={() => {

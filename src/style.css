@@ -28,16 +28,7 @@
 }
 
 .top-l2-col2-elem {
-    min-height: 90px;
-}
-
-.top-l2-col1-row3 {
-    display: flex;
     height: 100%;
-    background-color: #dbdbdb;
-    padding: 8px;
-    flex-direction: column;
-    row-gap: 6px;
 }
 
 .hspacer {

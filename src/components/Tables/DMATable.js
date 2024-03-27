@@ -113,9 +113,8 @@ function DMATable({ device }) {
           <label>FPGA &gt; DMA</label>
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase
-          header={mainTableHeader}
-          data={
+        <TableBase header={mainTableHeader}>
+          {
             dmaData.map((row, index) => (
               row.data.enable && (
                 <tr key={row.id}>
@@ -139,7 +138,7 @@ function DMATable({ device }) {
               )
             ))
           }
-        />
+        </TableBase>
         {modalOpen && (
         <DMAModal
           closeModal={() => {

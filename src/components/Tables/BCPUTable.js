@@ -172,9 +172,8 @@ function BCPUTable({ device }) {
               </select>
             </div>
           </div>
-          <TableBase
-            header={header}
-            data={
+          <TableBase header={header}>
+            {
               endpoints.map((row, index) => (
                 (row.data !== undefined && row.data.name !== '')
                 && (
@@ -193,7 +192,7 @@ function BCPUTable({ device }) {
                 )
               ))
             }
-          />
+          </TableBase>
           {modalOpen
             && (
               <ABCPUModal

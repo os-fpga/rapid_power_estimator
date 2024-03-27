@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PeripheralsComponent from './PeripheralsComponent';
-import { Table } from '../utils/common';
+import { Table, State } from '../utils/common';
 import TitleComponent from './TitleComponent';
 import ABCPUComponent from './ABCPUComponent';
 import DMAComponent from './DMAComponent';
@@ -54,24 +54,31 @@ function SOCTable({ device, setOpenedTable }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
+  const warn = 0.003; // TBD
+  const error = 0.016; // TBD
+
   return (
     <div className="top-l2-col1">
       <div className="top-l2-col1-row1">
-        <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.ACPU)}>
-          <ABCPUComponent
-            device={device}
-            title="ACPU"
-            index="acpu"
-            power={acpuPower}
-          />
+        <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.ACPU)}>
+          <State refValue={acpuPower} warn={warn} err={error}>
+            <ABCPUComponent
+              device={device}
+              title="ACPU"
+              index="acpu"
+              power={acpuPower}
+            />
+          </State>
         </div>
-        <div className="top-l2-col1-row1-elem clickable" onClick={() => setOpenedTable(Table.BCPU)}>
-          <ABCPUComponent
-            device={device}
-            title="BCPU"
-            index="bcpu"
-            power={bcpuPower}
-          />
+        <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.BCPU)}>
+          <State refValue={bcpuPower} warn={warn} err={error}>
+            <ABCPUComponent
+              device={device}
+              title="BCPU"
+              index="bcpu"
+              power={bcpuPower}
+            />
+          </State>
         </div>
         <div className="top-l2-col1-row1-elem-text">
           <TitleComponent
@@ -83,10 +90,10 @@ function SOCTable({ device, setOpenedTable }) {
         </div>
       </div>
       <div className="top-l2-col1-row2">
-        <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.DMA)}>
+        <div className="top-l2-col1-row2-elem" onClick={() => setOpenedTable(Table.DMA)}>
           <DMAComponent device={device} />
         </div>
-        <div className="top-l2-col1-row2-elem clickable" onClick={() => setOpenedTable(Table.Connectivity)}>
+        <div className="top-l2-col1-row2-elem" onClick={() => setOpenedTable(Table.Connectivity)}>
           <ConnectivityComponent device={device} />
         </div>
       </div>

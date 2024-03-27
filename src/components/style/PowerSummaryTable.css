@@ -15,15 +15,19 @@
     border-collapse: collapse;
 }
 
+.pst-table th:not(:first-child),
+.pst-table td:not(:first-child) {
+    padding: 0.5em;
+}
+
 .pst-table th,
 .pst-table td {
-    padding: 0.5em;
     border-bottom: 1px solid #e1e1e1;
 }
 
-.pst-table tbody > tr:last-child > td {
+.pst-table tbody>tr:last-child>td {
     border-bottom: 0;
-  }
+}
 
 .pst-bottom {
     display: flex;
@@ -46,4 +50,16 @@
 .pst-bottom-total {
     text-align: right;
     width: 100%;
+}
+
+.dot-td {
+    text-align: center;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
 }

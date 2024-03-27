@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as server from '../utils/serverAPI';
-import { fixed } from '../utils/common';
+import { fixed, State } from '../utils/common';
 import { subscribe, unsubscribe } from '../utils/events';
 
 import './style/MemoryComponent.css';
@@ -56,32 +56,35 @@ function MemoryComponent({ device }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
+  const warn = 0.001; // TBD
+  const error = 0.016; // TBD
+
   return (
-    <div className="mem-container">
+    <State refValue={power} warn={warn} err={error} baseClass="mem-container">
       <div className="mem-line">
-        <div>Memory</div>
+        <div className="bold-text">Memory</div>
         <div className="grayed-text bold-text mem-value">
           {fixed(power)}
           {' W'}
         </div>
       </div>
       {
-        memData.map((item, index) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={index} className="mem-line grayed-text">
-            <div className="mem-name">{item.name}</div>
-            <div className="mem-value">
-              {fixed(item.consumption.block_power)}
-              {' W'}
+          memData.map((item, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <div key={index} className="mem-line grayed-text">
+              <div className="mem-name">{item.name}</div>
+              <div className="mem-value">
+                {fixed(item.consumption.block_power)}
+                {' W'}
+              </div>
+              <div className="mem-value">
+                {fixed(item.consumption.percentage, 0)}
+                {' %'}
+              </div>
             </div>
-            <div className="mem-value">
-              {fixed(item.consumption.percentage, 0)}
-              {' %'}
-            </div>
-          </div>
-        ))
+          ))
       }
-    </div>
+    </State>
   );
 }
 

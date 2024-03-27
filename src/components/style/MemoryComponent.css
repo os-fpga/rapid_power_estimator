@@ -1,9 +1,12 @@
+@import './base.css';
+
 .mem-container {
     display: flex;
     flex-direction: column;
-    padding: 3px;
-    height: 100%;
     row-gap: 5px;
+    cursor: pointer;
+    padding: 10px;
+    min-width: 85px;
 }
 
 .mem-line {

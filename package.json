@@ -5,7 +5,7 @@
   "author": "Rapid Silicon",
   "main": "main.js",
   "scripts": {
-    "start": "webpack --mode development && NODE_ENV=development electron .",
+    "start": "webpack --mode development && electron . --development",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-builder install-app-deps",
     "pack": "electron-builder --dir",

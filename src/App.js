@@ -24,6 +24,7 @@ import FPGASummaryComponent from './components/FPGASummaryComponent';
 import SOCSummaryComponent from './components/SOCSummaryComponent';
 import TypicalWorstComponent from './components/TypicalWorstComponent';
 import Notes from './components/Notes';
+import Preferences from './preferences';
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
@@ -41,8 +42,30 @@ function App() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [notes, setNotes] = React.useState('');
   const [topLevel, setTopLevel] = React.useState('');
+  const [config, setConfig] = React.useState({});
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleOk = () => {
+    setIsModalOpen(false);
+    window.ipcAPI.send('config', config);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
+
+  React.useEffect(() => {
+    if ((typeof window !== 'undefined')) {
+      window.ipcAPI.loadPreferences('preferences', (event, data) => {
+        setConfig(data);
+        showModal();
+      });
+    }
+  }, []);
 
   const deviceChanged = (newDevice) => {
     setDevice(newDevice);
@@ -81,6 +104,10 @@ function App() {
   const handleLangChange = (val) => {
     // implementation TBD
     console.log(val);
+  };
+
+  const handleConfigChange = (name, val) => {
+    setConfig({ ...config, [name]: val });
   };
 
   return (
@@ -223,6 +250,13 @@ function App() {
         onSubmit={handleNotesChange}
       />
       )}
+      <Preferences
+        isModalOpen={isModalOpen}
+        config={config}
+        handleOk={handleOk}
+        handleCancel={handleCancel}
+        handleConfigChange={handleConfigChange}
+      />
     </div>
   );
 }

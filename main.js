@@ -4,7 +4,7 @@ const path = require('node:path');
 const fs = require('fs');
 const config = require('./rpe.config.json');
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.argv.find((val) => val === '--development');
 const template = [
   {
     label: 'File',

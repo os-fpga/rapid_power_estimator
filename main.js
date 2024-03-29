@@ -135,6 +135,10 @@ const createWindow = () => {
   ipcMain.on('config', (event, arg) => {
     store.set('port', arg.port);
     store.set('device_xml', arg.device_xml);
+
+    child.kill();
+    child = startFlaskServer();
+    mainWindow.reload();
   });
 };
 

@@ -23,7 +23,7 @@ function Preferences({
         <input
           type="text"
           name="device_xml"
-          onChange={handleConfigChange}
+          onChange={(e) => handleConfigChange(e.target.name, e.target.value)}
         // eslint-disable-next-line no-nested-ternary
           value={config.device_xml}
         />

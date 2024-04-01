@@ -10,6 +10,7 @@
 
 .top-l1 {
     border-bottom: 2px solid #908f8f;
+    cursor: pointer;
 }
 
 .top-l2 {
@@ -44,10 +45,9 @@
 .pt-group input,
 .pt-group textarea,
 .pt-group select {
-  border: none;
-  border-radius: 0.3rem;
-  padding: 0.3rem;
-  /* font-size: 1rem; */
+    border: none;
+    border-radius: 0.3rem;
+    padding: 0.3rem;
 }
 
 .last-time {
@@ -103,4 +103,15 @@
     align-content: center;
     border-left: 1px solid #828282;
     padding-left: 2px;
+}
+
+.warningLabel {
+    color: red;
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.selected {
+    outline: 3px solid #3385FF;
 }

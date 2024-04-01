@@ -3,6 +3,7 @@ import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
 import { State } from '../utils/common';
+import { useSelection } from '../SelectionProvider';
 
 function ConnectivityComponent({ device }) {
   const [name, setName] = React.useState('');
@@ -11,6 +12,7 @@ function ConnectivityComponent({ device }) {
   const [ep2, setEp2] = React.useState(0);
   const [ep3, setEp3] = React.useState(0);
   const [power, setPower] = React.useState(0);
+  const { selectedItem } = useSelection();
   const endpoints = [
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ];
@@ -47,11 +49,16 @@ function ConnectivityComponent({ device }) {
 
   const warn = 0.003; // TBD
   const error = 0.016; // TBD
+  const Title = 'Connectivity';
+
+  function getBaseName() {
+    return (selectedItem === Title) ? 'clickable selected' : 'clickable';
+  }
 
   return (
-    <State refValue={power} warn={warn} err={error}>
+    <State refValue={power} warn={warn} err={error} baseClass={getBaseName()}>
       <CPUComponent
-        title="Connectivity"
+        title={Title}
         power={power}
         name={name}
         ep0={ep0}

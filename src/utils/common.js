@@ -12,6 +12,7 @@ export const Table = {
   Memory: 8,
   BCPU: 9,
   DMA: 10,
+  Summary: 11,
 };
 
 export const formatString = (template, ...args) => template.replace(/{([0-9]+)}/g, (match, index) => (typeof args[index] === 'undefined' ? match : args[index]));

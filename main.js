@@ -1,8 +1,28 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const {
+  app, BrowserWindow, Menu, ipcMain,
+} = require('electron');
 const { spawn } = require('child_process');
 const path = require('node:path');
 const fs = require('fs');
+const Store = require('electron-store');
 const config = require('./rpe.config.json');
+
+const schema = {
+  port: {
+    type: 'number',
+    maximum: 65535,
+    minimum: 1,
+    default: config.port,
+  },
+  device_xml: {
+    type: 'string',
+    default: config.device_xml,
+  },
+};
+
+const store = new Store({ schema });
+
+let mainWindow = null;
 
 const isDev = process.argv.find((val) => val === '--development');
 const template = [
@@ -16,7 +36,12 @@ const template = [
       { label: 'Save' },
       { label: 'Save as...' },
       { type: 'separator' },
-      { label: 'Preferences' },
+      {
+        label: 'Preferences',
+        click: async () => {
+          mainWindow.webContents.send('preferences', store.store);
+        },
+      },
       { type: 'separator' },
       { role: 'quit' },
     ],
@@ -50,24 +75,21 @@ const template = [
   },
 ];
 
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
-
 const startFlaskServer = () => {
-  console.log(isDev);
   let apiServer;
   const RestAPIscript = path.join(__dirname, 'backend/restapi_server.py');
   const restAPIexe = path.join(app.getAppPath(), '..', '..', 'backend', 'restapi_server.exe');
 
   const args = [
-    '--port', config.port,
+    '--port', store.get('port'),
   ];
   if (config.debug === 1) { args.push('--debug'); }
 
+  const deviceXml = store.get('device_xml');
   if (fs.existsSync(RestAPIscript)) {
-    apiServer = spawn('python', [RestAPIscript, path.join(__dirname, config.device_xml), ...args]);
+    apiServer = spawn('python', [RestAPIscript, path.join(__dirname, deviceXml), ...args]);
   } else {
-    apiServer = spawn(restAPIexe, [path.join(app.getAppPath(), '..', '..', config.device_xml), ...args]);
+    apiServer = spawn(restAPIexe, [path.join(app.getAppPath(), '..', '..', deviceXml), ...args]);
   }
 
   apiServer.stdout.on('data', (data) => {
@@ -93,13 +115,32 @@ const startFlaskServer = () => {
   return apiServer;
 };
 
-const createWindow = () => {
-  const win = new BrowserWindow({ width: 1100, height: 700 });
-  const indexPath = path.join(app.getAppPath(), 'build/index.html');
-  win.loadURL(`file://${indexPath}`);
-};
-
 let child = null;
+const createWindow = () => {
+  mainWindow = new BrowserWindow({
+    width: 1100,
+    height: 700,
+    webPreferences: {
+      preload: path.join(app.getAppPath(), 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: true,
+    },
+  });
+  const indexPath = path.join(app.getAppPath(), 'build/index.html');
+  mainWindow.loadURL(`file://${indexPath}`);
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+
+  ipcMain.on('config', (event, arg) => {
+    store.set('port', arg.port);
+    store.set('device_xml', arg.device_xml);
+
+    child.kill();
+    child = startFlaskServer();
+    mainWindow.reload();
+  });
+};
 
 app.whenReady().then(() => {
   child = startFlaskServer();

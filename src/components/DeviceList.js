@@ -1,10 +1,12 @@
 import * as React from 'react';
 import * as server from '../utils/serverAPI';
-
+import { useSelection } from '../SelectionProvider';
 import './style/DeviceList.css';
 
 function DeviceList({ devices, setDevice }) {
   const [deviceInfo, setDeviceInfo] = React.useState({});
+  const { selectedItem } = useSelection();
+  const [selectedDevice, setSelectedDevice] = React.useState('selectDev');
 
   function getDeviceInfo(id) {
     server.GET(server.deviceInfo(id), (data) => setDeviceInfo(data));
@@ -12,13 +14,18 @@ function DeviceList({ devices, setDevice }) {
 
   function DeviceOnChange(event) {
     const deviceId = event.target.value;
+    setSelectedDevice(deviceId);
     getDeviceInfo(deviceId);
     setDevice(deviceId);
   }
 
+  function getBaseName() {
+    return (selectedItem === 'Summary') ? 'dev-table selected' : 'dev-table';
+  }
+
   return (
     <div className="dev-table-container">
-      <table className="dev-table">
+      <table className={getBaseName()}>
         <thead>
           <tr>
             <td>
@@ -32,8 +39,9 @@ function DeviceList({ devices, setDevice }) {
                   id="deviceId"
                   className="dev-selector"
                   onChange={DeviceOnChange}
+                  value={selectedDevice}
                 >
-                  <option key="" value="">
+                  <option key="" value="selectDev" disabled>
                     Select a device...
                   </option>
                   {devices.map((data) => (

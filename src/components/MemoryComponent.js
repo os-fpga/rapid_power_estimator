@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import * as server from '../utils/serverAPI';
 import { fixed, State } from '../utils/common';
 import { subscribe, unsubscribe } from '../utils/events';
+import { useSelection } from '../SelectionProvider';
 
 import './style/MemoryComponent.css';
 
@@ -24,6 +25,7 @@ function MemoryComponent({ device }) {
     },
   ]);
   const [power, setPower] = React.useState(0);
+  const { selectedItem } = useSelection();
 
   function update() {
     server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
@@ -59,10 +61,15 @@ function MemoryComponent({ device }) {
   const warn = 0.001; // TBD
   const error = 0.016; // TBD
 
+  const Title = 'Memory';
+  function getBaseClass() {
+    return (selectedItem === Title) ? 'mem-container selected' : 'mem-container';
+  }
+
   return (
-    <State refValue={power} warn={warn} err={error} baseClass="mem-container">
+    <State refValue={power} warn={warn} err={error} baseClass={getBaseClass()}>
       <div className="mem-line">
-        <div className="bold-text">Memory</div>
+        <div className="bold-text">{Title}</div>
         <div className="grayed-text bold-text mem-value">
           {fixed(power)}
           {' W'}

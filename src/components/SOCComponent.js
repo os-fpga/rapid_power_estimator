@@ -8,6 +8,7 @@ import DMAComponent from './DMAComponent';
 import ConnectivityComponent from './ConnectivityComponent';
 import { subscribe, unsubscribe } from '../utils/events';
 import * as server from '../utils/serverAPI';
+import { useSelection } from '../SelectionProvider';
 
 import './style/SOCTable.css';
 
@@ -16,6 +17,7 @@ function SOCTable({ device, setOpenedTable }) {
   const [staticPower, setStaticPower] = React.useState(0);
   const [acpuPower, setAcpuPower] = React.useState(0);
   const [bcpuPower, setBcpuPower] = React.useState(0);
+  const { selectedItem } = useSelection();
 
   function componentChanged() {
     if (device !== null) {
@@ -57,11 +59,15 @@ function SOCTable({ device, setOpenedTable }) {
   const warn = 0.003; // TBD
   const error = 0.016; // TBD
 
+  function getBaseName(item) {
+    return (selectedItem === item) ? 'clickable selected' : 'clickable';
+  }
+
   return (
     <div className="top-l2-col1">
       <div className="top-l2-col1-row1">
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.ACPU)}>
-          <State refValue={acpuPower} warn={warn} err={error}>
+          <State refValue={acpuPower} warn={warn} err={error} baseClass={getBaseName('ACPU')}>
             <ABCPUComponent
               device={device}
               title="ACPU"
@@ -71,7 +77,7 @@ function SOCTable({ device, setOpenedTable }) {
           </State>
         </div>
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.BCPU)}>
-          <State refValue={bcpuPower} warn={warn} err={error}>
+          <State refValue={bcpuPower} warn={warn} err={error} baseClass={getBaseName('BCPU')}>
             <ABCPUComponent
               device={device}
               title="BCPU"

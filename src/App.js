@@ -25,6 +25,7 @@ import SOCSummaryComponent from './components/SOCSummaryComponent';
 import TypicalWorstComponent from './components/TypicalWorstComponent';
 import Notes from './components/Notes';
 import Preferences from './preferences';
+import { useSelection } from './SelectionProvider';
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
@@ -43,6 +44,7 @@ function App() {
   const [notes, setNotes] = React.useState('');
   const [topLevel, setTopLevel] = React.useState('');
   const [config, setConfig] = React.useState({});
+  const { toggleItemSelection } = useSelection();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -55,6 +57,16 @@ function App() {
   const handleCancel = () => {
     setIsModalOpen(false);
   };
+
+  function getKeyByValue(object, value) {
+    return Object.keys(object).find((key) => object[key] === value);
+  }
+
+  React.useEffect(() => {
+    const key = getKeyByValue(Table, openedTable);
+    toggleItemSelection(key);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openedTable]);
 
   React.useEffect(() => server.GET(server.devices, setDevices), []);
 
@@ -114,8 +126,11 @@ function App() {
     <div>
       <div className="app-main-container">
         <div className="top-container">
-          <div className="top-l1">
-            <DeviceList devices={devices} setDevice={deviceChanged} />
+          <div className="top-l1" onClick={() => setOpenedTable(Table.Summary)}>
+            <DeviceList
+              devices={devices}
+              setDevice={deviceChanged}
+            />
           </div>
           <div className="top-l2">
             <SOCComponent
@@ -240,6 +255,10 @@ function App() {
       {
         openedTable === Table.Peripherals
         && <PeripheralsTable device={device} />
+      }
+      {
+        openedTable === Table.Summary
+        && <div>Summary</div>
       }
       {modalOpen && (
       <Notes

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, fixed, State } from '../utils/common';
 import * as server from '../utils/serverAPI';
+import { useSelection } from '../SelectionProvider';
 
 import './style/Peripherals.css';
 
@@ -15,6 +16,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
   const [uart1, setUart1] = React.useState(0);
   const [gpio, setGPIO] = React.useState(0);
   const [power, setPower] = React.useState(0);
+  const { selectedItem } = useSelection();
 
   function fetchPeripherals(deviceId, key, url) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
@@ -46,13 +48,22 @@ function PeripheralsComponent({ setOpenedTable, device }) {
     }
   }, [device]);
 
+  const Title = 'Peripherals';
+
+  function getClassName() {
+    return (selectedItem === Title) ? 'periph-top selected' : 'periph-top';
+  }
+
   const warn = 0.001; // TBD
   const error = 0.016; // TBD
 
   return (
-    <div className="periph-top" onClick={() => setOpenedTable(Table.Peripherals)}>
+    <div
+      className={getClassName()}
+      onClick={() => setOpenedTable(Table.Peripherals)}
+    >
       <div className="periph-row-head">
-        <div>Peripherals</div>
+        <div>{Title}</div>
         <div id="peripherals-power" className="grayed-text">
           {fixed(power)}
           {' W'}

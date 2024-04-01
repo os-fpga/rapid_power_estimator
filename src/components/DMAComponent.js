@@ -3,6 +3,7 @@ import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
 import { State } from '../utils/common';
+import { useSelection } from '../SelectionProvider';
 
 function DMAComponent({ device }) {
   const [ep0, setEp0] = React.useState(0);
@@ -10,6 +11,7 @@ function DMAComponent({ device }) {
   const [ep2, setEp2] = React.useState(0);
   const [ep3, setEp3] = React.useState(0);
   const [power, setPower] = React.useState(0);
+  const { selectedItem } = useSelection();
 
   function fetchEndPoint(href, setEp) {
     server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
@@ -45,11 +47,16 @@ function DMAComponent({ device }) {
 
   const warn = 0.001; // TBD
   const error = 0.016; // TBD
+  const Title = 'DMA';
+
+  function getBaseName() {
+    return (selectedItem === Title) ? 'clickable selected' : 'clickable';
+  }
 
   return (
-    <State refValue={power} warn={warn} err={error}>
+    <State refValue={power} warn={warn} err={error} baseClass={getBaseName()}>
       <CPUComponent
-        title="DMA"
+        title={Title}
         power={power}
         name={null}
         ep0={ep0}

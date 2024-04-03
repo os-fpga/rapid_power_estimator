@@ -113,8 +113,18 @@ function DMATable({ device }) {
           <label>FPGA &gt; DMA</label>
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="DMA power"
+              total={null}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+              subHeader="Sub System"
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             dmaData.map((row, index) => (
               row.data.enable && (
                 <tr key={row.id}>
@@ -138,7 +148,8 @@ function DMATable({ device }) {
               )
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
         <DMAModal
           closeModal={() => {
@@ -157,15 +168,6 @@ function DMATable({ device }) {
           }}
         />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="DMA power"
-          total={null}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-          subHeader="Sub System"
-        />
       </div>
     </div>
   );

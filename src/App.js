@@ -15,6 +15,7 @@ import BCPUTable from './components/Tables/BCPUTable';
 import DMATable from './components/Tables/DMATable';
 import ConnectivityTable from './components/Tables/ConnectivityTable';
 import MemoryTable from './components/Tables/MemoryTable';
+import DesignParametesTable from './components/Tables/DesignParametesTable';
 import { Table } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
@@ -122,7 +123,7 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="rpe-head">
       <div className="app-main-container">
         <div className="top-container">
           <div className="top-l1" onClick={() => setOpenedTable(Table.Summary)}>
@@ -257,7 +258,7 @@ function App() {
       }
       {
         openedTable === Table.Summary
-        && <div>Summary</div>
+        && <DesignParametesTable />
       }
       {modalOpen && (
       <Notes

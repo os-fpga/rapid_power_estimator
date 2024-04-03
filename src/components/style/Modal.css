@@ -13,7 +13,7 @@
 
 .modal {
   border-radius: 5px;
-  padding: 2rem;
+  padding: 1rem;
   background-color: white;
   min-width: 25em;
 }
@@ -74,5 +74,4 @@
 
 .notes-input {
   min-height: 200px;
-  min-width: 25em;
 }

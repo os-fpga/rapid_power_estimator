@@ -1,7 +1,6 @@
 .cpu-component-top {
     gap: 10px;
     block-size: fit-content;
-    min-width: 160px;
 }
 
 .cpu-component-title-top {
@@ -9,9 +8,9 @@
 }
 
 .cpu-component-l2 {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    min-height: 18px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    height: 1rem;
 }
 
 .cpu-component-l1,
@@ -35,4 +34,5 @@
     display: inline;
     text-align: right;
     width: 100%;
+    white-space: nowrap;
 }

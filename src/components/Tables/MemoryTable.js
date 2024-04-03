@@ -97,8 +97,18 @@ function MemoryTable({ device }) {
         <div className="layout-head">
           <label>FPGA &gt; Memory</label>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="Memory power"
+              total={null}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+              subHeader="Sub System"
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             memoryData.map((row, index) => (
               row.data.enable !== undefined && (
                 <tr key={row.id}>
@@ -130,7 +140,8 @@ function MemoryTable({ device }) {
               )
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
         <MemoryModal
           closeModal={() => {
@@ -148,15 +159,6 @@ function MemoryTable({ device }) {
           }}
         />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="Memory power"
-          total={null}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-          subHeader="Sub System"
-        />
       </div>
     </div>
   );

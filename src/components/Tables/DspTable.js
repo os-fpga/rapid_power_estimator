@@ -92,8 +92,17 @@ function DspTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; DSP</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="DSP power"
+              total={powerTotal}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             dspData.map((row, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
@@ -124,7 +133,8 @@ function DspTable({ device, totalPowerCallback }) {
               </tr>
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
           <DspModal
             closeModal={() => {
@@ -144,14 +154,6 @@ function DspTable({ device, totalPowerCallback }) {
             }}
           />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="DSP power"
-          total={powerTotal}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-        />
       </div>
     </div>
   );

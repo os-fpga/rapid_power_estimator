@@ -144,8 +144,17 @@ function BramTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; BRAM</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="BRAM power"
+              total={powerTotal}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             bramData.map((row, index) => (
               <React.Fragment key={row.name}>
                 <tr>
@@ -193,7 +202,8 @@ function BramTable({ device, totalPowerCallback }) {
               </React.Fragment>
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
           <BramModal
             closeModal={() => {
@@ -218,14 +228,6 @@ function BramTable({ device, totalPowerCallback }) {
             }}
           />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="BRAM power"
-          total={powerTotal}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-        />
       </div>
     </div>
   );

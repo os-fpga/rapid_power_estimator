@@ -63,7 +63,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
       onClick={() => setOpenedTable(Table.Peripherals)}
     >
       <div className="periph-row-head">
-        <div>{Title}</div>
+        <div className="bold-text-title">{Title}</div>
         <div id="peripherals-power" className="grayed-text">
           {fixed(power)}
           {' W'}

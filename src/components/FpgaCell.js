@@ -10,7 +10,7 @@ function FpgaCell({
 }) {
   const { selectedItem } = useSelection();
   function getBaseClass() {
-    return (selectedItem === title) ? 'clickable selected' : 'clickable';
+    return (selectedItem === title) ? 'one-block clickable selected' : 'one-block clickable';
   }
   return (
     <State refValue={power} warn={powerWarm} err={powerErr} baseClass={getBaseClass()}>
@@ -18,6 +18,9 @@ function FpgaCell({
       <div className="grayed-text">
         {fixed(power)}
         {' W'}
+      </div>
+      <div className="grayed-text">
+        XX %
       </div>
     </State>
   );

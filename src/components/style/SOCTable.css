@@ -1,6 +1,5 @@
 .top-l2-col1 {
     display: flex;
-    min-height: 10px;
     width: fit-content;
     flex-direction: column;
     row-gap: 8px;
@@ -14,11 +13,10 @@
 }
 
 .top-l2-col1-row1-elem {
-    min-width: 160px;
+    width: 100%;
 }
 
 .top-l2-col1-row1-elem-text {
-    min-width: 160px;
     margin-top: 8px;
     margin-right: 8px;
     display: flex;

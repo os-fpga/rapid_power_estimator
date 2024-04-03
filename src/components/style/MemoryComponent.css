@@ -6,20 +6,36 @@
     row-gap: 5px;
     cursor: pointer;
     padding: 10px;
-    min-width: 85px;
 }
 
 .mem-line {
     display: flex;
     flex-direction: row;
+    column-gap: 5px;
 }
 
 .mem-value {
+    display: table-cell;
     width: 100%;
     text-align: right;
+    white-space: nowrap;
 }
 
 .mem-name {
+    display: table-cell;
     width: 100%;
     text-align: left;
+    white-space: nowrap;
 }
+
+.mem-grid-parent {
+    display: table-row;
+}
+
+.mem-grid {
+    display: table;
+}
+
+.mem-value:last-child {
+    min-width: 6ch; /* width for 000000 */
+  }

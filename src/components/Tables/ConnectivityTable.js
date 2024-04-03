@@ -116,8 +116,16 @@ function ConnectivityTable({ device }) {
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
         <div className="cpu-container">
-          <TableBase header={header}>
-            {
+          <div className="power-and-table-wrapper">
+            <PowerTable
+              title="Connectivity power"
+              total={null}
+              resourcesHeaders={powerHeader}
+              resources={powerData}
+              subHeader="Sub System"
+            />
+            <TableBase header={header}>
+              {
               endpoints.map((row, index) => (
                 (row.data !== undefined && row.data.name !== '') && (
                 <tr key={row.ep}>
@@ -141,7 +149,8 @@ function ConnectivityTable({ device }) {
                 )
               ))
             }
-          </TableBase>
+            </TableBase>
+          </div>
           {modalOpen
             && (
               <ConnectivityModal
@@ -169,13 +178,6 @@ function ConnectivityTable({ device }) {
             )}
         </div>
       </div>
-      <PowerTable
-        title="Connectivity power"
-        total={null}
-        resourcesHeaders={powerHeader}
-        resources={powerData}
-        subHeader="Sub System"
-      />
     </div>
   );
 }

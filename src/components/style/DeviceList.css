@@ -1,5 +1,7 @@
 .dev-table-container {
     padding: 4px;
+    white-space: nowrap;
+    font-size: 13px;
 }
 
 .devLabel {
@@ -7,13 +9,23 @@
 }
 
 .dev-table {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
     background-color: #eaeaea;
     border-collapse:separate;
     border-radius:20px;
-    border-spacing: 10px;
+    padding: 5px;
+    padding-left: 10px;
 }
 
 .dev-selector {
     background-color: #eaeaea;
     border-style: none;
+}
+
+.dev-table-res {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
 }

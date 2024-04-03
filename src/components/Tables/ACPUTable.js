@@ -131,6 +131,13 @@ function ACPUTable({ device }) {
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
         <div className="cpu-container">
+          <PowerTable
+            title="ACPU power"
+            total={null}
+            resourcesHeaders={powerHeader}
+            resources={powerData}
+            subHeader="Sub System"
+          />
           <div className="acpu-group-container">
             <div className="acpu-group">
               <label>ACPU name</label>
@@ -198,13 +205,6 @@ function ACPUTable({ device }) {
             )}
         </div>
       </div>
-      <PowerTable
-        title="ACPU power"
-        total={null}
-        resourcesHeaders={powerHeader}
-        resources={powerData}
-        subHeader="Sub System"
-      />
     </div>
   );
 }

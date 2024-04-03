@@ -65,7 +65,7 @@ function FpgaComponent({
         </div>
       </div>
       <div className="fpga-rowx" onClick={() => tableOpen(Table.IO)}>
-        <div id="io">
+        <div className="blocks-row">
           <FpgaCell
             title="IO"
             power={io}

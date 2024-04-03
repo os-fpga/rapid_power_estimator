@@ -25,78 +25,72 @@ function DeviceList({ devices, setDevice }) {
 
   return (
     <div className="dev-table-container">
-      <table className={getBaseName()}>
-        <thead>
-          <tr>
-            <td>
-              <div id="inner1">
-                <label>Device:</label>
-              </div>
-            </td>
-            <td>
-              <div className="col-md-6">
-                <select
-                  id="deviceId"
-                  className="dev-selector"
-                  onChange={DeviceOnChange}
-                  value={selectedDevice}
-                >
-                  <option key="" value="selectDev" disabled>
-                    Select a device...
-                  </option>
-                  {devices.map((data) => (
-                    <option key={data.id} value={data.id}>
-                      {data.id}
-                      {' '}
-                      {data.series}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </td>
-            <td>
-              <div className="devLabel">
-                <label>Logic Density</label>
-              </div>
-            </td>
-            <td>
-              <div id="inner1">
-                <label>{deviceInfo.logic_density || '(n/a)'}</label>
-              </div>
-            </td>
-            <td>
-              <div className="devLabel">
-                <label>Package</label>
-              </div>
-            </td>
-            <td>
-              <div id="inner1">
-                <label>{deviceInfo.package || '(n/a)'}</label>
-              </div>
-            </td>
-            <td>
-              <div className="devLabel">
-                <label>Speedgrade</label>
-              </div>
-            </td>
-            <td>
-              <div id="inner1">
-                <label>{deviceInfo.speedgrade || '(n/a)'}</label>
-              </div>
-            </td>
-            <td>
-              <div className="devLabel">
-                <label>Temp Grade</label>
-              </div>
-            </td>
-            <td>
-              <div id="inner1">
-                <label>{deviceInfo.temperature_grade || '(n/a)'}</label>
-              </div>
-            </td>
-          </tr>
-        </thead>
-      </table>
+      <div className={getBaseName()}>
+        <div className="dev-table-res">
+          <div id="inner1">
+            <label>Device:</label>
+          </div>
+          <select
+            id="deviceId"
+            className="dev-selector"
+            onChange={DeviceOnChange}
+            value={selectedDevice}
+          >
+            <option key="" value="selectDev" disabled>
+              Select a device...
+            </option>
+            {devices.map((data) => (
+              <option key={data.id} value={data.id}>
+                {data.id}
+                {' '}
+                {data.series}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="dev-table-res">
+          <div>
+            <div className="devLabel">
+              <label>Logic Density</label>
+            </div>
+          </div>
+          <div>
+            <div id="inner1">
+              <label>{deviceInfo.logic_density || '(n/a)'}</label>
+            </div>
+          </div>
+          <div>
+            <div className="devLabel">
+              <label>Package</label>
+            </div>
+          </div>
+          <div>
+            <div id="inner1">
+              <label>{deviceInfo.package || '(n/a)'}</label>
+            </div>
+          </div>
+          <div>
+            <div className="devLabel">
+              <label>Speedgrade</label>
+            </div>
+          </div>
+          <div>
+            <div id="inner1">
+              <label>{deviceInfo.speedgrade || '(n/a)'}</label>
+            </div>
+          </div>
+          <div>
+            <div className="devLabel">
+              <label>Temp Grade</label>
+            </div>
+          </div>
+          <div>
+            <div id="inner1">
+              <label>{deviceInfo.temperature_grade || '(n/a)'}</label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

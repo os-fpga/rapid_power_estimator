@@ -11,39 +11,35 @@ function TitleComponent({
     return dynamicPower + staticPower;
   }
   return (
-    <>
+    <div>
       <div className="bold-text-title">{title}</div>
-      <div className="row-container">
-        <div className="bold-text">Total</div>
-        <div className="label-value bold-text">
+      <div className="title-grid">
+        <div className="title-comp-total-text">Total</div>
+        <div className="label-value title-comp-total-text">
           {fixed(getTotal())}
           {' W'}
         </div>
-        <div className="label-value bold-text label-percent">0 %</div>
-      </div>
-      <div className="row-container">
+        <div className="label-value title-comp-total-text">0 %</div>
         <div className="grayed-text">Dynamic</div>
         <div className="grayed-text label-value">
           {fixed(dynamicPower)}
           {' W'}
         </div>
-        <div className="grayed-text label-value label-percent">
+        <div className="grayed-text label-value">
           {fixed(getTotal() ? ((dynamicPower / getTotal()) * 100) : 0, 0)}
           {' %'}
         </div>
-      </div>
-      <div className="row-container">
         <div className="grayed-text">{staticText}</div>
         <div className="grayed-text label-value">
           {fixed(staticPower)}
           {' W'}
         </div>
-        <div className="grayed-text label-value label-percent">
+        <div className="grayed-text label-value">
           {fixed(getTotal() ? ((staticPower / getTotal()) * 100) : 0, 0)}
           {' %'}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

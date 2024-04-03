@@ -144,6 +144,13 @@ function BCPUTable({ device }) {
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
         <div className="cpu-container">
+          <PowerTable
+            title="BCPU power"
+            total={null}
+            resourcesHeaders={powerHeader}
+            resources={powerData}
+            subHeader="Sub System"
+          />
           <div className="acpu-group-container">
             <div className="acpu-group">
               <label>BCPU name</label>
@@ -219,13 +226,6 @@ function BCPUTable({ device }) {
             )}
         </div>
       </div>
-      <PowerTable
-        title="BCPU power"
-        total={null}
-        resourcesHeaders={powerHeader}
-        resources={powerData}
-        subHeader="Sub System"
-      />
     </div>
   );
 }

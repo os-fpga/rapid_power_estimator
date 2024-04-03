@@ -43,7 +43,7 @@ function PowerSummaryTable({
           </label>
           <progress id="progress-bar" value={percent} max={100} />
         </div>
-        <div className="pst-bottom-total grayed-text bold-text-title">
+        <div className="pst-bottom-total bold-text-title">
           Total
           <span className="bold-text-title">{`  ${fixed(total)} W`}</span>
         </div>

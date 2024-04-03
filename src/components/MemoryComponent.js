@@ -74,11 +74,15 @@ function MemoryComponent({ device }) {
           {fixed(power)}
           {' W'}
         </div>
+        <div className="grayed-text bold-text mem-value">
+          XXX %
+        </div>
       </div>
-      {
+      <div className="mem-grid">
+        {
           memData.map((item, index) => (
             // eslint-disable-next-line react/no-array-index-key
-            <div key={index} className="mem-line grayed-text">
+            <div key={index} className="mem-line-parent grayed-text">
               <div className="mem-name">{item.name}</div>
               <div className="mem-value">
                 {fixed(item.consumption.block_power)}
@@ -91,6 +95,7 @@ function MemoryComponent({ device }) {
             </div>
           ))
       }
+      </div>
     </State>
   );
 }

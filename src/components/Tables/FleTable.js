@@ -95,8 +95,17 @@ function FleTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; FLE</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="FLE power"
+              total={powerTotal}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             fleData.map((row, index) => (
               <tr key={row.name}>
                 <td>{row.name}</td>
@@ -124,7 +133,8 @@ function FleTable({ device, totalPowerCallback }) {
               </tr>
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
           <FleModal
             closeModal={() => {
@@ -143,14 +153,6 @@ function FleTable({ device, totalPowerCallback }) {
             }}
           />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="FLE power"
-          total={powerTotal}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-        />
       </div>
     </div>
   );

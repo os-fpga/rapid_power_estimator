@@ -167,7 +167,6 @@ jobs:
       - name: Create Package on ${{ matrix.os }}
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'windows-latest' }}
         run: |
-             pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py
              npm run dist
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -183,7 +182,6 @@ jobs:
                 cd /work
                 npm install
                 python3 -m pip install -r requirements.txt
-                pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py
                 npm run dist
                 ls dist
                 tar -czvf rapid_power_estimator.tar.gz -C dist/linux-unpacked .

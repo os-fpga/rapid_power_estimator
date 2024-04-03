@@ -19,6 +19,7 @@
       "build/**/*",
       "src/**/*",
       "main.js",
+      "preload.js",
       "rpe.config.json",
       "node_modules/**/*",
       "package.json"

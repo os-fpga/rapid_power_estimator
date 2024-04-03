@@ -14,6 +14,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 restapi_server.spec
+restapi_server.exe.spec
+backend/restapi_server.exe
 
 # C extensions
 *.so

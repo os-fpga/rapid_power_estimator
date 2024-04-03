@@ -100,7 +100,7 @@ jobs:
         run: python3 -m pytest
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/')
+#    if: startsWith(github.ref, 'refs/tags/')
     needs: build 	
     strategy:
       fail-fast: false
@@ -202,9 +202,9 @@ jobs:
         run: |
             echo ${{ github.ref }}     
 
-      - name: Upload Release
-        uses: softprops/action-gh-release@v1
-        with:
-            files: dist/rapid_power_estimator*.tar.gz*
+  #    - name: Upload Release
+  #      uses: softprops/action-gh-release@v1
+  #      with:
+  #          files: dist/rapid_power_estimator*.tar.gz*
 
 

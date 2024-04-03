@@ -191,12 +191,12 @@ jobs:
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Upload Package
-#        if: ${{ matrix.os != 'ubuntu-latest' }}
-#        uses: actions/upload-artifact@v3
-#        with:
-#            name: rapid_power_estimator_${{ matrix.os }}
-#            path: dist/rapid_power_estimator*.tar.gz*
+      - name: Upload Package
+        if: ${{ matrix.os != 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+            name: rapid_power_estimator_${{ matrix.os }}
+            path: dist/rapid_power_estimator*.tar.gz*
  
       - name: Run on refs/tags only
         run: |

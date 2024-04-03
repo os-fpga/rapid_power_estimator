@@ -113,9 +113,8 @@ function App() {
     setNotes(data);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleLangChange = (val) => {
-    // implementation TBD
-    console.log(val);
   };
 
   const handleConfigChange = (name, val) => {

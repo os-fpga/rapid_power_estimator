@@ -200,7 +200,7 @@ jobs:
             path: dist/rapid_power_estimator*.tar.gz*    
 
       - name: Upload Release
-  	if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
             files: dist/rapid_power_estimator*.tar.gz*

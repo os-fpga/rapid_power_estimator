@@ -105,7 +105,7 @@ const startFlaskServer = () => {
   });
 
   apiServer.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
+    console.log(`serverProcess exited with code ${code}`);
   });
 
   apiServer.on('message', (message) => {
@@ -115,7 +115,7 @@ const startFlaskServer = () => {
   return apiServer;
 };
 
-let child = null;
+let serverProcess = null;
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -132,18 +132,26 @@ const createWindow = () => {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send('loadConfig', store.store);
+  });
+
   ipcMain.on('config', (event, arg) => {
     store.set('port', arg.port);
     store.set('device_xml', arg.device_xml);
 
-    child.kill();
-    child = startFlaskServer();
-    mainWindow.reload();
+    serverProcess.kill();
+
+    app.relaunch();
+    app.quit();
+  });
+  ipcMain.on('getConfig', (event, arg) => {
+    mainWindow.webContents.send('loadConfig', store.store);
   });
 };
 
 app.whenReady().then(() => {
-  child = startFlaskServer();
+  serverProcess = startFlaskServer();
   createWindow();
 
   app.on('activate', () => {
@@ -152,6 +160,6 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  child.kill('SIGINT');
+  serverProcess.kill('SIGINT');
   if (process.platform !== 'darwin') app.quit();
 });

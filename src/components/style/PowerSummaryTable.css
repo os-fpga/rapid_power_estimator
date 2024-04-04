@@ -50,6 +50,8 @@
 .pst-bottom-total {
     text-align: right;
     width: 100%;
+    color: #7c7c7c;
+    font-size: 17px;
 }
 
 .dot-td {

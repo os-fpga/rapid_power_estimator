@@ -158,8 +158,16 @@ function IOTable({ device, totalPowerCallback }) {
           <label>FPGA &gt; IO</label>
           <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <IOPowerTable
+              title="IO power"
+              total={powerTotal}
+              resources={powerTable !== null ? powerTable : defaultPowerData}
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             ioData.map((row, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
@@ -198,7 +206,8 @@ function IOTable({ device, totalPowerCallback }) {
               </tr>
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
           <IOModal
             closeModal={() => {
@@ -209,13 +218,6 @@ function IOTable({ device, totalPowerCallback }) {
             defaultValue={(editIndex !== null && ioData[editIndex]) || defaultIOData}
           />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <IOPowerTable
-          title="IO power"
-          total={powerTotal}
-          resources={powerTable !== null ? powerTable : defaultPowerData}
-        />
       </div>
     </div>
   );

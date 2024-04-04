@@ -8,6 +8,7 @@ import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
@@ -21,6 +22,7 @@ function MemoryTable({ device }) {
     { id: 0, data: {} },
     { id: 1, data: {} },
   ]);
+  const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
     '', 'Memory', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
@@ -75,6 +77,7 @@ function MemoryTable({ device }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     publish('memoryChanged');
+    updateTotalPower(device);
   };
 
   const resourcesHeaders = [
@@ -88,6 +91,7 @@ function MemoryTable({ device }) {
     server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, () => {
       fetchData();
       publish('memoryChanged');
+      updateTotalPower(device);
     });
   }
 
@@ -97,8 +101,18 @@ function MemoryTable({ device }) {
         <div className="layout-head">
           <label>FPGA &gt; Memory</label>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="Memory power"
+              total={null}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+              subHeader="Sub System"
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             memoryData.map((row, index) => (
               row.data.enable !== undefined && (
                 <tr key={row.id}>
@@ -130,7 +144,8 @@ function MemoryTable({ device }) {
               )
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
         <MemoryModal
           closeModal={() => {
@@ -148,15 +163,6 @@ function MemoryTable({ device }) {
           }}
         />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="Memory power"
-          total={null}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-          subHeader="Sub System"
-        />
       </div>
     </div>
   );

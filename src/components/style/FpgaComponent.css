@@ -6,6 +6,7 @@
     flex-direction: column;
     padding: 8px;
     background-color: #efefef;
+    height: 100%;
 }
 
 .fpga-main-head {
@@ -18,13 +19,16 @@
     display: flex;
     flex-direction: row;
     column-gap: 8px;
+    height: 100%;
 }
 
 .clickable {
     cursor: pointer;
     padding: 5px;
-    min-width: 85px;
-    min-height: 75px;
+}
+
+.one-block {
+    height: 100%;
 }
 
 #io {
@@ -44,11 +48,13 @@
 
 .grayed-text {
     color: #7c7c7c;
-    font-size: 0.9em;
+    font-size: 12px;
 }
 
 .blocks-row {
     display: flex;
     flex-direction: column;
     row-gap: 5px;
+    width: 100%;
+    height: 100%;
 }

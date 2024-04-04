@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { fixed } from '../utils/common';
 
 import './style/CPUComponent.css';
@@ -8,7 +9,7 @@ const text = [
 ];
 
 function CPUComponent({
-  title, power, name, endpointText = text, ep0 = 0, ep1 = 0, ep2 = 0, ep3 = 0,
+  title, power, percent = '0', name, endpointText = text, ep0 = 0, ep1 = 0, ep2 = 0, ep3 = 0,
 }) {
   return (
     <div className="cpu-component-top">
@@ -17,6 +18,10 @@ function CPUComponent({
         <div className="cpu-component-power grayed-text">
           {fixed(power, 3)}
           {' W'}
+        </div>
+        <div className="cpu-component-power grayed-text">
+          {percent}
+          {' %'}
         </div>
       </div>
       <div className="cpu-component-l2">
@@ -53,5 +58,21 @@ function CPUComponent({
     </div>
   );
 }
+
+CPUComponent.propTypes = {
+  title: PropTypes.string.isRequired,
+  power: PropTypes.number.isRequired,
+  percent: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  endpointText: PropTypes.arrayOf(PropTypes.string),
+  ep0: PropTypes.number.isRequired,
+  ep1: PropTypes.number.isRequired,
+  ep2: PropTypes.number.isRequired,
+  ep3: PropTypes.number.isRequired,
+};
+
+CPUComponent.defaultProps = {
+  endpointText: text,
+};
 
 export default CPUComponent;

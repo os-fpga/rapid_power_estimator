@@ -13,11 +13,17 @@
 .periph-row-head {
     display: flex;
     flex-direction: row;
+    column-gap: 10px;
 }
 
-#peripherals-power {
+.peripherals-power {
     text-align: right;
+    white-space: nowrap;
+}
+
+.periph-title {
     width: 100%;
+    text-align: left;
 }
 
 .periph-row {

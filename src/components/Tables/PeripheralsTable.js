@@ -5,13 +5,14 @@ import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import * as per from '../../utils/peripherals';
-import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
 function PeripheralsTable({ device }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
+  const { updateTotalPower } = useSocTotalPower();
   const [peripherals, setPeripherals] = React.useState([
     {
       id: 'spi',
@@ -136,7 +137,7 @@ function PeripheralsTable({ device }) {
     const { url } = peripherals[index.main].data[index.inner];
     server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
-      publish('peripheralsChanged');
+      updateTotalPower(device);
     });
   }
 
@@ -151,7 +152,7 @@ function PeripheralsTable({ device }) {
     const { url } = peripherals[index].data[idx];
     server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
-      publish('peripheralsChanged');
+      updateTotalPower(device);
     });
   }
 

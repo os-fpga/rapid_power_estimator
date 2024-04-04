@@ -1,55 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PeripheralsComponent from './PeripheralsComponent';
-import { Table, State } from '../utils/common';
+import { Table, State, percentage } from '../utils/common';
 import TitleComponent from './TitleComponent';
 import ABCPUComponent from './ABCPUComponent';
 import DMAComponent from './DMAComponent';
 import ConnectivityComponent from './ConnectivityComponent';
-import { subscribe, unsubscribe } from '../utils/events';
-import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 import './style/SOCTable.css';
 
 function SOCTable({ device, setOpenedTable }) {
-  const [dynamicPower, setDynamicPower] = React.useState(0);
-  const [staticPower, setStaticPower] = React.useState(0);
-  const [acpuPower, setAcpuPower] = React.useState(0);
-  const [bcpuPower, setBcpuPower] = React.useState(0);
   const { selectedItem } = useSelection();
+  const {
+    power, dynamicPower, staticPower, updateTotalPower,
+  } = useSocTotalPower();
 
   function componentChanged() {
     if (device !== null) {
-      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-        setDynamicPower(data.total_acpu_power
-          + data.total_bcpu_power
-          + data.total_peripherals_power
-          + data.total_dma_power
-          + data.total_noc_interconnect_power
-          + data.total_memory_power);
-        setAcpuPower(data.total_acpu_power);
-        setBcpuPower(data.total_bcpu_power);
-      });
-      // todo, pending for backend implementation
-      setStaticPower(0);
+      updateTotalPower(device);
     }
   }
-
-  React.useEffect(() => {
-    subscribe('cpuChanged', componentChanged);
-    subscribe('dmaChanged', componentChanged);
-    subscribe('peripheralsChanged', componentChanged);
-    subscribe('interconnectChanged', componentChanged);
-    subscribe('memoryChanged', componentChanged);
-    return () => {
-      unsubscribe('cpuChanged', componentChanged);
-      unsubscribe('dmaChanged', componentChanged);
-      unsubscribe('peripheralsChanged', componentChanged);
-      unsubscribe('interconnectChanged', componentChanged);
-      unsubscribe('memoryChanged', componentChanged);
-    };
-  });
 
   React.useEffect(() => {
     if (device !== null) componentChanged();
@@ -67,22 +39,24 @@ function SOCTable({ device, setOpenedTable }) {
     <div className="top-l2-col1">
       <div className="top-l2-col1-row1">
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.ACPU)}>
-          <State refValue={acpuPower} warn={warn} err={error} baseClass={getBaseName('ACPU')}>
+          <State refValue={power.total_acpu_power} warn={warn} err={error} baseClass={getBaseName('ACPU')}>
             <ABCPUComponent
               device={device}
               title="ACPU"
               index="acpu"
-              power={acpuPower}
+              power={power.total_acpu_power}
+              percent={percentage(power.total_acpu_power, dynamicPower)}
             />
           </State>
         </div>
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.BCPU)}>
-          <State refValue={bcpuPower} warn={warn} err={error} baseClass={getBaseName('BCPU')}>
+          <State refValue={power.total_bcpu_power} warn={warn} err={error} baseClass={getBaseName('BCPU')}>
             <ABCPUComponent
               device={device}
               title="BCPU"
               index="bcpu"
-              power={bcpuPower}
+              power={power.total_bcpu_power}
+              percent={percentage(power.total_bcpu_power, dynamicPower)}
             />
           </State>
         </div>

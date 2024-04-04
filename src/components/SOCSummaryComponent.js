@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PowerSummaryTable from './Tables/PowerSummaryTable';
-import * as server from '../utils/serverAPI';
 import { percentage } from '../utils/common';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 function SOCSummaryComponent({ device }) {
   const [data, setData] = React.useState([
@@ -47,39 +47,31 @@ function SOCSummaryComponent({ device }) {
       percent: 0,
     },
   ]);
+  const { power, dynamicPower, staticPower } = useSocTotalPower();
 
   React.useEffect(() => {
     if (device !== null) {
-      server.GET(server.api.consumption(server.Elem.peripherals, device), (consumption) => {
-        const newData = data;
-        const dynamic = consumption.total_memory_power
-      + consumption.total_peripherals_power
-      + consumption.total_acpu_power
-      + consumption.total_dma_power
-      + consumption.total_noc_interconnect_power
-      + consumption.total_bcpu_power;
-        const stat = 0;
-        newData[0].power = consumption.total_memory_power;
-        newData[0].percent = percentage(consumption.total_memory_power, dynamic);
-        newData[1].power = consumption.total_peripherals_power;
-        newData[1].percent = percentage(consumption.total_peripherals_power, dynamic);
-        newData[2].power = consumption.total_acpu_power;
-        newData[2].percent = percentage(consumption.total_acpu_power, dynamic);
-        newData[3].power = consumption.total_dma_power;
-        newData[3].percent = percentage(consumption.total_dma_power, dynamic);
-        newData[4].power = consumption.total_noc_interconnect_power;
-        newData[4].percent = percentage(consumption.total_noc_interconnect_power, dynamic);
-        newData[5].power = consumption.total_bcpu_power;
-        newData[5].percent = percentage(consumption.total_bcpu_power, dynamic);
-        newData[6].power = dynamic;
-        newData[6].percent = percentage(dynamic, dynamic + stat);
-        newData[7].power = stat;
-        newData[7].percent = percentage(stat, dynamic + stat);
-        setData([...newData]);
-      });
+      const newData = data;
+      newData[0].power = power.total_memory_power;
+      newData[0].percent = percentage(power.total_memory_power, dynamicPower);
+      newData[1].power = power.total_peripherals_power;
+      newData[1].percent = percentage(power.total_peripherals_power, dynamicPower);
+      newData[2].power = power.total_acpu_power;
+      newData[2].percent = percentage(power.total_acpu_power, dynamicPower);
+      newData[3].power = power.total_dma_power;
+      newData[3].percent = percentage(power.total_dma_power, dynamicPower);
+      newData[4].power = power.total_noc_interconnect_power;
+      newData[4].percent = percentage(power.total_noc_interconnect_power, dynamicPower);
+      newData[5].power = power.total_bcpu_power;
+      newData[5].percent = percentage(power.total_bcpu_power, dynamicPower);
+      newData[6].power = dynamicPower;
+      newData[6].percent = percentage(dynamicPower, dynamicPower + staticPower);
+      newData[7].power = staticPower;
+      newData[7].percent = percentage(staticPower, dynamicPower + staticPower);
+      setData([...newData]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }, [device, power]);
 
   return (
     <PowerSummaryTable

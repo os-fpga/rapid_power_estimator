@@ -1,15 +1,16 @@
+.title-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    white-space: nowrap;
+    gap: 1px 5px;
+}
+
 .label-value {
     width: 100%;
     text-align: right;
 }
 
-.row-container {
-    display: flex;
-    flex-direction: row;
-    white-space: nowrap;
-    color: black;
-}
-
-.label-percent {
-    max-width: 50px;
+.title-comp-total-text {
+    font-size: 12px;
+    font-weight: bold;
 }

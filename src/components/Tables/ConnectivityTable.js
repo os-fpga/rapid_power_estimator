@@ -10,6 +10,7 @@ import {
 } from './TableCells';
 import { GetText, fixed } from '../../utils/common';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ACPUTable.css';
 
@@ -21,6 +22,7 @@ function ConnectivityTable({ device }) {
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(false);
+  const { updateTotalPower } = useSocTotalPower();
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -91,6 +93,7 @@ function ConnectivityTable({ device }) {
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchConnectivityData);
     publish('interconnectChanged');
+    updateTotalPower(device);
   };
 
   function addRow(newData) {
@@ -105,6 +108,7 @@ function ConnectivityTable({ device }) {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
     publish('interconnectChanged');
+    updateTotalPower(device);
   };
 
   const powerHeader = ['Power', '%'];
@@ -116,8 +120,16 @@ function ConnectivityTable({ device }) {
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
         <div className="cpu-container">
-          <TableBase header={header}>
-            {
+          <div className="power-and-table-wrapper">
+            <PowerTable
+              title="Connectivity power"
+              total={null}
+              resourcesHeaders={powerHeader}
+              resources={powerData}
+              subHeader="Sub System"
+            />
+            <TableBase header={header}>
+              {
               endpoints.map((row, index) => (
                 (row.data !== undefined && row.data.name !== '') && (
                 <tr key={row.ep}>
@@ -141,7 +153,8 @@ function ConnectivityTable({ device }) {
                 )
               ))
             }
-          </TableBase>
+            </TableBase>
+          </div>
           {modalOpen
             && (
               <ConnectivityModal
@@ -169,13 +182,6 @@ function ConnectivityTable({ device }) {
             )}
         </div>
       </div>
-      <PowerTable
-        title="Connectivity power"
-        total={null}
-        resourcesHeaders={powerHeader}
-        resources={powerData}
-        subHeader="Sub System"
-      />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
 
 function ABCPUComponent({
-  device, title, index, power,
+  device, title, index, power, percent,
 }) {
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
@@ -54,6 +54,7 @@ function ABCPUComponent({
     <CPUComponent
       title={title}
       power={power}
+      percent={percent}
       name={name}
       ep0={ep0}
       ep1={ep1}

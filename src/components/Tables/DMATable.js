@@ -9,6 +9,7 @@ import { fixed } from '../../utils/common';
 import { PercentsCell, PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
@@ -25,6 +26,7 @@ function DMATable({ device }) {
     { id: 3, data: {} },
   ]);
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
+  const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
     'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
@@ -85,6 +87,7 @@ function DMATable({ device }) {
     const data = { enable: false };
     server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, fetchData);
     publish('dmaChanged');
+    updateTotalPower(device);
   };
 
   function addRow(newData) {
@@ -100,6 +103,7 @@ function DMATable({ device }) {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
     publish('dmaChanged');
+    updateTotalPower(device);
   };
 
   const resourcesHeaders = [
@@ -113,8 +117,18 @@ function DMATable({ device }) {
           <label>FPGA &gt; DMA</label>
           <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
         </div>
-        <TableBase header={mainTableHeader}>
-          {
+        <div className="power-and-table-wrapper">
+          <div className="power-table-wrapper">
+            <PowerTable
+              title="DMA power"
+              total={null}
+              resourcesHeaders={resourcesHeaders}
+              resources={powerTable}
+              subHeader="Sub System"
+            />
+          </div>
+          <TableBase header={mainTableHeader}>
+            {
             dmaData.map((row, index) => (
               row.data.enable && (
                 <tr key={row.id}>
@@ -138,7 +152,8 @@ function DMATable({ device }) {
               )
             ))
           }
-        </TableBase>
+          </TableBase>
+        </div>
         {modalOpen && (
         <DMAModal
           closeModal={() => {
@@ -157,15 +172,6 @@ function DMATable({ device }) {
           }}
         />
         )}
-      </div>
-      <div className="power-table-wrapper">
-        <PowerTable
-          title="DMA power"
-          total={null}
-          resourcesHeaders={resourcesHeaders}
-          resources={powerTable}
-          subHeader="Sub System"
-        />
       </div>
     </div>
   );

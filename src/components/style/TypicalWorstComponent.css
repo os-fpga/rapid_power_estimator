@@ -1,13 +1,13 @@
 .twc-main {
     display: flex;
     flex-direction: row;
-    border: 1px solid gray;
+    border: 1px solid #E1E1E1;
     border-radius: 5px;
     padding: 8px;
 }
 
 .big-font {
-    font-size: 1.5rem;
+    font-size: 28px;
 }
 
 .column {

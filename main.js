@@ -118,7 +118,7 @@ const startFlaskServer = () => {
 let child = null;
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 1100,
+    width: 1200,
     height: 700,
     webPreferences: {
       preload: path.join(app.getAppPath(), 'preload.js'),

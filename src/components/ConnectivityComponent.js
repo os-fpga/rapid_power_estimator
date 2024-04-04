@@ -2,8 +2,9 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
-import { State } from '../utils/common';
+import { State, percentage } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 function ConnectivityComponent({ device }) {
   const [name, setName] = React.useState('');
@@ -11,8 +12,8 @@ function ConnectivityComponent({ device }) {
   const [ep1, setEp1] = React.useState(0);
   const [ep2, setEp2] = React.useState(0);
   const [ep3, setEp3] = React.useState(0);
-  const [power, setPower] = React.useState(0);
   const { selectedItem } = useSelection();
+  const { power, dynamicPower } = useSocTotalPower();
   const endpoints = [
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ];
@@ -22,9 +23,6 @@ function ConnectivityComponent({ device }) {
       server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
     }
     if (device === null) return;
-    server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-      setPower(data.total_noc_interconnect_power);
-    });
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
       const fpgaComplex = data.fpga_complex;
       const { href } = fpgaComplex[0];
@@ -56,10 +54,16 @@ function ConnectivityComponent({ device }) {
   }
 
   return (
-    <State refValue={power} warn={warn} err={error} baseClass={getBaseName()}>
+    <State
+      refValue={power.total_noc_interconnect_power}
+      warn={warn}
+      err={error}
+      baseClass={getBaseName()}
+    >
       <CPUComponent
         title={Title}
-        power={power}
+        power={power.total_noc_interconnect_power}
+        percent={percentage(power.total_noc_interconnect_power, dynamicPower)}
         name={name}
         ep0={ep0}
         ep1={ep1}

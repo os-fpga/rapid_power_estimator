@@ -2,25 +2,23 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
-import { State } from '../utils/common';
+import { State, percentage } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 function DMAComponent({ device }) {
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
   const [ep2, setEp2] = React.useState(0);
   const [ep3, setEp3] = React.useState(0);
-  const [power, setPower] = React.useState(0);
   const { selectedItem } = useSelection();
+  const { power, dynamicPower } = useSocTotalPower();
 
   function fetchEndPoint(href, setEp) {
     server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
   }
 
   function update() {
-    server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-      setPower(data.total_dma_power);
-    });
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
       if (data.dma !== null) {
         fetchEndPoint(`${data.dma[0].href}`, setEp0);
@@ -54,11 +52,12 @@ function DMAComponent({ device }) {
   }
 
   return (
-    <State refValue={power} warn={warn} err={error} baseClass={getBaseName()}>
+    <State refValue={power.total_dma_power} warn={warn} err={error} baseClass={getBaseName()}>
       <CPUComponent
         title={Title}
-        power={power}
-        name={null}
+        power={power.total_dma_power}
+        percent={percentage(power.total_dma_power, dynamicPower)}
+        name=""
         ep0={ep0}
         ep1={ep1}
         ep2={ep2}

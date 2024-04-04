@@ -1,7 +1,10 @@
 import React from 'react';
-import { Table, fixed, State } from '../utils/common';
+import {
+  Table, fixed, State, percentage,
+} from '../utils/common';
 import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 import './style/Peripherals.css';
 
@@ -15,8 +18,8 @@ function PeripheralsComponent({ setOpenedTable, device }) {
   const [uart0, setUart0] = React.useState(0);
   const [uart1, setUart1] = React.useState(0);
   const [gpio, setGPIO] = React.useState(0);
-  const [power, setPower] = React.useState(0);
   const { selectedItem } = useSelection();
+  const { power, dynamicPower } = useSocTotalPower();
 
   function fetchPeripherals(deviceId, key, url) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
@@ -35,9 +38,6 @@ function PeripheralsComponent({ setOpenedTable, device }) {
   }
   React.useEffect(() => {
     if (device !== null) {
-      server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-        setPower(data.total_peripherals_power);
-      });
       setGPIO(0);
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         // eslint-disable-next-line no-restricted-syntax
@@ -63,10 +63,14 @@ function PeripheralsComponent({ setOpenedTable, device }) {
       onClick={() => setOpenedTable(Table.Peripherals)}
     >
       <div className="periph-row-head">
-        <div>{Title}</div>
-        <div id="peripherals-power" className="grayed-text">
-          {fixed(power)}
+        <div className="periph-title bold-text-title">{Title}</div>
+        <div className="peripherals-power grayed-text">
+          {fixed(power.total_peripherals_power)}
           {' W'}
+        </div>
+        <div className=" peripherals-power grayed-text">
+          {percentage(power.total_peripherals_power, dynamicPower)}
+          {' %'}
         </div>
       </div>
       <div className="periph-row">

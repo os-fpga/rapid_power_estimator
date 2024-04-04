@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as server from '../utils/serverAPI';
-import { fixed, State } from '../utils/common';
+import { fixed, State, percentage } from '../utils/common';
 import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 import './style/MemoryComponent.css';
 
@@ -24,13 +25,10 @@ function MemoryComponent({ device }) {
       },
     },
   ]);
-  const [power, setPower] = React.useState(0);
   const { selectedItem } = useSelection();
+  const { power, dynamicPower } = useSocTotalPower();
 
   function update() {
-    server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
-      setPower(data.total_memory_power);
-    });
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
       const { memory } = data;
       memory.forEach((mem) => {
@@ -67,18 +65,23 @@ function MemoryComponent({ device }) {
   }
 
   return (
-    <State refValue={power} warn={warn} err={error} baseClass={getBaseClass()}>
+    <State refValue={power.total_memory_power} warn={warn} err={error} baseClass={getBaseClass()}>
       <div className="mem-line">
         <div className="bold-text">{Title}</div>
         <div className="grayed-text bold-text mem-value">
-          {fixed(power)}
+          {fixed(power.total_memory_power)}
           {' W'}
         </div>
+        <div className="grayed-text bold-text mem-value">
+          {percentage(power.total_memory_power, dynamicPower)}
+          {' %'}
+        </div>
       </div>
-      {
+      <div className="mem-grid">
+        {
           memData.map((item, index) => (
             // eslint-disable-next-line react/no-array-index-key
-            <div key={index} className="mem-line grayed-text">
+            <div key={index} className="mem-line-parent grayed-text">
               <div className="mem-name">{item.name}</div>
               <div className="mem-value">
                 {fixed(item.consumption.block_power)}
@@ -91,6 +94,7 @@ function MemoryComponent({ device }) {
             </div>
           ))
       }
+      </div>
     </State>
   );
 }

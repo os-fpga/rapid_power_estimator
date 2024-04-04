@@ -10,6 +10,7 @@ import {
 } from './TableCells';
 import { GetText, fixed } from '../../utils/common';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ACPUTable.css';
 
@@ -21,6 +22,7 @@ function ConnectivityTable({ device }) {
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(false);
+  const { updateTotalPower } = useSocTotalPower();
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -91,6 +93,7 @@ function ConnectivityTable({ device }) {
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchConnectivityData);
     publish('interconnectChanged');
+    updateTotalPower(device);
   };
 
   function addRow(newData) {
@@ -105,6 +108,7 @@ function ConnectivityTable({ device }) {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
     publish('interconnectChanged');
+    updateTotalPower(device);
   };
 
   const powerHeader = ['Power', '%'];

@@ -1,3 +1,4 @@
+// TODO, remove this file after migration to context object
 function subscribe(eventName, listener) {
   document.addEventListener(eventName, listener);
 }

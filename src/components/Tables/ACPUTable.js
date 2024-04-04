@@ -8,6 +8,7 @@ import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ACPUTable.css';
 
@@ -23,6 +24,7 @@ function ACPUTable({ device }) {
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
+  const { updateTotalPower } = useSocTotalPower();
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -90,6 +92,7 @@ function ACPUTable({ device }) {
   const handleChange = (name, val) => {
     setAcpuData({ ...acpuData, [name]: val });
     publish('cpuChanged', 'acpu');
+    updateTotalPower(device);
   };
 
   const header = ['Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power', 'Action'];
@@ -106,6 +109,7 @@ function ACPUTable({ device }) {
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchAcpuData);
     publish('cpuChanged', 'acpu');
+    updateTotalPower(device);
   };
 
   function addRow(newData) {
@@ -120,6 +124,7 @@ function ACPUTable({ device }) {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
     publish('cpuChanged', 'acpu');
+    updateTotalPower(device);
   };
 
   const powerHeader = ['Power', '%'];

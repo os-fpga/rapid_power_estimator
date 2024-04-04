@@ -10,6 +10,7 @@ import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ACPUTable.css';
 
@@ -29,6 +30,7 @@ function BCPUTable({ device }) {
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
+  const { updateTotalPower } = useSocTotalPower();
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -98,6 +100,7 @@ function BCPUTable({ device }) {
   const handleChange = (name, val) => {
     setBcpuData({ ...bcpuData, [name]: val });
     publish('cpuChanged', 'bcpu');
+    updateTotalPower(device);
   };
 
   const header = ['Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power', 'Action'];
@@ -114,6 +117,7 @@ function BCPUTable({ device }) {
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchAcpuData);
     publish('cpuChanged', 'bcpu');
+    updateTotalPower(device);
   };
 
   function addRow(newData) {
@@ -128,12 +132,14 @@ function BCPUTable({ device }) {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
     publish('cpuChanged', 'bcpu');
+    updateTotalPower(device);
   };
 
   const encryptionHandler = React.useCallback((state) => {
     setBcpuData({ ...bcpuData, encryption_used: state });
     publish('cpuChanged', 'bcpu');
-  }, [bcpuData]);
+    updateTotalPower(device);
+  }, [bcpuData, device, updateTotalPower]);
 
   const powerHeader = ['Power', '%'];
   return (

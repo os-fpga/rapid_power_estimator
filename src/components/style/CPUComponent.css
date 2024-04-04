@@ -23,6 +23,8 @@
 .cpu-component-title {
     font-weight: bold;
     display: inline-block;
+    width: 100%;
+    text-align: left;
 }
 
 .cpu-component-power {

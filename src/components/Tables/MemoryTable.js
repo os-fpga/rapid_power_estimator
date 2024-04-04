@@ -8,6 +8,7 @@ import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import { publish } from '../../utils/events';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
@@ -21,6 +22,7 @@ function MemoryTable({ device }) {
     { id: 0, data: {} },
     { id: 1, data: {} },
   ]);
+  const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
     '', 'Memory', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
@@ -75,6 +77,7 @@ function MemoryTable({ device }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     publish('memoryChanged');
+    updateTotalPower(device);
   };
 
   const resourcesHeaders = [
@@ -88,6 +91,7 @@ function MemoryTable({ device }) {
     server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, () => {
       fetchData();
       publish('memoryChanged');
+      updateTotalPower(device);
     });
   }
 

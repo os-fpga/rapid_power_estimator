@@ -96,7 +96,7 @@ function MemoryTable({ device }) {
   }
 
   return (
-    <div className="component-table-head">
+    <div className="component-table-head main-border">
       <div className="main-block">
         <div className="layout-head">
           <label>FPGA &gt; Memory</label>

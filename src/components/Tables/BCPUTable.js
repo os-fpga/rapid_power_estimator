@@ -143,7 +143,7 @@ function BCPUTable({ device }) {
 
   const powerHeader = ['Power', '%'];
   return (
-    <div className="acpu-container">
+    <div className="acpu-container main-border">
       <div className="main-block">
         <div className="layout-head">
           <label>FPGA &gt; BCPU</label>

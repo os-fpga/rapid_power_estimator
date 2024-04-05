@@ -6,7 +6,7 @@ import '../style/PowerTable.css';
 
 function IOPowerTable({ title, total, resources }) {
   return (
-    <div className="power-table-main">
+    <div className="power-table-main main-border">
       <div className="header">{title}</div>
       <div>
         <table className="total-table header">

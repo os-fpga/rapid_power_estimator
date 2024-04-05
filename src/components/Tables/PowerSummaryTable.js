@@ -11,7 +11,7 @@ function PowerSummaryTable({
   const warn = 0.001; // TBD
   const error = 0.016; // TBD
   return (
-    <div className="pst-container">
+    <div className="pst-container main-border">
       <div className="no-wrap pst-title bold-text-title">{title}</div>
       <div>
         <table className="pst-table">

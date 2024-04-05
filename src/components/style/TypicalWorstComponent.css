@@ -1,8 +1,6 @@
 .twc-main {
     display: flex;
     flex-direction: row;
-    border: 1px solid #E1E1E1;
-    border-radius: 5px;
     padding: 8px;
 }
 

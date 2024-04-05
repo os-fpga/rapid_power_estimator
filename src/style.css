@@ -9,13 +9,11 @@
 }
 
 .top-container {
-    border: 3px solid #2D2B2B;
     display: flex;
     flex-direction: column;
 }
 
 .top-l1 {
-    border-bottom: 2px solid #908f8f;
     cursor: pointer;
 }
 
@@ -39,7 +37,7 @@
 }
 
 .hspacer {
-    min-height: 5px;
+    min-height: 8px;
 }
 
 .power-tables {
@@ -124,4 +122,17 @@
     display: flex;
     flex-direction: row;
     column-gap: 10px;
+}
+
+:root {
+    --border-color: #9c9a9a;
+}
+
+.main-border {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.main-bottom-border {
+    border-bottom: 1px solid var(--border-color);
 }

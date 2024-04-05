@@ -38,7 +38,7 @@ export function Checkbox({
 export function TableBase({ header, children }) {
   return (
     <div className="table-wrapper">
-      <table className="table-style">
+      <table className="table-style main-border">
         <thead>
           <tr>
             {
@@ -68,7 +68,7 @@ export function TableBaseWrapper({
 }) {
   const [modalOpen, setModalOpen] = React.useState(false);
   return (
-    <div className="component-table-head">
+    <div className="component-table-head main-border">
       <div className="main-block">
         <div className="layout-head">
           <label htmlFor="plus-button">{title}</label>

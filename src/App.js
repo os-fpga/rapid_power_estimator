@@ -125,8 +125,8 @@ function App() {
   return (
     <div className="rpe-head">
       <div className="app-main-container">
-        <div className="top-container">
-          <div className="top-l1" onClick={() => setOpenedTable(Table.Summary)}>
+        <div className="top-container main-border">
+          <div className="top-l1 main-bottom-border" onClick={() => setOpenedTable(Table.Summary)}>
             <DeviceList
               devices={devices}
               setDevice={deviceChanged}

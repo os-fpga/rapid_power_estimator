@@ -7,7 +7,7 @@ function PowerTable({
   title, total, resourcesHeaders, resources, subHeader = 'Resources',
 }) {
   return (
-    <div className="power-table-main">
+    <div className="power-table-main main-border">
       <div className="header">{title}</div>
       {total !== null && (
         <div>

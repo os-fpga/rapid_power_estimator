@@ -38,7 +38,7 @@ const errorWorst = 10; // TBD
 
 function TypicalWorstComponent() {
   return (
-    <div className="twc-main">
+    <div className="twc-main main-border">
       <Column title="Typical" power={20} warnPow={warnTypical} errPow={errorTypical} temp={25} />
       <Column title="Worst case" power={20} warnPow={warnWorst} errPow={errorWorst} temp={85} />
     </div>

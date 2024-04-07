@@ -9,7 +9,7 @@ from utilities.common_utils import get_enum_by_value
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device import ModuleType
 from submodule.peripherals import PeripheralType
-from schema.device_schemas import DeviceSchema
+from schema.device_schemas import DeviceSchema, DeviceConsumptionSchema
 from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
 from schema.device_fabric_logic_element_schemas import FabricLogicElementSchema, FabricLogicElementResourcesConsumptionSchema
 from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
@@ -39,6 +39,15 @@ def get_device(device_id):
         device = devicemanager.get_device(device_id)
         schema = DeviceSchema()
         return schema.dump(device)
+    except ValueError as e:
+        return f"Error: {e}", 404
+
+@app.route('/devices/<device_id>/consumption', methods=['GET'], strict_slashes=False)
+def get_device_consumption(device_id):
+    try:
+        device = devicemanager.get_device(device_id)
+        schema = DeviceConsumptionSchema()
+        return schema.dump(device.get_power_consumption())
     except ValueError as e:
         return f"Error: {e}", 404
 

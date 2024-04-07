@@ -11,3 +11,11 @@ class DeviceSchema(Schema):
     package = fields.Str()
     speedgrade = fields.Str()
     temperature_grade = fields.Str()
+
+class DevicePowerThermalSchema(Schema):
+    total_power = fields.Number()
+    thermal = fields.Number()
+
+class DeviceConsumptionSchema(Schema):
+    typical = fields.Nested(DevicePowerThermalSchema)
+    worsecase = fields.Nested(DevicePowerThermalSchema)

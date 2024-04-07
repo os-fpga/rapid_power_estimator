@@ -372,6 +372,8 @@ class Peripheral_SubModule:
 
     def __init__(self, resources):
         self.resources = resources
+        self.total_interconnect_power = 0.0
+        self.total_block_power = 0.0
         # todo: add peripherals for testing. actual configuration should be retrieved from device.xml when 
         # this data is availiable
         self.peripherals = [

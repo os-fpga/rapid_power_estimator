@@ -41,10 +41,11 @@ export function TableBase({
   return (
     <div className="table-wrapper">
       {!hideAddBtn && <AddButton disabled={disabled} onClick={onClick} />}
-      <table className="table-style main-border">
-        <thead>
-          <tr>
-            {
+      <div className="main-border">
+        <table className="table-style">
+          <thead>
+            <tr>
+              {
               header.map((item, index) => {
                 if (item.className) {
                   // eslint-disable-next-line react/no-array-index-key
@@ -54,14 +55,15 @@ export function TableBase({
                 return <th key={index}>{item}</th>;
               })
             }
-          </tr>
-        </thead>
-        <tbody>
-          {
+            </tr>
+          </thead>
+          <tbody>
+            {
             children
           }
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

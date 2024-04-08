@@ -211,71 +211,72 @@ function App() {
           <SOCSummaryComponent device={device} />
         </div>
       </div>
-      <div className="hspacer" />
-      {
+      <div className="table-container">
+        {
         openedTable === Table.Clocking
         && <ClockingTable device={device} totalPowerCallback={setClockingPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.FLE
         && <FleTable device={device} totalPowerCallback={setFlePower} />
-      }
-      {
+        }
+        {
         openedTable === Table.IO
         && <IOTable device={device} totalPowerCallback={setIoPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.BRAM
         && <BramTable device={device} totalPowerCallback={setBramPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.DSP
         && <DspTable device={device} totalPowerCallback={setDspPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.ACPU
         && <ACPUTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.BCPU
         && <BCPUTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Connectivity
         && <ConnectivityTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Memory
         && <MemoryTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.DMA
         && <DMATable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Peripherals
         && <PeripheralsTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Summary
         && <DesignParametesTable />
-      }
-      {modalOpen && (
-      <Notes
-        defaultValue={notes}
-        closeModal={() => {
-          setModalOpen(false);
-        }}
-        onSubmit={handleNotesChange}
-      />
-      )}
-      <Preferences
-        isModalOpen={isModalOpen}
-        config={config}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
-        handleConfigChange={handleConfigChange}
-      />
+        }
+        {modalOpen && (
+        <Notes
+          defaultValue={notes}
+          closeModal={() => {
+            setModalOpen(false);
+          }}
+          onSubmit={handleNotesChange}
+        />
+        )}
+        <Preferences
+          isModalOpen={isModalOpen}
+          config={config}
+          handleOk={handleOk}
+          handleCancel={handleCancel}
+          handleConfigChange={handleConfigChange}
+        />
+      </div>
     </div>
   );
 }

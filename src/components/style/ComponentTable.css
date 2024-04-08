@@ -3,11 +3,11 @@
 }
 
 .table-style {
-    display: block;
     overflow: hidden;
     table-layout: auto;
     border-collapse: collapse;
-    max-width: 100%;
+    width: 100%;
+    border-radius: 8px;
 }
 
 .table-style thead {
@@ -50,10 +50,9 @@
     padding-top: 0;
     display: inline-flex;
     gap: 10px;
+    width: 100%;
 }
 
-/* .main-block {
-    display: flex;
-    flex-direction: row;
-    column-gap: 10px;
-} */
+.main-block {
+    width: 100%;
+}

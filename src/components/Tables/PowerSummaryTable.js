@@ -37,8 +37,7 @@ function PowerSummaryTable({
       <div className="pst-bottom">
         <div className="pst-bottom-progress">
           <label htmlFor="progress-bar">
-            {' '}
-            {percent}
+            {fixed(percent, 0)}
             %
           </label>
           <progress id="progress-bar" value={percent} max={100} />

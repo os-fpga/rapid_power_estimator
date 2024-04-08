@@ -47,7 +47,9 @@ function SOCSummaryComponent({ device }) {
       percent: 0,
     },
   ]);
-  const { power, dynamicPower, staticPower } = useSocTotalPower();
+  const {
+    power, dynamicPower, staticPower, calcPercents,
+  } = useSocTotalPower();
 
   React.useEffect(() => {
     if (device !== null) {
@@ -78,7 +80,7 @@ function SOCSummaryComponent({ device }) {
       title="Processing Complex (SOC) Power"
       data={data}
       total={data[6].power + data[7].power}
-      percent={0}
+      percent={calcPercents(data[6].power + data[7].power)}
     />
   );
 }

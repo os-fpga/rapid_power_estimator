@@ -53,6 +53,12 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "msi",
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "publisherName": "Rapid Silicon, Inc.",
@@ -63,12 +69,6 @@
       "target": [
         {
           "target": "tar.gz",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "msi",
           "arch": [
             "x64"
           ]

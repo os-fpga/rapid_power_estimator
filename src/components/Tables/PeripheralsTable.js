@@ -6,6 +6,7 @@ import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import * as per from '../../utils/peripherals';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -81,7 +82,7 @@ function PeripheralsTable({ device }) {
   ]);
 
   const mainTableHeader = [
-    '', '', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%', 'Action',
+    '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
   ];
 
   function peripheralMatch(component, data, url) {
@@ -159,10 +160,8 @@ function PeripheralsTable({ device }) {
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Peripherals</label>
-        </div>
-        <TableBase header={mainTableHeader}>
+        <ComponentLabel name="Peripherals" />
+        <TableBase header={mainTableHeader} hideAddBtn>
           {
             peripherals.map((row, index) => row.data.map((i, idx) => (
               i.data !== undefined && (
@@ -178,6 +177,12 @@ function PeripheralsTable({ device }) {
                   />
                 </td>
                 <td className="innerHeader">{i.data.name}</td>
+                <Actions
+                  onEditClick={() => {
+                    setEditIndex({ main: index, inner: idx });
+                    setModalOpen(true);
+                  }}
+                />
                 <SelectionCell val={i.data.usage} values={row.usage} />
                 <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
                 <td>
@@ -189,12 +194,6 @@ function PeripheralsTable({ device }) {
                   {fixed(parseFloat(i.data.consumption.percentage), 0)}
                   {' %'}
                 </td>
-                <Actions
-                  onEditClick={() => {
-                    setEditIndex({ main: index, inner: idx });
-                    setModalOpen(true);
-                  }}
-                />
               </tr>
               )
             )))

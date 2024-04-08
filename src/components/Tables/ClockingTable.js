@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import ClockingModal from '../ModalWindows/ClockingModal';
 import { sources, states } from '../../utils/clocking';
 import PowerTable from './PowerTable';
@@ -7,6 +6,7 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -18,8 +18,8 @@ function ClockingTable({ device, totalPowerCallback }) {
   const [powerTable, setPowerTable] = React.useState([]);
 
   const mainTableHeader = [
-    'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
-    'Block Power', 'Intc. Power', '%', 'Action',
+    'Action', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
+    'Block Power', 'Intc. Power', '%',
   ];
 
   const fetchClockData = (deviceId) => {
@@ -95,10 +95,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Clocking</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="Clocking" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <PowerTable
@@ -108,10 +105,18 @@ function ClockingTable({ device, totalPowerCallback }) {
               resources={powerTable}
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase
+            header={mainTableHeader}
+            disabled={device === null}
+            onClick={() => setModalOpen(true)}
+          >
             {
             clockingData.map((row, index) => (
               <tr key={row.description}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
                 <td>{row.description}</td>
                 <td>{GetText(row.source, sources)}</td>
                 <td>{row.port}</td>
@@ -124,10 +129,6 @@ function ClockingTable({ device, totalPowerCallback }) {
                   {fixed(row.consumption.percentage, 0)}
                   {' %'}
                 </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
               </tr>
             ))
           }

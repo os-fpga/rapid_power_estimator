@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FaPlus } from 'react-icons/fa6';
 import DMAModal from '../ModalWindows/DMAModal';
 import { source, loadActivity } from '../../utils/cpu';
 import PowerTable from './PowerTable';
@@ -10,6 +9,7 @@ import { PercentsCell, PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -29,8 +29,8 @@ function DMATable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
-    'Bandwidth', 'Block Power', '%', 'Action',
+    'Action', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
+    'Bandwidth', 'Block Power', '%',
   ];
 
   React.useEffect(() => {
@@ -113,10 +113,7 @@ function DMATable({ device }) {
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; DMA</label>
-          <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="DMA" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <PowerTable
@@ -127,11 +124,19 @@ function DMATable({ device }) {
               subHeader="Sub System"
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase
+            header={mainTableHeader}
+            disabled={addButtonDisable}
+            onClick={() => setModalOpen(true)}
+          >
             {
             dmaData.map((row, index) => (
               row.data.enable && (
                 <tr key={row.id}>
+                  <Actions
+                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                    onDeleteClick={() => deleteRow(row.id)}
+                  />
                   <td>{row.data.name}</td>
                   <SelectionCell val={row.data.source} values={source} />
                   <SelectionCell val={row.data.destination} values={source} />
@@ -144,10 +149,6 @@ function DMATable({ device }) {
                     {fixed(row.data.consumption.percentage, 0)}
                     {' %'}
                   </td>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(row.id)}
-                  />
                 </tr>
               )
             ))

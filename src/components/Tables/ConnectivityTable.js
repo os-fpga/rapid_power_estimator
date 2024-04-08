@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { connectivityNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
@@ -11,6 +10,7 @@ import {
 import { GetText, fixed } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
@@ -77,8 +77,8 @@ function ConnectivityTable({ device }) {
     setAddButtonDisable(found === undefined);
   }, [endpoints]);
 
-  const header = ['Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
-    'Toggle Rate', 'Bandwidth', 'Noc Power', '%', 'Action',
+  const header = ['Action', 'Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
+    'Toggle Rate', 'Bandwidth', 'Noc Power', '%',
   ];
 
   function modifyRow(index, row) {
@@ -115,10 +115,7 @@ function ConnectivityTable({ device }) {
   return (
     <div className="acpu-container main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Connectivity</label>
-          <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="Connectivity" />
         <div className="cpu-container">
           <div className="power-and-table-wrapper">
             <PowerTable
@@ -128,11 +125,19 @@ function ConnectivityTable({ device }) {
               resources={powerData}
               subHeader="Sub System"
             />
-            <TableBase header={header}>
+            <TableBase
+              header={header}
+              disabled={addButtonDisable}
+              onClick={() => setModalOpen(true)}
+            >
               {
               endpoints.map((row, index) => (
                 (row.data !== undefined && row.data.name !== '') && (
                 <tr key={row.ep}>
+                  <Actions
+                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                    onDeleteClick={() => deleteRow(index)}
+                  />
                   <td>{row.data.clock}</td>
                   <FrequencyCell val={row.data.consumption.clock_frequency} />
                   <td>{row.data.name}</td>
@@ -145,10 +150,6 @@ function ConnectivityTable({ device }) {
                     {fixed(row.data.consumption.percentage, 0)}
                     {' %'}
                   </td>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
                 </tr>
                 )
               ))

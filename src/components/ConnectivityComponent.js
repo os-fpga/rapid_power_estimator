@@ -2,9 +2,10 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
-import { State, percentage } from '../utils/common';
+import { percentage } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
+import { State } from './ComponentsLib';
 
 function ConnectivityComponent({ device }) {
   const [name, setName] = React.useState('');

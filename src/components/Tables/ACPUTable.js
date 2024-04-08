@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { acpuNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
@@ -9,6 +8,7 @@ import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
@@ -95,7 +95,7 @@ function ACPUTable({ device }) {
     updateTotalPower(device);
   };
 
-  const header = ['Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power', 'Action'];
+  const header = ['Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
 
   function modifyRow(index, row) {
     const data = row;
@@ -131,10 +131,7 @@ function ACPUTable({ device }) {
   return (
     <div className="acpu-container main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; ACPU</label>
-          <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="ACPU" />
         <div className="cpu-container">
           <PowerTable
             title="ACPU power"
@@ -163,22 +160,22 @@ function ACPUTable({ device }) {
               </select>
             </div>
           </div>
-          <TableBase header={header}>
+          <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>
             {
               endpoints.map((row, index) => (
                 (row.data !== undefined && row.data.name !== '')
                 && (
                 <tr key={row.ep}>
+                  <Actions
+                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                    onDeleteClick={() => deleteRow(index)}
+                  />
                   <td>{row.data.name}</td>
                   <SelectionCell val={row.data.activity} values={loadActivity} />
                   <PercentsCell val={row.data.read_write_rate} />
                   <PercentsCell val={row.data.toggle_rate} precition={1} />
                   <PowerCell val={row.data.consumption.calculated_bandwidth} />
                   <PowerCell val={row.data.consumption.noc_power} />
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
                 </tr>
                 )
               ))

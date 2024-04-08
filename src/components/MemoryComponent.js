@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as server from '../utils/serverAPI';
-import { fixed, State, percentage } from '../utils/common';
+import { fixed, percentage } from '../utils/common';
 import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
+import { State } from './ComponentsLib';
 
 import './style/MemoryComponent.css';
 

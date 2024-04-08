@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
@@ -7,6 +6,7 @@ import BramModal from '../ModalWindows/BramModal';
 import bramType from '../../utils/bram';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -133,17 +133,14 @@ function BramTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
-    'Toggle Rate', 'Clock Freq', 'RAM Depth', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'Action', 'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
+    'Toggle Rate', 'Clock Freq', 'RAM Depth', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; BRAM</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="BRAM" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <PowerTable
@@ -153,11 +150,20 @@ function BramTable({ device, totalPowerCallback }) {
               resources={powerTable}
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase
+            header={mainTableHeader}
+            disabled={device === null}
+            onClick={() => setModalOpen(true)}
+          >
             {
             bramData.map((row, index) => (
               <React.Fragment key={row.name}>
                 <tr>
+                  <Actions
+                    rowSpan={2}
+                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                    onDeleteClick={() => deleteRow(index)}
+                  />
                   <td rowSpan={2}>{row.name}</td>
                   <td rowSpan={2}>{GetText(row.type, bramType)}</td>
                   <td rowSpan={2}>{row.bram_used}</td>
@@ -179,11 +185,6 @@ function BramTable({ device, totalPowerCallback }) {
                     {fixed(row.consumption.percentage, 0)}
                     {' %'}
                   </td>
-                  <Actions
-                    rowSpan={2}
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
                 </tr>
                 <tr>
                   <td>B - Read</td>

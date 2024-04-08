@@ -45,19 +45,15 @@
     color: #2e65f3;
 }
 
-.layout-head {
-    display: flex;
-    padding: 0.4rem;
-    gap: 10px;
-}
-
 .component-table-head {
-    padding: 10px;
+    padding: 6px;
+    padding-top: 0;
     display: inline-flex;
     gap: 10px;
 }
 
-.plus-button {
-    justify-content: center;
-    align-items: center;
-}
+/* .main-block {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+} */

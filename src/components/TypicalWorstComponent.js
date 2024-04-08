@@ -1,7 +1,8 @@
 import React from 'react';
 import { AiFillThunderbolt } from 'react-icons/ai';
-import { fixed, State } from '../utils/common';
+import { fixed } from '../utils/common';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
+import { State } from './ComponentsLib';
 
 import './style/TypicalWorstComponent.css';
 

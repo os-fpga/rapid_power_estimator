@@ -1,7 +1,7 @@
 import React from 'react';
 import { BsFillTrashFill } from 'react-icons/bs';
 import { PiNotePencil } from 'react-icons/pi';
-import { FaPlus } from 'react-icons/fa6';
+import { AddButton } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -35,9 +35,12 @@ export function Checkbox({
   );
 }
 
-export function TableBase({ header, children }) {
+export function TableBase({
+  header, disabled, onClick, hideAddBtn = false, children,
+}) {
   return (
     <div className="table-wrapper">
+      {!hideAddBtn && <AddButton disabled={disabled} onClick={onClick} />}
       <table className="table-style main-border">
         <thead>
           <tr>
@@ -59,32 +62,6 @@ export function TableBase({ header, children }) {
           }
         </tbody>
       </table>
-    </div>
-  );
-}
-
-export function TableBaseWrapper({
-  title, content, powerTable, modalContent,
-}) {
-  const [modalOpen, setModalOpen] = React.useState(false);
-  return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label htmlFor="plus-button">{title}</label>
-          <button name="plus-button" aria-label="Add" type="button" className="plus-button" onClick={setModalOpen(true)}><FaPlus /></button>
-        </div>
-        {
-          content
-        }
-        {modalOpen
-          && (modalContent)}
-      </div>
-      <div className="power-table-wrapper">
-        {
-          powerTable
-        }
-      </div>
     </div>
   );
 }

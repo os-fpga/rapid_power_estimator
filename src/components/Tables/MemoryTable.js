@@ -9,6 +9,7 @@ import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, Checkbox } from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -25,8 +26,8 @@ function MemoryTable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    '', 'Memory', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
-    'W Bandwidth', 'Block Power', '%', 'Action',
+    '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
+    'W Bandwidth', 'Block Power', '%',
   ];
 
   React.useEffect(() => {
@@ -98,9 +99,7 @@ function MemoryTable({ device }) {
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Memory</label>
-        </div>
+        <ComponentLabel name="Memory" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <PowerTable
@@ -111,7 +110,7 @@ function MemoryTable({ device }) {
               subHeader="Sub System"
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase header={mainTableHeader} hideAddBtn>
             {
             memoryData.map((row, index) => (
               row.data.enable !== undefined && (
@@ -126,6 +125,9 @@ function MemoryTable({ device }) {
                     />
                   </td>
                   <td>{row.data.name}</td>
+                  <Actions
+                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  />
                   <SelectionCell val={row.data.usage} values={memory.usage} />
                   <SelectionCell val={row.data.memory_type} values={memory.memory_type} />
                   <td>{row.data.data_rate}</td>
@@ -137,9 +139,6 @@ function MemoryTable({ device }) {
                     {fixed(row.data.consumption.percentage, 0)}
                     {' %'}
                   </td>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  />
                 </tr>
               )
             ))

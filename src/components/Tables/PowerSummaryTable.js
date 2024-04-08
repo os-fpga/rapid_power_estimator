@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { PowerCell } from './TableCells';
-import { fixed, State } from '../../utils/common';
+import { fixed } from '../../utils/common';
+import { State } from '../ComponentsLib';
 
 import '../style/PowerSummaryTable.css';
 

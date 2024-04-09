@@ -46,14 +46,17 @@ function App() {
   const [topLevel, setTopLevel] = React.useState('');
   const [config, setConfig] = React.useState({});
   const { toggleItemSelection } = useSelection();
+  const [preferencesChanged, setPreferencesChanged] = React.useState(false);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
+    setPreferencesChanged(false);
     setIsModalOpen(true);
   };
   const handleOk = () => {
-    setIsModalOpen(false);
-    window.ipcAPI.send('config', config);
+    // this will restart app
+    if (preferencesChanged) window.ipcAPI.send('config', config);
+    else setIsModalOpen(false);
   };
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -69,13 +72,16 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openedTable]);
 
-  React.useEffect(() => server.GET(server.devices, setDevices), []);
-
   React.useEffect(() => {
+    window.ipcAPI.send('getConfig');
     if ((typeof window !== 'undefined')) {
       window.ipcAPI.loadPreferences('preferences', (event, data) => {
         setConfig(data);
         showModal();
+      });
+      window.ipcAPI.loadPreferences('loadConfig', (event, data) => {
+        setConfig(data);
+        server.setPort(data.port, setDevices);
       });
     }
   }, []);
@@ -119,6 +125,7 @@ function App() {
   };
 
   const handleConfigChange = (name, val) => {
+    setPreferencesChanged(true);
     setConfig({ ...config, [name]: val });
   };
 

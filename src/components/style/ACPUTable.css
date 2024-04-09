@@ -3,6 +3,7 @@
     padding-top: 0;
     display: inline-flex;
     gap: 10px;
+    width: 100%;
 }
 
 .acpu-group {
@@ -21,8 +22,10 @@
 }
 
 .cpu-container {
-    display: inline-flex;
+    display: flex;
+    flex-direction: row;
     gap: 10px;
+    width: 100%;
 }
 
 .acpu-group-container {

@@ -1,4 +1,6 @@
 .rpe-head {
+    display: flex;
+    flex-direction: column;
     font-size: 14px;
 }
 
@@ -6,11 +8,13 @@
     display: flex;
     flex-direction: row;
     column-gap: 10px;
+    min-width: fit-content;
 }
 
 .top-container {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-l1 {
@@ -36,8 +40,10 @@
     flex-grow: 1;
 }
 
-.hspacer {
-    min-height: 8px;
+.table-container {
+    display: flex;
+    padding-top: 8px;
+    min-width: fit-content;
 }
 
 .power-tables {
@@ -122,6 +128,7 @@
     display: flex;
     flex-direction: row;
     column-gap: 10px;
+    width: 100%;
 }
 
 :root {

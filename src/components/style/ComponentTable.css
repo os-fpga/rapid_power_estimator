@@ -3,11 +3,11 @@
 }
 
 .table-style {
-    display: block;
     overflow: hidden;
     table-layout: auto;
     border-collapse: collapse;
-    max-width: 100%;
+    width: 100%;
+    border-radius: 8px;
 }
 
 .table-style thead {
@@ -45,19 +45,14 @@
     color: #2e65f3;
 }
 
-.layout-head {
-    display: flex;
-    padding: 0.4rem;
-    gap: 10px;
-}
-
 .component-table-head {
-    padding: 10px;
+    padding: 6px;
+    padding-top: 0;
     display: inline-flex;
     gap: 10px;
+    width: 100%;
 }
 
-.plus-button {
-    justify-content: center;
-    align-items: center;
+.main-block {
+    width: 100%;
 }

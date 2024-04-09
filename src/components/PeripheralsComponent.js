@@ -1,10 +1,9 @@
 import React from 'react';
-import {
-  Table, fixed, State, percentage,
-} from '../utils/common';
+import { Table, fixed, percentage } from '../utils/common';
 import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
+import { State } from './ComponentsLib';
 
 import './style/Peripherals.css';
 

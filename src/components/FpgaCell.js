@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { fixed, State } from '../utils/common';
+import { fixed } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
+import { State } from './ComponentsLib';
 
 import './style/base.css';
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import DspModal from '../ModalWindows/DspModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
@@ -7,6 +6,7 @@ import { fixed, GetText } from '../../utils/common';
 import { dspMode, pipelining } from '../../utils/dsp';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -80,18 +80,15 @@ function DspTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
+    'Action', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
     'Clock', 'Pipeline', 'T-Rate',
-    'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; DSP</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="DSP" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <PowerTable
@@ -101,11 +98,19 @@ function DspTable({ device, totalPowerCallback }) {
               resources={powerTable}
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase
+            header={mainTableHeader}
+            disabled={device === null}
+            onClick={() => setModalOpen(true)}
+          >
             {
             dspData.map((row, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
                 <td>{row.name}</td>
                 <td>{row.number_of_multipliers}</td>
                 <td>{GetText(row.dsp_mode, dspMode)}</td>
@@ -126,10 +131,6 @@ function DspTable({ device, totalPowerCallback }) {
                   {fixed(row.consumption.percentage, 0)}
                   {' %'}
                 </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
               </tr>
             ))
           }

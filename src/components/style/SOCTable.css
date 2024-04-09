@@ -4,6 +4,7 @@
     flex-direction: column;
     row-gap: 8px;
     background-color: #f2f2f2;
+    width: 100%;
 }
 
 .top-l2-col1-row1 {

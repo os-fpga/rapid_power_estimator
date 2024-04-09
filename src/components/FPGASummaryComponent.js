@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PowerSummaryTable from './Tables/PowerSummaryTable';
 import { percentage } from '../utils/common';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
 
 function FPGASummaryComponent({
   device, clocking, fle, dsp, bram, io,
@@ -43,6 +44,7 @@ function FPGASummaryComponent({
       percent: 0,
     },
   ]);
+  const { calcPercents } = useSocTotalPower();
 
   React.useEffect(() => {
     const newData = data;
@@ -71,7 +73,7 @@ function FPGASummaryComponent({
       title="FPGA Complex and Core Power"
       data={data}
       total={data[5].power + data[6].power}
-      percent={0}
+      percent={calcPercents(data[5].power + data[6].power)}
     />
   );
 }

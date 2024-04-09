@@ -1,11 +1,11 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import IOModal from '../ModalWindows/IOModal';
 import IOPowerTable from './IOPowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PercentsCell, SelectionCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 import {
@@ -146,18 +146,15 @@ function IOTable({ device, totalPowerCallback }) {
   };
 
   const mainTableHeader = [
-    'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
+    'Action', 'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
     'Clock', 'Toggle Rate', 'Duty Cycle', 'Sync', 'Input En', 'Output En', 'Pullup / Pulldown', 'Bank Type', 'Bank #',
-    'VCCIO', 'Signal Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'VCCIO', 'Signal Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; IO</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="IO" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <IOPowerTable
@@ -166,11 +163,19 @@ function IOTable({ device, totalPowerCallback }) {
               resources={powerTable !== null ? powerTable : defaultPowerData}
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase
+            header={mainTableHeader}
+            disabled={device === null}
+            onClick={() => setModalOpen(true)}
+          >
             {
             ioData.map((row, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <tr key={index}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
                 <td>{row.name}</td>
                 <td>{row.bus_width}</td>
                 <SelectionCell val={row.direction} values={direction} />
@@ -199,10 +204,6 @@ function IOTable({ device, totalPowerCallback }) {
                   {fixed(row.consumption.percentage, 0)}
                   {' %'}
                 </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
               </tr>
             ))
           }

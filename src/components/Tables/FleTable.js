@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import FleModal from '../ModalWindows/FleModal';
 import glitchFactor from '../../utils/fle';
 import PowerTable from './PowerTable';
@@ -7,6 +6,7 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -84,17 +84,14 @@ function FleTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
-    'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'Action', 'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
+    'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; FLE</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
+        <ComponentLabel name="FLE" />
         <div className="power-and-table-wrapper">
           <div className="power-table-wrapper">
             <PowerTable
@@ -104,10 +101,18 @@ function FleTable({ device, totalPowerCallback }) {
               resources={powerTable}
             />
           </div>
-          <TableBase header={mainTableHeader}>
+          <TableBase
+            header={mainTableHeader}
+            disabled={device === null}
+            onClick={() => setModalOpen(true)}
+          >
             {
             fleData.map((row, index) => (
               <tr key={row.name}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
                 <td>{row.name}</td>
                 <td>{row.lut6}</td>
                 <td>{row.flip_flop}</td>
@@ -126,10 +131,6 @@ function FleTable({ device, totalPowerCallback }) {
                   {fixed(row.consumption.percentage, 0)}
                   {' %'}
                 </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
               </tr>
             ))
           }

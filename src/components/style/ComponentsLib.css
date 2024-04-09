@@ -1,0 +1,55 @@
+.layout-head {
+    display: flex;
+    padding: 6px;
+    column-gap: 5px;
+    /* border: 1px solid black; */
+}
+
+.component-label-text-center {
+    display: flex;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1px;
+    /* fix unknown offset */
+}
+
+.component-label {
+    border-radius: 10px;
+    background-color: #3385FF;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 3px;
+    padding-bottom: 2px;
+    color: white;
+}
+
+.button {
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 10px 0 8px;
+    border: none;
+    text-decoration: none;
+    color: #007bff;
+    line-height: 1;
+    background-color: #e7e3e3;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.icon-container {
+    padding-top: 2px;
+    align-items: center;
+    align-content: center;
+}
+
+.icon {
+    transform: scale(1.2);
+}

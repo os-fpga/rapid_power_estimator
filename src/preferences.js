@@ -1,13 +1,28 @@
 import React from 'react';
 import { Modal } from 'antd';
+import { Checkbox } from './components/ComponentsLib';
 
 function Preferences({
   isModalOpen, config, handleOk, handleCancel, handleConfigChange,
 }) {
   const [warning, setWarnig] = React.useState(false);
+  const [okButtonDisabled, setOkButtonDisabled] = React.useState(false);
+
+  const checkState = React.useCallback((state) => {
+    handleConfigChange('useDefaultFile', state);
+    setWarnig(true);
+    setOkButtonDisabled(!state && (config.device_xml === ''));
+  }, [config.device_xml, handleConfigChange]);
+
   React.useEffect(() => setWarnig(false), [isModalOpen]);
   return (
-    <Modal title="Preferences" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+    <Modal
+      title="Preferences"
+      open={isModalOpen}
+      onOk={handleOk}
+      onCancel={handleCancel}
+      okButtonProps={{ disabled: okButtonDisabled }}
+    >
       <div className="form-group">
         <label>Port</label>
         <input
@@ -19,19 +34,27 @@ function Preferences({
             handleConfigChange(e.target.name, parseInt(e.target.value, 10));
             setWarnig(true);
           }}
-        // eslint-disable-next-line no-nested-ternary
           value={config.port}
         />
       </div>
       <div className="form-group">
         <label>Devices file</label>
+        <Checkbox
+          isChecked={config.useDefaultFile}
+          label="Use default file"
+          checkHandler={checkState}
+          id="useDefaultFile"
+        />
         <input
           type="text"
           name="device_xml"
           onChange={(e) => {
             handleConfigChange(e.target.name, e.target.value);
             setWarnig(true);
+            setOkButtonDisabled(!config.useDefaultFile && (e.target.value === ''));
           }}
+          disabled={config.useDefaultFile}
+          placeholder="Absolute path is required"
         // eslint-disable-next-line no-nested-ternary
           value={config.device_xml}
         />

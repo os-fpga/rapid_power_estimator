@@ -14,9 +14,13 @@ const schema = {
     minimum: 1,
     default: config.port,
   },
+  useDefaultFile: {
+    type: 'boolean',
+    default: true,
+  },
   device_xml: {
     type: 'string',
-    default: config.device_xml,
+    default: '',
   },
 };
 
@@ -86,10 +90,11 @@ const startFlaskServer = () => {
   if (config.debug === 1) { args.push('--debug'); }
 
   const deviceXml = store.get('device_xml');
+  const useDefaultFile = store.get('useDefaultFile');
   if (fs.existsSync(RestAPIscript)) {
-    apiServer = spawn('python', [RestAPIscript, path.join(__dirname, deviceXml), ...args]);
+    apiServer = spawn('python', [RestAPIscript, useDefaultFile ? path.join(__dirname, config.device_xml) : deviceXml, ...args]);
   } else {
-    apiServer = spawn(restAPIexe, [path.join(app.getAppPath(), '..', '..', deviceXml), ...args]);
+    apiServer = spawn(restAPIexe, [useDefaultFile ? path.join(app.getAppPath(), '..', '..', config.device_xml) : deviceXml, ...args]);
   }
 
   apiServer.stdout.on('data', (data) => {
@@ -139,6 +144,7 @@ const createWindow = () => {
   ipcMain.on('config', (event, arg) => {
     store.set('port', arg.port);
     store.set('device_xml', arg.device_xml);
+    store.set('useDefaultFile', arg.useDefaultFile);
 
     serverProcess.kill();
 

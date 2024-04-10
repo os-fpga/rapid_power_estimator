@@ -81,11 +81,6 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
             npx eslint src/
-            
-      - name: Run frontend unit test only on ubuntu-latest
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-            npm test
 
       - name: Install packages centos 7 & Run pytest
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -103,6 +98,10 @@ jobs:
       - name: Run pytest on ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: python3 -m pytest
+        
+      - name: Run frontend unit test only on ubuntu-latest
+        run: |
+            npm test
 
   publish:
     needs: build 	

@@ -98,6 +98,10 @@ jobs:
       - name: Run pytest on ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: python3 -m pytest
+        
+      - name: Run frontend unit test only on ubuntu-latest
+        run: |
+            npm test
 
   publish:
     needs: build 	

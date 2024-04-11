@@ -28,7 +28,7 @@ function DeviceList({ devices, setDevice }) {
       <div className={getBaseName()}>
         <div className="dev-table-res">
           <div id="inner1">
-            <label>Device:</label>
+            <label htmlFor="deviceId">Device:</label>
           </div>
           <select
             id="deviceId"

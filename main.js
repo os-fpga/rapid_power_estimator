@@ -6,6 +6,7 @@ const path = require('node:path');
 const fs = require('fs');
 const Store = require('electron-store');
 const config = require('./rpe.config.json');
+const { log, closeLogStream } = require('./loggingModule');
 
 const schema = {
   port: {
@@ -29,6 +30,9 @@ const store = new Store({ schema });
 let mainWindow = null;
 
 const isDev = process.argv.find((val) => val === '--development');
+if (!isDev) {
+  console.log = log;
+}
 const template = [
   {
     label: 'File',
@@ -167,5 +171,6 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   serverProcess.kill('SIGINT');
+  closeLogStream();
   if (process.platform !== 'darwin') app.quit();
 });

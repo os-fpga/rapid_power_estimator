@@ -21,6 +21,7 @@ class RsMessageManager:
         102: RsMessage(102, RsMessageType.INFO, "DSP is disabled"),
         103: RsMessage(103, RsMessageType.INFO, "Logic Element is disabled"),
         104: RsMessage(104, RsMessageType.INFO, "BRAM is disabled"),
+        105: RsMessage(105, RsMessageType.INFO, "IO is disabled"),
         201: RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
         301: RsMessage(301, RsMessageType.ERRO, "Invalid clock"),
         302: RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),

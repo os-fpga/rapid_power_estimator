@@ -54,8 +54,8 @@ class RsDevice:
 
         # io module
         self.resources.register_module(ModuleType.IO, IO_SubModule(self.resources, [
-            IO(name="test 1"),
-            IO(name="test 2")
+            IO(name="test 1", clock="CLK_100", enable=True),
+            IO(name="test 2", clock="CLK_233")
         ]))
 
         # clocking module

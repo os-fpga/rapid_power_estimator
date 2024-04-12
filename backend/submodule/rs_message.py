@@ -19,6 +19,7 @@ class RsMessageManager:
     messages = {
         101: RsMessage(101, RsMessageType.INFO, "This clock is disabled"),
         102: RsMessage(102, RsMessageType.INFO, "DSP is disabled"),
+        103: RsMessage(103, RsMessageType.INFO, "Logic Element is disabled"),
         201: RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
         301: RsMessage(301, RsMessageType.ERRO, "Invalid clock"),
         999: RsMessage(999, RsMessageType.ERRO, "Unknown error")

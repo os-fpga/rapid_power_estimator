@@ -5,6 +5,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
+from .rs_message import RsMessage, RsMessageManager
 
 class Glitch_Factor(Enum):
     TYPICAL = 0 
@@ -18,7 +19,7 @@ class Fabric_LE_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    message : str = field(default='')
+    messages : list[RsMessage] = field(default_factory=list)
 
 @dataclass
 class Fabric_LE:
@@ -47,11 +48,19 @@ class Fabric_LE:
             return 4 
 
     def compute_dynamic_power(self, clock, VCC_CORE, LUT_CAP, FF_CAP, FF_CLK_CAP, LUT_INT_CAP, FF_INT_CAP):
+        self.output.clock_frequency = 0
+        self.output.output_signal_rate = 0.0
+        self.output.block_power = 0.0
+        self.output.interconnect_power = 0.0
+        self.output.messages.clear()
+
         if clock == None:
-            self.output.message = f"Invalid clock {self.clock}"
+            self.output.messages.append(RsMessageManager.get_message(301))
             return
 
-        if self.enable:
+        if self.enable == False:
+            self.output.messages.append(RsMessageManager.get_message(103))
+        else:
             # set clock freq
             self.output.clock_frequency = clock.frequency
 
@@ -78,9 +87,6 @@ class Fabric_LE:
             p1 = VCC_CORE ** 2 * self.lut6 * self.output.output_signal_rate * LUT_INT_CAP * self.get_glitch_factor()
             p2 = VCC_CORE ** 2 * self.flip_flop * self.output.output_signal_rate * FF_INT_CAP
             self.output.interconnect_power = p1 + p2
-            self.output.message = ''
-        else:
-            self.output.message = 'This logic is disabled'
         
 class Fabric_LE_SubModule:
 

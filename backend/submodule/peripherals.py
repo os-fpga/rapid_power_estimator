@@ -131,7 +131,7 @@ class Peripheral_Output:
     calculated_bandwidth: float = field(default=0.0)
     block_power: float = field(default=0.0)
     percentage: float = field(default=0.0)
-    messages: list[RsMessage] = field(default_factory=list)
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class PeripheralBase:
@@ -258,7 +258,7 @@ class Memory_Output:
     read_bandwidth: float = field(default=0.0)
     block_power: float = field(default=0.0)
     percentage: float = field(default=0.0)
-    messages: list[RsMessage] = field(default_factory=list)
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class Memory(PeripheralBase):
@@ -282,7 +282,7 @@ class Endpoint_Output:
     clock_frequency: int = field(default=0) # specific to FPGA_Complex only
     percentage: float = field(default=0.0) # specific to FPGA_Complex only
     noc_power: float = field(default=0.0)
-    messages: list[RsMessage] = field(default_factory=list)
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class Endpoint:
@@ -349,7 +349,7 @@ class DMA_Output:
     noc_power: float = field(default=0.0)
     block_power: float = field(default=0.0)
     percentage: float = field(default=0.0)
-    messages: list[RsMessage] = field(default_factory=list)
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class DMA(PeripheralBase):

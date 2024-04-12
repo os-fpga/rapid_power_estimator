@@ -111,7 +111,7 @@ class IO_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    messages : list[RsMessage] = field(default_factory=list)
+    messages : [RsMessage] = field(default_factory=list)
 
 @dataclass
 class IO:

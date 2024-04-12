@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from .clock import Clock
 from utilities.common_utils import update_attributes
+from .rs_message import RsMessage, RsMessageManager
 
 class BRAM_IO_DIRECTION(Enum):
     INPUT_ONLY = 0
@@ -37,7 +38,7 @@ class BRAM_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    message : str = field(default='')
+    messages : list[RsMessage] = field(default_factory=list)
 
 @dataclass
 class PortProperties:
@@ -102,19 +103,36 @@ class BRAM:
             self.output.percentage = 0
 
     def compute_dynamic_power(self, clock_a, clock_b, WRITE_CAP, READ_CAP, INT_CAP, FIFO_CAP):
-        # Set clock freq for Port A
-        if clock_a is not None:
+        self.output.port_a.output_signal_rate = 0.0
+        self.output.port_a.clock_frequency = 0
+        self.output.port_b.output_signal_rate = 0.0
+        self.output.port_b.clock_frequency = 0
+        self.output.block_power = 0.0
+        self.output.interconnect_power = 0.0
+        self.output.messages.clear()
+        clock_error = False
+
+        if clock_a is None:
+            self.output.messages.append(RsMessageManager.get_message(302))
+            clock_error = True
+        else:
+            # Set clock freq for Port A
             self.output.port_a.clock_frequency = clock_a.frequency
-        else:
-            self.output.port_a.clock_frequency = 0
 
-        # Set clock freq for Port B
-        if clock_b is not None:
+        if clock_b is None:
+            if self.type not in (BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SP):
+                self.output.messages.append(RsMessageManager.get_message(303))
+                clock_error = True
+        else:
+            # Set clock freq for Port B
             self.output.port_b.clock_frequency = clock_b.frequency
-        else:
-            self.output.port_b.clock_frequency = 0
 
-        if self.enable:
+        if clock_error:
+            return
+
+        if self.enable == False:
+            self.output.messages.append(RsMessageManager.get_message(104))
+        else:
             # Set default properties because each bram type has its own behavior
             # this function clear off the non supported read and write rates value
             self.set_default_write_read_bram_properties()
@@ -159,16 +177,6 @@ class BRAM:
 
             self.output.block_power = block_power
             self.output.interconnect_power = interconnect_power
-            self.output.message = ''
-        else:
-            self.output.port_a.output_signal_rate = 0
-            self.output.port_a.clock_frequency = 0
-            self.output.port_b.output_signal_rate = 0
-            self.output.port_b.clock_frequency = 0     
-            self.output.block_power = 0.0
-            self.output.interconnect_power = 0.0
-            self.output.percentage = 0.0
-            self.output.message = f"BRAM is disabled"
 
 class BRAM_SubModule:
 

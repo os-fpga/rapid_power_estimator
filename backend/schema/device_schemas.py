@@ -6,7 +6,7 @@ from marshmallow import Schema, fields
 from submodule.rs_message import RsMessageType
 
 class MessageSchema(Schema):
-    type = fields.Enum(RsMessageType, by_value=True)
+    message_type = fields.Enum(RsMessageType, by_value=True, data_key="type")
     text = fields.Str()
 
 class DeviceSchema(Schema):

@@ -12,7 +12,7 @@ class RsMessageType(Enum):
 class RsMessage:
     def __init__(self, message_code, message_type, message_text):
         self.code = message_code
-        self.message_type = message_type
+        self.type = message_type
         self.text = message_text
 
 class RsMessageManager:

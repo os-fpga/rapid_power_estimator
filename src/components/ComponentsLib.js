@@ -45,3 +45,22 @@ export function AddButton({ disabled, onClick }) {
     </button>
   );
 }
+
+export function Checkbox({
+  isChecked, label, checkHandler, id, disabled,
+}) {
+  const checkboxRef = React.useRef(null);
+  return (
+    <div>
+      <input
+        type="checkbox"
+        id={id}
+        checked={isChecked}
+        onChange={() => checkHandler(checkboxRef.current.checked)}
+        ref={checkboxRef}
+        disabled={disabled}
+      />
+      <label htmlFor={id}>{label}</label>
+    </div>
+  );
+}

@@ -4,13 +4,13 @@ import * as server from '../../utils/serverAPI';
 import {
   bcpuNames, clock, loadActivity, findEvailableIndex,
 } from '../../utils/cpu';
-import { TableBase, Actions, Checkbox } from './TableBase';
+import { TableBase, Actions } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 

@@ -3,6 +3,11 @@
 #  Authorized use only
 #
 from marshmallow import Schema, fields
+from submodule.rs_device_resources import MessageType
+
+class MessageSchema(Schema):
+    type = fields.Enum(MessageType, by_value=True)
+    text = fields.Str()
 
 class DeviceSchema(Schema):
     id = fields.Str()

@@ -74,6 +74,8 @@ class RsDevice:
         return self.resources.get_module(modtype)
 
     def compute_output_power(self):
+        self.output.typical.total_power = 0.0
+        self.output.worsecase.total_power = 0.0
         for mod in self.resources.get_modules():
             if mod is not None:
                 mod.compute_output_power()

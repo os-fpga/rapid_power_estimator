@@ -5,6 +5,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
+from .rs_message import RsMessage, RsMessageManager
 
 class Pipelining(Enum):
     INPUT_AND_OUTPUT = 0
@@ -25,7 +26,7 @@ class DSP_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    message : str = field(default='')
+    messages : [RsMessage] = field(default_factory=list)
 
 @dataclass
 class DSP:
@@ -47,11 +48,20 @@ class DSP:
             self.output.percentage = 0.0
 
     def compute_dynamic_power(self, clock, VCC_CORE, DSP_MULT_CAP, DSP_MULT_CAP2, DSP_INT_CAP):
+        self.output.dsp_blocks_used = 0.0
+        self.output.clock_frequency = 0
+        self.output.output_signal_rate = 0.0
+        self.output.block_power = 0.0
+        self.output.interconnect_power = 0.0
+        self.output.messages.clear()
+
         if clock == None:
-            self.output.message = f"Invalid clock {self.clock}"
+            self.output.messages.append(RsMessageManager.get_message(301))
             return
 
-        if self.enable:
+        if self.enable == False:
+            self.output.messages.append(RsMessageManager.get_message(102))
+        else:
             # Calculate DSP blocks used
             if self.a_input_width < 10 and self.b_input_width < 11:
                 self.output.dsp_blocks_used = self.number_of_multipliers * 0.5
@@ -89,13 +99,6 @@ class DSP:
             # Calculate interconnect power
             # interconnect_power = VCC_CORE^2 * output_signal_rate * no. of multipliers * (a-input width + b-input width) * DSP_INT_CAP
             self.output.interconnect_power = VCC_CORE ** 2 * self.output.output_signal_rate * self.number_of_multipliers * (self.a_input_width + self.b_input_width) * DSP_INT_CAP
-        else:
-            self.output.dsp_blocks_used = 0.0
-            self.output.clock_frequency = 0
-            self.output.output_signal_rate = 0.0
-            self.output.block_power = 0.0
-            self.output.interconnect_power = 0.0
-            self.output.message = 'This DSP is disabled'
 
 class DSP_SubModule:
 

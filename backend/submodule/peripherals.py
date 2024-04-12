@@ -7,6 +7,7 @@ from utilities.common_utils import update_attributes
 from .clock import Clock
 from typing import List
 from enum import Enum
+from .rs_message import RsMessage, RsMessageManager
 
 class PeripheralType(Enum):
     NONE = 'none'
@@ -130,7 +131,7 @@ class Peripheral_Output:
     calculated_bandwidth: float = field(default=0.0)
     block_power: float = field(default=0.0)
     percentage: float = field(default=0.0)
-    message: str = field(default='')
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class PeripheralBase:
@@ -257,7 +258,7 @@ class Memory_Output:
     read_bandwidth: float = field(default=0.0)
     block_power: float = field(default=0.0)
     percentage: float = field(default=0.0)
-    message: str = field(default='')
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class Memory(PeripheralBase):
@@ -281,7 +282,7 @@ class Endpoint_Output:
     clock_frequency: int = field(default=0) # specific to FPGA_Complex only
     percentage: float = field(default=0.0) # specific to FPGA_Complex only
     noc_power: float = field(default=0.0)
-    message: str = field(default='')
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class Endpoint:
@@ -348,7 +349,7 @@ class DMA_Output:
     noc_power: float = field(default=0.0)
     block_power: float = field(default=0.0)
     percentage: float = field(default=0.0)
-    message: str = field(default='')
+    messages: [RsMessage] = field(default_factory=list)
 
 @dataclass
 class DMA(PeripheralBase):

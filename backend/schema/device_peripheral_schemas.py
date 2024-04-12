@@ -6,6 +6,7 @@ from marshmallow import Schema, fields
 from submodule.peripherals import PeripheralType, Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, \
     I2c_Speed, Baud_Rate, Cpu, Usb_Speed, Gige_Speed, Gpio_Type, GpioStandard, Memory_Type, \
     Dma_Source_Destination, Dma_Activity, N22_RISC_V_Clock, Port_Activity, A45_Load
+from .device_schemas import MessageSchema
 
 class UrlField(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -44,7 +45,7 @@ class PeripheralOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
     block_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class PeripheralSchema(Schema):
     name = fields.Str()
@@ -135,7 +136,7 @@ class MemoryOutputSchema(Schema):
     read_bandwidth = fields.Number()
     block_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class MemorySchema(PeripheralSchema):
     enable = fields.Bool()
@@ -150,7 +151,7 @@ class DmaOutputSchema(Schema):
     noc_power = fields.Number()
     block_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class DmaSchema(PeripheralSchema):
     enable = fields.Bool()
@@ -165,7 +166,7 @@ class DmaSchema(PeripheralSchema):
 class EndpointOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
     noc_power = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class EndpointSchema(Schema):
     name = fields.Str()
@@ -184,18 +185,6 @@ class BcpuSchema(PeripheralSchema):
     clock = fields.Enum(N22_RISC_V_Clock, by_value=True)
     ports = EndpointUrlField()
     output = fields.Nested(BcpuOutputSchema, data_key="consumption")
-
-class EndpointOutputSchema(Schema):
-    calculated_bandwidth = fields.Number()
-    noc_power = fields.Number()
-    message = fields.Str()
-
-class EndpointSchema(Schema):
-    name = fields.Str()
-    activity = fields.Enum(Port_Activity, by_value=True)
-    read_write_rate = fields.Number()
-    toggle_rate = fields.Number()
-    output = fields.Nested(EndpointOutputSchema, data_key="consumption")
 
 class FpgaComplexEndpointOutputSchema(EndpointOutputSchema):
     clock_frequency = fields.Int()

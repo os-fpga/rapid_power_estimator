@@ -4,6 +4,7 @@
 #
 from marshmallow import Schema, fields
 from submodule.clock import Clock_State, Source
+from .device_schemas import MessageSchema
 
 class ClockingResourcesConsumptionSchema(Schema):
     total_clocks_available = fields.Int()
@@ -19,7 +20,7 @@ class ClockingOutputSchema(Schema):
     block_power = fields.Number()
     interconnect_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class ClockingSchema(Schema):
     enable = fields.Bool()

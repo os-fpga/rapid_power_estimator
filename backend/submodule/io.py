@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
 from typing import List
+from .rs_message import RsMessage, RsMessageManager
 
 class IO_Direction(Enum):
     INPUT = 0
@@ -110,7 +111,7 @@ class IO_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    message : str = field(default='')
+    messages : [RsMessage] = field(default_factory=list)
 
 @dataclass
 class IO:
@@ -132,9 +133,27 @@ class IO:
     io_pull_up_down : IO_Pull_up_down = field(default=IO_Pull_up_down.NONE)
     output : IO_output = field(default_factory=IO_output)
 
-    def compute_dynamic_power(self):
-        # todo
-        pass
+    def compute_percentage(self, total_power):
+        if total_power > 0:
+            self.output.percentage = (self.output.block_power + self.output.interconnect_power) / total_power * 100.0
+        else:
+            self.output.percentage = 0.0
+
+    def compute_dynamic_power(self, clock):
+        self.output.io_signal_rate = 0.0
+        self.output.block_power = 0.0
+        self.output.interconnect_power = 0.0
+        self.output.messages.clear()
+
+        if clock is None:
+            self.output.messages.append(RsMessageManager.get_message(301))
+            return
+
+        if self.enable == False:
+            self.output.messages.append(RsMessageManager.get_message(105))
+            return
+
+        # todo: io power calculation
 
 @dataclass
 class IO_Usage_Allocation:
@@ -206,4 +225,19 @@ class IO_SubModule:
             raise ValueError("Invalid index. Item doesn't exist at the specified index.")
 
     def compute_output_power(self):
-        pass
+        # todo: Get power calculation coefficients
+
+        # Compute the total power consumption of all clocks
+        self.total_block_power = 0.0
+        self.total_interconnect_power = 0.0
+
+        # Compute the power consumption for each individual items
+        for item in self.itemlist:
+            item.compute_dynamic_power(self.resources.get_clock(item.clock))
+            self.total_interconnect_power += item.output.interconnect_power
+            self.total_block_power += item.output.block_power
+
+        # update individual clock percentage
+        total_power = self.total_block_power + self.total_interconnect_power
+        for item in self.itemlist:
+            item.compute_percentage(total_power)

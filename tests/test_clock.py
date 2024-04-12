@@ -4,6 +4,7 @@
 #
 from submodule.clock import Clock, Source, ClockOutput, Clock_SubModule, Clock_State
 from submodule.rs_device_resources import RsDeviceResources
+from submodule.rs_message import RsMessageType
 from unittest.mock import Mock
 import pytest
 
@@ -20,7 +21,7 @@ def test_clock_initialization():
     assert clock.output.block_power == 0.0
     assert clock.output.interconnect_power == 0.0
     assert clock.output.percentage == 0.0
-    assert clock.output.message == ''
+    assert clock.output.messages == []
 
 @pytest.mark.parametrize("block_power, interconnect_power, total_power, expected_percentage", [
     (10, 20, 100.0, 30.0),
@@ -36,12 +37,12 @@ def test_compute_percentage(block_power, interconnect_power, total_power, expect
     assert clock.output.percentage == expected_percentage
 
 @pytest.mark.parametrize(
-"enable, frequency, fan_out, clock_cap_block, clock_cap_interconnect, expected_block_power, expected_interconnect_power", 
+"enable, frequency, fan_out, clock_cap_block, clock_cap_interconnect, expected_block_power, expected_interconnect_power, message_count, message_code",
 [
-    (True, 100000000, 10, 0.5, 0.3, 50.0, 300.0),
-    (False, 100000000, 10, 0.5, 0.3, 0, 0)
+    (True, 100000000, 10, 0.5, 0.3, 50.0, 300.0, 0, 0),
+    (False, 100000000, 10, 0.5, 0.3, 0, 0, 1, 101)
 ])
-def test_compute_dynamic_power(enable, frequency, fan_out, clock_cap_block, clock_cap_interconnect, expected_block_power, expected_interconnect_power):
+def test_compute_dynamic_power(enable, frequency, fan_out, clock_cap_block, clock_cap_interconnect, expected_block_power, expected_interconnect_power, message_count, message_code):
     clock = Clock(enable=enable, frequency=frequency)
 
     clock.compute_dynamic_power(fan_out, clock_cap_block, clock_cap_interconnect)
@@ -49,7 +50,9 @@ def test_compute_dynamic_power(enable, frequency, fan_out, clock_cap_block, cloc
     assert clock.output.fan_out == fan_out
     assert clock.output.block_power == expected_block_power
     assert clock.output.interconnect_power == expected_interconnect_power
-    assert clock.output.message == ''
+    assert len(clock.output.messages) == message_count
+    if message_count > 0:
+        assert clock.output.messages[0].type == RsMessageType.INFO
 
 def test_clock_submodule_initialization():
     mock_resources = Mock(spec=RsDeviceResources)

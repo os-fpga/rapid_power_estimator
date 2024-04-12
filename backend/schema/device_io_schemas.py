@@ -5,6 +5,7 @@
 from marshmallow import Schema, fields
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_STANDARD, IO_Synchronization, IO_Pull_up_down, IO_Bank_Type
+from .device_schemas import MessageSchema
 
 class IoOnDieTerminationSchema(Schema):
     bank_number = fields.Int()
@@ -38,7 +39,7 @@ class IoOutputSchema(Schema):
     block_power = fields.Number()
     interconnect_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class IoSchema(Schema):
     enable = fields.Bool()

@@ -5,8 +5,12 @@ const { spawn } = require('child_process');
 const path = require('node:path');
 const fs = require('fs');
 const Store = require('electron-store');
+const log = require('electron-log');
 const config = require('./rpe.config.json');
-const { log, closeLogStream } = require('./loggingModule');
+
+log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
+log.transports.file.fileName = 'rpe.log';
+log.transports.file.maxSize = 1024 * 1024 * 10; // 10MB
 
 const schema = {
   port: {
@@ -31,7 +35,10 @@ let mainWindow = null;
 
 const isDev = process.argv.find((val) => val === '--development');
 if (!isDev) {
-  console.log = log;
+  ['log', 'warn', 'error', 'info', 'debug'].forEach((method) => {
+    console[method] = log[method].bind(log);
+  });
+  log.transports.console.level = false; // silent console
 }
 const template = [
   {
@@ -106,15 +113,15 @@ const startFlaskServer = () => {
   });
 
   apiServer.stderr.on('data', (data) => {
-    console.log(`stderr: ${data}`);
+    console.error(`stderr: ${data}`);
   });
 
   apiServer.on('error', (error) => {
-    console.log(`error: ${error.message}`);
+    console.error(`error: ${error.message}`);
   });
 
   apiServer.on('close', (code) => {
-    console.log(`serverProcess exited with code ${code}`);
+    console.warn(`serverProcess exited with code ${code}`);
   });
 
   apiServer.on('message', (message) => {
@@ -171,6 +178,5 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   serverProcess.kill('SIGINT');
-  closeLogStream();
   if (process.platform !== 'darwin') app.quit();
 });

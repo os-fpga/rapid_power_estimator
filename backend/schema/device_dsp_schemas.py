@@ -4,6 +4,7 @@
 #
 from marshmallow import Schema, fields
 from submodule.dsp import DSP_Mode, Pipelining
+from .device_schemas import MessageSchema
 
 class DspResourcesConsumptionSchema(Schema):
     total_dsp_blocks_available = fields.Int()
@@ -18,7 +19,7 @@ class DspOutputSchema(Schema):
     block_power = fields.Number()
     interconnect_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class DspSchema(Schema):
     name = fields.Str()

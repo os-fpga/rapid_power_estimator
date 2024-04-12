@@ -9,16 +9,6 @@ class ModuleType(Enum):
     SOC_PERIPHERALS = 5
     REGULATOR = 6
 
-class MessageType(Enum):
-    ERROR = "error"
-    WARN = "warn"
-    INFO = "info"
-
-class RsMessage:
-    def __init__(self, msg_type, message):
-        self.type = msg_type
-        self.text = message
-
 class RsDeviceResources:
 
     def __init__(self, device):

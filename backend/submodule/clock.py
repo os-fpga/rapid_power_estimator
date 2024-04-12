@@ -5,7 +5,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
-from .rs_device_resources import ModuleType, MessageType, RsMessage
+from .rs_device_resources import ModuleType
+from .rs_message import RsMessage, RsMessageManager
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -51,12 +52,12 @@ class Clock:
         self.output.messages.clear()
 
         if self.enable == False:
-            self.output.messages.append(RsMessage(MessageType.INFO, "This clock is disabled"))
+            self.output.messages.append(RsMessageManager.get_message(101))
             return
 
         if self.state == Clock_State.ACTIVE:
             if fan_out == 0:
-                self.output.messages.append(RsMessage(MessageType.WARN, "Clock is specified but no loads identified in other tabs"))
+               self.output.messages.append(RsMessageManager.get_message(201))
             self.output.block_power = CLK_CAP * (self.frequency/1000000)
             self.output.interconnect_power = self.output.fan_out * CLK_INT_CAP * (self.frequency/1000000)
 

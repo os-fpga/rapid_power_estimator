@@ -3,10 +3,10 @@
 #  Authorized use only
 #
 from marshmallow import Schema, fields
-from submodule.rs_device_resources import MessageType
+from submodule.rs_message import RsMessageType
 
 class MessageSchema(Schema):
-    type = fields.Enum(MessageType, by_value=True)
+    type = fields.Enum(RsMessageType, by_value=True)
     text = fields.Str()
 
 class DeviceSchema(Schema):

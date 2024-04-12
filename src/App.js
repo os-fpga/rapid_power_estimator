@@ -27,6 +27,7 @@ import TypicalWorstComponent from './components/TypicalWorstComponent';
 import Notes from './components/Notes';
 import Preferences from './preferences';
 import { useSelection } from './SelectionProvider';
+import { port } from '../rpe.config.json';
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
@@ -44,7 +45,11 @@ function App() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [notes, setNotes] = React.useState('');
   const [topLevel, setTopLevel] = React.useState('');
-  const [config, setConfig] = React.useState({});
+  const [config, setConfig] = React.useState({
+    useDefaultFile: true,
+    device_xml: '',
+    port,
+  });
   const { toggleItemSelection } = useSelection();
   const [preferencesChanged, setPreferencesChanged] = React.useState(false);
 
@@ -55,8 +60,11 @@ function App() {
   };
   const handleOk = () => {
     // this will restart app
-    if (preferencesChanged) window.ipcAPI.send('config', config);
-    else setIsModalOpen(false);
+    if (preferencesChanged) {
+      const conf = config;
+      if (conf.useDefaultFile) conf.device_xml = '';
+      window.ipcAPI.send('config', conf);
+    } else setIsModalOpen(false);
   };
   const handleCancel = () => {
     setIsModalOpen(false);

@@ -3,10 +3,10 @@ import PeripheralsModal from '../ModalWindows/PeripheralsModal';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions, Checkbox } from './TableBase';
+import { TableBase, Actions } from './TableBase';
 import * as per from '../../utils/peripherals';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 

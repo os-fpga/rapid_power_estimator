@@ -16,25 +16,6 @@ export function Actions({ onEditClick, onDeleteClick, rowSpan }) {
   );
 }
 
-export function Checkbox({
-  isChecked, label, checkHandler, id, disabled,
-}) {
-  const checkboxRef = React.useRef(null);
-  return (
-    <div>
-      <input
-        type="checkbox"
-        id={id}
-        checked={isChecked}
-        onChange={() => checkHandler(checkboxRef.current.checked)}
-        ref={checkboxRef}
-        disabled={disabled}
-      />
-      <label htmlFor={id}>{label}</label>
-    </div>
-  );
-}
-
 export function TableBase({
   header, disabled, onClick, hideAddBtn = false, children,
 }) {

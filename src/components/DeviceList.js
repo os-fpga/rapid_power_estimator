@@ -40,7 +40,7 @@ function DeviceList({ devices, setDevice }) {
               Select a device...
             </option>
             {devices.map((data) => (
-              <option key={data.id} value={data.id}>
+              <option key={data.id + data.series} value={data.id}>
                 {data.id}
                 {' '}
                 {data.series}

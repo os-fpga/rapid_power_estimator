@@ -8,7 +8,9 @@ const Store = require('electron-store');
 const log = require('electron-log');
 const config = require('./rpe.config.json');
 
-log.transports.file.format = '{h}:{i}:{s}:{ms} {text}';
+const logFormat = '[{h}:{i}:{s}.{ms}] [{level}] {text}';
+log.transports.console.format = logFormat;
+log.transports.file.format = logFormat;
 log.transports.file.fileName = 'rpe.log';
 log.transports.file.maxSize = 1024 * 1024 * 10; // 10MB
 
@@ -113,7 +115,7 @@ const startFlaskServer = () => {
   });
 
   apiServer.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`);
+    console.log(`stderr: ${data}`);
   });
 
   apiServer.on('error', (error) => {

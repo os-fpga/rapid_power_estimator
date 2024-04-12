@@ -54,7 +54,7 @@ function Preferences({
             setOkButtonDisabled(!config.useDefaultFile && (e.target.value === ''));
           }}
           disabled={config.useDefaultFile}
-          placeholder="Absolute path is required"
+          placeholder="Enter absolute path to devices.xml"
         // eslint-disable-next-line no-nested-ternary
           value={config.device_xml}
         />

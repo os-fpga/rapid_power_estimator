@@ -110,5 +110,9 @@
   },
   "files": [
     "build/**/*"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/os-fpga/rapid_power_estimator.git"
+  }
 }

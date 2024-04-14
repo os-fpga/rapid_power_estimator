@@ -82,7 +82,7 @@ jobs:
         run: |
             npx eslint src/
 
-      - name: Install packages centos 7 & Run pytest
+      - name: Install packages centos 7 & Run pytest & frontend test
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -94,12 +94,14 @@ jobs:
                 npm install
                 python3 -m pip install -r requirements.txt
                 python3 -m pytest
+                npm test
 
       - name: Run pytest on ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: python3 -m pytest
         
-      - name: Run frontend unit test only on ubuntu-latest
+      - name: Run frontend unit test on ${{ matrix.os }}
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
             npm test
 

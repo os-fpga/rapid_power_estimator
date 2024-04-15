@@ -115,6 +115,9 @@ jobs:
           - macos-latest
           - windows-latest
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      packages: read
     env:
       MODE: ${{ matrix.os }}
 
@@ -189,8 +192,8 @@ jobs:
                 python3 -m pip install -r requirements.txt
                 npm run dist
                 ls dist
-                tar -czvf rapid_power_estimator.tar.gz -C dist/linux-unpacked .
-                mv rapid_power_estimator.tar.gz dist
+                tar -czvf rapid_power_estimator_linux.tar.gz -C dist/linux-unpacked .
+                mv rapid_power_estimator_linux.tar.gz dist
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

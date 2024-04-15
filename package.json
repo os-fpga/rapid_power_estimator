@@ -10,7 +10,7 @@
     "test": "jest src/tests",
     "postinstall": "electron-builder install-app-deps",
     "pack": "electron-builder --dir",
-    "dist": "pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py && webpack --mode production && electron-builder"
+    "dist": "pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile  backend/restapi_server.py && webpack --mode production && electron-builder -p never"
   },
   "build": {
     "appId": "org.rapidsilicon.rapid_power_estimator",

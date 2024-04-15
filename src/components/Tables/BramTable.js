@@ -6,7 +6,7 @@ import BramModal from '../ModalWindows/BramModal';
 import bramType from '../../utils/bram';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -75,7 +75,7 @@ function BramTable({ device, totalPowerCallback }) {
 
   function sendData(row) {
     const data = {};
-    data.enable = true;
+    data.enable = row.enable;
     data.name = row.name;
     data.type = parseInt(row.type, 10);
     data.bram_used = parseInt(row.bram_used, 10);
@@ -133,9 +133,20 @@ function BramTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Action', 'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
+    'Action', 'En', 'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
     'Toggle Rate', 'Clock Freq', 'RAM Depth', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
+
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.bram, device, index),
+      data,
+      () => fetchBramData(device),
+    );
+  }
 
   return (
     <div className="component-table-head main-border">
@@ -164,6 +175,13 @@ function BramTable({ device, totalPowerCallback }) {
                     onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                     onDeleteClick={() => deleteRow(index)}
                   />
+                  <td rowSpan={2}>
+                    <Checkbox
+                      isChecked={row.enable}
+                      checkHandler={(state) => enableChanged(index, state)}
+                      id={index}
+                    />
+                  </td>
                   <td rowSpan={2}>{row.name}</td>
                   <td rowSpan={2}>{GetText(row.type, bramType)}</td>
                   <td rowSpan={2}>{row.bram_used}</td>
@@ -213,6 +231,7 @@ function BramTable({ device, totalPowerCallback }) {
             }}
             onSubmit={handleSubmit}
             defaultValue={(editIndex !== null && bramWindowData[editIndex]) || {
+              enable: true,
               name: '',
               type: 0,
               bram_used: 0,

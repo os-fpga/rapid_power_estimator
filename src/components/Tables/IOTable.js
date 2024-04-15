@@ -5,7 +5,7 @@ import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PercentsCell, SelectionCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 import {
@@ -83,6 +83,7 @@ function IOTable({ device, totalPowerCallback }) {
   };
 
   const defaultIOData = {
+    enable: true,
     name: '',
     bus_width: 0,
     direction: 0,
@@ -146,10 +147,21 @@ function IOTable({ device, totalPowerCallback }) {
   };
 
   const mainTableHeader = [
-    'Action', 'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
+    'Action', 'En', 'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
     'Clock', 'Toggle Rate', 'Duty Cycle', 'Sync', 'Input En', 'Output En', 'Pullup / Pulldown', 'Bank Type', 'Bank #',
     'VCCIO', 'Signal Rate', 'Block Power', 'Intc. Power', '%',
   ];
+
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.io, device, index),
+      data,
+      () => fetchIoData(device),
+    );
+  }
 
   return (
     <div className="component-table-head main-border">
@@ -176,6 +188,13 @@ function IOTable({ device, totalPowerCallback }) {
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}
                 />
+                <td>
+                  <Checkbox
+                    isChecked={row.enable}
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
                 <td>{row.name}</td>
                 <td>{row.bus_width}</td>
                 <SelectionCell val={row.direction} values={direction} />

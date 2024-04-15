@@ -6,7 +6,7 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -18,7 +18,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   const [powerTable, setPowerTable] = React.useState([]);
 
   const mainTableHeader = [
-    'Action', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
+    'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
     'Block Power', 'Intc. Power', '%',
   ];
 
@@ -92,6 +92,17 @@ function ClockingTable({ device, totalPowerCallback }) {
     'Used', 'Total', 'Power', '%',
   ];
 
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.clocking, device, index),
+      data,
+      () => fetchClockData(device),
+    );
+  }
+
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
@@ -117,6 +128,13 @@ function ClockingTable({ device, totalPowerCallback }) {
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}
                 />
+                <td>
+                  <Checkbox
+                    isChecked={row.enable}
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
                 <td>{row.description}</td>
                 <td>{GetText(row.source, sources)}</td>
                 <td>{row.port}</td>
@@ -142,6 +160,7 @@ function ClockingTable({ device, totalPowerCallback }) {
             }}
             onSubmit={handleSubmit}
             defaultValue={(editIndex !== null && clockingData[editIndex]) || {
+              enable: true,
               source: 0,
               description: '',
               port: '',

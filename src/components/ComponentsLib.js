@@ -47,7 +47,7 @@ export function AddButton({ disabled, onClick }) {
 }
 
 export function Checkbox({
-  isChecked, label, checkHandler, id, disabled,
+  isChecked, checkHandler, id, label = '', disabled = false,
 }) {
   const checkboxRef = React.useRef(null);
   return (

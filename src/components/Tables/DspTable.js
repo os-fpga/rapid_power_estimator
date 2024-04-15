@@ -6,7 +6,7 @@ import { fixed, GetText } from '../../utils/common';
 import { dspMode, pipelining } from '../../utils/dsp';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -80,10 +80,21 @@ function DspTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Action', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
+    'Action', 'En', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
     'Clock', 'Pipeline', 'T-Rate',
     'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
+
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.dsp, device, index),
+      data,
+      () => fetchDspData(device),
+    );
+  }
 
   return (
     <div className="component-table-head main-border">
@@ -111,6 +122,13 @@ function DspTable({ device, totalPowerCallback }) {
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}
                 />
+                <td>
+                  <Checkbox
+                    isChecked={row.enable}
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
                 <td>{row.name}</td>
                 <td>{row.number_of_multipliers}</td>
                 <td>{GetText(row.dsp_mode, dspMode)}</td>
@@ -144,6 +162,7 @@ function DspTable({ device, totalPowerCallback }) {
             }}
             onSubmit={handleSubmit}
             defaultValue={(editIndex !== null && dspData[editIndex]) || {
+              enable: true,
               name: '',
               number_of_multipliers: 0,
               dsp_mode: 0,

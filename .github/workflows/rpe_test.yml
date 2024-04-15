@@ -193,7 +193,7 @@ jobs:
                 npm run dist
                 ls dist
                 tar -czvf rapid_power_estimator_linux.tar.gz -C dist/linux-unpacked .
-                mv rapid_power_estimator.tar.gz dist
+                mv rapid_power_estimator_linux.tar.gz dist
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

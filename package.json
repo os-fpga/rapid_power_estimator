@@ -22,7 +22,8 @@
       "preload.js",
       "rpe.config.json",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "cleanup.js"
     ],
     "directories": {
       "buildResources": "resources"
@@ -106,7 +107,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
-    "react-switch": "^7.0.0"
+    "react-switch": "^7.0.0",
+    "tree-kill": "^1.2.2"
   },
   "files": [
     "build/**/*"

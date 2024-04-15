@@ -115,6 +115,9 @@ jobs:
           - macos-latest
           - windows-latest
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      pull-requests: write
     env:
       MODE: ${{ matrix.os }}
 

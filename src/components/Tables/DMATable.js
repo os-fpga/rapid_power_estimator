@@ -9,7 +9,7 @@ import { PercentsCell, PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -25,18 +25,12 @@ function DMATable({ device }) {
     { id: 2, data: {} },
     { id: 3, data: {} },
   ]);
-  const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    'Action', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
+    'Action', 'En', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
     'Bandwidth', 'Block Power', '%',
   ];
-
-  React.useEffect(() => {
-    const found = dmaData.find((item) => item.data.enable === false);
-    setAddButtonDisable(found === undefined);
-  }, [dmaData]);
 
   React.useEffect(() => {
     if (device !== null) {
@@ -83,13 +77,6 @@ function DMATable({ device }) {
     server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, fetchData);
   }
 
-  const deleteRow = (index) => {
-    const data = { enable: false };
-    server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, fetchData);
-    publish('dmaChanged');
-    updateTotalPower(device);
-  };
-
   function addRow(newData) {
     if (device !== null) {
       const found = dmaData.find((item) => item.data.enable === false);
@@ -110,6 +97,15 @@ function DMATable({ device }) {
     'Power', '%',
   ];
 
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, fetchData);
+    publish('dmaChanged');
+    updateTotalPower(device);
+  }
+
   return (
     <div className="component-table-head main-border">
       <div className="main-block">
@@ -126,17 +122,23 @@ function DMATable({ device }) {
           </div>
           <TableBase
             header={mainTableHeader}
-            disabled={addButtonDisable}
+            hideAddBtn
             onClick={() => setModalOpen(true)}
           >
             {
             dmaData.map((row, index) => (
-              row.data.enable && (
+              (row.data.consumption !== undefined) && (
                 <tr key={row.id}>
                   <Actions
                     onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(row.id)}
                   />
+                  <td>
+                    <Checkbox
+                      isChecked={row.data.enable}
+                      checkHandler={(state) => enableChanged(index, state)}
+                      id={index}
+                    />
+                  </td>
                   <td>{row.data.name}</td>
                   <SelectionCell val={row.data.source} values={source} />
                   <SelectionCell val={row.data.destination} values={source} />

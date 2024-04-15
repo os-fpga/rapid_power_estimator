@@ -117,7 +117,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
-      pull-requests: write
+      packages: read
     env:
       MODE: ${{ matrix.os }}
 

@@ -6,7 +6,7 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -84,9 +84,20 @@ function FleTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Action', 'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
+    'Action', 'En', 'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
     'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
+
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.fle, device, index),
+      data,
+      () => fetchFleData(device),
+    );
+  }
 
   return (
     <div className="component-table-head main-border">
@@ -113,6 +124,13 @@ function FleTable({ device, totalPowerCallback }) {
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}
                 />
+                <td>
+                  <Checkbox
+                    isChecked={row.enable}
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
                 <td>{row.name}</td>
                 <td>{row.lut6}</td>
                 <td>{row.flip_flop}</td>
@@ -144,6 +162,7 @@ function FleTable({ device, totalPowerCallback }) {
             }}
             onSubmit={handleSubmit}
             defaultValue={(editIndex !== null && fleData[editIndex]) || {
+              enable: true,
               name: '',
               lut6: 0,
               flip_flop: 0,

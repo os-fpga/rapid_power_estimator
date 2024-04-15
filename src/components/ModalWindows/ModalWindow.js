@@ -14,11 +14,7 @@ function ModalWindow({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const state = formState;
-    if (Object.prototype.hasOwnProperty.call(state, 'consumption')) {
-      delete state.consumption;
-    }
-    onSubmit(state);
+    onSubmit(formState);
     closeModal();
   };
 

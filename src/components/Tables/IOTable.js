@@ -165,80 +165,78 @@ function IOTable({ device, totalPowerCallback }) {
 
   return (
     <div className="component-table-head">
-      <div className="main-block">
-        <ComponentLabel name="IO" />
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <IOPowerTable
-              title="IO power"
-              total={powerTotal}
-              resources={powerTable !== null ? powerTable : defaultPowerData}
-            />
-          </div>
-          <TableBase
-            header={mainTableHeader}
-            disabled={device === null}
-            onClick={() => setModalOpen(true)}
-          >
-            {
-            ioData.map((row, index) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={index}>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-                <td>
-                  <Checkbox
-                    isChecked={row.enable}
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={index}
-                  />
-                </td>
-                <td>{row.name}</td>
-                <td>{row.bus_width}</td>
-                <SelectionCell val={row.direction} values={direction} />
-                <SelectionCell val={row.io_standard} values={ioStandard} />
-                <SelectionCell val={row.drive_strength} values={driveStrength} />
-                <SelectionCell val={row.slew_rate} values={slewRate} />
-                <SelectionCell
-                  val={row.differential_termination}
-                  values={differentialTermination}
-                />
-                <SelectionCell val={row.io_data_type} values={ioDataType} />
-                <td>{row.clock}</td>
-                <PercentsCell val={row.toggle_rate} precition={1} />
-                <PercentsCell val={row.duty_cycle} />
-                <SelectionCell val={row.synchronization} values={synchronization} />
-                <PercentsCell val={row.input_enable_rate} />
-                <PercentsCell val={row.output_enable_rate} />
-                <SelectionCell val={row.io_pull_up_down} values={ioPullUpDown} />
-                <SelectionCell val={row.consumption.bank_type} values={bankType} />
-                <td>{row.consumption.bank_number}</td>
-                <td>{row.consumption.vccio_voltage}</td>
-                <PercentsCell val={row.consumption.io_signal_rate} />
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <IOModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && ioData[editIndex]) || defaultIOData}
+      <ComponentLabel name="IO" />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <IOPowerTable
+            title="IO power"
+            total={powerTotal}
+            resources={powerTable !== null ? powerTable : defaultPowerData}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          ioData.map((row, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <tr key={index}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.name}</td>
+              <td>{row.bus_width}</td>
+              <SelectionCell val={row.direction} values={direction} />
+              <SelectionCell val={row.io_standard} values={ioStandard} />
+              <SelectionCell val={row.drive_strength} values={driveStrength} />
+              <SelectionCell val={row.slew_rate} values={slewRate} />
+              <SelectionCell
+                val={row.differential_termination}
+                values={differentialTermination}
+              />
+              <SelectionCell val={row.io_data_type} values={ioDataType} />
+              <td>{row.clock}</td>
+              <PercentsCell val={row.toggle_rate} precition={1} />
+              <PercentsCell val={row.duty_cycle} />
+              <SelectionCell val={row.synchronization} values={synchronization} />
+              <PercentsCell val={row.input_enable_rate} />
+              <PercentsCell val={row.output_enable_rate} />
+              <SelectionCell val={row.io_pull_up_down} values={ioPullUpDown} />
+              <SelectionCell val={row.consumption.bank_type} values={bankType} />
+              <td>{row.consumption.bank_number}</td>
+              <td>{row.consumption.vccio_voltage}</td>
+              <PercentsCell val={row.consumption.io_signal_rate} />
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <IOModal
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && ioData[editIndex]) || defaultIOData}
+      />
+      )}
     </div>
   );
 }

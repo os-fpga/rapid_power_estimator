@@ -159,58 +159,56 @@ function PeripheralsTable({ device }) {
 
   return (
     <div className="component-table-head">
-      <div className="main-block">
-        <ComponentLabel name="Peripherals" />
-        <TableBase header={mainTableHeader} hideAddBtn>
-          {
-            peripherals.map((row, index) => row.data.map((i, idx) => (
-              i.data !== undefined && (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={`${index}.${idx}`}>
-                <td>
-                  <Checkbox
-                    disabled={i.data.enable === undefined}
-                    isChecked={i.data.enable === undefined || i.data.enable}
-                    label=""
-                    checkHandler={(state) => enableChanged(index, idx, state)}
-                    id={index}
-                  />
-                </td>
-                <td className="innerHeader">{i.data.name}</td>
-                <Actions
-                  onEditClick={() => {
-                    setEditIndex({ main: index, inner: idx });
-                    setModalOpen(true);
-                  }}
-                />
-                <SelectionCell val={i.data.usage} values={row.usage} />
-                <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
-                <td>
-                  {i.data.consumption.calculated_bandwidth}
-                  {' MB/s'}
-                </td>
-                <PowerCell val={i.data.consumption.block_power} />
-                <td>
-                  {fixed(parseFloat(i.data.consumption.percentage), 0)}
-                  {' %'}
-                </td>
-              </tr>
-              )
-            )))
-          }
-        </TableBase>
-        {modalOpen && (
-          <PeripheralsModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={peripherals[editIndex.main]}
-            index={editIndex.inner}
-          />
-        )}
-      </div>
+      <ComponentLabel name="Peripherals" />
+      <TableBase header={mainTableHeader} hideAddBtn>
+        {
+        peripherals.map((row, index) => row.data.map((i, idx) => (
+          i.data !== undefined && (
+          // eslint-disable-next-line react/no-array-index-key
+          <tr key={`${index}.${idx}`}>
+            <td>
+              <Checkbox
+                disabled={i.data.enable === undefined}
+                isChecked={i.data.enable === undefined || i.data.enable}
+                label=""
+                checkHandler={(state) => enableChanged(index, idx, state)}
+                id={index}
+              />
+            </td>
+            <td className="innerHeader">{i.data.name}</td>
+            <Actions
+              onEditClick={() => {
+                setEditIndex({ main: index, inner: idx });
+                setModalOpen(true);
+              }}
+            />
+            <SelectionCell val={i.data.usage} values={row.usage} />
+            <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
+            <td>
+              {i.data.consumption.calculated_bandwidth}
+              {' MB/s'}
+            </td>
+            <PowerCell val={i.data.consumption.block_power} />
+            <td>
+              {fixed(parseFloat(i.data.consumption.percentage), 0)}
+              {' %'}
+            </td>
+          </tr>
+          )
+        )))
+        }
+      </TableBase>
+      {modalOpen && (
+      <PeripheralsModal
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={peripherals[editIndex.main]}
+        index={editIndex.inner}
+      />
+      )}
     </div>
   );
 }

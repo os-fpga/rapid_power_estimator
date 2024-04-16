@@ -101,79 +101,77 @@ function FleTable({ device, totalPowerCallback }) {
 
   return (
     <div className="component-table-head">
-      <div className="main-block">
-        <ComponentLabel name="FLE" />
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="FLE power"
-              total={powerTotal}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-            />
-          </div>
-          <TableBase
-            header={mainTableHeader}
-            disabled={device === null}
-            onClick={() => setModalOpen(true)}
-          >
-            {
-            fleData.map((row, index) => (
-              <tr key={row.name}>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-                <td>
-                  <Checkbox
-                    isChecked={row.enable}
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={index}
-                  />
-                </td>
-                <td>{row.name}</td>
-                <td>{row.lut6}</td>
-                <td>{row.flip_flop}</td>
-                <td>{row.clock}</td>
-                <PercentsCell val={row.toggle_rate} precition={1} />
-                <td>{GetText(row.glitch_factor, glitchFactor)}</td>
-                <PercentsCell val={row.clock_enable_rate} />
-                <FrequencyCell val={row.consumption.clock_frequency} />
-                <td>
-                  {fixed(row.consumption.output_signal_rate, 1)}
-                  {' MTr/S'}
-                </td>
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <FleModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && fleData[editIndex]) || {
-              enable: true,
-              name: '',
-              lut6: 0,
-              flip_flop: 0,
-              clock: '',
-              toggle_rate: 0,
-              glitch_factor: 0,
-              clock_enable_rate: 0.0,
-            }}
+      <ComponentLabel name="FLE" />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="FLE power"
+            total={powerTotal}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          fleData.map((row, index) => (
+            <tr key={row.name}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.name}</td>
+              <td>{row.lut6}</td>
+              <td>{row.flip_flop}</td>
+              <td>{row.clock}</td>
+              <PercentsCell val={row.toggle_rate} precition={1} />
+              <td>{GetText(row.glitch_factor, glitchFactor)}</td>
+              <PercentsCell val={row.clock_enable_rate} />
+              <FrequencyCell val={row.consumption.clock_frequency} />
+              <td>
+                {fixed(row.consumption.output_signal_rate, 1)}
+                {' MTr/S'}
+              </td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <FleModal
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && fleData[editIndex]) || {
+          enable: true,
+          name: '',
+          lut6: 0,
+          flip_flop: 0,
+          clock: '',
+          toggle_rate: 0,
+          glitch_factor: 0,
+          clock_enable_rate: 0.0,
+        }}
+      />
+      )}
     </div>
   );
 }

@@ -150,105 +150,103 @@ function BramTable({ device, totalPowerCallback }) {
 
   return (
     <div className="component-table-head">
-      <div className="main-block">
-        <ComponentLabel name="BRAM" />
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="BRAM power"
-              total={powerTotal}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-            />
-          </div>
-          <TableBase
-            header={mainTableHeader}
-            disabled={device === null}
-            onClick={() => setModalOpen(true)}
-          >
-            {
-            bramData.map((row, index) => (
-              <React.Fragment key={row.name}>
-                <tr>
-                  <Actions
-                    rowSpan={2}
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
-                  <td rowSpan={2}>
-                    <Checkbox
-                      isChecked={row.enable}
-                      checkHandler={(state) => enableChanged(index, state)}
-                      id={index}
-                    />
-                  </td>
-                  <td rowSpan={2}>{row.name}</td>
-                  <td rowSpan={2}>{GetText(row.type, bramType)}</td>
-                  <td rowSpan={2}>{row.bram_used}</td>
-                  <td>A - Write</td>
-                  <td>{row.port_a.clock}</td>
-                  <td>{row.port_a.width}</td>
-                  <PercentsCell val={row.port_a.write_enable_rate} />
-                  <PercentsCell val={row.port_a.read_enable_rate} />
-                  <PercentsCell val={row.port_a.toggle_rate} precition={1} />
-                  <FrequencyCell val={row.consumption.port_a.clock_frequency} />
-                  <td>
-                    {fixed(row.consumption.port_a.output_signal_rate, 1)}
-                    {' MTr/S'}
-                  </td>
-                  <td>{row.consumption.port_a.ram_depth}</td>
-                  <PowerCell rowSpan={2} val={row.consumption.block_power} />
-                  <PowerCell rowSpan={2} val={row.consumption.interconnect_power} />
-                  <td rowSpan={2}>
-                    {fixed(row.consumption.percentage, 0)}
-                    {' %'}
-                  </td>
-                </tr>
-                <tr>
-                  <td>B - Read</td>
-                  <td>{row.port_b.clock}</td>
-                  <td>{row.port_b.width}</td>
-                  <PercentsCell val={row.port_b.write_enable_rate} />
-                  <PercentsCell val={row.port_b.read_enable_rate} />
-                  <PercentsCell val={row.port_b.toggle_rate} precition={1} />
-                  <FrequencyCell val={row.consumption.port_b.clock_frequency} />
-                  <td>
-                    {fixed(row.consumption.port_b.output_signal_rate, 1)}
-                    {' MTr/S'}
-                  </td>
-                  <td>{row.consumption.port_b.ram_depth}</td>
-                </tr>
-              </React.Fragment>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <BramModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && bramWindowData[editIndex]) || {
-              enable: true,
-              name: '',
-              type: 0,
-              bram_used: 0,
-              port_a_clock: '',
-              port_a_width: 0,
-              port_b_clock: '',
-              port_b_width: 0,
-              port_a_write_enable_rate: 0,
-              port_a_read_enable_rate: 0,
-              port_a_toggle_rate: 0,
-              port_b_write_enable_rate: 0,
-              port_b_read_enable_rate: 0,
-              port_b_toggle_rate: 0,
-            }}
+      <ComponentLabel name="BRAM" />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="BRAM power"
+            total={powerTotal}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          bramData.map((row, index) => (
+            <React.Fragment key={row.name}>
+              <tr>
+                <Actions
+                  rowSpan={2}
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
+                <td rowSpan={2}>
+                  <Checkbox
+                    isChecked={row.enable}
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
+                <td rowSpan={2}>{row.name}</td>
+                <td rowSpan={2}>{GetText(row.type, bramType)}</td>
+                <td rowSpan={2}>{row.bram_used}</td>
+                <td>A - Write</td>
+                <td>{row.port_a.clock}</td>
+                <td>{row.port_a.width}</td>
+                <PercentsCell val={row.port_a.write_enable_rate} />
+                <PercentsCell val={row.port_a.read_enable_rate} />
+                <PercentsCell val={row.port_a.toggle_rate} precition={1} />
+                <FrequencyCell val={row.consumption.port_a.clock_frequency} />
+                <td>
+                  {fixed(row.consumption.port_a.output_signal_rate, 1)}
+                  {' MTr/S'}
+                </td>
+                <td>{row.consumption.port_a.ram_depth}</td>
+                <PowerCell rowSpan={2} val={row.consumption.block_power} />
+                <PowerCell rowSpan={2} val={row.consumption.interconnect_power} />
+                <td rowSpan={2}>
+                  {fixed(row.consumption.percentage, 0)}
+                  {' %'}
+                </td>
+              </tr>
+              <tr>
+                <td>B - Read</td>
+                <td>{row.port_b.clock}</td>
+                <td>{row.port_b.width}</td>
+                <PercentsCell val={row.port_b.write_enable_rate} />
+                <PercentsCell val={row.port_b.read_enable_rate} />
+                <PercentsCell val={row.port_b.toggle_rate} precition={1} />
+                <FrequencyCell val={row.consumption.port_b.clock_frequency} />
+                <td>
+                  {fixed(row.consumption.port_b.output_signal_rate, 1)}
+                  {' MTr/S'}
+                </td>
+                <td>{row.consumption.port_b.ram_depth}</td>
+              </tr>
+            </React.Fragment>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <BramModal
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && bramWindowData[editIndex]) || {
+          enable: true,
+          name: '',
+          type: 0,
+          bram_used: 0,
+          port_a_clock: '',
+          port_a_width: 0,
+          port_b_clock: '',
+          port_b_width: 0,
+          port_a_write_enable_rate: 0,
+          port_a_read_enable_rate: 0,
+          port_a_toggle_rate: 0,
+          port_b_write_enable_rate: 0,
+          port_b_read_enable_rate: 0,
+          port_b_toggle_rate: 0,
+        }}
+      />
+      )}
     </div>
   );
 }

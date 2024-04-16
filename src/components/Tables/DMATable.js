@@ -108,56 +108,55 @@ function DMATable({ device }) {
 
   return (
     <div className="component-table-head">
-      <div className="main-block">
-        <ComponentLabel name="DMA" />
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="DMA power"
-              total={null}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-              subHeader="Sub System"
-            />
-          </div>
-          <TableBase
-            header={mainTableHeader}
-            hideAddBtn
-            onClick={() => setModalOpen(true)}
-          >
-            {
-            dmaData.map((row, index) => (
-              (row.data.consumption !== undefined) && (
-                <tr key={row.id}>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  />
-                  <td>
-                    <Checkbox
-                      isChecked={row.data.enable}
-                      checkHandler={(state) => enableChanged(index, state)}
-                      id={index}
-                    />
-                  </td>
-                  <td>{row.data.name}</td>
-                  <SelectionCell val={row.data.source} values={source} />
-                  <SelectionCell val={row.data.destination} values={source} />
-                  <SelectionCell val={row.data.activity} values={loadActivity} />
-                  <PercentsCell val={row.data.read_write_rate} />
-                  <PercentsCell val={row.data.toggle_rate} precition={1} />
-                  <PowerCell val={row.data.consumption.calculated_bandwidth} />
-                  <PowerCell val={row.data.consumption.block_power} />
-                  <td>
-                    {fixed(row.data.consumption.percentage, 0)}
-                    {' %'}
-                  </td>
-                </tr>
-              )
-            ))
-          }
-          </TableBase>
+      <ComponentLabel name="DMA" />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="DMA power"
+            total={null}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
+            subHeader="Sub System"
+          />
         </div>
-        {modalOpen && (
+        <TableBase
+          header={mainTableHeader}
+          hideAddBtn
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          dmaData.map((row, index) => (
+            (row.data.consumption !== undefined) && (
+              <tr key={row.id}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                />
+                <td>
+                  <Checkbox
+                    isChecked={row.data.enable}
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={index}
+                  />
+                </td>
+                <td>{row.data.name}</td>
+                <SelectionCell val={row.data.source} values={source} />
+                <SelectionCell val={row.data.destination} values={source} />
+                <SelectionCell val={row.data.activity} values={loadActivity} />
+                <PercentsCell val={row.data.read_write_rate} />
+                <PercentsCell val={row.data.toggle_rate} precition={1} />
+                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <PowerCell val={row.data.consumption.block_power} />
+                <td>
+                  {fixed(row.data.consumption.percentage, 0)}
+                  {' %'}
+                </td>
+              </tr>
+            )
+          ))
+        }
+        </TableBase>
+      </div>
+      {modalOpen && (
         <DMAModal
           closeModal={() => {
             setModalOpen(false);
@@ -174,8 +173,7 @@ function DMATable({ device }) {
             toggle_rate: 0,
           }}
         />
-        )}
-      </div>
+      )}
     </div>
   );
 }

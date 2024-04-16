@@ -3,7 +3,7 @@
 }
 
 .table-style {
-    overflow: hidden;
+    overflow: hidden; /* cut table to nice view */
     table-layout: auto; /* cell view */
     border-collapse: collapse; /* cell view */
     width: 100%;
@@ -49,11 +49,7 @@
 .component-table-head {
     padding: 6px;
     padding-top: 0;
-    display: inline-flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.main-block {
+    display: flex;
+    flex-direction: column;
     width: 100%;
 }

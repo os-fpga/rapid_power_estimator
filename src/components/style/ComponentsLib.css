@@ -1,8 +1,8 @@
 .layout-head {
     display: flex;
+    flex-direction: row;
     padding: 6px;
     column-gap: 5px;
-    /* border: 1px solid black; */
 }
 
 .component-label-text-center {

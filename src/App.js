@@ -226,7 +226,7 @@ function App() {
           <SOCSummaryComponent device={device} />
         </div>
       </div>
-      <div className="table-container">
+      <div className="table-container main-border">
         {
         openedTable === Table.Clocking
         && <ClockingTable device={device} totalPowerCallback={setClockingPower} />

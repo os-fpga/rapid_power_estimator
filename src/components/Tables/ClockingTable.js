@@ -104,7 +104,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   }
 
   return (
-    <div className="component-table-head main-border">
+    <div className="component-table-head">
       <div className="main-block">
         <ComponentLabel name="Clocking" />
         <div className="power-and-table-wrapper">

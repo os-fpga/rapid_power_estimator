@@ -158,7 +158,7 @@ function PeripheralsTable({ device }) {
   }
 
   return (
-    <div className="component-table-head main-border">
+    <div className="component-table-head">
       <div className="main-block">
         <ComponentLabel name="Peripherals" />
         <TableBase header={mainTableHeader} hideAddBtn>

@@ -4,8 +4,8 @@
 
 .table-style {
     overflow: hidden;
-    table-layout: auto;
-    border-collapse: collapse;
+    table-layout: auto; /* cell view */
+    border-collapse: collapse; /* cell view */
     width: 100%;
     border-radius: 8px;
 }

@@ -164,7 +164,7 @@ function IOTable({ device, totalPowerCallback }) {
   }
 
   return (
-    <div className="component-table-head main-border">
+    <div className="component-table-head">
       <div className="main-block">
         <ComponentLabel name="IO" />
         <div className="power-and-table-wrapper">

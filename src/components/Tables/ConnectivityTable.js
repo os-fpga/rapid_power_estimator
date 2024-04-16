@@ -113,7 +113,7 @@ function ConnectivityTable({ device }) {
 
   const powerHeader = ['Power', '%'];
   return (
-    <div className="acpu-container main-border">
+    <div className="component-table-head">
       <div className="main-block">
         <ComponentLabel name="Connectivity" />
         <div className="cpu-container">

@@ -7,6 +7,7 @@ const fs = require('fs');
 const Store = require('electron-store');
 const log = require('electron-log');
 const config = require('./rpe.config.json');
+const { kill } = require('./cleanup');
 
 const logFormat = '[{h}:{i}:{s}.{ms}] [{level}] {text}';
 log.transports.console.format = logFormat;
@@ -179,6 +180,6 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  serverProcess.kill('SIGINT');
+  kill(serverProcess);
   if (process.platform !== 'darwin') app.quit();
 });

@@ -163,9 +163,11 @@ function IOTable({ device, totalPowerCallback }) {
     );
   }
 
+  const title = 'IO';
+
   return (
     <div className="component-table-head">
-      <ComponentLabel name="IO" />
+      <ComponentLabel name={title} />
       <div className="power-and-table-wrapper">
         <div className="power-table-wrapper">
           <IOPowerTable
@@ -229,6 +231,7 @@ function IOTable({ device, totalPowerCallback }) {
       </div>
       {modalOpen && (
       <IOModal
+        title={title}
         closeModal={() => {
           setModalOpen(false);
           setEditIndex(null);

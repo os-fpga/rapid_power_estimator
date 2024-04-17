@@ -4,9 +4,12 @@ import { source, loadActivity } from '../../utils/cpu';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
-function DMAModal({ closeModal, onSubmit, defaultValue }) {
+function DMAModal({
+  closeModal, onSubmit, defaultValue, title,
+}) {
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

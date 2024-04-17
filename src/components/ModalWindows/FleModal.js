@@ -3,9 +3,12 @@ import glitchFactor from '../../utils/fle';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
-function FleModal({ closeModal, onSubmit, defaultValue }) {
+function FleModal({
+  closeModal, onSubmit, defaultValue, title,
+}) {
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

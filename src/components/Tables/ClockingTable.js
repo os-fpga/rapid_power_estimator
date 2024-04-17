@@ -103,9 +103,11 @@ function ClockingTable({ device, totalPowerCallback }) {
     );
   }
 
+  const title = 'Clocking';
+
   return (
     <div className="component-table-head">
-      <ComponentLabel name="Clocking" />
+      <ComponentLabel name={title} />
       <div className="power-and-table-wrapper">
         <div className="power-table-wrapper">
           <PowerTable
@@ -153,6 +155,7 @@ function ClockingTable({ device, totalPowerCallback }) {
       </div>
       {modalOpen && (
       <ClockingModal
+        title={title}
         closeModal={() => {
           setModalOpen(false);
           setEditIndex(null);

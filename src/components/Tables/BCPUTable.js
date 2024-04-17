@@ -142,9 +142,10 @@ function BCPUTable({ device }) {
   }, [bcpuData, device, updateTotalPower]);
 
   const powerHeader = ['Power', '%'];
+  const title = 'BCPU';
   return (
     <div className="component-table-head">
-      <ComponentLabel name="BCPU" />
+      <ComponentLabel name={title} />
       <div className="cpu-container">
         <PowerTable
           title="BCPU power"
@@ -202,9 +203,9 @@ function BCPUTable({ device }) {
             ))
           }
         </TableBase>
-        {modalOpen
-        && (
+        {modalOpen && (
           <ABCPUModal
+            title={title}
             closeModal={() => {
               setModalOpen(false);
               setEditIndex(null);

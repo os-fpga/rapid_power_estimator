@@ -5,10 +5,11 @@ import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
 function ConnectivityModal({
-  closeModal, onSubmit, defaultValue,
+  closeModal, onSubmit, defaultValue, title,
 }) {
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

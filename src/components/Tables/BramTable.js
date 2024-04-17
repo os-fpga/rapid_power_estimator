@@ -148,9 +148,11 @@ function BramTable({ device, totalPowerCallback }) {
     );
   }
 
+  const title = 'BRAM';
+
   return (
     <div className="component-table-head">
-      <ComponentLabel name="BRAM" />
+      <ComponentLabel name={title} />
       <div className="power-and-table-wrapper">
         <div className="power-table-wrapper">
           <PowerTable
@@ -224,6 +226,7 @@ function BramTable({ device, totalPowerCallback }) {
       </div>
       {modalOpen && (
       <BramModal
+        title={title}
         closeModal={() => {
           setModalOpen(false);
           setEditIndex(null);

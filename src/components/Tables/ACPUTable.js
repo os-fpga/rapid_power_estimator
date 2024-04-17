@@ -128,9 +128,10 @@ function ACPUTable({ device }) {
   };
 
   const powerHeader = ['Power', '%'];
+  const title = 'ACPU';
   return (
     <div className="component-table-head">
-      <ComponentLabel name="ACPU" />
+      <ComponentLabel name={title} />
       <div className="cpu-container">
         <PowerTable
           title="ACPU power"
@@ -180,9 +181,9 @@ function ACPUTable({ device }) {
             ))
           }
         </TableBase>
-        {modalOpen
-        && (
+        {modalOpen && (
           <ABCPUModal
+            title={title}
             closeModal={() => {
               setModalOpen(false);
               setEditIndex(null);

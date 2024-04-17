@@ -106,9 +106,11 @@ function DMATable({ device }) {
     updateTotalPower(device);
   }
 
+  const title = 'DMA';
+
   return (
     <div className="component-table-head">
-      <ComponentLabel name="DMA" />
+      <ComponentLabel name={title} />
       <div className="power-and-table-wrapper">
         <div className="power-table-wrapper">
           <PowerTable
@@ -158,6 +160,7 @@ function DMATable({ device }) {
       </div>
       {modalOpen && (
         <DMAModal
+          title={title}
           closeModal={() => {
             setModalOpen(false);
             setEditIndex(null);

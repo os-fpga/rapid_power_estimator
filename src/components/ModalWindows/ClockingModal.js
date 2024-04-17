@@ -3,9 +3,13 @@ import { sources, states } from '../../utils/clocking';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
-function ClockingModal({ closeModal, onSubmit, defaultValue }) {
+function ClockingModal({
+  closeModal, onSubmit, defaultValue, title, isModalOpen,
+}) {
   return (
     <ModalWindow
+      title={title}
+      isModalOpen={isModalOpen}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

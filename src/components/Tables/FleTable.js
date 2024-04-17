@@ -99,9 +99,11 @@ function FleTable({ device, totalPowerCallback }) {
     );
   }
 
+  const title = 'FLE';
+
   return (
     <div className="component-table-head">
-      <ComponentLabel name="FLE" />
+      <ComponentLabel name={title} />
       <div className="power-and-table-wrapper">
         <div className="power-table-wrapper">
           <PowerTable
@@ -155,6 +157,7 @@ function FleTable({ device, totalPowerCallback }) {
       </div>
       {modalOpen && (
       <FleModal
+        title={title}
         closeModal={() => {
           setModalOpen(false);
           setEditIndex(null);

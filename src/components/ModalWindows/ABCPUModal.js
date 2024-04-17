@@ -5,10 +5,11 @@ import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
 function ABCPUModal({
-  closeModal, onSubmit, defaultValue, endpoints,
+  closeModal, onSubmit, defaultValue, endpoints, title,
 }) {
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

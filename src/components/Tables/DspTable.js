@@ -96,9 +96,11 @@ function DspTable({ device, totalPowerCallback }) {
     );
   }
 
+  const title = 'DSP';
+
   return (
     <div className="component-table-head">
-      <ComponentLabel name="DSP" />
+      <ComponentLabel name={title} />
       <div className="power-and-table-wrapper">
         <div className="power-table-wrapper">
           <PowerTable
@@ -155,6 +157,7 @@ function DspTable({ device, totalPowerCallback }) {
       </div>
       {modalOpen && (
       <DspModal
+        title={title}
         closeModal={() => {
           setModalOpen(false);
           setEditIndex(null);

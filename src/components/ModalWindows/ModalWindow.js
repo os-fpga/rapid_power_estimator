@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Modal } from 'antd';
 
 import { FieldType } from '../../utils/common';
 
@@ -11,28 +12,6 @@ function ModalWindow({
   const handleChange = (name, val) => {
     setFormState({ ...formState, [name]: val });
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formState);
-    closeModal();
-  };
-
-  const handleKeyPress = React.useCallback((event) => {
-    if (event.key === 'Escape') {
-      closeModal();
-    }
-  }, [closeModal]);
-
-  React.useEffect(() => {
-    // attach the event listener
-    document.addEventListener('keydown', handleKeyPress);
-
-    // remove the event listener
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [handleKeyPress]);
 
   function generateField(item) {
     if (item.fieldType === FieldType.textarea) {
@@ -90,44 +69,40 @@ function ModalWindow({
     );
   }
 
+  const handleOk = () => {
+    onSubmit(formState);
+    closeModal();
+  };
+
   return (
-    <div
-      className="modal-container"
-      onClick={(e) => {
-        if (e.target.className === 'modal-container') closeModal();
-      }}
+    <Modal
+      title={title}
+      open
+      onOk={handleOk}
+      onCancel={closeModal}
     >
       <div className="modal">
         <form>
-          {title
-            && (
-              <div className="form-group">
-                <label id="form-group-header">{title}</label>
-              </div>
-            )}
           {
-            fields.map((item) => {
-              if (Object.prototype.hasOwnProperty.call(item, 'internal')) {
-                return (
-                  <div key={item.id} className="form-group">
-                    <fieldset>
-                      <legend>{item.text}</legend>
-                      {
-                        item.internal.map((i) => generateField(i))
-                      }
-                    </fieldset>
-                  </div>
-                );
-              }
-              return generateField(item);
-            })
-          }
-          <button type="submit" className="btn" onClick={handleSubmit}>
-            Submit
-          </button>
+          fields.map((item) => {
+            if (Object.prototype.hasOwnProperty.call(item, 'internal')) {
+              return (
+                <div key={item.id} className="form-group">
+                  <fieldset>
+                    <legend>{item.text}</legend>
+                    {
+                      item.internal.map((i) => generateField(i))
+                    }
+                  </fieldset>
+                </div>
+              );
+            }
+            return generateField(item);
+          })
+        }
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }
 

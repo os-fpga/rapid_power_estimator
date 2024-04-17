@@ -4,9 +4,12 @@ import { FieldType } from '../../utils/common';
 
 import ModalWindow from './ModalWindow';
 
-function DspModal({ closeModal, onSubmit, defaultValue }) {
+function DspModal({
+  closeModal, onSubmit, defaultValue, title,
+}) {
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

@@ -112,9 +112,10 @@ function ConnectivityTable({ device }) {
   };
 
   const powerHeader = ['Power', '%'];
+  const title = 'Connectivity';
   return (
     <div className="component-table-head">
-      <ComponentLabel name="Connectivity" />
+      <ComponentLabel name={title} />
       <div className="cpu-container">
         <div className="power-and-table-wrapper">
           <PowerTable
@@ -155,31 +156,31 @@ function ConnectivityTable({ device }) {
           }
           </TableBase>
         </div>
-        {modalOpen
-          && (
-            <ConnectivityModal
-              closeModal={() => {
-                setModalOpen(false);
-                setEditIndex(null);
-              }}
-              onSubmit={handleSubmit}
-              defaultValue={(editIndex !== null && {
-                name: connectivityNames.indexOf(connectivityNames.find(
-                  (elem) => elem.text === endpoints[editIndex].data.name,
-                )),
-                clock: endpoints[editIndex].data.clock,
-                activity: endpoints[editIndex].data.activity,
-                read_write_rate: endpoints[editIndex].data.read_write_rate,
-                toggle_rate: endpoints[editIndex].data.toggle_rate,
-              }) || {
-                name: 0,
-                clock: '',
-                activity: 0,
-                read_write_rate: 0.5,
-                toggle_rate: 0.125,
-              }}
-            />
-          )}
+        {modalOpen && (
+        <ConnectivityModal
+          title={title}
+          closeModal={() => {
+            setModalOpen(false);
+            setEditIndex(null);
+          }}
+          onSubmit={handleSubmit}
+          defaultValue={(editIndex !== null && {
+            name: connectivityNames.indexOf(connectivityNames.find(
+              (elem) => elem.text === endpoints[editIndex].data.name,
+            )),
+            clock: endpoints[editIndex].data.clock,
+            activity: endpoints[editIndex].data.activity,
+            read_write_rate: endpoints[editIndex].data.read_write_rate,
+            toggle_rate: endpoints[editIndex].data.toggle_rate,
+          }) || {
+            name: 0,
+            clock: '',
+            activity: 0,
+            read_write_rate: 0.5,
+            toggle_rate: 0.125,
+          }}
+        />
+        )}
       </div>
     </div>
   );

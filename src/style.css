@@ -7,20 +7,29 @@
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    min-width: fit-content;
 }
 
-.app-main-container {
+.top-row-container {
     display: flex;
     flex-direction: row;
     column-gap: 10px;
     min-width: fit-content;
 }
 
-.top-container {
+.main-table-container {
     display: flex;
     flex-direction: column;
     width: var(--central-size);
+    min-width: fit-content;
+}
+
+.table-container {
+    display: flex;
+    margin-top: 8px;
+    overflow: auto;
+    width: 100%;
+    /* TODO, temporary solution to make bottom scroll works */
+    min-width: 1230px;
 }
 
 .top-l1 {
@@ -44,12 +53,6 @@
 
 .top-l2-col2-elem {
     flex-grow: 1;
-}
-
-.table-container {
-    display: flex;
-    margin-top: 8px;
-    min-width: fit-content;
 }
 
 .power-tables {

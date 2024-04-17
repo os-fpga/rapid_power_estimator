@@ -142,92 +142,91 @@ function BCPUTable({ device }) {
   }, [bcpuData, device, updateTotalPower]);
 
   const powerHeader = ['Power', '%'];
+  const title = 'BCPU';
   return (
-    <div className="acpu-container main-border">
-      <div className="main-block">
-        <ComponentLabel name="BCPU" />
-        <div className="cpu-container">
-          <PowerTable
-            title="BCPU power"
-            total={null}
-            resourcesHeaders={powerHeader}
-            resources={powerData}
-            subHeader="Sub System"
-          />
-          <div className="acpu-group-container">
-            <div className="acpu-group">
-              <label>BCPU name</label>
-              <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={bcpuData.name} />
-            </div>
-            <div className="acpu-group">
-              <Checkbox
-                isChecked={bcpuData.encryption_used}
-                label="Encryption"
-                checkHandler={encryptionHandler}
-                id="encryption"
-              />
-            </div>
-            <div className="acpu-group">
-              <label>Boot Mode</label>
-              <input type="text" value={bootMode} disabled />
-            </div>
-            <div className="acpu-group">
-              <label>Clock</label>
-              <select type="text" value={bcpuData.clock} onChange={(e) => handleChange('clock', parseInt(e.target.value, 10))}>
-                {
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="cpu-container">
+        <PowerTable
+          title="BCPU power"
+          total={null}
+          resourcesHeaders={powerHeader}
+          resources={powerData}
+          subHeader="Sub System"
+        />
+        <div className="acpu-group-container">
+          <div className="acpu-group">
+            <label>BCPU name</label>
+            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={bcpuData.name} />
+          </div>
+          <div className="acpu-group">
+            <Checkbox
+              isChecked={bcpuData.encryption_used}
+              label="Encryption"
+              checkHandler={encryptionHandler}
+              id="encryption"
+            />
+          </div>
+          <div className="acpu-group">
+            <label>Boot Mode</label>
+            <input type="text" value={bootMode} disabled />
+          </div>
+          <div className="acpu-group">
+            <label>Clock</label>
+            <select type="text" value={bcpuData.clock} onChange={(e) => handleChange('clock', parseInt(e.target.value, 10))}>
+              {
                   clock.map((it) => (
                     <option key={it.id} value={it.id}>{it.text}</option>
                   ))
                 }
-              </select>
-            </div>
+            </select>
           </div>
-          <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>
-            {
-              endpoints.map((row, index) => (
-                (row.data !== undefined && row.data.name !== '')
-                && (
-                <tr key={row.ep}>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
-                  <td>{row.data.name}</td>
-                  <SelectionCell val={row.data.activity} values={loadActivity} />
-                  <PercentsCell val={row.data.read_write_rate} />
-                  <PercentsCell val={row.data.toggle_rate} precition={1} />
-                  <PowerCell val={row.data.consumption.calculated_bandwidth} />
-                  <PowerCell val={row.data.consumption.noc_power} />
-                </tr>
-                )
-              ))
-            }
-          </TableBase>
-          {modalOpen
-            && (
-              <ABCPUModal
-                closeModal={() => {
-                  setModalOpen(false);
-                  setEditIndex(null);
-                }}
-                onSubmit={handleSubmit}
-                defaultValue={(editIndex !== null && {
-                  name: bcpuNames.indexOf(bcpuNames.find(
-                    (elem) => elem.text === endpoints[editIndex].data.name,
-                  )),
-                  activity: endpoints[editIndex].data.activity,
-                  read_write_rate: endpoints[editIndex].data.read_write_rate,
-                  toggle_rate: endpoints[editIndex].data.toggle_rate,
-                }) || {
-                  name: 0,
-                  activity: 0,
-                  read_write_rate: 0.5,
-                  toggle_rate: 0.125,
-                }}
-                endpoints={bcpuNames}
-              />
-            )}
         </div>
+        <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>
+          {
+            endpoints.map((row, index) => (
+              (row.data !== undefined && row.data.name !== '')
+              && (
+              <tr key={row.ep}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
+                <td>{row.data.name}</td>
+                <SelectionCell val={row.data.activity} values={loadActivity} />
+                <PercentsCell val={row.data.read_write_rate} />
+                <PercentsCell val={row.data.toggle_rate} precition={1} />
+                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <PowerCell val={row.data.consumption.noc_power} />
+              </tr>
+              )
+            ))
+          }
+        </TableBase>
+        {modalOpen && (
+          <ABCPUModal
+            title={title}
+            closeModal={() => {
+              setModalOpen(false);
+              setEditIndex(null);
+            }}
+            onSubmit={handleSubmit}
+            defaultValue={(editIndex !== null && {
+              name: bcpuNames.indexOf(bcpuNames.find(
+                (elem) => elem.text === endpoints[editIndex].data.name,
+              )),
+              activity: endpoints[editIndex].data.activity,
+              read_write_rate: endpoints[editIndex].data.read_write_rate,
+              toggle_rate: endpoints[editIndex].data.toggle_rate,
+            }) || {
+              name: 0,
+              activity: 0,
+              read_write_rate: 0.5,
+              toggle_rate: 0.125,
+            }}
+            endpoints={bcpuNames}
+          />
+        )}
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import '../style/DesignParametesTable.css';
 
 function DesignParametesTable() {
   return (
-    <div className="param-element-container main-border">
+    <div className="param-element-container">
       <div className="param-element">
         <div>LUTs</div>
         <select>

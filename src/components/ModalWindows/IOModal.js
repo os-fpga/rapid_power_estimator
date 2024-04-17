@@ -12,9 +12,12 @@ import {
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
-function IOModal({ closeModal, onSubmit, defaultValue }) {
+function IOModal({
+  closeModal, onSubmit, defaultValue, title,
+}) {
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

@@ -103,73 +103,74 @@ function ClockingTable({ device, totalPowerCallback }) {
     );
   }
 
+  const title = 'Clocking';
+
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <ComponentLabel name="Clocking" />
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="Clock power"
-              total={powerTotal}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-            />
-          </div>
-          <TableBase
-            header={mainTableHeader}
-            disabled={device === null}
-            onClick={() => setModalOpen(true)}
-          >
-            {
-            clockingData.map((row, index) => (
-              <tr key={row.description}>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-                <td>
-                  <Checkbox
-                    isChecked={row.enable}
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={index}
-                  />
-                </td>
-                <td>{row.description}</td>
-                <td>{GetText(row.source, sources)}</td>
-                <td>{row.port}</td>
-                <FrequencyCell val={row.frequency} />
-                <td>{GetText(row.state, states)}</td>
-                <td>{row.consumption.fan_out}</td>
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <ClockingModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && clockingData[editIndex]) || {
-              enable: true,
-              source: 0,
-              description: '',
-              port: '',
-              frequency: 1000000,
-              state: 1,
-            }}
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="Clock power"
+            total={powerTotal}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          clockingData.map((row, index) => (
+            <tr key={row.description}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.description}</td>
+              <td>{GetText(row.source, sources)}</td>
+              <td>{row.port}</td>
+              <FrequencyCell val={row.frequency} />
+              <td>{GetText(row.state, states)}</td>
+              <td>{row.consumption.fan_out}</td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <ClockingModal
+        title={title}
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && clockingData[editIndex]) || {
+          enable: true,
+          source: 0,
+          description: '',
+          port: '',
+          frequency: 1000000,
+          state: 1,
+        }}
+      />
+      )}
     </div>
   );
 }

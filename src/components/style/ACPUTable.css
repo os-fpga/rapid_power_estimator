@@ -1,11 +1,3 @@
-.acpu-container {
-    padding: 6px;
-    padding-top: 0;
-    display: inline-flex;
-    gap: 10px;
-    width: 100%;
-}
-
 .acpu-group {
     display: flex;
     flex-direction: column;

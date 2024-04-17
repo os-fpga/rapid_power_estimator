@@ -139,8 +139,8 @@ function App() {
 
   return (
     <div className="rpe-head">
-      <div className="app-main-container">
-        <div className="top-container main-border">
+      <div className="top-row-container">
+        <div className="main-table-container main-border">
           <div className="top-l1 main-bottom-border" onClick={() => setOpenedTable(Table.Summary)}>
             <DeviceList
               devices={devices}
@@ -226,7 +226,7 @@ function App() {
           <SOCSummaryComponent device={device} />
         </div>
       </div>
-      <div className="table-container">
+      <div className="table-container main-border">
         {
         openedTable === Table.Clocking
         && <ClockingTable device={device} totalPowerCallback={setClockingPower} />

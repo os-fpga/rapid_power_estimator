@@ -3,8 +3,11 @@
 }
 
 .table-style {
+    /* cut table to nice view */
     overflow: hidden;
+    /* cell view */
     table-layout: auto;
+    /* cell view */
     border-collapse: collapse;
     width: 100%;
     border-radius: 8px;
@@ -49,11 +52,8 @@
 .component-table-head {
     padding: 6px;
     padding-top: 0;
-    display: inline-flex;
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
     width: 100%;
-}
-
-.main-block {
-    width: 100%;
+    min-width: fit-content;
 }

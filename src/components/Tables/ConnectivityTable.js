@@ -112,76 +112,75 @@ function ConnectivityTable({ device }) {
   };
 
   const powerHeader = ['Power', '%'];
+  const title = 'Connectivity';
   return (
-    <div className="acpu-container main-border">
-      <div className="main-block">
-        <ComponentLabel name="Connectivity" />
-        <div className="cpu-container">
-          <div className="power-and-table-wrapper">
-            <PowerTable
-              title="Connectivity power"
-              total={null}
-              resourcesHeaders={powerHeader}
-              resources={powerData}
-              subHeader="Sub System"
-            />
-            <TableBase
-              header={header}
-              disabled={addButtonDisable}
-              onClick={() => setModalOpen(true)}
-            >
-              {
-              endpoints.map((row, index) => (
-                (row.data !== undefined && row.data.name !== '') && (
-                <tr key={row.ep}>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
-                  <td>{row.data.clock}</td>
-                  <FrequencyCell val={row.data.consumption.clock_frequency} />
-                  <td>{row.data.name}</td>
-                  <SelectionCell val={row.data.activity} values={loadActivity} />
-                  <PercentsCell val={row.data.read_write_rate} />
-                  <PercentsCell val={row.data.toggle_rate} precition={1} />
-                  <PowerCell val={row.data.consumption.calculated_bandwidth} />
-                  <PowerCell val={row.data.consumption.noc_power} />
-                  <td>
-                    {fixed(row.data.consumption.percentage, 0)}
-                    {' %'}
-                  </td>
-                </tr>
-                )
-              ))
-            }
-            </TableBase>
-          </div>
-          {modalOpen
-            && (
-              <ConnectivityModal
-                closeModal={() => {
-                  setModalOpen(false);
-                  setEditIndex(null);
-                }}
-                onSubmit={handleSubmit}
-                defaultValue={(editIndex !== null && {
-                  name: connectivityNames.indexOf(connectivityNames.find(
-                    (elem) => elem.text === endpoints[editIndex].data.name,
-                  )),
-                  clock: endpoints[editIndex].data.clock,
-                  activity: endpoints[editIndex].data.activity,
-                  read_write_rate: endpoints[editIndex].data.read_write_rate,
-                  toggle_rate: endpoints[editIndex].data.toggle_rate,
-                }) || {
-                  name: 0,
-                  clock: '',
-                  activity: 0,
-                  read_write_rate: 0.5,
-                  toggle_rate: 0.125,
-                }}
-              />
-            )}
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="cpu-container">
+        <div className="power-and-table-wrapper">
+          <PowerTable
+            title="Connectivity power"
+            total={null}
+            resourcesHeaders={powerHeader}
+            resources={powerData}
+            subHeader="Sub System"
+          />
+          <TableBase
+            header={header}
+            disabled={addButtonDisable}
+            onClick={() => setModalOpen(true)}
+          >
+            {
+            endpoints.map((row, index) => (
+              (row.data !== undefined && row.data.name !== '') && (
+              <tr key={row.ep}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
+                <td>{row.data.clock}</td>
+                <FrequencyCell val={row.data.consumption.clock_frequency} />
+                <td>{row.data.name}</td>
+                <SelectionCell val={row.data.activity} values={loadActivity} />
+                <PercentsCell val={row.data.read_write_rate} />
+                <PercentsCell val={row.data.toggle_rate} precition={1} />
+                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <PowerCell val={row.data.consumption.noc_power} />
+                <td>
+                  {fixed(row.data.consumption.percentage, 0)}
+                  {' %'}
+                </td>
+              </tr>
+              )
+            ))
+          }
+          </TableBase>
         </div>
+        {modalOpen && (
+        <ConnectivityModal
+          title={title}
+          closeModal={() => {
+            setModalOpen(false);
+            setEditIndex(null);
+          }}
+          onSubmit={handleSubmit}
+          defaultValue={(editIndex !== null && {
+            name: connectivityNames.indexOf(connectivityNames.find(
+              (elem) => elem.text === endpoints[editIndex].data.name,
+            )),
+            clock: endpoints[editIndex].data.clock,
+            activity: endpoints[editIndex].data.activity,
+            read_write_rate: endpoints[editIndex].data.read_write_rate,
+            toggle_rate: endpoints[editIndex].data.toggle_rate,
+          }) || {
+            name: 0,
+            clock: '',
+            activity: 0,
+            read_write_rate: 0.5,
+            toggle_rate: 0.125,
+          }}
+        />
+        )}
       </div>
     </div>
   );

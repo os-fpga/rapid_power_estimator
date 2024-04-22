@@ -28,6 +28,7 @@ import Notes from './components/Notes';
 import Preferences from './preferences';
 import { useSelection } from './SelectionProvider';
 import { port } from '../rpe.config.json';
+import { useClockSelection } from './ClockSelectionProvider';
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
@@ -52,6 +53,7 @@ function App() {
   });
   const { toggleItemSelection } = useSelection();
   const [preferencesChanged, setPreferencesChanged] = React.useState(false);
+  const { setClocks } = useClockSelection();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -120,6 +122,9 @@ function App() {
           + data.total_interconnect_power
           + data.total_on_die_termination_power;
         setIoPower(total);
+      });
+      server.GET(server.api.fetch(server.Elem.clocking, newDevice), (data) => {
+        setClocks(data.map((item) => item.port));
       });
     }
   };

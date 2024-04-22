@@ -11,6 +11,7 @@ import { GetText, fixed } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ACPUTable.css';
 
@@ -23,6 +24,7 @@ function ConnectivityTable({ device }) {
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
+  const { defaultClock } = useClockSelection();
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -174,7 +176,7 @@ function ConnectivityTable({ device }) {
             toggle_rate: endpoints[editIndex].data.toggle_rate,
           }) || {
             name: 0,
-            clock: '',
+            clock: defaultClock(),
             activity: 0,
             read_write_rate: 0.5,
             toggle_rate: 0.125,

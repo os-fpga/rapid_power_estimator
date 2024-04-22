@@ -8,7 +8,7 @@ import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel } from '../ComponentsLib';
+import { ComponentLabel, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
@@ -151,13 +151,7 @@ function ACPUTable({ device }) {
           </div>
           <div className="acpu-group">
             <label>Load</label>
-            <select type="text" value={acpuData.load} onChange={(e) => handleChange('load', parseInt(e.target.value, 10))}>
-              {
-                  loadActivity.map((it) => (
-                    <option key={it.id} value={it.id}>{it.text}</option>
-                  ))
-                }
-            </select>
+            <Dropdown value={acpuData.load} onChangeHandler={(value) => handleChange('load', value)} items={loadActivity} />
           </div>
         </div>
         <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>

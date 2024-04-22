@@ -7,6 +7,7 @@ import { dspMode, pipelining } from '../../utils/dsp';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -16,6 +17,7 @@ function DspTable({ device, totalPowerCallback }) {
   const [dspData, setDspData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { defaultClock } = useClockSelection();
 
   const fetchDspData = (deviceId) => {
     if (deviceId !== null) {
@@ -170,7 +172,7 @@ function DspTable({ device, totalPowerCallback }) {
           dsp_mode: 0,
           a_input_width: 0,
           b_input_width: 0,
-          clock: '',
+          clock: defaultClock(),
           pipelining: 0,
           toggle_rate: 0,
         }}

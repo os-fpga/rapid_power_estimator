@@ -64,3 +64,37 @@ export function Checkbox({
     </div>
   );
 }
+
+export function PercentSelector({ value, setValue, max }) {
+  function* generateNumbers(start, end, step) {
+    for (let i = start; i <= end; i += step) {
+      yield i;
+    }
+  }
+  const numbersArray = [...generateNumbers(0, max, 10)];
+
+  return (
+    <select value={value} onChange={(e) => setValue(parseInt(e.target.value, 10))}>
+      {
+        numbersArray.map((item) => (
+          <option key={item} value={item}>
+            {item}
+            {' %'}
+          </option>
+        ))
+      }
+    </select>
+  );
+}
+
+export function Dropdown({
+  id, value, onChangeHandler, items,
+}) {
+  return (
+    <select id={id} value={value} onChange={(e) => onChangeHandler(parseInt(e.target.value, 10))}>
+      {
+        items.map((item) => <option key={item.id} value={item.id}>{item.text}</option>)
+      }
+    </select>
+  );
+}

@@ -7,6 +7,7 @@ import { fixed, GetText } from '../../utils/common';
 import { FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -16,6 +17,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   const [clockingData, setClockingData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { setClocks } = useClockSelection();
 
   const mainTableHeader = [
     'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
@@ -26,6 +28,7 @@ function ClockingTable({ device, totalPowerCallback }) {
     if (deviceId !== null) {
       server.GET(server.api.fetch(server.Elem.clocking, deviceId), (data) => {
         setClockingData(data);
+        setClocks(data.map((item) => item.port));
         server.GET(server.api.consumption(server.Elem.clocking, deviceId), (consumption) => {
           const total = consumption.total_clock_block_power
             + consumption.total_clock_interconnect_power

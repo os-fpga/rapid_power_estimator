@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from 'antd';
+import { Dropdown } from '../ComponentsLib';
 
 import { FieldType } from '../../utils/common';
 
@@ -51,20 +52,34 @@ function ModalWindow({
           />
         </div>
       );
+    } if (item.fieldType === FieldType.selectClock) {
+      const value = formState[item.id];
+      const found = item.values.indexOf(value);
+      let { values } = item;
+      if (found === -1) values = [value, ...item.values];
+      return (
+        <div key={item.id} className="form-group">
+          <label>{item.text}</label>
+          <select
+            id={item.id}
+            value={value}
+            onChange={(e) => handleChange(item.id, e.target.value)}
+          >
+            {
+              values.map((it) => <option key={it} value={it}>{it}</option>)
+            }
+          </select>
+        </div>
+      );
     }
     return (
       <div key={item.id} className="form-group">
         <label>{item.text}</label>
-        <select
-          onChange={(e) => handleChange(item.id, parseInt(e.target.value, 10))}
+        <Dropdown
           value={formState[item.id]}
-        >
-          {
-            item.values.map((it) => (
-              <option key={it.id} value={it.id}>{it.text}</option>
-            ))
-          }
-        </select>
+          onChangeHandler={(value) => handleChange(item.id, value)}
+          items={item.values}
+        />
       </div>
     );
   }

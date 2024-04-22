@@ -75,69 +75,123 @@ function PeripheralsComponent({ setOpenedTable, device }) {
       <div className="periph-row">
         <State refValue={uart0} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">UART0</div>
-          <div className="periph-internal-font">
-            {fixed(uart0)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(uart0)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
         <State refValue={uart1} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">UART1</div>
-          <div className="periph-internal-font">
-            {fixed(uart1)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(uart1)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
         <State refValue={usb2} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">USB 2.0</div>
-          <div className="periph-internal-font">
-            {fixed(usb2)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(usb2)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
       </div>
       <div className="periph-row">
         <State refValue={i2c} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">I2C</div>
-          <div className="periph-internal-font">
-            {fixed(i2c)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(i2c)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
         <State refValue={gpio} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">GPIO</div>
-          <div className="periph-internal-font">
-            {fixed(gpio)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(gpio)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
         <State refValue={pwm} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">PWM</div>
-          <div className="periph-internal-font">
-            {fixed(pwm)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(pwm)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
       </div>
       <div className="periph-row">
         <State refValue={spi} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">SPI/QSPI</div>
-          <div className="periph-internal-font">
-            {fixed(spi)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(spi)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
         <State refValue={jtag} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">JTAG</div>
-          <div className="periph-internal-font">
-            {fixed(jtag)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(jtag)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
         <State refValue={gige} warn={warn} err={error} baseClass="periph-rowx">
           <div className="periph-internal-font-header">GigI</div>
-          <div className="periph-internal-font">
-            {fixed(gige)}
-            {' W'}
+          <div className="periph-internal">
+            <div className="periph-internal-font">
+              {fixed(gige)}
+              {' W'}
+            </div>
+            <div className="periph-internal-font">
+              {fixed(100, 0)}
+              {' %'}
+            </div>
           </div>
         </State>
       </div>

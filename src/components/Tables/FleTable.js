@@ -7,6 +7,7 @@ import { fixed, GetText } from '../../utils/common';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -16,6 +17,7 @@ function FleTable({ device, totalPowerCallback }) {
   const [fleData, setFleData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { defaultClock } = useClockSelection();
 
   const fetchFleData = React.useCallback((deviceId) => {
     if (deviceId !== null) {
@@ -168,7 +170,7 @@ function FleTable({ device, totalPowerCallback }) {
           name: '',
           lut6: 0,
           flip_flop: 0,
-          clock: '',
+          clock: defaultClock(),
           toggle_rate: 0,
           glitch_factor: 0,
           clock_enable_rate: 0.0,

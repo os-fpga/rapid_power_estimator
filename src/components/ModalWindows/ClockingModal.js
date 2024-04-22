@@ -4,12 +4,11 @@ import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
 function ClockingModal({
-  closeModal, onSubmit, defaultValue, title, isModalOpen,
+  closeModal, onSubmit, defaultValue, title,
 }) {
   return (
     <ModalWindow
       title={title}
-      isModalOpen={isModalOpen}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}

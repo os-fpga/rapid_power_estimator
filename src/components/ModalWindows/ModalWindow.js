@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from 'antd';
+import { Dropdown } from '../ComponentsLib';
 
 import { FieldType } from '../../utils/common';
 
@@ -55,16 +56,11 @@ function ModalWindow({
     return (
       <div key={item.id} className="form-group">
         <label>{item.text}</label>
-        <select
-          onChange={(e) => handleChange(item.id, parseInt(e.target.value, 10))}
+        <Dropdown
           value={formState[item.id]}
-        >
-          {
-            item.values.map((it) => (
-              <option key={it.id} value={it.id}>{it.text}</option>
-            ))
-          }
-        </select>
+          onChangeHandler={(value) => handleChange(item.id, value)}
+          items={item.values}
+        />
       </div>
     );
   }

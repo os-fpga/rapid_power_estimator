@@ -10,7 +10,7 @@ import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { ComponentLabel, Checkbox, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
@@ -173,13 +173,7 @@ function BCPUTable({ device }) {
           </div>
           <div className="acpu-group">
             <label>Clock</label>
-            <select type="text" value={bcpuData.clock} onChange={(e) => handleChange('clock', parseInt(e.target.value, 10))}>
-              {
-                  clock.map((it) => (
-                    <option key={it.id} value={it.id}>{it.text}</option>
-                  ))
-                }
-            </select>
+            <Dropdown value={bcpuData.clock} onChangeHandler={(value) => handleChange('clock', value)} items={clock} />
           </div>
         </div>
         <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>

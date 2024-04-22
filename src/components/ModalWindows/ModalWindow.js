@@ -52,6 +52,25 @@ function ModalWindow({
           />
         </div>
       );
+    } if (item.fieldType === FieldType.selectClock) {
+      const value = formState[item.id];
+      const found = item.values.indexOf(value);
+      let { values } = item;
+      if (found === -1) values = [value, ...item.values];
+      return (
+        <div key={item.id} className="form-group">
+          <label>{item.text}</label>
+          <select
+            id={item.id}
+            value={value}
+            onChange={(e) => handleChange(item.id, e.target.value)}
+          >
+            {
+              values.map((it) => <option key={it} value={it}>{it}</option>)
+            }
+          </select>
+        </div>
+      );
     }
     return (
       <div key={item.id} className="form-group">

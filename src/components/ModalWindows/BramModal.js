@@ -1,12 +1,14 @@
 import React from 'react';
 import bramType from '../../utils/bram';
 import { FieldType } from '../../utils/common';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import ModalWindow from './ModalWindow';
 
 function BramModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
+  const { clocks } = useClockSelection();
   return (
     <ModalWindow
       title={title}
@@ -38,10 +40,11 @@ function BramModal({
           id: 'Port A - Write',
           internal: [
             {
-              fieldType: FieldType.textarea,
+              fieldType: FieldType.selectClock,
               id: 'port_a_clock',
               text: 'Clock',
               value: defaultValue.port_a_clock,
+              values: clocks,
             },
             {
               fieldType: FieldType.number,
@@ -74,10 +77,11 @@ function BramModal({
           id: 'Port B - Read',
           internal: [
             {
-              fieldType: FieldType.textarea,
+              fieldType: FieldType.selectClock,
               id: 'port_b_clock',
               text: 'Clock',
               value: defaultValue.port_b_clock,
+              values: clocks,
             },
             {
               fieldType: FieldType.number,

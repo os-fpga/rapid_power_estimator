@@ -7,6 +7,7 @@ import bramType from '../../utils/bram';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -17,6 +18,7 @@ function BramTable({ device, totalPowerCallback }) {
   const [bramWindowData, setBramWindowData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { defaultClock } = useClockSelection();
 
   const fetchBramData = (deviceId) => {
     if (deviceId !== null) {
@@ -237,9 +239,9 @@ function BramTable({ device, totalPowerCallback }) {
           name: '',
           type: 0,
           bram_used: 0,
-          port_a_clock: '',
+          port_a_clock: defaultClock(),
           port_a_width: 0,
-          port_b_clock: '',
+          port_b_clock: defaultClock(),
           port_b_width: 0,
           port_a_write_enable_rate: 0,
           port_a_read_enable_rate: 0,

@@ -6,6 +6,7 @@ import { fixed } from '../../utils/common';
 import { PercentsCell, SelectionCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 import {
@@ -26,6 +27,7 @@ function IOTable({ device, totalPowerCallback }) {
   const [ioData, setIoData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState(null);
+  const { defaultClock } = useClockSelection();
 
   const defaultPowerData = {
     io_usage: [
@@ -89,7 +91,7 @@ function IOTable({ device, totalPowerCallback }) {
     direction: 0,
     io_standard: 0,
     drive_strength: 2,
-    clock: '',
+    clock: defaultClock(),
     toggle_rate: 0,
     duty_cycle: 0,
     slew_rate: 0,

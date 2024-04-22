@@ -33,6 +33,7 @@ export const FieldType = {
   select: 1,
   number: 2,
   float: 3,
+  selectClock: 4,
 };
 
 export function percentage(val, sum) {

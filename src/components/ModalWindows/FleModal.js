@@ -2,10 +2,12 @@ import React from 'react';
 import glitchFactor from '../../utils/fle';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 function FleModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
+  const { clocks } = useClockSelection();
   return (
     <ModalWindow
       title={title}
@@ -32,10 +34,11 @@ function FleModal({
           value: defaultValue.flip_flop,
         },
         {
-          fieldType: FieldType.textarea,
+          fieldType: FieldType.selectClock,
           id: 'clock',
           text: 'Clock',
           value: defaultValue.clock,
+          values: clocks,
         },
         {
           fieldType: FieldType.float,

@@ -2,7 +2,7 @@ import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { connectivityNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
-import { TableBase, Actions } from './TableBase';
+import { TableBase, Actions, StatusColumn } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
   PowerCell, SelectionCell, PercentsCell, FrequencyCell,
@@ -16,9 +16,9 @@ import { useClockSelection } from '../../ClockSelectionProvider';
 import '../style/ACPUTable.css';
 
 function ConnectivityTable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [powerData, setPowerData] = React.useState([['NOC Interconnect', 0, 0]]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
@@ -26,20 +26,8 @@ function ConnectivityTable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
   const { defaultClock } = useClockSelection();
 
-  function fetchData() {
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      setHref(data.fpga_complex[0].href);
-    });
-  }
-
-  React.useEffect(() => {
-    setPowerData([
-      ['NOC Interconnect', powerTotal, 0],
-    ]);
-  }, [powerTotal]);
-
-  function fetchPort(port) {
-    server.GET(server.peripheralPath(device, `${href}/${port.href}`), (data) => {
+  function fetchPort(port, link) {
+    server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
       if (data.name !== '') {
         setPowerTotal((prev) => prev + data.consumption.noc_power);
       }
@@ -48,52 +36,49 @@ function ConnectivityTable({ device }) {
       while (newData.length < (ep + 1)) newData.push({});
       newData[ep] = { ep, data };
       setEndpoints([...newData]);
+
+      const found = newData.find((it) => it.data !== undefined && it.data.name === '');
+      setAddButtonDisable(found === undefined);
     });
   }
 
-  function fetchConnectivityData() {
-    if (href !== '') {
-      server.GET(server.peripheralPath(device, href), (data) => {
+  function fetchConnectivityData(link) {
+    if (link !== '') {
+      server.GET(server.peripheralPath(device, link), (data) => {
         setPowerTotal(0);
-        data.ports.forEach((port) => fetchPort(port));
+        data.ports.forEach((port) => fetchPort(port, link));
       });
     }
   }
 
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  function fetchData() {
+    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+      const link = data.fpga_complex[0].href;
+      setHref(link);
+      fetchConnectivityData(link);
+    });
+  }
 
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchConnectivityData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [href]);
+  if (dev !== device) {
+    setDev(device);
+    if (device !== null) fetchData();
+  }
 
-  React.useEffect(() => {
-    const found = endpoints.find((it) => it.data !== undefined && it.data.name === '');
-    setAddButtonDisable(found === undefined);
-  }, [endpoints]);
-
-  const header = ['Action', 'Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
+  const header = ['', 'Action', 'Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
     'Toggle Rate', 'Bandwidth', 'Noc Power', '%',
   ];
 
   function modifyRow(index, row) {
     const data = row;
     data.name = GetText(row.name, connectivityNames);
-    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, fetchConnectivityData);
+    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, () => fetchConnectivityData(href));
   }
 
   const deleteRow = (index) => {
     // no delete method for acpu. this is just clear name of the endpoint which mean disable
     const val = endpoints[index].data;
     val.name = '';
-    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchConnectivityData);
+    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchConnectivityData(href));
     publish('interconnectChanged');
     updateTotalPower(device);
   };
@@ -102,7 +87,7 @@ function ConnectivityTable({ device }) {
     if (device !== null) {
       const data = newData;
       data.name = GetText(newData.name, connectivityNames);
-      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, fetchConnectivityData);
+      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, () => fetchConnectivityData(href));
     }
   }
 
@@ -124,7 +109,7 @@ function ConnectivityTable({ device }) {
             title="Connectivity power"
             total={null}
             resourcesHeaders={powerHeader}
-            resources={powerData}
+            resources={[['NOC Interconnect', powerTotal, 0]]}
             subHeader="Sub System"
           />
           <TableBase
@@ -136,6 +121,7 @@ function ConnectivityTable({ device }) {
             endpoints.map((row, index) => (
               (row.data !== undefined && row.data.name !== '') && (
               <tr key={row.ep}>
+                <StatusColumn messages={row.data.consumption.messages} />
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}

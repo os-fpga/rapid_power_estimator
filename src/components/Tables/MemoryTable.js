@@ -6,18 +6,20 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
 function MemoryTable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerTotal, setPowerTotal] = React.useState(0);
-  const [powerTable, setPowerTable] = React.useState([]);
   const [href, setHref] = React.useState([]);
   const [memoryData, setMemoryData] = React.useState([
     { id: 0, data: {} },
@@ -26,23 +28,9 @@ function MemoryTable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
+    '', '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
     'W Bandwidth', 'Block Power', '%',
   ];
-
-  React.useEffect(() => {
-    if (device !== null) {
-      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        setHref(data.memory);
-      });
-    }
-  }, [device]);
-
-  React.useEffect(() => {
-    setPowerTable([
-      ['Memory', powerTotal, 0],
-    ]);
-  }, [powerTotal]);
 
   function fetchMemoryData(index, memHref) {
     server.GET(server.peripheralPath(device, memHref), (memJson) => {
@@ -54,25 +42,28 @@ function MemoryTable({ device }) {
     });
   }
 
-  function fetchData() {
+  function fetchData(lhref) {
     if (device !== null) {
       setPowerTotal(0);
-      href.forEach((mem) => {
+      lhref.forEach((mem) => {
         const index = parseInt(mem.href.slice(-1), 10);
         fetchMemoryData(index, mem.href);
       });
     }
   }
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) {
-      fetchData();
+      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+        setHref(data.memory);
+        fetchData(data.memory);
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [href]);
+  }
 
   function modifyRow(index, row) {
-    server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, fetchData);
+    server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, () => fetchData(href));
   }
 
   const handleSubmit = (newRow) => {
@@ -90,7 +81,7 @@ function MemoryTable({ device }) {
       enable: state,
     };
     server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, () => {
-      fetchData();
+      fetchData(href);
       publish('memoryChanged');
       updateTotalPower(device);
     });
@@ -105,7 +96,7 @@ function MemoryTable({ device }) {
             title="Memory power"
             total={null}
             resourcesHeaders={resourcesHeaders}
-            resources={powerTable}
+            resources={[['Memory', powerTotal, 0]]}
             subHeader="Sub System"
           />
         </div>
@@ -114,15 +105,11 @@ function MemoryTable({ device }) {
           memoryData.map((row, index) => (
             row.data.enable !== undefined && (
               <tr key={row.id}>
-                <td>
-                  <Checkbox
-                    disabled={false}
-                    isChecked={row.data.enable}
-                    label=""
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={row.id}
-                  />
-                </td>
+                <StatusColumn messages={row.data.consumption.messages} />
+                <EnableState
+                  isChecked={row.data.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                />
                 <td>{row.data.name}</td>
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}

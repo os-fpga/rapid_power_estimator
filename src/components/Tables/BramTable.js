@@ -5,13 +5,16 @@ import { fixed, GetText } from '../../utils/common';
 import BramModal from '../ModalWindows/BramModal';
 import bramType from '../../utils/bram';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
 function BramTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [bramData, setBramData] = React.useState([]);
@@ -70,10 +73,10 @@ function BramTable({ device, totalPowerCallback }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchBramData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function sendData(row) {
     const data = {};
@@ -135,7 +138,7 @@ function BramTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Action', 'En', 'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
+    '', 'Action', 'En', 'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
     'Toggle Rate', 'Clock Freq', 'RAM Depth', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
@@ -173,18 +176,17 @@ function BramTable({ device, totalPowerCallback }) {
           bramData.map((row, index) => (
             <React.Fragment key={row.name}>
               <tr>
+                <StatusColumn messages={row.consumption.messages} rowSpan={2} />
                 <Actions
                   rowSpan={2}
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}
                 />
-                <td rowSpan={2}>
-                  <Checkbox
-                    isChecked={row.enable}
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={index}
-                  />
-                </td>
+                <EnableState
+                  rowSpan={2}
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                />
                 <td rowSpan={2}>{row.name}</td>
                 <td rowSpan={2}>{GetText(row.type, bramType)}</td>
                 <td rowSpan={2}>{row.bram_used}</td>

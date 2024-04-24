@@ -18,6 +18,12 @@
     background-color: #eaeaea;
 }
 
+.fixed-col {
+    /* Make status column as small as possible */
+    width: 1px;
+    writing-mode: nowrap;
+}
+
 .table-style th,
 .table-style td {
     padding: 0.4rem;

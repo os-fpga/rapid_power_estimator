@@ -5,13 +5,16 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { dspMode, pipelining } from '../../utils/dsp';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
 function DspTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [dspData, setDspData] = React.useState([]);
@@ -42,10 +45,10 @@ function DspTable({ device, totalPowerCallback }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchDspData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function modifyRow(index, row) {
     server.PATCH(
@@ -82,7 +85,7 @@ function DspTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Action', 'En', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
+    '', 'Action', 'En', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
     'Clock', 'Pipeline', 'T-Rate',
     'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
@@ -121,17 +124,15 @@ function DspTable({ device, totalPowerCallback }) {
           dspData.map((row, index) => (
             // eslint-disable-next-line react/no-array-index-key
             <tr key={index}>
+              <StatusColumn messages={row.consumption.messages} />
               <Actions
                 onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                 onDeleteClick={() => deleteRow(index)}
               />
-              <td>
-                <Checkbox
-                  isChecked={row.enable}
-                  checkHandler={(state) => enableChanged(index, state)}
-                  id={index}
-                />
-              </td>
+              <EnableState
+                isChecked={row.enable}
+                checkHandler={(state) => enableChanged(index, state)}
+              />
               <td>{row.name}</td>
               <td>{row.number_of_multipliers}</td>
               <td>{GetText(row.dsp_mode, dspMode)}</td>

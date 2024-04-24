@@ -206,7 +206,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
-            path: dist/rapid_power_estimator*.tar.gz*    
+            path: dist/rapid_power_estimator*.tar.gz 
 
       - name: Upload Package
         if: ${{ github.ref == 'refs/heads/main' &&  matrix.os == 'windows-latest' }}

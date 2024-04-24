@@ -173,7 +173,7 @@ jobs:
             python3 -m pip install -r requirements.txt
 
       - name: Create Package on ${{ matrix.os }}
-        if: ${{ matrix.os == 'macos-latest' || matrix.os == 'windows-latest' }}
+        if: ${{ matrix.os == 'macos-12' || matrix.os == 'windows-latest' }}
         run: |
              npm run dist
         env:

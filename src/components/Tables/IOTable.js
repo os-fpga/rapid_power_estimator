@@ -1,11 +1,12 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import IOModal from '../ModalWindows/IOModal';
 import IOPowerTable from './IOPowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PercentsCell, SelectionCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 import {
@@ -26,6 +27,7 @@ function IOTable({ device, totalPowerCallback }) {
   const [ioData, setIoData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState(null);
+  const { defaultClock } = useClockSelection();
 
   const defaultPowerData = {
     io_usage: [
@@ -83,12 +85,13 @@ function IOTable({ device, totalPowerCallback }) {
   };
 
   const defaultIOData = {
+    enable: true,
     name: '',
     bus_width: 0,
     direction: 0,
     io_standard: 0,
     drive_strength: 2,
-    clock: '',
+    clock: defaultClock(),
     toggle_rate: 0,
     duty_cycle: 0,
     slew_rate: 0,
@@ -146,79 +149,99 @@ function IOTable({ device, totalPowerCallback }) {
   };
 
   const mainTableHeader = [
-    'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
+    'Action', 'En', 'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
     'Clock', 'Toggle Rate', 'Duty Cycle', 'Sync', 'Input En', 'Output En', 'Pullup / Pulldown', 'Bank Type', 'Bank #',
-    'VCCIO', 'Signal Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'VCCIO', 'Signal Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.io, device, index),
+      data,
+      () => fetchIoData(device),
+    );
+  }
+
+  const title = 'IO';
+
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; IO</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <IOPowerTable
-              title="IO power"
-              total={powerTotal}
-              resources={powerTable !== null ? powerTable : defaultPowerData}
-            />
-          </div>
-          <TableBase header={mainTableHeader}>
-            {
-            ioData.map((row, index) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={index}>
-                <td>{row.name}</td>
-                <td>{row.bus_width}</td>
-                <SelectionCell val={row.direction} values={direction} />
-                <SelectionCell val={row.io_standard} values={ioStandard} />
-                <SelectionCell val={row.drive_strength} values={driveStrength} />
-                <SelectionCell val={row.slew_rate} values={slewRate} />
-                <SelectionCell
-                  val={row.differential_termination}
-                  values={differentialTermination}
-                />
-                <SelectionCell val={row.io_data_type} values={ioDataType} />
-                <td>{row.clock}</td>
-                <PercentsCell val={row.toggle_rate} precition={1} />
-                <PercentsCell val={row.duty_cycle} />
-                <SelectionCell val={row.synchronization} values={synchronization} />
-                <PercentsCell val={row.input_enable_rate} />
-                <PercentsCell val={row.output_enable_rate} />
-                <SelectionCell val={row.io_pull_up_down} values={ioPullUpDown} />
-                <SelectionCell val={row.consumption.bank_type} values={bankType} />
-                <td>{row.consumption.bank_number}</td>
-                <td>{row.consumption.vccio_voltage}</td>
-                <PercentsCell val={row.consumption.io_signal_rate} />
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <IOModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && ioData[editIndex]) || defaultIOData}
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <IOPowerTable
+            title="IO power"
+            total={powerTotal}
+            resources={powerTable !== null ? powerTable : defaultPowerData}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          ioData.map((row, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <tr key={index}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.name}</td>
+              <td>{row.bus_width}</td>
+              <SelectionCell val={row.direction} values={direction} />
+              <SelectionCell val={row.io_standard} values={ioStandard} />
+              <SelectionCell val={row.drive_strength} values={driveStrength} />
+              <SelectionCell val={row.slew_rate} values={slewRate} />
+              <SelectionCell
+                val={row.differential_termination}
+                values={differentialTermination}
+              />
+              <SelectionCell val={row.io_data_type} values={ioDataType} />
+              <td>{row.clock}</td>
+              <PercentsCell val={row.toggle_rate} precition={1} />
+              <PercentsCell val={row.duty_cycle} />
+              <SelectionCell val={row.synchronization} values={synchronization} />
+              <PercentsCell val={row.input_enable_rate} />
+              <PercentsCell val={row.output_enable_rate} />
+              <SelectionCell val={row.io_pull_up_down} values={ioPullUpDown} />
+              <SelectionCell val={row.consumption.bank_type} values={bankType} />
+              <td>{row.consumption.bank_number}</td>
+              <td>{row.consumption.vccio_voltage}</td>
+              <PercentsCell val={row.consumption.io_signal_rate} />
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <IOModal
+        title={title}
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && ioData[editIndex]) || defaultIOData}
+      />
+      )}
     </div>
   );
 }

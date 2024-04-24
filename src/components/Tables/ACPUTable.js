@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { acpuNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
@@ -9,6 +8,7 @@ import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
@@ -95,7 +95,7 @@ function ACPUTable({ device }) {
     updateTotalPower(device);
   };
 
-  const header = ['Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power', 'Action'];
+  const header = ['Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
 
   function modifyRow(index, row) {
     const data = row;
@@ -128,87 +128,77 @@ function ACPUTable({ device }) {
   };
 
   const powerHeader = ['Power', '%'];
+  const title = 'ACPU';
   return (
-    <div className="acpu-container main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; ACPU</label>
-          <button type="button" disabled={addButtonDisable} className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
-        <div className="cpu-container">
-          <PowerTable
-            title="ACPU power"
-            total={null}
-            resourcesHeaders={powerHeader}
-            resources={powerData}
-            subHeader="Sub System"
-          />
-          <div className="acpu-group-container">
-            <div className="acpu-group">
-              <label>ACPU name</label>
-              <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={acpuData.name} />
-            </div>
-            <div className="acpu-group">
-              <label>Frequency</label>
-              <input type="number" min={0} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} />
-            </div>
-            <div className="acpu-group">
-              <label>Load</label>
-              <select type="text" value={acpuData.load} onChange={(e) => handleChange('load', parseInt(e.target.value, 10))}>
-                {
-                  loadActivity.map((it) => (
-                    <option key={it.id} value={it.id}>{it.text}</option>
-                  ))
-                }
-              </select>
-            </div>
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="cpu-container">
+        <PowerTable
+          title="ACPU power"
+          total={null}
+          resourcesHeaders={powerHeader}
+          resources={powerData}
+          subHeader="Sub System"
+        />
+        <div className="acpu-group-container">
+          <div className="acpu-group">
+            <label>ACPU name</label>
+            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={acpuData.name} />
           </div>
-          <TableBase header={header}>
-            {
-              endpoints.map((row, index) => (
-                (row.data !== undefined && row.data.name !== '')
-                && (
-                <tr key={row.ep}>
-                  <td>{row.data.name}</td>
-                  <SelectionCell val={row.data.activity} values={loadActivity} />
-                  <PercentsCell val={row.data.read_write_rate} />
-                  <PercentsCell val={row.data.toggle_rate} precition={1} />
-                  <PowerCell val={row.data.consumption.calculated_bandwidth} />
-                  <PowerCell val={row.data.consumption.noc_power} />
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                    onDeleteClick={() => deleteRow(index)}
-                  />
-                </tr>
-                )
-              ))
-            }
-          </TableBase>
-          {modalOpen
-            && (
-              <ABCPUModal
-                closeModal={() => {
-                  setModalOpen(false);
-                  setEditIndex(null);
-                }}
-                onSubmit={handleSubmit}
-                defaultValue={(editIndex !== null && {
-                  name: acpuNames.indexOf(acpuNames.find(
-                    (elem) => elem.text === endpoints[editIndex].data.name,
-                  )),
-                  activity: endpoints[editIndex].data.activity,
-                  read_write_rate: endpoints[editIndex].data.read_write_rate,
-                  toggle_rate: endpoints[editIndex].data.toggle_rate,
-                }) || {
-                  name: 0,
-                  activity: 0,
-                  read_write_rate: 0.5,
-                  toggle_rate: 0.125,
-                }}
-                endpoints={acpuNames}
-              />
-            )}
+          <div className="acpu-group">
+            <label>Frequency</label>
+            <input type="number" min={0} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} />
+          </div>
+          <div className="acpu-group">
+            <label>Load</label>
+            <Dropdown value={acpuData.load} onChangeHandler={(value) => handleChange('load', value)} items={loadActivity} />
+          </div>
         </div>
+        <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>
+          {
+            endpoints.map((row, index) => (
+              (row.data !== undefined && row.data.name !== '')
+              && (
+              <tr key={row.ep}>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                  onDeleteClick={() => deleteRow(index)}
+                />
+                <td>{row.data.name}</td>
+                <SelectionCell val={row.data.activity} values={loadActivity} />
+                <PercentsCell val={row.data.read_write_rate} />
+                <PercentsCell val={row.data.toggle_rate} precition={1} />
+                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <PowerCell val={row.data.consumption.noc_power} />
+              </tr>
+              )
+            ))
+          }
+        </TableBase>
+        {modalOpen && (
+          <ABCPUModal
+            title={title}
+            closeModal={() => {
+              setModalOpen(false);
+              setEditIndex(null);
+            }}
+            onSubmit={handleSubmit}
+            defaultValue={(editIndex !== null && {
+              name: acpuNames.indexOf(acpuNames.find(
+                (elem) => elem.text === endpoints[editIndex].data.name,
+              )),
+              activity: endpoints[editIndex].data.activity,
+              read_write_rate: endpoints[editIndex].data.read_write_rate,
+              toggle_rate: endpoints[editIndex].data.toggle_rate,
+            }) || {
+              name: 0,
+              activity: 0,
+              read_write_rate: 0.5,
+              toggle_rate: 0.125,
+            }}
+            endpoints={acpuNames}
+          />
+        )}
       </div>
     </div>
   );

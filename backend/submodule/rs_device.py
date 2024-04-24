@@ -54,8 +54,8 @@ class RsDevice:
 
         # io module
         self.resources.register_module(ModuleType.IO, IO_SubModule(self.resources, [
-            IO(name="test 1"),
-            IO(name="test 2")
+            IO(name="test 1", clock="CLK_100", enable=True),
+            IO(name="test 2", clock="CLK_233")
         ]))
 
         # clocking module
@@ -74,6 +74,8 @@ class RsDevice:
         return self.resources.get_module(modtype)
 
     def compute_output_power(self):
+        self.output.typical.total_power = 0.0
+        self.output.worsecase.total_power = 0.0
         for mod in self.resources.get_modules():
             if mod is not None:
                 mod.compute_output_power()

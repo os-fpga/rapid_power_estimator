@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import DspModal from '../ModalWindows/DspModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
@@ -7,6 +6,8 @@ import { fixed, GetText } from '../../utils/common';
 import { dspMode, pipelining } from '../../utils/dsp';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -16,6 +17,7 @@ function DspTable({ device, totalPowerCallback }) {
   const [dspData, setDspData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { defaultClock } = useClockSelection();
 
   const fetchDspData = (deviceId) => {
     if (deviceId !== null) {
@@ -80,81 +82,102 @@ function DspTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
+    'Action', 'En', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
     'Clock', 'Pipeline', 'T-Rate',
-    'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.dsp, device, index),
+      data,
+      () => fetchDspData(device),
+    );
+  }
+
+  const title = 'DSP';
+
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; DSP</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="DSP power"
-              total={powerTotal}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-            />
-          </div>
-          <TableBase header={mainTableHeader}>
-            {
-            dspData.map((row, index) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={index}>
-                <td>{row.name}</td>
-                <td>{row.number_of_multipliers}</td>
-                <td>{GetText(row.dsp_mode, dspMode)}</td>
-                <td>{row.a_input_width}</td>
-                <td>{row.b_input_width}</td>
-                <td>{row.clock}</td>
-                <td>{GetText(row.pipelining, pipelining)}</td>
-                <PercentsCell val={row.toggle_rate} precition={1} />
-                <td>{row.consumption.dsp_blocks_used}</td>
-                <FrequencyCell val={row.consumption.clock_frequency} />
-                <td>
-                  {fixed(row.consumption.output_signal_rate, 1)}
-                  {' MTr/S'}
-                </td>
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <DspModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && dspData[editIndex]) || {
-              name: '',
-              number_of_multipliers: 0,
-              dsp_mode: 0,
-              a_input_width: 0,
-              b_input_width: 0,
-              clock: '',
-              pipelining: 0,
-              toggle_rate: 0,
-            }}
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="DSP power"
+            total={powerTotal}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          dspData.map((row, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <tr key={index}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.name}</td>
+              <td>{row.number_of_multipliers}</td>
+              <td>{GetText(row.dsp_mode, dspMode)}</td>
+              <td>{row.a_input_width}</td>
+              <td>{row.b_input_width}</td>
+              <td>{row.clock}</td>
+              <td>{GetText(row.pipelining, pipelining)}</td>
+              <PercentsCell val={row.toggle_rate} precition={1} />
+              <td>{row.consumption.dsp_blocks_used}</td>
+              <FrequencyCell val={row.consumption.clock_frequency} />
+              <td>
+                {fixed(row.consumption.output_signal_rate, 1)}
+                {' MTr/S'}
+              </td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <DspModal
+        title={title}
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && dspData[editIndex]) || {
+          enable: true,
+          name: '',
+          number_of_multipliers: 0,
+          dsp_mode: 0,
+          a_input_width: 0,
+          b_input_width: 0,
+          clock: defaultClock(),
+          pipelining: 0,
+          toggle_rate: 0,
+        }}
+      />
+      )}
     </div>
   );
 }

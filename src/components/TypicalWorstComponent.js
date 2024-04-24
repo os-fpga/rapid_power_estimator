@@ -1,6 +1,8 @@
 import React from 'react';
 import { AiFillThunderbolt } from 'react-icons/ai';
-import { fixed, State } from '../utils/common';
+import { fixed } from '../utils/common';
+import { useSocTotalPower } from '../SOCTotalPowerProvider';
+import { State } from './ComponentsLib';
 
 import './style/TypicalWorstComponent.css';
 
@@ -37,10 +39,23 @@ const warnWorst = 40; // TBD
 const errorWorst = 10; // TBD
 
 function TypicalWorstComponent() {
+  const { thermalData } = useSocTotalPower();
   return (
     <div className="twc-main main-border">
-      <Column title="Typical" power={20} warnPow={warnTypical} errPow={errorTypical} temp={25} />
-      <Column title="Worst case" power={20} warnPow={warnWorst} errPow={errorWorst} temp={85} />
+      <Column
+        title="Typical"
+        power={thermalData.typical.total_power}
+        warnPow={warnTypical}
+        errPow={errorTypical}
+        temp={thermalData.typical.thermal}
+      />
+      <Column
+        title="Worst case"
+        power={thermalData.worsecase.total_power}
+        warnPow={warnWorst}
+        errPow={errorWorst}
+        temp={thermalData.worsecase.thermal}
+      />
     </div>
   );
 }

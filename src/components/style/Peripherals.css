@@ -41,8 +41,14 @@
 .periph-internal-font {
     color: #727e74;
     font-size: smaller;
+    width: 100%;
 }
 
 .periph-internal-font-header {
     font-weight: bold;
+}
+
+.periph-internal {
+    display: flex;
+    flex-direction: row;
 }

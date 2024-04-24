@@ -4,6 +4,7 @@
 #
 from marshmallow import Schema, fields
 from submodule.fabric_logic_element import Glitch_Factor
+from .device_schemas import MessageSchema
 
 class FabricLogicElementResourcesConsumptionSchema(Schema):
     total_lut6_available = fields.Int()
@@ -19,7 +20,7 @@ class FabricLogicElementOutputSchema(Schema):
     block_power = fields.Number()
     interconnect_power = fields.Number()
     percentage = fields.Number()
-    message = fields.Str()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class FabricLogicElementSchema(Schema):
     enable = fields.Bool()

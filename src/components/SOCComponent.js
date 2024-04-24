@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PeripheralsComponent from './PeripheralsComponent';
-import { Table, State, percentage } from '../utils/common';
+import { Table, percentage } from '../utils/common';
 import TitleComponent from './TitleComponent';
 import ABCPUComponent from './ABCPUComponent';
 import DMAComponent from './DMAComponent';
 import ConnectivityComponent from './ConnectivityComponent';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
+import { State } from './ComponentsLib';
 
 import './style/SOCTable.css';
 

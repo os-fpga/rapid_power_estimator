@@ -27,6 +27,8 @@ import TypicalWorstComponent from './components/TypicalWorstComponent';
 import Notes from './components/Notes';
 import Preferences from './preferences';
 import { useSelection } from './SelectionProvider';
+import { port } from '../rpe.config.json';
+import { useClockSelection } from './ClockSelectionProvider';
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
@@ -44,16 +46,27 @@ function App() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [notes, setNotes] = React.useState('');
   const [topLevel, setTopLevel] = React.useState('');
-  const [config, setConfig] = React.useState({});
+  const [config, setConfig] = React.useState({
+    useDefaultFile: true,
+    device_xml: '',
+    port,
+  });
   const { toggleItemSelection } = useSelection();
+  const [preferencesChanged, setPreferencesChanged] = React.useState(false);
+  const { setClocks } = useClockSelection();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
+    setPreferencesChanged(false);
     setIsModalOpen(true);
   };
   const handleOk = () => {
-    setIsModalOpen(false);
-    window.ipcAPI.send('config', config);
+    // this will restart app
+    if (preferencesChanged) {
+      const conf = config;
+      if (conf.useDefaultFile) conf.device_xml = '';
+      window.ipcAPI.send('config', conf);
+    } else setIsModalOpen(false);
   };
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -69,13 +82,16 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openedTable]);
 
-  React.useEffect(() => server.GET(server.devices, setDevices), []);
-
   React.useEffect(() => {
+    window.ipcAPI.send('getConfig');
     if ((typeof window !== 'undefined')) {
       window.ipcAPI.loadPreferences('preferences', (event, data) => {
         setConfig(data);
         showModal();
+      });
+      window.ipcAPI.loadPreferences('loadConfig', (event, data) => {
+        setConfig(data);
+        server.setPort(data.port, setDevices);
       });
     }
   }, []);
@@ -107,6 +123,9 @@ function App() {
           + data.total_on_die_termination_power;
         setIoPower(total);
       });
+      server.GET(server.api.fetch(server.Elem.clocking, newDevice), (data) => {
+        setClocks(data.map((item) => item.port));
+      });
     }
   };
 
@@ -119,13 +138,14 @@ function App() {
   };
 
   const handleConfigChange = (name, val) => {
+    setPreferencesChanged(true);
     setConfig({ ...config, [name]: val });
   };
 
   return (
     <div className="rpe-head">
-      <div className="app-main-container">
-        <div className="top-container main-border">
+      <div className="top-row-container">
+        <div className="main-table-container main-border">
           <div className="top-l1 main-bottom-border" onClick={() => setOpenedTable(Table.Summary)}>
             <DeviceList
               devices={devices}
@@ -211,71 +231,72 @@ function App() {
           <SOCSummaryComponent device={device} />
         </div>
       </div>
-      <div className="hspacer" />
-      {
+      <div className="table-container main-border">
+        {
         openedTable === Table.Clocking
         && <ClockingTable device={device} totalPowerCallback={setClockingPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.FLE
         && <FleTable device={device} totalPowerCallback={setFlePower} />
-      }
-      {
+        }
+        {
         openedTable === Table.IO
         && <IOTable device={device} totalPowerCallback={setIoPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.BRAM
         && <BramTable device={device} totalPowerCallback={setBramPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.DSP
         && <DspTable device={device} totalPowerCallback={setDspPower} />
-      }
-      {
+        }
+        {
         openedTable === Table.ACPU
         && <ACPUTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.BCPU
         && <BCPUTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Connectivity
         && <ConnectivityTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Memory
         && <MemoryTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.DMA
         && <DMATable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Peripherals
         && <PeripheralsTable device={device} />
-      }
-      {
+        }
+        {
         openedTable === Table.Summary
         && <DesignParametesTable />
-      }
-      {modalOpen && (
-      <Notes
-        defaultValue={notes}
-        closeModal={() => {
-          setModalOpen(false);
-        }}
-        onSubmit={handleNotesChange}
-      />
-      )}
-      <Preferences
-        isModalOpen={isModalOpen}
-        config={config}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
-        handleConfigChange={handleConfigChange}
-      />
+        }
+        {modalOpen && (
+        <Notes
+          defaultValue={notes}
+          closeModal={() => {
+            setModalOpen(false);
+          }}
+          onSubmit={handleNotesChange}
+        />
+        )}
+        <Preferences
+          isModalOpen={isModalOpen}
+          config={config}
+          handleOk={handleOk}
+          handleCancel={handleCancel}
+          handleConfigChange={handleConfigChange}
+        />
+      </div>
     </div>
   );
 }

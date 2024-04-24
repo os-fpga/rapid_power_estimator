@@ -1,12 +1,17 @@
 import React from 'react';
 import { dspMode, pipelining } from '../../utils/dsp';
 import { FieldType } from '../../utils/common';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import ModalWindow from './ModalWindow';
 
-function DspModal({ closeModal, onSubmit, defaultValue }) {
+function DspModal({
+  closeModal, onSubmit, defaultValue, title,
+}) {
+  const { clocks } = useClockSelection();
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}
@@ -43,10 +48,11 @@ function DspModal({ closeModal, onSubmit, defaultValue }) {
           value: defaultValue.b_input_width,
         },
         {
-          fieldType: FieldType.textarea,
+          fieldType: FieldType.selectClock,
           id: 'clock',
           text: 'Clock',
           value: defaultValue.clock,
+          values: clocks,
         },
         {
           fieldType: FieldType.select,

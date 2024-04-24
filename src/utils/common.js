@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Table = {
   Clocking: 0,
   FLE: 1,
@@ -35,25 +33,9 @@ export const FieldType = {
   select: 1,
   number: 2,
   float: 3,
+  selectClock: 4,
 };
 
 export function percentage(val, sum) {
   return fixed((val / sum) * 100, 0);
-}
-
-export function State({
-  refValue, warn, err, baseClass = 'clickable', children,
-}) {
-  const buildClassName = React.useCallback(() => {
-    let base = baseClass;
-    if (refValue >= err) base += ' error';
-    else if (refValue >= warn) base += ' warning';
-    else base += ' normal';
-    return base;
-  }, [refValue, warn, err, baseClass]);
-  return (
-    <div className={buildClassName()}>
-      {children}
-    </div>
-  );
 }

@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import ClockingModal from '../ModalWindows/ClockingModal';
 import { sources, states } from '../../utils/clocking';
 import PowerTable from './PowerTable';
@@ -7,6 +6,8 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -16,16 +17,18 @@ function ClockingTable({ device, totalPowerCallback }) {
   const [clockingData, setClockingData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { setClocks } = useClockSelection();
 
   const mainTableHeader = [
-    'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
-    'Block Power', 'Intc. Power', '%', 'Action',
+    'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
+    'Block Power', 'Intc. Power', '%',
   ];
 
   const fetchClockData = (deviceId) => {
     if (deviceId !== null) {
       server.GET(server.api.fetch(server.Elem.clocking, deviceId), (data) => {
         setClockingData(data);
+        setClocks(data.map((item) => item.port));
         server.GET(server.api.consumption(server.Elem.clocking, deviceId), (consumption) => {
           const total = consumption.total_clock_block_power
             + consumption.total_clock_interconnect_power
@@ -92,64 +95,85 @@ function ClockingTable({ device, totalPowerCallback }) {
     'Used', 'Total', 'Power', '%',
   ];
 
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.clocking, device, index),
+      data,
+      () => fetchClockData(device),
+    );
+  }
+
+  const title = 'Clocking';
+
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Clocking</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="Clock power"
-              total={powerTotal}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-            />
-          </div>
-          <TableBase header={mainTableHeader}>
-            {
-            clockingData.map((row, index) => (
-              <tr key={row.description}>
-                <td>{row.description}</td>
-                <td>{GetText(row.source, sources)}</td>
-                <td>{row.port}</td>
-                <FrequencyCell val={row.frequency} />
-                <td>{GetText(row.state, states)}</td>
-                <td>{row.consumption.fan_out}</td>
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <ClockingModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && clockingData[editIndex]) || {
-              source: 0,
-              description: '',
-              port: '',
-              frequency: 1000000,
-              state: 1,
-            }}
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="Clock power"
+            total={powerTotal}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          clockingData.map((row, index) => (
+            <tr key={row.description}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.description}</td>
+              <td>{GetText(row.source, sources)}</td>
+              <td>{row.port}</td>
+              <FrequencyCell val={row.frequency} />
+              <td>{GetText(row.state, states)}</td>
+              <td>{row.consumption.fan_out}</td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <ClockingModal
+        title={title}
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && clockingData[editIndex]) || {
+          enable: true,
+          source: 0,
+          description: '',
+          port: '',
+          frequency: 1000000,
+          state: 1,
+        }}
+      />
+      )}
     </div>
   );
 }

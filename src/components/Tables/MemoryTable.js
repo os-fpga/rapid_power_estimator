@@ -6,9 +6,10 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions, Checkbox } from './TableBase';
+import { TableBase, Actions } from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -25,8 +26,8 @@ function MemoryTable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    '', 'Memory', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
-    'W Bandwidth', 'Block Power', '%', 'Action',
+    '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
+    'W Bandwidth', 'Block Power', '%',
   ];
 
   React.useEffect(() => {
@@ -96,57 +97,54 @@ function MemoryTable({ device }) {
   }
 
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Memory</label>
+    <div className="component-table-head">
+      <ComponentLabel name="Memory" />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="Memory power"
+            total={null}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
+            subHeader="Sub System"
+          />
         </div>
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="Memory power"
-              total={null}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-              subHeader="Sub System"
-            />
-          </div>
-          <TableBase header={mainTableHeader}>
-            {
-            memoryData.map((row, index) => (
-              row.data.enable !== undefined && (
-                <tr key={row.id}>
-                  <td>
-                    <Checkbox
-                      disabled={false}
-                      isChecked={row.data.enable}
-                      label=""
-                      checkHandler={(state) => enableChanged(index, state)}
-                      id={row.id}
-                    />
-                  </td>
-                  <td>{row.data.name}</td>
-                  <SelectionCell val={row.data.usage} values={memory.usage} />
-                  <SelectionCell val={row.data.memory_type} values={memory.memory_type} />
-                  <td>{row.data.data_rate}</td>
-                  <td>{row.data.width}</td>
-                  <PowerCell val={row.data.consumption.write_bandwidth} />
-                  <PowerCell val={row.data.consumption.read_bandwidth} />
-                  <PowerCell val={row.data.consumption.block_power} />
-                  <td>
-                    {fixed(row.data.consumption.percentage, 0)}
-                    {' %'}
-                  </td>
-                  <Actions
-                    onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+        <TableBase header={mainTableHeader} hideAddBtn>
+          {
+          memoryData.map((row, index) => (
+            row.data.enable !== undefined && (
+              <tr key={row.id}>
+                <td>
+                  <Checkbox
+                    disabled={false}
+                    isChecked={row.data.enable}
+                    label=""
+                    checkHandler={(state) => enableChanged(index, state)}
+                    id={row.id}
                   />
-                </tr>
-              )
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
+                </td>
+                <td>{row.data.name}</td>
+                <Actions
+                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                />
+                <SelectionCell val={row.data.usage} values={memory.usage} />
+                <SelectionCell val={row.data.memory_type} values={memory.memory_type} />
+                <td>{row.data.data_rate}</td>
+                <td>{row.data.width}</td>
+                <PowerCell val={row.data.consumption.write_bandwidth} />
+                <PowerCell val={row.data.consumption.read_bandwidth} />
+                <PowerCell val={row.data.consumption.block_power} />
+                <td>
+                  {fixed(row.data.consumption.percentage, 0)}
+                  {' %'}
+                </td>
+              </tr>
+            )
+          ))
+        }
+        </TableBase>
+      </div>
+      {modalOpen && (
         <MemoryModal
           closeModal={() => {
             setModalOpen(false);
@@ -162,8 +160,7 @@ function MemoryTable({ device }) {
             width: 32,
           }}
         />
-        )}
-      </div>
+      )}
     </div>
   );
 }

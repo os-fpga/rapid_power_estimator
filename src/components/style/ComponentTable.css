@@ -3,11 +3,14 @@
 }
 
 .table-style {
-    display: block;
+    /* cut table to nice view */
     overflow: hidden;
+    /* cell view */
     table-layout: auto;
+    /* cell view */
     border-collapse: collapse;
-    max-width: 100%;
+    width: 100%;
+    border-radius: 8px;
 }
 
 .table-style thead {
@@ -22,6 +25,7 @@
 
 .table-style td {
     white-space: nowrap;
+    text-align: center;
 }
 
 .table-style tbody tr:hover {
@@ -45,19 +49,11 @@
     color: #2e65f3;
 }
 
-.layout-head {
-    display: flex;
-    padding: 0.4rem;
-    gap: 10px;
-}
-
 .component-table-head {
-    padding: 10px;
-    display: inline-flex;
-    gap: 10px;
-}
-
-.plus-button {
-    justify-content: center;
-    align-items: center;
+    padding: 6px;
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: fit-content;
 }

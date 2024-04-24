@@ -1,5 +1,4 @@
 import React from 'react';
-import { FaPlus } from 'react-icons/fa6';
 import FleModal from '../ModalWindows/FleModal';
 import glitchFactor from '../../utils/fle';
 import PowerTable from './PowerTable';
@@ -7,6 +6,8 @@ import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import { TableBase, Actions } from './TableBase';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
 
@@ -16,6 +17,7 @@ function FleTable({ device, totalPowerCallback }) {
   const [fleData, setFleData] = React.useState([]);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
+  const { defaultClock } = useClockSelection();
 
   const fetchFleData = React.useCallback((deviceId) => {
     if (deviceId !== null) {
@@ -84,76 +86,97 @@ function FleTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
-    'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%', 'Action',
+    'Action', 'En', 'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
+    'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
+  function enableChanged(index, state) {
+    const data = {
+      enable: state,
+    };
+    server.PATCH(
+      server.api.index(server.Elem.fle, device, index),
+      data,
+      () => fetchFleData(device),
+    );
+  }
+
+  const title = 'FLE';
+
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; FLE</label>
-          <button type="button" className="plus-button" onClick={() => setModalOpen(true)}><FaPlus /></button>
-        </div>
-        <div className="power-and-table-wrapper">
-          <div className="power-table-wrapper">
-            <PowerTable
-              title="FLE power"
-              total={powerTotal}
-              resourcesHeaders={resourcesHeaders}
-              resources={powerTable}
-            />
-          </div>
-          <TableBase header={mainTableHeader}>
-            {
-            fleData.map((row, index) => (
-              <tr key={row.name}>
-                <td>{row.name}</td>
-                <td>{row.lut6}</td>
-                <td>{row.flip_flop}</td>
-                <td>{row.clock}</td>
-                <PercentsCell val={row.toggle_rate} precition={1} />
-                <td>{GetText(row.glitch_factor, glitchFactor)}</td>
-                <PercentsCell val={row.clock_enable_rate} />
-                <FrequencyCell val={row.consumption.clock_frequency} />
-                <td>
-                  {fixed(row.consumption.output_signal_rate, 1)}
-                  {' MTr/S'}
-                </td>
-                <PowerCell val={row.consumption.block_power} />
-                <PowerCell val={row.consumption.interconnect_power} />
-                <td>
-                  {fixed(row.consumption.percentage, 0)}
-                  {' %'}
-                </td>
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-              </tr>
-            ))
-          }
-          </TableBase>
-        </div>
-        {modalOpen && (
-          <FleModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={(editIndex !== null && fleData[editIndex]) || {
-              name: '',
-              lut6: 0,
-              flip_flop: 0,
-              clock: '',
-              toggle_rate: 0,
-              glitch_factor: 0,
-              clock_enable_rate: 0.0,
-            }}
+    <div className="component-table-head">
+      <ComponentLabel name={title} />
+      <div className="power-and-table-wrapper">
+        <div className="power-table-wrapper">
+          <PowerTable
+            title="FLE power"
+            total={powerTotal}
+            resourcesHeaders={resourcesHeaders}
+            resources={powerTable}
           />
-        )}
+        </div>
+        <TableBase
+          header={mainTableHeader}
+          disabled={device === null}
+          onClick={() => setModalOpen(true)}
+        >
+          {
+          fleData.map((row, index) => (
+            <tr key={row.name}>
+              <Actions
+                onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
+                onDeleteClick={() => deleteRow(index)}
+              />
+              <td>
+                <Checkbox
+                  isChecked={row.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                  id={index}
+                />
+              </td>
+              <td>{row.name}</td>
+              <td>{row.lut6}</td>
+              <td>{row.flip_flop}</td>
+              <td>{row.clock}</td>
+              <PercentsCell val={row.toggle_rate} precition={1} />
+              <td>{GetText(row.glitch_factor, glitchFactor)}</td>
+              <PercentsCell val={row.clock_enable_rate} />
+              <FrequencyCell val={row.consumption.clock_frequency} />
+              <td>
+                {fixed(row.consumption.output_signal_rate, 1)}
+                {' MTr/S'}
+              </td>
+              <PowerCell val={row.consumption.block_power} />
+              <PowerCell val={row.consumption.interconnect_power} />
+              <td>
+                {fixed(row.consumption.percentage, 0)}
+                {' %'}
+              </td>
+            </tr>
+          ))
+        }
+        </TableBase>
       </div>
+      {modalOpen && (
+      <FleModal
+        title={title}
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={(editIndex !== null && fleData[editIndex]) || {
+          enable: true,
+          name: '',
+          lut6: 0,
+          flip_flop: 0,
+          clock: defaultClock(),
+          toggle_rate: 0,
+          glitch_factor: 0,
+          clock_enable_rate: 0.0,
+        }}
+      />
+      )}
     </div>
   );
 }

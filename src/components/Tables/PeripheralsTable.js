@@ -3,9 +3,10 @@ import PeripheralsModal from '../ModalWindows/PeripheralsModal';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions, Checkbox } from './TableBase';
+import { TableBase, Actions } from './TableBase';
 import * as per from '../../utils/peripherals';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -81,7 +82,7 @@ function PeripheralsTable({ device }) {
   ]);
 
   const mainTableHeader = [
-    '', '', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%', 'Action',
+    '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
   ];
 
   function peripheralMatch(component, data, url) {
@@ -157,61 +158,57 @@ function PeripheralsTable({ device }) {
   }
 
   return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label>FPGA &gt; Peripherals</label>
-        </div>
-        <TableBase header={mainTableHeader}>
-          {
-            peripherals.map((row, index) => row.data.map((i, idx) => (
-              i.data !== undefined && (
-              // eslint-disable-next-line react/no-array-index-key
-              <tr key={`${index}.${idx}`}>
-                <td>
-                  <Checkbox
-                    disabled={i.data.enable === undefined}
-                    isChecked={i.data.enable === undefined || i.data.enable}
-                    label=""
-                    checkHandler={(state) => enableChanged(index, idx, state)}
-                    id={index}
-                  />
-                </td>
-                <td className="innerHeader">{i.data.name}</td>
-                <SelectionCell val={i.data.usage} values={row.usage} />
-                <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
-                <td>
-                  {i.data.consumption.calculated_bandwidth}
-                  {' MB/s'}
-                </td>
-                <PowerCell val={i.data.consumption.block_power} />
-                <td>
-                  {fixed(parseFloat(i.data.consumption.percentage), 0)}
-                  {' %'}
-                </td>
-                <Actions
-                  onEditClick={() => {
-                    setEditIndex({ main: index, inner: idx });
-                    setModalOpen(true);
-                  }}
-                />
-              </tr>
-              )
-            )))
-          }
-        </TableBase>
-        {modalOpen && (
-          <PeripheralsModal
-            closeModal={() => {
-              setModalOpen(false);
-              setEditIndex(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={peripherals[editIndex.main]}
-            index={editIndex.inner}
-          />
-        )}
-      </div>
+    <div className="component-table-head">
+      <ComponentLabel name="Peripherals" />
+      <TableBase header={mainTableHeader} hideAddBtn>
+        {
+        peripherals.map((row, index) => row.data.map((i, idx) => (
+          i.data !== undefined && (
+          // eslint-disable-next-line react/no-array-index-key
+          <tr key={`${index}.${idx}`}>
+            <td>
+              <Checkbox
+                disabled={i.data.enable === undefined}
+                isChecked={i.data.enable === undefined || i.data.enable}
+                label=""
+                checkHandler={(state) => enableChanged(index, idx, state)}
+                id={index}
+              />
+            </td>
+            <td className="innerHeader">{i.data.name}</td>
+            <Actions
+              onEditClick={() => {
+                setEditIndex({ main: index, inner: idx });
+                setModalOpen(true);
+              }}
+            />
+            <SelectionCell val={i.data.usage} values={row.usage} />
+            <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
+            <td>
+              {i.data.consumption.calculated_bandwidth}
+              {' MB/s'}
+            </td>
+            <PowerCell val={i.data.consumption.block_power} />
+            <td>
+              {fixed(parseFloat(i.data.consumption.percentage), 0)}
+              {' %'}
+            </td>
+          </tr>
+          )
+        )))
+        }
+      </TableBase>
+      {modalOpen && (
+      <PeripheralsModal
+        closeModal={() => {
+          setModalOpen(false);
+          setEditIndex(null);
+        }}
+        onSubmit={handleSubmit}
+        defaultValue={peripherals[editIndex.main]}
+        index={editIndex.inner}
+      />
+      )}
     </div>
   );
 }

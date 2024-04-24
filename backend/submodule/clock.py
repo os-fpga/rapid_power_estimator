@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
 from .rs_device_resources import ModuleType
+from .rs_message import RsMessage, RsMessageManager
 
 class Clock_State(Enum):
     ACTIVE = 1
@@ -26,7 +27,7 @@ class ClockOutput:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    message : str = field(default='')
+    messages : [RsMessage] = field(default_factory=list)
 
 @dataclass
 class Clock:
@@ -44,17 +45,21 @@ class Clock:
         else:
             self.output.percentage = 0.0
 
-    def compute_dynamic_power(self, fan_out, CLK_CAP, CLK_INT_CAP) -> float:
-        if self.enable == True and self.state == Clock_State.ACTIVE:
-            self.output.fan_out = fan_out # fan out calculate whether the clock is being used by other module
+    def compute_dynamic_power(self, fan_out, CLK_CAP, CLK_INT_CAP):
+        self.output.block_power = 0
+        self.output.interconnect_power = 0
+        self.output.fan_out = fan_out
+        self.output.messages.clear()
+
+        if self.enable == False:
+            self.output.messages.append(RsMessageManager.get_message(101))
+            return
+
+        if self.state == Clock_State.ACTIVE:
+            if fan_out == 0:
+               self.output.messages.append(RsMessageManager.get_message(201))
             self.output.block_power = CLK_CAP * (self.frequency/1000000)
             self.output.interconnect_power = self.output.fan_out * CLK_INT_CAP * (self.frequency/1000000)
-            self.output.message = ''
-        else:
-            self.output.fan_out = fan_out
-            self.output.block_power = 0
-            self.output.interconnect_power = 0
-            self.output.message = ''
 
 class Clock_SubModule:
 

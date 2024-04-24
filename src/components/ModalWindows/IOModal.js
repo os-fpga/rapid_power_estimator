@@ -11,10 +11,15 @@ import {
 } from '../../utils/io';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
-function IOModal({ closeModal, onSubmit, defaultValue }) {
+function IOModal({
+  closeModal, onSubmit, defaultValue, title,
+}) {
+  const { clocks } = useClockSelection();
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}
@@ -32,10 +37,11 @@ function IOModal({ closeModal, onSubmit, defaultValue }) {
           value: defaultValue.bus_width,
         },
         {
-          fieldType: FieldType.textarea,
+          fieldType: FieldType.selectClock,
           id: 'clock',
           text: 'Clock',
           value: defaultValue.clock,
+          values: clocks,
         },
         {
           fieldType: FieldType.float,

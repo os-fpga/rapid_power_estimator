@@ -3,16 +3,24 @@ import { formatString } from './common';
 const config = require('../../rpe.config.json');
 
 const { server } = config;
-const { port } = config;
+let { port } = config;
 
-export const devices = formatString('{0}:{1}/devices', server, port);
+export function devices() { return formatString('{0}:{1}/devices', server, port); }
+
+export function setPort(p, fetchDevices) {
+  if (p !== undefined) {
+    port = p;
+    // eslint-disable-next-line no-use-before-define
+    GET(devices(), fetchDevices);
+  }
+}
 
 export function peripheralPath(deviceId, url) {
-  return formatString('{0}/{1}/peripherals/{2}', devices, deviceId, url);
+  return formatString('{0}/{1}/peripherals/{2}', devices(), deviceId, url);
 }
 
 export function deviceInfo(deviceId) {
-  return formatString('{0}/{1}', devices, deviceId);
+  return formatString('{0}/{1}', devices(), deviceId);
 }
 
 export const Elem = {
@@ -26,15 +34,15 @@ export const Elem = {
 
 export const api = {
   fetch(func, deviceId) {
-    return formatString('{0}/{1}/{2}', devices, deviceId, func);
+    return formatString('{0}/{1}/{2}', devices(), deviceId, func);
   },
 
   consumption(func, deviceId) {
-    return formatString('{0}/{1}/{2}/consumption', devices, deviceId, func);
+    return formatString('{0}/{1}/{2}/consumption', devices(), deviceId, func);
   },
 
   index(func, deviceId, index) {
-    return formatString('{0}/{1}/{2}/{3}', devices, deviceId, func, index);
+    return formatString('{0}/{1}/{2}/{3}', devices(), deviceId, func, index);
   },
 };
 

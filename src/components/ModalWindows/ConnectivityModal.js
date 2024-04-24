@@ -1,23 +1,27 @@
 import React from 'react';
 import { loadActivity, connectivityNames } from '../../utils/cpu';
 import { FieldType } from '../../utils/common';
+import { useClockSelection } from '../../ClockSelectionProvider';
 
 import ModalWindow from './ModalWindow';
 
 function ConnectivityModal({
-  closeModal, onSubmit, defaultValue,
+  closeModal, onSubmit, defaultValue, title,
 }) {
+  const { clocks } = useClockSelection();
   return (
     <ModalWindow
+      title={title}
       closeModal={closeModal}
       onSubmit={onSubmit}
       defaultValue={defaultValue}
       fields={[
         {
-          fieldType: FieldType.textarea,
+          fieldType: FieldType.selectClock,
           id: 'clock',
           text: 'Clock',
           value: defaultValue.clock,
+          values: clocks,
         },
         {
           fieldType: FieldType.select,

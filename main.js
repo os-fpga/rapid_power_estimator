@@ -5,7 +5,15 @@ const { spawn } = require('child_process');
 const path = require('node:path');
 const fs = require('fs');
 const Store = require('electron-store');
+const log = require('electron-log');
 const config = require('./rpe.config.json');
+const { kill } = require('./cleanup');
+
+const logFormat = '[{h}:{i}:{s}.{ms}] [{level}] {text}';
+log.transports.console.format = logFormat;
+log.transports.file.format = logFormat;
+log.transports.file.fileName = 'rpe.log';
+log.transports.file.maxSize = 1024 * 1024 * 10; // 10MB
 
 const schema = {
   port: {
@@ -14,9 +22,13 @@ const schema = {
     minimum: 1,
     default: config.port,
   },
+  useDefaultFile: {
+    type: 'boolean',
+    default: true,
+  },
   device_xml: {
     type: 'string',
-    default: config.device_xml,
+    default: '',
   },
 };
 
@@ -25,6 +37,12 @@ const store = new Store({ schema });
 let mainWindow = null;
 
 const isDev = process.argv.find((val) => val === '--development');
+if (!isDev) {
+  ['log', 'warn', 'error', 'info', 'debug'].forEach((method) => {
+    console[method] = log[method].bind(log);
+  });
+  log.transports.console.level = false; // silent console
+}
 const template = [
   {
     label: 'File',
@@ -86,10 +104,11 @@ const startFlaskServer = () => {
   if (config.debug === 1) { args.push('--debug'); }
 
   const deviceXml = store.get('device_xml');
+  const useDefaultFile = store.get('useDefaultFile');
   if (fs.existsSync(RestAPIscript)) {
-    apiServer = spawn('python', [RestAPIscript, path.join(__dirname, deviceXml), ...args]);
+    apiServer = spawn('python', [RestAPIscript, useDefaultFile ? path.join(__dirname, config.device_xml) : deviceXml, ...args]);
   } else {
-    apiServer = spawn(restAPIexe, [path.join(app.getAppPath(), '..', '..', deviceXml), ...args]);
+    apiServer = spawn(restAPIexe, [useDefaultFile ? path.join(app.getAppPath(), '..', '..', config.device_xml) : deviceXml, ...args]);
   }
 
   apiServer.stdout.on('data', (data) => {
@@ -101,11 +120,11 @@ const startFlaskServer = () => {
   });
 
   apiServer.on('error', (error) => {
-    console.log(`error: ${error.message}`);
+    console.error(`error: ${error.message}`);
   });
 
   apiServer.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
+    console.warn(`serverProcess exited with code ${code}`);
   });
 
   apiServer.on('message', (message) => {
@@ -115,11 +134,11 @@ const startFlaskServer = () => {
   return apiServer;
 };
 
-let child = null;
+let serverProcess = null;
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 700,
+    width: 1400,
+    height: 800,
     webPreferences: {
       preload: path.join(app.getAppPath(), 'preload.js'),
       nodeIntegration: true,
@@ -132,18 +151,27 @@ const createWindow = () => {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send('loadConfig', store.store);
+  });
+
   ipcMain.on('config', (event, arg) => {
     store.set('port', arg.port);
     store.set('device_xml', arg.device_xml);
+    store.set('useDefaultFile', arg.useDefaultFile);
 
-    child.kill();
-    child = startFlaskServer();
-    mainWindow.reload();
+    serverProcess.kill();
+
+    app.relaunch();
+    app.quit();
+  });
+  ipcMain.on('getConfig', (event, arg) => {
+    mainWindow.webContents.send('loadConfig', store.store);
   });
 };
 
 app.whenReady().then(() => {
-  child = startFlaskServer();
+  serverProcess = startFlaskServer();
   createWindow();
 
   app.on('activate', () => {
@@ -152,6 +180,6 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  child.kill('SIGINT');
+  kill(serverProcess);
   if (process.platform !== 'darwin') app.quit();
 });

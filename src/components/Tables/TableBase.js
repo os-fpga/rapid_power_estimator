@@ -1,7 +1,7 @@
 import React from 'react';
 import { BsFillTrashFill } from 'react-icons/bs';
 import { PiNotePencil } from 'react-icons/pi';
-import { FaPlus } from 'react-icons/fa6';
+import { AddButton } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -16,32 +16,17 @@ export function Actions({ onEditClick, onDeleteClick, rowSpan }) {
   );
 }
 
-export function Checkbox({
-  isChecked, label, checkHandler, id, disabled,
+export function TableBase({
+  header, disabled, onClick, hideAddBtn = false, children,
 }) {
-  const checkboxRef = React.useRef(null);
-  return (
-    <div>
-      <input
-        type="checkbox"
-        id={id}
-        checked={isChecked}
-        onChange={() => checkHandler(checkboxRef.current.checked)}
-        ref={checkboxRef}
-        disabled={disabled}
-      />
-      <label htmlFor={id}>{label}</label>
-    </div>
-  );
-}
-
-export function TableBase({ header, children }) {
   return (
     <div className="table-wrapper">
-      <table className="table-style main-border">
-        <thead>
-          <tr>
-            {
+      {!hideAddBtn && <AddButton disabled={disabled} onClick={onClick} />}
+      <div className="main-border">
+        <table className="table-style">
+          <thead>
+            <tr>
+              {
               header.map((item, index) => {
                 if (item.className) {
                   // eslint-disable-next-line react/no-array-index-key
@@ -51,39 +36,14 @@ export function TableBase({ header, children }) {
                 return <th key={index}>{item}</th>;
               })
             }
-          </tr>
-        </thead>
-        <tbody>
-          {
+            </tr>
+          </thead>
+          <tbody>
+            {
             children
           }
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-export function TableBaseWrapper({
-  title, content, powerTable, modalContent,
-}) {
-  const [modalOpen, setModalOpen] = React.useState(false);
-  return (
-    <div className="component-table-head main-border">
-      <div className="main-block">
-        <div className="layout-head">
-          <label htmlFor="plus-button">{title}</label>
-          <button name="plus-button" aria-label="Add" type="button" className="plus-button" onClick={setModalOpen(true)}><FaPlus /></button>
-        </div>
-        {
-          content
-        }
-        {modalOpen
-          && (modalContent)}
-      </div>
-      <div className="power-table-wrapper">
-        {
-          powerTable
-        }
+          </tbody>
+        </table>
       </div>
     </div>
   );

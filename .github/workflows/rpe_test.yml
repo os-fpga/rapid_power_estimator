@@ -112,7 +112,7 @@ jobs:
       matrix:
         os: 
           - ubuntu-22.04 # This is CentOS 7 under the hood
-          - macos-latest
+          - macos-12
           - windows-latest
     runs-on: ${{ matrix.os }}
     permissions:
@@ -202,11 +202,19 @@ jobs:
             echo ${{ github.ref }} 
 
       - name: Upload Package
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/main' &&  matrix.os != 'windows-latest'  }}
         uses: actions/upload-artifact@v3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.tar.gz*    
+
+      - name: Upload Package
+        if: ${{ github.ref == 'refs/heads/main' &&  matrix.os == 'windows-latest' }}
+        uses: actions/upload-artifact@v3
+        with:
+            name: rapid_power_estimator_${{ matrix.os }}
+            path: dist/rapid_power_estimator*.exe
+
 
       - name: Upload Release
         if: startsWith(github.ref, 'refs/tags/')

@@ -20,7 +20,7 @@ jobs:
         os: 
           - ubuntu-latest
           - ubuntu-22.04 # This is CentOS 7 under the hood
-          - macos-latest
+          - macos-12
           - windows-latest
     runs-on: ${{ matrix.os }}
     env:

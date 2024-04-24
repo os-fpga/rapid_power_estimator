@@ -12,6 +12,7 @@ import { useClockSelection } from '../../ClockSelectionProvider';
 import '../style/ComponentTable.css';
 
 function BramTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [bramData, setBramData] = React.useState([]);
@@ -70,10 +71,10 @@ function BramTable({ device, totalPowerCallback }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchBramData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function sendData(row) {
     const data = {};

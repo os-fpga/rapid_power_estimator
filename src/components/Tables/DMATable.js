@@ -14,10 +14,10 @@ import { ComponentLabel, Checkbox } from '../ComponentsLib';
 import '../style/ComponentTable.css';
 
 function DMATable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerTotal, setPowerTotal] = React.useState(0);
-  const [powerTable, setPowerTable] = React.useState([]);
   const [href, setHref] = React.useState([]);
   const [dmaData, setDmaData] = React.useState([
     { id: 0, data: {} },
@@ -32,20 +32,6 @@ function DMATable({ device }) {
     'Bandwidth', 'Block Power', '%',
   ];
 
-  React.useEffect(() => {
-    if (device !== null) {
-      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        setHref(data.dma);
-      });
-    }
-  }, [device]);
-
-  React.useEffect(() => {
-    setPowerTable([
-      ['DMA', powerTotal, 0],
-    ]);
-  }, [powerTotal]);
-
   function fetchDmaData(index, dmaHref) {
     server.GET(server.peripheralPath(device, dmaHref), (dmaJson) => {
       setPowerTotal((prev) => prev + dmaJson.consumption.block_power);
@@ -56,32 +42,35 @@ function DMATable({ device }) {
     });
   }
 
-  function fetchData() {
+  function fetchData(lhref) {
     if (device !== null) {
       setPowerTotal(0);
-      href.forEach((dma) => {
+      lhref.forEach((dma) => {
         const index = parseInt(dma.href.slice(-1), 10);
         fetchDmaData(index, dma.href);
       });
     }
   }
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) {
-      fetchData();
+      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+        setHref(data.dma);
+        fetchData(data.dma);
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [href]);
+  }
 
   function modifyRow(index, row) {
-    server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, fetchData);
+    server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, () => fetchData(href));
   }
 
   function addRow(newData) {
     if (device !== null) {
       const found = dmaData.find((item) => item.data.enable === false);
       if (found) {
-        server.PATCH(server.peripheralPath(device, `${href[found.id].href}`), newData, fetchData);
+        server.PATCH(server.peripheralPath(device, `${href[found.id].href}`), newData, () => fetchData(href));
       }
     }
   }
@@ -101,7 +90,7 @@ function DMATable({ device }) {
     const data = {
       enable: state,
     };
-    server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, fetchData);
+    server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, () => fetchData(href));
     publish('dmaChanged');
     updateTotalPower(device);
   }
@@ -117,7 +106,7 @@ function DMATable({ device }) {
             title="DMA power"
             total={null}
             resourcesHeaders={resourcesHeaders}
-            resources={powerTable}
+            resources={[['DMA', powerTotal, 0]]}
             subHeader="Sub System"
           />
         </div>

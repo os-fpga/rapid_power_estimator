@@ -11,6 +11,7 @@ import { ComponentLabel, Checkbox } from '../ComponentsLib';
 import '../style/ComponentTable.css';
 
 function PeripheralsTable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
@@ -125,10 +126,10 @@ function PeripheralsTable({ device }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchData(device);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function modifyRow(index, row) {
     const data = {

@@ -12,6 +12,7 @@ import { useClockSelection } from '../../ClockSelectionProvider';
 import '../style/ComponentTable.css';
 
 function FleTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [fleData, setFleData] = React.useState([]);
@@ -47,9 +48,10 @@ function FleTable({ device, totalPowerCallback }) {
     }
   }, [totalPowerCallback]);
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchFleData(device);
-  }, [device, fetchFleData]);
+  }
 
   function modifyRow(index, row) {
     server.PATCH(

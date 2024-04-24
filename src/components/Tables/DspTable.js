@@ -12,6 +12,7 @@ import { useClockSelection } from '../../ClockSelectionProvider';
 import '../style/ComponentTable.css';
 
 function DspTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [dspData, setDspData] = React.useState([]);
@@ -42,10 +43,10 @@ function DspTable({ device, totalPowerCallback }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchDspData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function modifyRow(index, row) {
     server.PATCH(

@@ -12,6 +12,7 @@ import { useClockSelection } from '../../ClockSelectionProvider';
 import '../style/ComponentTable.css';
 
 function ClockingTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [clockingData, setClockingData] = React.useState([]);
@@ -56,10 +57,10 @@ function ClockingTable({ device, totalPowerCallback }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchClockData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function modifyRow(index, row) {
     server.PATCH(

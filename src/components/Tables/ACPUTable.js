@@ -13,6 +13,7 @@ import { ComponentLabel, Dropdown } from '../ComponentsLib';
 import '../style/ACPUTable.css';
 
 function ACPUTable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerData, setPowerData] = React.useState([['Block Power', 0, 0]]);
@@ -26,32 +27,22 @@ function ACPUTable({ device }) {
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
 
-  function fetchData() {
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      setHref(data.acpu[0].href);
-    });
-  }
-
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
-
-  function fetchPort(port) {
-    server.GET(server.peripheralPath(device, `${href}/${port.href}`), (data) => {
+  function fetchPort(port, link) {
+    server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
       const ep = parseInt(port.href.slice(-1), 10);
       const newData = endpoints;
       while (newData.length < (ep + 1)) newData.push({});
       newData[ep] = { ep, data };
       setEndpoints([...newData]);
+
+      const found = newData.find((it) => it.data !== undefined && it.data.name === '');
+      setAddButtonDisable(found === undefined);
     });
   }
 
-  function fetchAcpuData() {
-    if (href !== '') {
-      server.GET(server.peripheralPath(device, href), (data) => {
+  function fetchAcpuData(link) {
+    if (link !== '') {
+      server.GET(server.peripheralPath(device, link), (data) => {
         // resolve cycling
         if (data.name !== acpuData.name
           || data.frequency !== acpuData.frequency
@@ -65,32 +56,30 @@ function ACPUTable({ device }) {
         setPowerData([
           ['Block Power', data.consumption.block_power, 0],
         ]);
-        data.ports.forEach((port) => fetchPort(port));
+        data.ports.forEach((port) => fetchPort(port, link));
       });
     }
   }
 
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchAcpuData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [href]);
+  function fetchData() {
+    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+      const link = data.acpu[0].href;
+      setHref(link);
+      fetchAcpuData(link);
+    });
+  }
 
-  React.useEffect(() => {
-    const found = endpoints.find((it) => it.data !== undefined && it.data.name === '');
-    setAddButtonDisable(found === undefined);
-  }, [endpoints]);
-
-  React.useEffect(() => {
-    if (device !== null && href !== '') {
-      server.PATCH(server.peripheralPath(device, href), acpuData, fetchAcpuData);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [acpuData]);
+  if (dev !== device) {
+    setDev(device);
+    if (device !== null) fetchData();
+  }
 
   const handleChange = (name, val) => {
-    setAcpuData({ ...acpuData, [name]: val });
+    const newData = { ...acpuData, [name]: val };
+    setAcpuData(newData);
+    if (device !== null && href !== '') {
+      server.PATCH(server.peripheralPath(device, href), newData, () => fetchAcpuData(href));
+    }
     publish('cpuChanged', 'acpu');
     updateTotalPower(device);
   };
@@ -100,14 +89,14 @@ function ACPUTable({ device }) {
   function modifyRow(index, row) {
     const data = row;
     data.name = GetText(row.name, acpuNames);
-    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, fetchAcpuData);
+    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, () => fetchAcpuData(href));
   }
 
   const deleteRow = (index) => {
     // no delete method for acpu. this is just clear name of the endpoint which mean disable
     const val = endpoints[index].data;
     val.name = '';
-    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchAcpuData);
+    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchAcpuData(href));
     publish('cpuChanged', 'acpu');
     updateTotalPower(device);
   };
@@ -116,7 +105,7 @@ function ACPUTable({ device }) {
     if (device !== null) {
       const data = newData;
       data.name = GetText(newData.name, acpuNames);
-      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, fetchAcpuData);
+      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, () => fetchAcpuData(href));
     }
   }
 

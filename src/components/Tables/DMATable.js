@@ -6,10 +6,12 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PercentsCell, PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -28,7 +30,7 @@ function DMATable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    'Action', 'En', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
+    '', 'Action', 'En', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
     'Bandwidth', 'Block Power', '%',
   ];
 
@@ -119,16 +121,14 @@ function DMATable({ device }) {
           dmaData.map((row, index) => (
             (row.data.consumption !== undefined) && (
               <tr key={row.id}>
+                <StatusColumn messages={row.data.consumption.messages} />
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                 />
-                <td>
-                  <Checkbox
-                    isChecked={row.data.enable}
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={index}
-                  />
-                </td>
+                <EnableState
+                  isChecked={row.data.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                />
                 <td>{row.data.name}</td>
                 <SelectionCell val={row.data.source} values={source} />
                 <SelectionCell val={row.data.destination} values={source} />

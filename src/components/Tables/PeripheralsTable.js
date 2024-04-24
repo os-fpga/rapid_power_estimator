@@ -3,7 +3,7 @@ import PeripheralsModal from '../ModalWindows/PeripheralsModal';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
+import { TableBase, Actions, StatusColumn } from './TableBase';
 import * as per from '../../utils/peripherals';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
@@ -83,7 +83,7 @@ function PeripheralsTable({ device }) {
   ]);
 
   const mainTableHeader = [
-    '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
+    '', '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
   ];
 
   function peripheralMatch(component, data, url) {
@@ -167,7 +167,8 @@ function PeripheralsTable({ device }) {
           i.data !== undefined && (
           // eslint-disable-next-line react/no-array-index-key
           <tr key={`${index}.${idx}`}>
-            <td>
+            <StatusColumn messages={i.data.consumption.messages} />
+            <td className="fixed-col">
               <Checkbox
                 disabled={i.data.enable === undefined}
                 isChecked={i.data.enable === undefined || i.data.enable}

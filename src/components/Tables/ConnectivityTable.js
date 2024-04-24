@@ -2,7 +2,7 @@ import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { connectivityNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
-import { TableBase, Actions } from './TableBase';
+import { TableBase, Actions, StatusColumn } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
   PowerCell, SelectionCell, PercentsCell, FrequencyCell,
@@ -64,7 +64,7 @@ function ConnectivityTable({ device }) {
     if (device !== null) fetchData();
   }
 
-  const header = ['Action', 'Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
+  const header = ['', 'Action', 'Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
     'Toggle Rate', 'Bandwidth', 'Noc Power', '%',
   ];
 
@@ -121,6 +121,7 @@ function ConnectivityTable({ device }) {
             endpoints.map((row, index) => (
               (row.data !== undefined && row.data.name !== '') && (
               <tr key={row.ep}>
+                <StatusColumn messages={row.data.consumption.messages} />
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}

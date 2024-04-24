@@ -5,8 +5,10 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
@@ -88,7 +90,7 @@ function FleTable({ device, totalPowerCallback }) {
   ];
 
   const mainTableHeader = [
-    'Action', 'En', 'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
+    '', 'Action', 'En', 'Name/Hierarchy', 'LUT6', 'FF/Latch', 'Clock', 'Toggle Rate', 'Glitch Factor', 'Clock Enable',
     'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 
@@ -125,17 +127,15 @@ function FleTable({ device, totalPowerCallback }) {
           {
           fleData.map((row, index) => (
             <tr key={row.name}>
+              <StatusColumn messages={row.consumption.messages} />
               <Actions
                 onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                 onDeleteClick={() => deleteRow(index)}
               />
-              <td>
-                <Checkbox
-                  isChecked={row.enable}
-                  checkHandler={(state) => enableChanged(index, state)}
-                  id={index}
-                />
-              </td>
+              <EnableState
+                isChecked={row.enable}
+                checkHandler={(state) => enableChanged(index, state)}
+              />
               <td>{row.name}</td>
               <td>{row.lut6}</td>
               <td>{row.flip_flop}</td>

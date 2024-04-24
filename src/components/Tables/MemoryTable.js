@@ -6,10 +6,12 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
@@ -26,7 +28,7 @@ function MemoryTable({ device }) {
   const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
-    '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
+    '', '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
     'W Bandwidth', 'Block Power', '%',
   ];
 
@@ -103,15 +105,11 @@ function MemoryTable({ device }) {
           memoryData.map((row, index) => (
             row.data.enable !== undefined && (
               <tr key={row.id}>
-                <td>
-                  <Checkbox
-                    disabled={false}
-                    isChecked={row.data.enable}
-                    label=""
-                    checkHandler={(state) => enableChanged(index, state)}
-                    id={row.id}
-                  />
-                </td>
+                <StatusColumn messages={row.data.consumption.messages} />
+                <EnableState
+                  isChecked={row.data.enable}
+                  checkHandler={(state) => enableChanged(index, state)}
+                />
                 <td>{row.data.name}</td>
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}

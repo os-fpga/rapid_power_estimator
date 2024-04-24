@@ -5,8 +5,10 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import { FrequencyCell, PowerCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import {
+  TableBase, Actions, EnableState, StatusColumn,
+} from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
@@ -21,7 +23,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   const { setClocks } = useClockSelection();
 
   const mainTableHeader = [
-    'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
+    '', 'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
     'Block Power', 'Intc. Power', '%',
   ];
 
@@ -129,17 +131,15 @@ function ClockingTable({ device, totalPowerCallback }) {
           {
           clockingData.map((row, index) => (
             <tr key={row.description}>
+              <StatusColumn messages={row.consumption.messages} />
               <Actions
                 onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                 onDeleteClick={() => deleteRow(index)}
               />
-              <td>
-                <Checkbox
-                  isChecked={row.enable}
-                  checkHandler={(state) => enableChanged(index, state)}
-                  id={index}
-                />
-              </td>
+              <EnableState
+                isChecked={row.enable}
+                checkHandler={(state) => enableChanged(index, state)}
+              />
               <td>{row.description}</td>
               <td>{GetText(row.source, sources)}</td>
               <td>{row.port}</td>

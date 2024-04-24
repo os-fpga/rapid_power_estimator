@@ -4,7 +4,7 @@ import * as server from '../../utils/serverAPI';
 import {
   bcpuNames, clock, loadActivity, findEvailableIndex,
 } from '../../utils/cpu';
-import { TableBase, Actions } from './TableBase';
+import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
@@ -91,7 +91,7 @@ function BCPUTable({ device }) {
     updateTotalPower(device);
   };
 
-  const header = ['Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
+  const header = ['', 'Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
 
   function modifyRow(index, row) {
     const data = row;
@@ -164,6 +164,7 @@ function BCPUTable({ device }) {
               (row.data !== undefined && row.data.name !== '')
               && (
               <tr key={row.ep}>
+                <StatusColumn messages={row.data.consumption.messages} />
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}

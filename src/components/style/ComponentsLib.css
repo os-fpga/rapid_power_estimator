@@ -53,3 +53,8 @@
 .icon {
     transform: scale(1.2);
 }
+
+.status-col-span {
+    display: flex;
+    justify-content: space-around;
+}

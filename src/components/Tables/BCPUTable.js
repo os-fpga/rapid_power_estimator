@@ -4,7 +4,7 @@ import * as server from '../../utils/serverAPI';
 import {
   bcpuNames, clock, loadActivity, findEvailableIndex,
 } from '../../utils/cpu';
-import { TableBase, Actions } from './TableBase';
+import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
@@ -15,6 +15,7 @@ import { ComponentLabel, Checkbox, Dropdown } from '../ComponentsLib';
 import '../style/ACPUTable.css';
 
 function BCPUTable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerData, setPowerData] = React.useState([
@@ -32,32 +33,22 @@ function BCPUTable({ device }) {
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
 
-  function fetchData() {
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      setHref(data.bcpu[0].href);
-    });
-  }
-
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
-
-  function fetchPort(port) {
-    server.GET(server.peripheralPath(device, `${href}/${port.href}`), (data) => {
+  function fetchPort(port, link) {
+    server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
       const ep = parseInt(port.href.slice(-1), 10);
       const newData = endpoints;
       while (newData.length < (ep + 1)) newData.push({});
       newData[ep] = { ep, data };
       setEndpoints([...newData]);
+
+      const found = newData.find((it) => it.data !== undefined && it.data.name === '');
+      setAddButtonDisable(found === undefined);
     });
   }
 
-  function fetchAcpuData() {
-    if (href !== '') {
-      server.GET(server.peripheralPath(device, href), (data) => {
+  function fetchAcpuData(link) {
+    if (link !== '') {
+      server.GET(server.peripheralPath(device, link), (data) => {
         setBootMode(data.consumption.boot_mode);
         // resolve cycling
         if (data.name !== bcpuData.name
@@ -73,49 +64,46 @@ function BCPUTable({ device }) {
           ['Active Power', data.consumption.active_power, 0],
           ['Boot Power', data.consumption.boot_power, 0],
         ]);
-        data.ports.forEach((port) => fetchPort(port));
+        data.ports.forEach((port) => fetchPort(port, link));
       });
     }
   }
 
-  React.useEffect(() => {
-    if (device !== null) {
-      fetchAcpuData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [href]);
+  function fetchData() {
+    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
+      setHref(data.bcpu[0].href);
+      fetchAcpuData(data.bcpu[0].href);
+    });
+  }
 
-  React.useEffect(() => {
-    const found = endpoints.find((it) => it.data !== undefined && it.data.name === '');
-    setAddButtonDisable(found === undefined);
-  }, [endpoints]);
-
-  React.useEffect(() => {
-    if (device !== null && href !== '') {
-      server.PATCH(server.peripheralPath(device, href), bcpuData, fetchAcpuData);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bcpuData]);
+  if (dev !== device) {
+    setDev(device);
+    if (device !== null) fetchData();
+  }
 
   const handleChange = (name, val) => {
-    setBcpuData({ ...bcpuData, [name]: val });
+    const newData = { ...bcpuData, [name]: val };
+    setBcpuData(newData);
+    if (device !== null && href !== '') {
+      server.PATCH(server.peripheralPath(device, href), newData, () => fetchAcpuData(href));
+    }
     publish('cpuChanged', 'bcpu');
     updateTotalPower(device);
   };
 
-  const header = ['Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
+  const header = ['', 'Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
 
   function modifyRow(index, row) {
     const data = row;
     data.name = GetText(row.name, bcpuNames);
-    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, fetchAcpuData);
+    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, () => fetchAcpuData(href));
   }
 
   const deleteRow = (index) => {
     // no delete method for acpu. this is just clear name of the endpoint which mean disable
     const val = endpoints[index].data;
     val.name = '';
-    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, fetchAcpuData);
+    server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchAcpuData(href));
     publish('cpuChanged', 'bcpu');
     updateTotalPower(device);
   };
@@ -124,7 +112,7 @@ function BCPUTable({ device }) {
     if (device !== null) {
       const data = newData;
       data.name = GetText(newData.name, bcpuNames);
-      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, fetchAcpuData);
+      server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, () => fetchAcpuData(href));
     }
   }
 
@@ -134,12 +122,6 @@ function BCPUTable({ device }) {
     publish('cpuChanged', 'bcpu');
     updateTotalPower(device);
   };
-
-  const encryptionHandler = React.useCallback((state) => {
-    setBcpuData({ ...bcpuData, encryption_used: state });
-    publish('cpuChanged', 'bcpu');
-    updateTotalPower(device);
-  }, [bcpuData, device, updateTotalPower]);
 
   const powerHeader = ['Power', '%'];
   const title = 'BCPU';
@@ -163,7 +145,7 @@ function BCPUTable({ device }) {
             <Checkbox
               isChecked={bcpuData.encryption_used}
               label="Encryption"
-              checkHandler={encryptionHandler}
+              checkHandler={(state) => handleChange('encryption_used', state)}
               id="encryption"
             />
           </div>
@@ -182,6 +164,7 @@ function BCPUTable({ device }) {
               (row.data !== undefined && row.data.name !== '')
               && (
               <tr key={row.ep}>
+                <StatusColumn messages={row.data.consumption.messages} />
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                   onDeleteClick={() => deleteRow(index)}

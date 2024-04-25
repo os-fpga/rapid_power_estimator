@@ -3,7 +3,7 @@ import PeripheralsModal from '../ModalWindows/PeripheralsModal';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
+import { TableBase, Actions, StatusColumn } from './TableBase';
 import * as per from '../../utils/peripherals';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
@@ -11,6 +11,7 @@ import { ComponentLabel, Checkbox } from '../ComponentsLib';
 import '../style/ComponentTable.css';
 
 function PeripheralsTable({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
@@ -82,7 +83,7 @@ function PeripheralsTable({ device }) {
   ]);
 
   const mainTableHeader = [
-    '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
+    '', '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
   ];
 
   function peripheralMatch(component, data, url) {
@@ -125,10 +126,10 @@ function PeripheralsTable({ device }) {
     }
   };
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchData(device);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function modifyRow(index, row) {
     const data = {
@@ -166,7 +167,8 @@ function PeripheralsTable({ device }) {
           i.data !== undefined && (
           // eslint-disable-next-line react/no-array-index-key
           <tr key={`${index}.${idx}`}>
-            <td>
+            <StatusColumn messages={i.data.consumption.messages} />
+            <td className="fixed-col">
               <Checkbox
                 disabled={i.data.enable === undefined}
                 isChecked={i.data.enable === undefined || i.data.enable}

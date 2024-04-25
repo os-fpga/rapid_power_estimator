@@ -4,8 +4,10 @@ import IOPowerTable from './IOPowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
 import { PercentsCell, SelectionCell, PowerCell } from './TableCells';
-import { TableBase, Actions } from './TableBase';
-import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import {
+  TableBase, Actions, StatusColumn, EnableState,
+} from './TableBase';
+import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ComponentTable.css';
@@ -22,6 +24,7 @@ import {
 } from '../../utils/io';
 
 function IOTable({ device, totalPowerCallback }) {
+  const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [ioData, setIoData] = React.useState([]);
@@ -117,10 +120,11 @@ function IOTable({ device, totalPowerCallback }) {
       });
     }
   };
-  React.useEffect(() => {
+
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) fetchIoData(device);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   function modifyRow(index, row) {
     server.PATCH(
@@ -149,7 +153,7 @@ function IOTable({ device, totalPowerCallback }) {
   };
 
   const mainTableHeader = [
-    'Action', 'En', 'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
+    '', 'Action', 'En', 'RTL Port Name', 'Bus', 'Dir', 'IO Standard', 'Drive Strength', 'Slew Rate', 'Differential Termination', 'Data Type',
     'Clock', 'Toggle Rate', 'Duty Cycle', 'Sync', 'Input En', 'Output En', 'Pullup / Pulldown', 'Bank Type', 'Bank #',
     'VCCIO', 'Signal Rate', 'Block Power', 'Intc. Power', '%',
   ];
@@ -187,17 +191,15 @@ function IOTable({ device, totalPowerCallback }) {
           ioData.map((row, index) => (
             // eslint-disable-next-line react/no-array-index-key
             <tr key={index}>
+              <StatusColumn messages={row.consumption.messages} />
               <Actions
                 onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                 onDeleteClick={() => deleteRow(index)}
               />
-              <td>
-                <Checkbox
-                  isChecked={row.enable}
-                  checkHandler={(state) => enableChanged(index, state)}
-                  id={index}
-                />
-              </td>
+              <EnableState
+                isChecked={row.enable}
+                checkHandler={(state) => enableChanged(index, state)}
+              />
               <td>{row.name}</td>
               <td>{row.bus_width}</td>
               <SelectionCell val={row.direction} values={direction} />

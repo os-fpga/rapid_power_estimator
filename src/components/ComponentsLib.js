@@ -3,7 +3,7 @@ import { BsPlus } from 'react-icons/bs';
 import './style/ComponentsLib.css';
 
 export function State({
-  messages = [], refValue, warn, err, baseClass = 'clickable', children,
+  messages = [], baseClass = 'clickable', children,
 }) {
   function isError() {
     const errors = messages.filter((item) => item.filter((inner) => inner.type === 'error').length > 0);

@@ -7,13 +7,13 @@ import { State } from './ComponentsLib';
 import './style/TypicalWorstComponent.css';
 
 function Column({
-  title, power, warnPow, errPow, temp,
+  title, power, messages, temp,
 }) {
   return (
     <div className="column">
       <div className="grayed-text title-div">{title}</div>
       <div className="column-h2">
-        <State refValue={power} warn={warnPow} err={errPow} baseClass="indicator" />
+        <State messages={messages} baseClass="indicator" />
         <div>
           <div className="power-row big-font bold-text">
             <div className="no-wrap big-font">
@@ -32,12 +32,6 @@ function Column({
   );
 }
 
-const warnTypical = 10; // TBD
-const errorTypical = 40; // TBD
-
-const warnWorst = 40; // TBD
-const errorWorst = 10; // TBD
-
 function TypicalWorstComponent() {
   const { thermalData } = useSocTotalPower();
   return (
@@ -45,15 +39,13 @@ function TypicalWorstComponent() {
       <Column
         title="Typical"
         power={thermalData.typical.total_power}
-        warnPow={warnTypical}
-        errPow={errorTypical}
+        messages={[]}
         temp={thermalData.typical.thermal}
       />
       <Column
         title="Worst case"
         power={thermalData.worsecase.total_power}
-        warnPow={warnWorst}
-        errPow={errorWorst}
+        messages={[]}
         temp={thermalData.worsecase.thermal}
       />
     </div>

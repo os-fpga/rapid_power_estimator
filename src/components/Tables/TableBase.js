@@ -99,9 +99,7 @@ export function TableBase({
             </tr>
           </thead>
           <tbody>
-            {
-            children
-          }
+            { children }
           </tbody>
         </table>
       </div>

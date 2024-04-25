@@ -6,6 +6,7 @@ import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
+import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/MemoryComponent.css';
 
@@ -28,6 +29,7 @@ function MemoryComponent({ device }) {
   ]);
   const { selectedItem } = useSelection();
   const { power, dynamicPower } = useSocTotalPower();
+  const { socState } = useGlobalState();
 
   function update() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
@@ -57,16 +59,13 @@ function MemoryComponent({ device }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
-  const warn = 0.001; // TBD
-  const error = 0.016; // TBD
-
   const Title = 'Memory';
   function getBaseClass() {
     return (selectedItem === Title) ? 'mem-container selected' : 'mem-container';
   }
 
   return (
-    <State refValue={power.total_memory_power} warn={warn} err={error} baseClass={getBaseClass()}>
+    <State messages={socState.memory} baseClass={getBaseClass()}>
       <div className="mem-line">
         <div className="bold-text">{Title}</div>
         <div className="grayed-text bold-text mem-value">

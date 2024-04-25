@@ -9,6 +9,7 @@ import ConnectivityComponent from './ConnectivityComponent';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
+import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/SOCTable.css';
 
@@ -17,6 +18,7 @@ function SOCTable({ device, setOpenedTable }) {
   const {
     power, dynamicPower, staticPower, updateTotalPower,
   } = useSocTotalPower();
+  const { socState } = useGlobalState();
 
   function componentChanged() {
     if (device !== null) {
@@ -29,9 +31,6 @@ function SOCTable({ device, setOpenedTable }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device]);
 
-  const warn = 0.003; // TBD
-  const error = 0.016; // TBD
-
   function getBaseName(item) {
     return (selectedItem === item) ? 'clickable selected' : 'clickable';
   }
@@ -40,7 +39,7 @@ function SOCTable({ device, setOpenedTable }) {
     <div className="top-l2-col1">
       <div className="top-l2-col1-row1">
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.ACPU)}>
-          <State refValue={power.total_acpu_power} warn={warn} err={error} baseClass={getBaseName('ACPU')}>
+          <State messages={socState.acpu} baseClass={getBaseName('ACPU')}>
             <ABCPUComponent
               device={device}
               title="ACPU"
@@ -51,7 +50,7 @@ function SOCTable({ device, setOpenedTable }) {
           </State>
         </div>
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.BCPU)}>
-          <State refValue={power.total_bcpu_power} warn={warn} err={error} baseClass={getBaseName('BCPU')}>
+          <State messages={socState.bcpu} baseClass={getBaseName('BCPU')}>
             <ABCPUComponent
               device={device}
               title="BCPU"

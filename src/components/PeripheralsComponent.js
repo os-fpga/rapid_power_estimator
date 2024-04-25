@@ -4,6 +4,7 @@ import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
+import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/Peripherals.css';
 
@@ -19,6 +20,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
   const [gpio, setGPIO] = React.useState(0);
   const { selectedItem } = useSelection();
   const { power, dynamicPower } = useSocTotalPower();
+  const { socState } = useGlobalState();
 
   function fetchPeripherals(deviceId, key, url) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
@@ -53,9 +55,6 @@ function PeripheralsComponent({ setOpenedTable, device }) {
     return (selectedItem === Title) ? 'periph-top selected' : 'periph-top';
   }
 
-  const warn = 0.001; // TBD
-  const error = 0.016; // TBD
-
   return (
     <div
       className={getClassName()}
@@ -73,7 +72,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
         </div>
       </div>
       <div className="periph-row">
-        <State refValue={uart0} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.uart0} baseClass="periph-rowx">
           <div className="periph-internal-font-header">UART0</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -86,7 +85,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
             </div>
           </div>
         </State>
-        <State refValue={uart1} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.uart1} baseClass="periph-rowx">
           <div className="periph-internal-font-header">UART1</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -99,7 +98,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
             </div>
           </div>
         </State>
-        <State refValue={usb2} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.usb2} baseClass="periph-rowx">
           <div className="periph-internal-font-header">USB 2.0</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -114,7 +113,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
         </State>
       </div>
       <div className="periph-row">
-        <State refValue={i2c} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.i2c} baseClass="periph-rowx">
           <div className="periph-internal-font-header">I2C</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -127,7 +126,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
             </div>
           </div>
         </State>
-        <State refValue={gpio} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.gpio} baseClass="periph-rowx">
           <div className="periph-internal-font-header">GPIO</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -140,7 +139,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
             </div>
           </div>
         </State>
-        <State refValue={pwm} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.pwm} baseClass="periph-rowx">
           <div className="periph-internal-font-header">PWM</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -155,7 +154,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
         </State>
       </div>
       <div className="periph-row">
-        <State refValue={spi} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.spi} baseClass="periph-rowx">
           <div className="periph-internal-font-header">SPI/QSPI</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -168,7 +167,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
             </div>
           </div>
         </State>
-        <State refValue={jtag} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.jtag} baseClass="periph-rowx">
           <div className="periph-internal-font-header">JTAG</div>
           <div className="periph-internal">
             <div className="periph-internal-font">
@@ -181,7 +180,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
             </div>
           </div>
         </State>
-        <State refValue={gige} warn={warn} err={error} baseClass="periph-rowx">
+        <State messages={socState.gige} baseClass="periph-rowx">
           <div className="periph-internal-font-header">GigI</div>
           <div className="periph-internal">
             <div className="periph-internal-font">

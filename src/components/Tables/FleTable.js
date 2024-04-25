@@ -10,6 +10,7 @@ import {
 } from './TableBase';
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
@@ -21,8 +22,9 @@ function FleTable({ device, totalPowerCallback }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
+  const { updateGlobalState } = useGlobalState();
 
-  const fetchFleData = React.useCallback((deviceId) => {
+  function fetchFleData(deviceId) {
     if (deviceId !== null) {
       server.GET(server.api.fetch(server.Elem.fle, deviceId), (data) => {
         setFleData(data);
@@ -48,25 +50,30 @@ function FleTable({ device, totalPowerCallback }) {
         });
       });
     }
-  }, [totalPowerCallback]);
+  }
 
   if (dev !== device) {
     setDev(device);
     if (device !== null) fetchFleData(device);
   }
 
+  function modifyDataHandler() {
+    fetchFleData(device);
+    updateGlobalState(device);
+  }
+
   function modifyRow(index, row) {
     server.PATCH(
       server.api.index(server.Elem.fle, device, index),
       row,
-      () => fetchFleData(device),
+      modifyDataHandler,
     );
   }
 
   const deleteRow = (index) => {
     server.DELETE(
       server.api.index(server.Elem.fle, device, index),
-      () => fetchFleData(device),
+      modifyDataHandler,
     );
   };
 
@@ -75,7 +82,7 @@ function FleTable({ device, totalPowerCallback }) {
       server.POST(
         server.api.fetch(server.Elem.fle, device),
         newData,
-        () => fetchFleData(device),
+        modifyDataHandler,
       );
     }
   }
@@ -101,7 +108,7 @@ function FleTable({ device, totalPowerCallback }) {
     server.PATCH(
       server.api.index(server.Elem.fle, device, index),
       data,
-      () => fetchFleData(device),
+      modifyDataHandler,
     );
   }
 

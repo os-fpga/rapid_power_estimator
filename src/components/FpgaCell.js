@@ -6,15 +6,13 @@ import { State } from './ComponentsLib';
 
 import './style/base.css';
 
-function FpgaCell({
-  power, powerWarm, powerErr, title,
-}) {
+function FpgaCell({ power, messages, title }) {
   const { selectedItem } = useSelection();
   function getBaseClass() {
     return (selectedItem === title) ? 'one-block clickable selected' : 'one-block clickable';
   }
   return (
-    <State refValue={power} warn={powerWarm} err={powerErr} baseClass={getBaseClass()}>
+    <State messages={messages} baseClass={getBaseClass()}>
       <div className="bold-text-title">{title}</div>
       <div className="grayed-text">
         {fixed(power)}
@@ -29,9 +27,8 @@ function FpgaCell({
 
 FpgaCell.propTypes = {
   power: PropTypes.number.isRequired,
-  powerWarm: PropTypes.number.isRequired,
-  powerErr: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
+  messages: PropTypes.oneOfType([PropTypes.array]).isRequired,
 };
 
 export default FpgaCell;

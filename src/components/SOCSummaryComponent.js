@@ -10,41 +10,49 @@ function SOCSummaryComponent({ device }) {
       text: 'Memory',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'Peripherals',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'ACPU',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'DMA',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'Interconnect',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'BCPU',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'Processing Dynamic',
       power: 0,
       percent: 0,
+      messages: [],
     },
     {
       text: 'Processing Static',
       power: 0,
       percent: 0,
+      messages: [],
     },
   ]);
   const {

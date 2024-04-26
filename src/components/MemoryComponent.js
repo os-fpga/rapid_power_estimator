@@ -11,6 +11,7 @@ import { useGlobalState } from '../GlobalStateProvider';
 import './style/MemoryComponent.css';
 
 function MemoryComponent({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [memData, setMemData] = React.useState([
     {
       name: 'DDR',
@@ -52,12 +53,10 @@ function MemoryComponent({ device }) {
     return () => { unsubscribe('memoryChanged', update); };
   });
 
-  React.useEffect(() => {
-    if (device !== null) {
-      update();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  if (dev !== device) {
+    setDev(device);
+    if (device !== null) update();
+  }
 
   const Title = 'Memory';
   function getBaseClass() {

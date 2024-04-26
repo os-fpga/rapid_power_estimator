@@ -9,6 +9,7 @@ import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
 
 function ConnectivityComponent({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
@@ -44,9 +45,10 @@ function ConnectivityComponent({ device }) {
     return () => { unsubscribe('interconnectChanged', update); };
   });
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) update();
-  }, [device, update]);
+  }
 
   const Title = 'Connectivity';
 

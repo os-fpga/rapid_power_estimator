@@ -9,6 +9,7 @@ import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
 
 function DMAComponent({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
   const [ep2, setEp2] = React.useState(0);
@@ -46,10 +47,10 @@ function DMAComponent({ device }) {
     return () => { unsubscribe('dmaChanged', update); };
   });
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) update();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  }
 
   const Title = 'DMA';
 

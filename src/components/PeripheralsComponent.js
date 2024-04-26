@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, fixed, percentage } from '../utils/common';
+import { fixed, percentage } from '../utils/common';
 import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
@@ -8,7 +8,8 @@ import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/Peripherals.css';
 
-function PeripheralsComponent({ setOpenedTable, device }) {
+function PeripheralsComponent({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [i2c, setI2c] = React.useState(0);
   const [spi, setSpi] = React.useState(0);
   const [pwm, setPWM] = React.useState(0);
@@ -37,17 +38,19 @@ function PeripheralsComponent({ setOpenedTable, device }) {
       if (key === 'gpio') setGPIO((prev) => prev + data.consumption.block_power);
     });
   }
-  React.useEffect(() => {
+
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) {
       setGPIO(0);
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const key of Object.keys(data)) {
-          data[key].forEach((item) => fetchPeripherals(device, key, item.href));
-        }
+        Object.entries(data).forEach((entry) => {
+          const [key, element] = entry;
+          element.forEach((refObj) => fetchPeripherals(device, key, refObj.href));
+        });
       });
     }
-  }, [device]);
+  }
 
   const Title = 'Peripherals';
 
@@ -56,10 +59,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
   }
 
   return (
-    <div
-      className={getClassName()}
-      onClick={() => setOpenedTable(Table.Peripherals)}
-    >
+    <div className={getClassName()}>
       <div className="periph-row-head">
         <div className="periph-title bold-text-title">{Title}</div>
         <div className="peripherals-power grayed-text">

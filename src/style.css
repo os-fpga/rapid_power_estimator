@@ -64,6 +64,7 @@
     flex-direction: column;
     row-gap: 10px;
     width: calc((100% - var(--central-size)) / 2);
+    min-width: fit-content;
 }
 
 .pt-group input,

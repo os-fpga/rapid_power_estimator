@@ -82,7 +82,7 @@ function FPGASummaryComponent({
     newData[6].percent = percentage(stat, sum + stat);
     setData([...newData]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device, clocking, fle, dsp, bram, io]);
+  }, [device, clocking, fle, dsp, bram, io, clockingState, fleState, bramState, dspState, ioState]);
 
   return (
     <PowerSummaryTable

@@ -55,7 +55,6 @@ function Preferences({
           }}
           disabled={config.useDefaultFile}
           placeholder="Enter absolute path to devices.xml"
-        // eslint-disable-next-line no-nested-ternary
           value={config.device_xml}
         />
       </div>

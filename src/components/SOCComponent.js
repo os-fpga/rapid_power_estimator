@@ -16,20 +16,9 @@ import './style/SOCTable.css';
 function SOCTable({ device, setOpenedTable }) {
   const { selectedItem } = useSelection();
   const {
-    power, dynamicPower, staticPower, updateTotalPower,
+    power, dynamicPower, staticPower,
   } = useSocTotalPower();
   const { socState } = useGlobalState();
-
-  function componentChanged() {
-    if (device !== null) {
-      updateTotalPower(device);
-    }
-  }
-
-  React.useEffect(() => {
-    if (device !== null) componentChanged();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
 
   function getBaseName(item) {
     return (selectedItem === item) ? 'clickable selected' : 'clickable';
@@ -77,7 +66,9 @@ function SOCTable({ device, setOpenedTable }) {
           <ConnectivityComponent device={device} />
         </div>
       </div>
-      <PeripheralsComponent setOpenedTable={setOpenedTable} device={device} />
+      <div onClick={() => setOpenedTable(Table.Peripherals)}>
+        <PeripheralsComponent device={device} />
+      </div>
     </div>
   );
 }

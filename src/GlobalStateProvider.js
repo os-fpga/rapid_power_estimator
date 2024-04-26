@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, {
+  createContext, useContext, useState, useMemo,
+} from 'react';
 import * as server from './utils/serverAPI';
 
 const GlobalStateContext = createContext();
@@ -56,7 +58,7 @@ export function GlobalStateProvider({ children }) {
     });
   }
 
-  const updateGlobalState = (device) => {
+  function updateGlobalState(device) {
     if (device !== null) {
       server.GET(server.api.fetch(server.Elem.clocking, device), (data) => {
         setClockingState(data.map((item) => item.consumption.messages));
@@ -81,20 +83,20 @@ export function GlobalStateProvider({ children }) {
         });
       });
     }
-  };
+  }
+  const values = useMemo(() => ({
+    updateGlobalState,
+    clockingState,
+    fleState,
+    bramState,
+    dspState,
+    ioState,
+    socState,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [bramState, clockingState, dspState, fleState, ioState, socState]);
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <GlobalStateContext.Provider value={{
-      updateGlobalState,
-      clockingState,
-      fleState,
-      bramState,
-      dspState,
-      ioState,
-      socState,
-    }}
-    >
+    <GlobalStateContext.Provider value={values}>
       {children}
     </GlobalStateContext.Provider>
   );

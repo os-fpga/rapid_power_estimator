@@ -9,6 +9,7 @@ import {
 } from './TableBase';
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 import {
@@ -31,6 +32,7 @@ function IOTable({ device, totalPowerCallback }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState(null);
   const { defaultClock } = useClockSelection();
+  const { updateGlobalState } = useGlobalState();
 
   const defaultPowerData = {
     io_usage: [
@@ -126,24 +128,28 @@ function IOTable({ device, totalPowerCallback }) {
     if (device !== null) fetchIoData(device);
   }
 
+  function modifyDataHandler() {
+    fetchIoData(device);
+    updateGlobalState(device);
+  }
   function modifyRow(index, row) {
     server.PATCH(
       server.api.index(server.Elem.io, device, index),
       row,
-      () => fetchIoData(device),
+      modifyDataHandler,
     );
   }
 
   const deleteRow = (index) => {
     server.DELETE(
       server.api.index(server.Elem.io, device, index),
-      () => fetchIoData(device),
+      modifyDataHandler,
     );
   };
 
   function addRow(newData) {
     if (device !== null) {
-      server.POST(server.api.fetch(server.Elem.io, device), newData, () => fetchIoData(device));
+      server.POST(server.api.fetch(server.Elem.io, device), newData, modifyDataHandler);
     }
   }
 
@@ -165,7 +171,7 @@ function IOTable({ device, totalPowerCallback }) {
     server.PATCH(
       server.api.index(server.Elem.io, device, index),
       data,
-      () => fetchIoData(device),
+      modifyDataHandler,
     );
   }
 

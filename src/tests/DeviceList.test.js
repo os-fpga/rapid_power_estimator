@@ -6,15 +6,18 @@ import '@testing-library/jest-dom';
 import DeviceList from '../components/DeviceList';
 import { SelectionProvider } from '../SelectionProvider';
 import { SocTotalPowerProvider } from '../SOCTotalPowerProvider';
+import { GlobalStateProvider } from '../GlobalStateProvider';
 
 describe('DeviceList', () => {
   it('default value', () => {
     const { getByLabelText } = render(
-      <SocTotalPowerProvider>
-        <SelectionProvider>
-          <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => {}} />
-        </SelectionProvider>
-      </SocTotalPowerProvider>,
+      <GlobalStateProvider>
+        <SocTotalPowerProvider>
+          <SelectionProvider>
+            <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => { }} />
+          </SelectionProvider>
+        </SocTotalPowerProvider>
+      </GlobalStateProvider>,
     );
     expect(getByLabelText('Device:')).toBeInTheDocument();
     expect(screen.getByText('test-dev test')).toBeInTheDocument();
@@ -25,7 +28,7 @@ describe('DeviceList', () => {
     render(
       <SocTotalPowerProvider>
         <SelectionProvider>
-          <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => {}} />
+          <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => { }} />
         </SelectionProvider>
       </SocTotalPowerProvider>,
     );

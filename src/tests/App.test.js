@@ -3,6 +3,7 @@ import renderer from 'react-test-renderer';
 import App from '../App';
 import { SelectionProvider } from '../SelectionProvider';
 import { SocTotalPowerProvider } from '../SOCTotalPowerProvider';
+import { GlobalStateProvider } from '../GlobalStateProvider';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -28,11 +29,13 @@ class ErrorBoundary extends React.Component {
 it('Run main app', () => {
   const component = renderer.create(
     <ErrorBoundary>
-      <SocTotalPowerProvider>
-        <SelectionProvider>
-          <App />
-        </SelectionProvider>
-      </SocTotalPowerProvider>
+      <GlobalStateProvider>
+        <SocTotalPowerProvider>
+          <SelectionProvider>
+            <App />
+          </SelectionProvider>
+        </SocTotalPowerProvider>
+      </GlobalStateProvider>
     </ErrorBoundary>,
   );
 });

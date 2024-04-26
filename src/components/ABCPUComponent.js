@@ -6,6 +6,7 @@ import { subscribe, unsubscribe } from '../utils/events';
 function ABCPUComponent({
   device, title, index, power, percent,
 }) {
+  const [dev, setDev] = React.useState(0);
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
@@ -45,12 +46,10 @@ function ABCPUComponent({
     return () => { unsubscribe('cpuChanged', cpuChanged); };
   });
 
-  React.useEffect(() => {
-    if (device !== null) {
-      update();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device]);
+  if (dev !== device) {
+    setDev(device);
+    if (device !== null) update();
+  }
 
   return (
     <CPUComponent

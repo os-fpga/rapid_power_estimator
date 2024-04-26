@@ -10,6 +10,7 @@ import {
 } from './TableBase';
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
@@ -22,6 +23,7 @@ function BramTable({ device, totalPowerCallback }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
+  const { updateGlobalState } = useGlobalState();
 
   const fetchBramData = (deviceId) => {
     if (deviceId !== null) {
@@ -103,18 +105,23 @@ function BramTable({ device, totalPowerCallback }) {
     return data;
   }
 
+  function modifyDataHandler() {
+    fetchBramData(device);
+    updateGlobalState(device);
+  }
+
   function modifyRow(index, row) {
     server.PATCH(
       server.api.index(server.Elem.bram, device, index),
       sendData(row),
-      () => fetchBramData(device),
+      modifyDataHandler,
     );
   }
 
   const deleteRow = (index) => {
     server.DELETE(
       server.api.index(server.Elem.bram, device, index),
-      () => fetchBramData(device),
+      modifyDataHandler,
     );
   };
 
@@ -123,7 +130,7 @@ function BramTable({ device, totalPowerCallback }) {
       server.POST(
         server.api.fetch(server.Elem.bram, device),
         sendData(newData),
-        () => fetchBramData(device),
+        modifyDataHandler,
       );
     }
   }
@@ -149,7 +156,7 @@ function BramTable({ device, totalPowerCallback }) {
     server.PATCH(
       server.api.index(server.Elem.bram, device, index),
       data,
-      () => fetchBramData(device),
+      modifyDataHandler,
     );
   }
 

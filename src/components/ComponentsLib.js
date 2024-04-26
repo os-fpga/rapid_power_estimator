@@ -3,15 +3,23 @@ import { BsPlus } from 'react-icons/bs';
 import './style/ComponentsLib.css';
 
 export function State({
-  refValue, warn, err, baseClass = 'clickable', children,
+  messages = [], baseClass = 'clickable', children,
 }) {
-  const buildClassName = React.useCallback(() => {
+  function isError() {
+    const errors = messages.filter((item) => item.filter((inner) => inner.type === 'error').length > 0);
+    return errors.length > 0;
+  }
+  function isWarning() {
+    const errors = messages.filter((item) => item.filter((inner) => inner.type === 'warn').length > 0);
+    return errors.length > 0;
+  }
+  const buildClassName = () => {
     let base = baseClass;
-    if (refValue >= err) base += ' error';
-    else if (refValue >= warn) base += ' warning';
+    if (isError()) base += ' error';
+    else if (isWarning()) base += ' warning';
     else base += ' normal';
     return base;
-  }, [refValue, warn, err, baseClass]);
+  };
   return (
     <div className={buildClassName()}>
       {children}

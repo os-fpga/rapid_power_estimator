@@ -6,8 +6,10 @@ import { percentage } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
+import { useGlobalState } from '../GlobalStateProvider';
 
 function ConnectivityComponent({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
@@ -18,6 +20,7 @@ function ConnectivityComponent({ device }) {
   const endpoints = [
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ];
+  const { socState } = useGlobalState();
 
   const update = React.useCallback(() => {
     function fetchEndPoint(href, setEp) {
@@ -42,12 +45,11 @@ function ConnectivityComponent({ device }) {
     return () => { unsubscribe('interconnectChanged', update); };
   });
 
-  React.useEffect(() => {
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) update();
-  }, [device, update]);
+  }
 
-  const warn = 0.003; // TBD
-  const error = 0.016; // TBD
   const Title = 'Connectivity';
 
   function getBaseName() {
@@ -56,9 +58,7 @@ function ConnectivityComponent({ device }) {
 
   return (
     <State
-      refValue={power.total_noc_interconnect_power}
-      warn={warn}
-      err={error}
+      messages={socState.fpga_complex}
       baseClass={getBaseName()}
     >
       <CPUComponent

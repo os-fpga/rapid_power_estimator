@@ -10,6 +10,7 @@ import {
 } from './TableBase';
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
@@ -21,6 +22,7 @@ function DspTable({ device, totalPowerCallback }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
+  const { updateGlobalState } = useGlobalState();
 
   const fetchDspData = (deviceId) => {
     if (deviceId !== null) {
@@ -50,18 +52,23 @@ function DspTable({ device, totalPowerCallback }) {
     if (device !== null) fetchDspData(device);
   }
 
+  function modifyDataHandler() {
+    fetchDspData(device);
+    updateGlobalState(device);
+  }
+
   function modifyRow(index, row) {
     server.PATCH(
       server.api.index(server.Elem.dsp, device, index),
       row,
-      () => fetchDspData(device),
+      modifyDataHandler,
     );
   }
 
   const deleteRow = (index) => {
     server.DELETE(
       server.api.index(server.Elem.dsp, device, index),
-      () => fetchDspData(device),
+      modifyDataHandler,
     );
   };
 
@@ -70,7 +77,7 @@ function DspTable({ device, totalPowerCallback }) {
       server.POST(
         server.api.fetch(server.Elem.dsp, device),
         newData,
-        () => fetchDspData(device),
+        modifyDataHandler,
       );
     }
   }
@@ -97,7 +104,7 @@ function DspTable({ device, totalPowerCallback }) {
     server.PATCH(
       server.api.index(server.Elem.dsp, device, index),
       data,
-      () => fetchDspData(device),
+      modifyDataHandler,
     );
   }
 

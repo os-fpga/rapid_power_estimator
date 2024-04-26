@@ -39,3 +39,10 @@ export const FieldType = {
 export function percentage(val, sum) {
   return fixed((val / sum) * 100, 0);
 }
+
+export function color(error = false, warning = false, info = false) {
+  if (error) return '#F288A8';
+  if (warning) return '#EFDB94';
+  if (info) return '#3385FF';
+  return '#9fdda9';
+}

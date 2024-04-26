@@ -10,7 +10,7 @@ import '../style/PowerSummaryTable.css';
 
 function PowerSummaryTableToolTip({ title, statusColor }) {
   return (
-    <Tooltip title={title} color={statusColor}>
+    <Tooltip title={title} color={statusColor} placement="left">
       <div>
         <IoMdCloseCircleOutline color={statusColor} size={18} />
       </div>

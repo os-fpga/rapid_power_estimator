@@ -8,6 +8,26 @@ import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/Peripherals.css';
 
+function PeripheralsBlock({
+  name, messages, power, percents,
+}) {
+  return (
+    <State messages={messages} baseClass="periph-rowx">
+      <div className="periph-internal-font-header">{name}</div>
+      <div className="periph-internal">
+        <div className="periph-internal-font">
+          {fixed(power)}
+          {' W'}
+        </div>
+        <div className="periph-internal-font">
+          {fixed(percents, 0)}
+          {' %'}
+        </div>
+      </div>
+    </State>
+  );
+}
+
 function PeripheralsComponent({ device }) {
   const [dev, setDev] = React.useState(null);
   const [i2c, setI2c] = React.useState(0);
@@ -72,127 +92,19 @@ function PeripheralsComponent({ device }) {
         </div>
       </div>
       <div className="periph-row">
-        <State messages={socState.uart0} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">UART0</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(uart0)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State messages={socState.uart1} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">UART1</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(uart1)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State messages={socState.usb2} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">USB 2.0</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(usb2)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
+        <PeripheralsBlock name="UART0" messages={socState.uart0} power={uart0} percents={100} />
+        <PeripheralsBlock name="UART1" messages={socState.uart1} power={uart1} percents={100} />
+        <PeripheralsBlock name="USB 2.0" messages={socState.usb2} power={usb2} percents={100} />
       </div>
       <div className="periph-row">
-        <State messages={socState.i2c} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">I2C</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(i2c)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State messages={socState.gpio} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">GPIO</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(gpio)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State messages={socState.pwm} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">PWM</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(pwm)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
+        <PeripheralsBlock name="I2C" messages={socState.i2c} power={i2c} percents={100} />
+        <PeripheralsBlock name="GPIO" messages={socState.gpio} power={gpio} percents={100} />
+        <PeripheralsBlock name="PWM" messages={socState.pwm} power={pwm} percents={100} />
       </div>
       <div className="periph-row">
-        <State messages={socState.spi} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">SPI/QSPI</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(spi)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State messages={socState.jtag} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">JTAG</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(jtag)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State messages={socState.gige} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">GigI</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(gige)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
+        <PeripheralsBlock name="SPI/QSPI" messages={socState.spi} power={spi} percents={100} />
+        <PeripheralsBlock name="JTAG" messages={socState.jtag} power={jtag} percents={100} />
+        <PeripheralsBlock name="GigI" messages={socState.gige} power={gige} percents={100} />
       </div>
     </div>
   );

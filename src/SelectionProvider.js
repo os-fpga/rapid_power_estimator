@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, {
+  createContext, useContext, useState, useMemo,
+} from 'react';
 
 const SelectionContext = createContext();
 
@@ -21,9 +23,12 @@ export function SelectionProvider({ children }) {
     setSelectedItem('');
   };
 
+  const values = useMemo(() => ({
+    selectedItem, toggleItemSelection, clearSelection,
+  }), [selectedItem]);
+
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <SelectionContext.Provider value={{ selectedItem, toggleItemSelection, clearSelection }}>
+    <SelectionContext.Provider value={values}>
       {children}
     </SelectionContext.Provider>
   );

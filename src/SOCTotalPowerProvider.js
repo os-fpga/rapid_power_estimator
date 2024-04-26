@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, {
+  createContext, useContext, useState, useMemo, useCallback,
+} from 'react';
 import * as server from './utils/serverAPI';
 
 const SocTotalPowerContext = createContext();
@@ -40,11 +42,11 @@ export function SocTotalPowerProvider({ children }) {
       server.GET(server.api.consumption(server.Elem.peripherals, device), (data) => {
         setPower(data);
         setDynamicPower(data.total_acpu_power
-            + data.total_bcpu_power
-            + data.total_peripherals_power
-            + data.total_dma_power
-            + data.total_noc_interconnect_power
-            + data.total_memory_power);
+          + data.total_bcpu_power
+          + data.total_peripherals_power
+          + data.total_dma_power
+          + data.total_noc_interconnect_power
+          + data.total_memory_power);
       });
       server.GET(server.api.consumption('', device), (data) => {
         setThermalData(data);
@@ -54,17 +56,17 @@ export function SocTotalPowerProvider({ children }) {
     }
   };
 
-  const calcPercents = (totalPower) => {
+  const calcPercents = useCallback((totalPower) => {
     if (thermalData.worsecase.total_power === 0) return 0;
     return (totalPower / thermalData.worsecase.total_power) * 100;
-  };
+  }, [thermalData.worsecase.total_power]);
+
+  const values = useMemo(() => ({
+    power, dynamicPower, staticPower, thermalData, updateTotalPower, calcPercents,
+  }), [calcPercents, dynamicPower, power, staticPower, thermalData]);
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <SocTotalPowerContext.Provider value={{
-      power, dynamicPower, staticPower, thermalData, updateTotalPower, calcPercents,
-    }}
-    >
+    <SocTotalPowerContext.Provider value={values}>
       {children}
     </SocTotalPowerContext.Provider>
   );

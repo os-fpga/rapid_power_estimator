@@ -2,21 +2,22 @@ import React from 'react';
 import { Table } from '../utils/common';
 import TitleComponent from './TitleComponent';
 import FpgaCell from './FpgaCell';
+import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/FpgaComponent.css';
 
 function FpgaComponent({
   clocking, fle, dsp, bram, io, staticPower = 0, tableOpen,
 }) {
+  const {
+    clockingState, fleState, bramState, dspState, ioState,
+  } = useGlobalState();
   function getDynamic() {
     return clocking + fle + dsp + bram + io;
   }
   function getStatic() {
     return staticPower;
   }
-
-  const warn = 0.003; // TBD
-  const error = 0.016; // TBD
 
   return (
     <div className="fpga-main">
@@ -33,16 +34,14 @@ function FpgaComponent({
           <FpgaCell
             title="Clocking"
             power={clocking}
-            powerErr={error}
-            powerWarm={warn}
+            messages={clockingState}
           />
         </div>
         <div className="blocks-row" onClick={() => tableOpen(Table.FLE)}>
           <FpgaCell
             title="FLE"
             power={fle}
-            powerErr={error}
-            powerWarm={warn}
+            messages={fleState}
           />
         </div>
       </div>
@@ -51,16 +50,14 @@ function FpgaComponent({
           <FpgaCell
             title="BRAM"
             power={bram}
-            powerErr={error}
-            powerWarm={warn}
+            messages={bramState}
           />
         </div>
         <div className="blocks-row" onClick={() => tableOpen(Table.DSP)}>
           <FpgaCell
             title="DSP"
             power={dsp}
-            powerErr={error}
-            powerWarm={warn}
+            messages={dspState}
           />
         </div>
       </div>
@@ -69,8 +66,7 @@ function FpgaComponent({
           <FpgaCell
             title="IO"
             power={io}
-            powerErr={error}
-            powerWarm={warn}
+            messages={ioState}
           />
         </div>
       </div>

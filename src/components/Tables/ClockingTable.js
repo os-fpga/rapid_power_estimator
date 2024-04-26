@@ -10,6 +10,7 @@ import {
 } from './TableBase';
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
@@ -21,6 +22,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { setClocks } = useClockSelection();
+  const { updateGlobalState } = useGlobalState();
 
   const mainTableHeader = [
     '', 'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
@@ -64,18 +66,23 @@ function ClockingTable({ device, totalPowerCallback }) {
     if (device !== null) fetchClockData(device);
   }
 
+  function modifyDataHandler() {
+    fetchClockData(device);
+    updateGlobalState(device);
+  }
+
   function modifyRow(index, row) {
     server.PATCH(
       server.api.index(server.Elem.clocking, device, index),
       row,
-      () => fetchClockData(device),
+      modifyDataHandler,
     );
   }
 
   const deleteRow = (index) => {
     server.DELETE(
       server.api.index(server.Elem.clocking, device, index),
-      () => fetchClockData(device),
+      modifyDataHandler,
     );
   };
 
@@ -84,7 +91,7 @@ function ClockingTable({ device, totalPowerCallback }) {
       server.POST(
         server.api.fetch(server.Elem.clocking, device),
         newData,
-        () => fetchClockData(device),
+        modifyDataHandler,
       );
     }
   }
@@ -105,7 +112,7 @@ function ClockingTable({ device, totalPowerCallback }) {
     server.PATCH(
       server.api.index(server.Elem.clocking, device, index),
       data,
-      () => fetchClockData(device),
+      modifyDataHandler,
     );
   }
 

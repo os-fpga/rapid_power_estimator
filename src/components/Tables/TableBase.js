@@ -5,6 +5,7 @@ import { MdDone } from 'react-icons/md';
 import { TiWarning } from 'react-icons/ti';
 import { Tooltip } from 'antd';
 import { AddButton, Checkbox } from '../ComponentsLib';
+import { color } from '../../utils/common';
 
 import '../style/ComponentTable.css';
 
@@ -47,28 +48,31 @@ export function StatusColumn({ messages, rowSpan }) {
     const result = messages.map((val, index) => (
       // eslint-disable-next-line react/no-array-index-key
       <span key={index}>
-        { val.text }
+        {val.text}
         <br />
       </span>
     ));
     return result.length !== 0 ? result : '';
   }
-  function color() {
-    if (isWarning()) return '#EFDB94';
-    if (isError()) return '#F288A8';
-    if (isInfo()) return '#3385FF';
-    return '#9fdda9';
+
+  function buildColor() {
+    return color(isError(), isWarning(), isInfo());
   }
 
   return (
-    <Tooltip title={message()} mouseEnterDelay={0} mouseLeaveDelay={0} color={color()}>
+    <Tooltip
+      title={message()}
+      mouseEnterDelay={0}
+      mouseLeaveDelay={0}
+      color={buildColor()}
+    >
       <td className="fixed-col" rowSpan={rowSpan}>
         <span className="status-col-span">
           {
-            messages.length === 0 && <MdDone color={color()} size={20} />
+            messages.length === 0 && <MdDone color={buildColor()} size={20} />
           }
           {
-            messages.length !== 0 && <TiWarning color={color()} size={20} />
+            messages.length !== 0 && <TiWarning color={buildColor()} size={20} />
           }
         </span>
       </td>
@@ -87,21 +91,19 @@ export function TableBase({
           <thead>
             <tr>
               {
-              header.map((item, index) => {
-                if (item.className) {
+                header.map((item, index) => {
+                  if (item.className) {
+                    // eslint-disable-next-line react/no-array-index-key
+                    return <th key={index} className={item.className}>{item.text}</th>;
+                  }
                   // eslint-disable-next-line react/no-array-index-key
-                  return <th key={index} className={item.className}>{item.text}</th>;
-                }
-                // eslint-disable-next-line react/no-array-index-key
-                return <th key={index}>{item}</th>;
-              })
-            }
+                  return <th key={index}>{item}</th>;
+                })
+              }
             </tr>
           </thead>
           <tbody>
-            {
-            children
-          }
+            {children}
           </tbody>
         </table>
       </div>

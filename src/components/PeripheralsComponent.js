@@ -1,13 +1,35 @@
 import React from 'react';
-import { Table, fixed, percentage } from '../utils/common';
+import { fixed, percentage } from '../utils/common';
 import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
+import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/Peripherals.css';
 
-function PeripheralsComponent({ setOpenedTable, device }) {
+function PeripheralsBlock({
+  name, messages, power, percents,
+}) {
+  return (
+    <State messages={messages} baseClass="periph-rowx">
+      <div className="periph-internal-font-header">{name}</div>
+      <div className="periph-internal">
+        <div className="periph-internal-font">
+          {fixed(power)}
+          {' W'}
+        </div>
+        <div className="periph-internal-font">
+          {fixed(percents, 0)}
+          {' %'}
+        </div>
+      </div>
+    </State>
+  );
+}
+
+function PeripheralsComponent({ device }) {
+  const [dev, setDev] = React.useState(null);
   const [i2c, setI2c] = React.useState(0);
   const [spi, setSpi] = React.useState(0);
   const [pwm, setPWM] = React.useState(0);
@@ -19,6 +41,7 @@ function PeripheralsComponent({ setOpenedTable, device }) {
   const [gpio, setGPIO] = React.useState(0);
   const { selectedItem } = useSelection();
   const { power, dynamicPower } = useSocTotalPower();
+  const { socState } = useGlobalState();
 
   function fetchPeripherals(deviceId, key, url) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
@@ -35,17 +58,19 @@ function PeripheralsComponent({ setOpenedTable, device }) {
       if (key === 'gpio') setGPIO((prev) => prev + data.consumption.block_power);
     });
   }
-  React.useEffect(() => {
+
+  if (dev !== device) {
+    setDev(device);
     if (device !== null) {
       setGPIO(0);
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const key of Object.keys(data)) {
-          data[key].forEach((item) => fetchPeripherals(device, key, item.href));
-        }
+        Object.entries(data).forEach((entry) => {
+          const [key, element] = entry;
+          element.forEach((refObj) => fetchPeripherals(device, key, refObj.href));
+        });
       });
     }
-  }, [device]);
+  }
 
   const Title = 'Peripherals';
 
@@ -53,14 +78,8 @@ function PeripheralsComponent({ setOpenedTable, device }) {
     return (selectedItem === Title) ? 'periph-top selected' : 'periph-top';
   }
 
-  const warn = 0.001; // TBD
-  const error = 0.016; // TBD
-
   return (
-    <div
-      className={getClassName()}
-      onClick={() => setOpenedTable(Table.Peripherals)}
-    >
+    <div className={getClassName()}>
       <div className="periph-row-head">
         <div className="periph-title bold-text-title">{Title}</div>
         <div className="peripherals-power grayed-text">
@@ -73,127 +92,19 @@ function PeripheralsComponent({ setOpenedTable, device }) {
         </div>
       </div>
       <div className="periph-row">
-        <State refValue={uart0} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">UART0</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(uart0)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State refValue={uart1} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">UART1</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(uart1)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State refValue={usb2} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">USB 2.0</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(usb2)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
+        <PeripheralsBlock name="UART0" messages={socState.uart0} power={uart0} percents={100} />
+        <PeripheralsBlock name="UART1" messages={socState.uart1} power={uart1} percents={100} />
+        <PeripheralsBlock name="USB 2.0" messages={socState.usb2} power={usb2} percents={100} />
       </div>
       <div className="periph-row">
-        <State refValue={i2c} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">I2C</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(i2c)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State refValue={gpio} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">GPIO</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(gpio)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State refValue={pwm} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">PWM</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(pwm)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
+        <PeripheralsBlock name="I2C" messages={socState.i2c} power={i2c} percents={100} />
+        <PeripheralsBlock name="GPIO" messages={socState.gpio} power={gpio} percents={100} />
+        <PeripheralsBlock name="PWM" messages={socState.pwm} power={pwm} percents={100} />
       </div>
       <div className="periph-row">
-        <State refValue={spi} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">SPI/QSPI</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(spi)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State refValue={jtag} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">JTAG</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(jtag)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
-        <State refValue={gige} warn={warn} err={error} baseClass="periph-rowx">
-          <div className="periph-internal-font-header">GigI</div>
-          <div className="periph-internal">
-            <div className="periph-internal-font">
-              {fixed(gige)}
-              {' W'}
-            </div>
-            <div className="periph-internal-font">
-              {fixed(100, 0)}
-              {' %'}
-            </div>
-          </div>
-        </State>
+        <PeripheralsBlock name="SPI/QSPI" messages={socState.spi} power={spi} percents={100} />
+        <PeripheralsBlock name="JTAG" messages={socState.jtag} power={jtag} percents={100} />
+        <PeripheralsBlock name="GigI" messages={socState.gige} power={gige} percents={100} />
       </div>
     </div>
   );

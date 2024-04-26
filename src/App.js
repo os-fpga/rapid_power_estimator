@@ -29,6 +29,8 @@ import Preferences from './preferences';
 import { useSelection } from './SelectionProvider';
 import { port } from '../rpe.config.json';
 import { useClockSelection } from './ClockSelectionProvider';
+import { useGlobalState } from './GlobalStateProvider';
+import { useSocTotalPower } from './SOCTotalPowerProvider';
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
@@ -54,6 +56,8 @@ function App() {
   const { toggleItemSelection } = useSelection();
   const [preferencesChanged, setPreferencesChanged] = React.useState(false);
   const { setClocks } = useClockSelection();
+  const { updateGlobalState } = useGlobalState();
+  const { updateTotalPower } = useSocTotalPower();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -98,6 +102,8 @@ function App() {
 
   const deviceChanged = (newDevice) => {
     setDevice(newDevice);
+    updateGlobalState(newDevice);
+    updateTotalPower(newDevice);
     if (newDevice !== null) {
       server.GET(server.api.consumption(server.Elem.clocking, newDevice), (data) => {
         const total = data.total_clock_block_power

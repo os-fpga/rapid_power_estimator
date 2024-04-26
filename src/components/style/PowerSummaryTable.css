@@ -6,19 +6,16 @@
     height: 100%;
 }
 
-.pst-title {}
-
 .pst-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.pst-table th:not(:first-child),
-.pst-table td:not(:first-child) {
-    padding: 0.5em;
+.pst-table td {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
 }
 
-.pst-table th,
 .pst-table td {
     border-bottom: 1px solid #e1e1e1;
 }

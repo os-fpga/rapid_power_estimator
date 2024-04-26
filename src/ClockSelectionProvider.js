@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, {
+  createContext, useContext, useState, useMemo,
+  useCallback,
+} from 'react';
 
 const ClockSelectionContext = createContext();
 
@@ -13,11 +16,11 @@ export const useClockSelection = () => {
 export function ClockSelectionProvider({ children }) {
   const [clocks, setClocks] = useState([]);
 
-  const defaultClock = () => clocks.find(() => true) ?? '';
+  const defaultClock = useCallback(() => clocks.find(() => true) ?? '', [clocks]);
 
+  const values = useMemo(() => ({ clocks, setClocks, defaultClock }), [clocks, defaultClock]);
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <ClockSelectionContext.Provider value={{ clocks, setClocks, defaultClock }}>
+    <ClockSelectionContext.Provider value={values}>
       {children}
     </ClockSelectionContext.Provider>
   );

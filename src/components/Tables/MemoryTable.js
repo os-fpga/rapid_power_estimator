@@ -62,14 +62,18 @@ function MemoryTable({ device }) {
     }
   }
 
+  function modifyDataHandler() {
+    fetchData(href);
+    publish('memoryChanged');
+    updateTotalPower(device);
+  }
+
   function modifyRow(index, row) {
-    server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, () => fetchData(href));
+    server.PATCH(server.peripheralPath(device, `${href[index].href}`), row, modifyDataHandler);
   }
 
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
-    publish('memoryChanged');
-    updateTotalPower(device);
   };
 
   const resourcesHeaders = [
@@ -80,11 +84,7 @@ function MemoryTable({ device }) {
     const data = {
       enable: state,
     };
-    server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, () => {
-      fetchData(href);
-      publish('memoryChanged');
-      updateTotalPower(device);
-    });
+    server.PATCH(server.peripheralPath(device, `${href[index].href}`), data, modifyDataHandler);
   }
 
   return (

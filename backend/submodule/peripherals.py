@@ -408,6 +408,10 @@ class Peripheral_SubModule:
         # todo
         return 20, 40
 
+    def get_all_messages(self):
+        # todo
+        return []
+
     def get_all(self):
         return self.peripherals
 

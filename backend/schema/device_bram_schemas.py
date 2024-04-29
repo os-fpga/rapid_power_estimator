@@ -13,6 +13,7 @@ class BramResourcesConsumptionSchema(Schema):
     total_36k_bram_used = fields.Int()
     total_bram_block_power = fields.Number()
     total_bram_interconnect_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class BramPortPropertiesOutputSchema(Schema):
     clock_frequency = fields.Int()

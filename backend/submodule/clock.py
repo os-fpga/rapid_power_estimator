@@ -78,6 +78,9 @@ class Clock_SubModule:
     def get_resources(self):
         return self.total_clock_available, self.total_pll_available, self.get_total_clock_used(), self.get_total_pll_used()
 
+    def get_all_messages(self):
+        return [message for item in self.itemlist for message in item.output.messages]
+
     def get_all(self):
         return self.itemlist
     

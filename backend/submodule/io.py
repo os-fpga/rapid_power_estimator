@@ -199,6 +199,9 @@ class IO_SubModule:
     def get_power_consumption(self):
         return self.total_block_power, self.total_interconnect_power, self.total_on_die_termination_power
 
+    def get_all_messages(self):
+        return [message for item in self.itemlist for message in item.output.messages]
+
     def get_all(self):
         return self.itemlist
 

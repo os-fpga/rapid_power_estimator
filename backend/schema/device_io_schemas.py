@@ -30,6 +30,7 @@ class IoResourcesConsumptionSchema(Schema):
     total_on_die_termination_power = fields.Number()
     io_usage = fields.Nested(IoUsageSchema, many=True)
     io_on_die_termination = fields.Nested(IoOnDieTerminationSchema, many=True)
+    messages = fields.Nested(MessageSchema, many=True)
 
 class IoOutputSchema(Schema):
     bank_type = fields.Enum(IO_Bank_Type, by_value=True)

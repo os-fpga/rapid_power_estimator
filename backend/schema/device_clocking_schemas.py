@@ -14,6 +14,7 @@ class ClockingResourcesConsumptionSchema(Schema):
     total_clock_block_power = fields.Number()
     total_clock_interconnect_power = fields.Number()
     total_pll_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class ClockingOutputSchema(Schema):
     fan_out = fields.Int()

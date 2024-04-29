@@ -11,6 +11,7 @@ class DspResourcesConsumptionSchema(Schema):
     total_dsp_blocks_used = fields.Int()
     total_dsp_block_power = fields.Number()
     total_dsp_interconnect_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class DspOutputSchema(Schema):
     dsp_blocks_used = fields.Number()

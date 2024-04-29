@@ -40,6 +40,7 @@ class PeripheralConsumptionSchema(Schema):
     total_bcpu_power = fields.Number()
     total_soc_io_available = fields.Int()
     total_soc_io_used = fields.Int()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class PeripheralOutputSchema(Schema):
     calculated_bandwidth = fields.Number()

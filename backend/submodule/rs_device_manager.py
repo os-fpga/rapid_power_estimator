@@ -50,6 +50,9 @@ class RsDeviceManager:
     def get_resources(self, modtype, device_id):
         return self.get_device(device_id).get_module(modtype).get_resources()
 
+    def get_all_messages(self, modtype, device_id):
+        return self.get_device(device_id).get_module(modtype).get_all_messages()
+
     def get_peripheral(self, device_id, peripheral_type, row_number):
         return self.get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(peripheral_type, row_number)
 

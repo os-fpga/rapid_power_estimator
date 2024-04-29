@@ -109,6 +109,9 @@ class Fabric_LE_SubModule:
             total_flipflop_used += item.flip_flop
         return total_lut6_used, self.total_lut6_available, total_flipflop_used, self.total_flipflop_available
     
+    def get_all_messages(self):
+        return [message for item in self.itemlist for message in item.output.messages]
+
     def get_all(self):
         return self.itemlist
     

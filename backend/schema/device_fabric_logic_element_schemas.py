@@ -13,6 +13,7 @@ class FabricLogicElementResourcesConsumptionSchema(Schema):
     total_flip_flop_used = fields.Int()
     total_block_power = fields.Number()
     total_interconnect_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
 
 class FabricLogicElementOutputSchema(Schema):
     clock_frequency = fields.Int()

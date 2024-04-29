@@ -103,6 +103,7 @@ def delete_device_clocking(device_id, row_number):
 def get_device_clocking_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.CLOCKING, device_id)
+        messages = devicemanager.get_all_messages(ModuleType.CLOCKING, device_id)
         res = devicemanager.get_resources(ModuleType.CLOCKING, device_id)
         data = {
             'total_clocks_available': res[0],
@@ -112,6 +113,7 @@ def get_device_clocking_power_consumption(device_id):
             'total_clock_block_power': consumption[0],
             'total_clock_interconnect_power': consumption[1],
             'total_pll_power': consumption[2],
+            'messages': messages
         }
         schema = ClockingResourcesConsumptionSchema()
         return schema.dump(data)
@@ -170,6 +172,7 @@ def delete_device_fabric_le(device_id, row_number):
 def get_device_fabric_le_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.FABRIC_LE, device_id)
+        messages = devicemanager.get_all_messages(ModuleType.FABRIC_LE, device_id)
         res = devicemanager.get_resources(ModuleType.FABRIC_LE, device_id)
         data = {
             "total_lut6_available": res[1],
@@ -177,7 +180,8 @@ def get_device_fabric_le_power_consumption(device_id):
             "total_flip_flop_available" : res[3],
             "total_flip_flop_used" : res[2],
             "total_block_power": consumption[0],
-            "total_interconnect_power": consumption[1]
+            "total_interconnect_power": consumption[1],
+            "messages": messages
         }
         schema = FabricLogicElementResourcesConsumptionSchema()
         return schema.dump(data)
@@ -236,12 +240,14 @@ def delete_device_dsp(device_id, row_number):
 def get_device_dsp_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.DSP, device_id)
+        messages = devicemanager.get_all_messages(ModuleType.DSP, device_id)
         res = devicemanager.get_resources(ModuleType.DSP, device_id)
         data = {
             "total_dsp_blocks_available": res[1],
             "total_dsp_blocks_used": res[0],
             "total_dsp_block_power" : consumption[0],
-            "total_dsp_interconnect_power" : consumption[1]
+            "total_dsp_interconnect_power" : consumption[1],
+            "messages": messages
         }
         schema = DspResourcesConsumptionSchema()
         return schema.dump(data)
@@ -300,6 +306,7 @@ def delete_device_bram(device_id, row_number):
 def get_device_bram_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.BRAM, device_id)
+        messages = devicemanager.get_all_messages(ModuleType.BRAM, device_id)
         res = devicemanager.get_resources(ModuleType.BRAM, device_id)
         data = {
             "total_18k_bram_available": res[1],
@@ -307,7 +314,8 @@ def get_device_bram_power_consumption(device_id):
             "total_36k_bram_available": res[3],
             "total_36k_bram_used": res[2],
             "total_bram_block_power" : consumption[0],
-            "total_bram_interconnect_power" : consumption[1]
+            "total_bram_interconnect_power" : consumption[1],
+            "messages": messages
         }
         schema = BramResourcesConsumptionSchema()
         return schema.dump(data)
@@ -366,13 +374,15 @@ def delete_device_io(device_id, row_number):
 def get_device_io_power_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.IO, device_id)
+        messages = devicemanager.get_all_messages(ModuleType.IO, device_id)
         res = devicemanager.get_resources(ModuleType.IO, device_id)
         data = {
             "total_block_power" : consumption[0],
             "total_interconnect_power" : consumption[1],
             "total_on_die_termination_power" : consumption[1],
             "io_usage" : res[0],
-            "io_on_die_termination": res[1]
+            "io_on_die_termination": res[1],
+            "messages": messages
         }
         schema = IoResourcesConsumptionSchema()
         return schema.dump(data)
@@ -405,6 +415,7 @@ def get_device_soc_peripherals(device_id):
 def get_device_soc_peripherals_consumption(device_id):
     try:
         consumption = devicemanager.get_power_consumption(ModuleType.SOC_PERIPHERALS, device_id)
+        messages = devicemanager.get_all_messages(ModuleType.SOC_PERIPHERALS, device_id)
         res = devicemanager.get_resources(ModuleType.SOC_PERIPHERALS, device_id)
         data = {
             "total_memory_power" : consumption[0],
@@ -414,7 +425,8 @@ def get_device_soc_peripherals_consumption(device_id):
             "total_noc_interconnect_power" : consumption[4],
             "total_bcpu_power" : consumption[5],
             "total_soc_io_available" : res[0],
-            "total_soc_io_used" : res[1]
+            "total_soc_io_used" : res[1],
+            "messages": messages
         }
         schema = PeripheralConsumptionSchema()
         return schema.dump(data)

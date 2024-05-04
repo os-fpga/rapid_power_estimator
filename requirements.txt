@@ -2,3 +2,4 @@ flask
 marshmallow
 pytest
 pyinstaller
+flasgger

@@ -5,6 +5,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
+from .rs_device_resources import DspNotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
 class Pipelining(Enum):
@@ -128,8 +129,7 @@ class DSP_SubModule:
     def get(self, idx):
         if 0 <= idx < len(self.itemlist):
             return self.itemlist[idx]
-        else:
-            raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
+        raise DspNotFoundException
 
     def add(self, data):
         item = update_attributes(DSP(), data)
@@ -144,8 +144,7 @@ class DSP_SubModule:
         if 0 <= idx < len(self.itemlist):
             item = self.itemlist.pop(idx)
             return item
-        else:
-            raise ValueError("Invalid index. DSP doesn't exist at the specified index.")
+        raise DspNotFoundException
 
     def compute_output_power(self):
         # Get power calculation coefficients

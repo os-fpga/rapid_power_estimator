@@ -5,7 +5,9 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
-from .rs_device_resources import ModuleType
+from .rs_device_resources import ModuleType, ClockNotFoundException, \
+    ClockDescriptionPortValidationException, \
+    ClockMaxCountReachedException
 from .rs_message import RsMessage, RsMessageManager
 
 class Clock_State(Enum):
@@ -87,16 +89,15 @@ class Clock_SubModule:
     def get(self, idx):
         if 0 <= idx < len(self.itemlist):
             return self.itemlist[idx]
-        else:
-            raise ValueError("Invalid index. Clock doesn't exist at the specified index.")
+        raise ClockNotFoundException
 
     def add(self, data):
         # Check if the clock already exists based on the ID
         if any(item.description == data["description"]
                 or item.port == data["port"]  for item in self.itemlist):
-            raise ValueError("Clock description or port already exists in the list of clocks.")
+            raise ClockDescriptionPortValidationException
         if len(self.itemlist) >= self.total_clock_available:
-            raise ValueError("Maximum no. of clocks reached")
+            raise ClockMaxCountReachedException
         item = update_attributes(Clock(), data)
         self.itemlist.append(item)
         return item
@@ -105,8 +106,7 @@ class Clock_SubModule:
         if 0 <= idx < len(self.itemlist):
             item = self.itemlist.pop(idx)
             return item
-        else:
-            raise ValueError("Invalid index. Clock doesn't exist at the specified index.")
+        raise ClockNotFoundException
 
     def update(self, idx, data):
         item = update_attributes(self.get(idx), data)

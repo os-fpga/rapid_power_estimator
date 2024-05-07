@@ -2,7 +2,6 @@
 
 .periph-top {
     display: flex;
-    height: 100%;
     background-color: #dbdbdb;
     padding: 8px;
     flex-direction: column;
@@ -30,7 +29,6 @@
     display: flex;
     flex-direction: row;
     column-gap: 8px;
-    height: 100%;
 }
 
 .periph-rowx {

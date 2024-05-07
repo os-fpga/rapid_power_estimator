@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from .clock import Clock
 from utilities.common_utils import update_attributes
+from .rs_device_resources import BramNotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
 class BRAM_IO_DIRECTION(Enum):
@@ -210,8 +211,7 @@ class BRAM_SubModule:
     def get(self, idx):
         if 0 <= idx < len(self.itemlist):
             return self.itemlist[idx]
-        else:
-            raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
+        raise BramNotFoundException
 
     def add(self, data):
         item = update_attributes(BRAM(), data)
@@ -224,10 +224,8 @@ class BRAM_SubModule:
 
     def remove(self, idx):
         if 0 <= idx < len(self.itemlist):
-            item = self.itemlist.pop(idx)
-            return item
-        else:
-            raise ValueError("Invalid index. BRAM doesn't exist at the specified index.")
+            return self.itemlist.pop(idx)
+        raise BramNotFoundException
 
     def compute_output_power(self):
         # Get power calculation coefficients

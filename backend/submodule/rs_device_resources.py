@@ -1,5 +1,41 @@
 from enum import Enum
 
+class DeviceNotFoundException(Exception):
+    pass
+
+class ClockNotFoundException(Exception):
+    pass
+
+class ClockDescriptionPortValidationException(Exception):
+    pass
+
+class ClockMaxCountReachedException(Exception):
+    pass
+
+class DspNotFoundException(Exception):
+    pass
+
+class FabricLeNotFoundException(Exception):
+    pass
+
+class FabricLeDescriptionAlreadyExistsException(Exception):
+    pass
+
+class BramNotFoundException(Exception):
+    pass
+
+class IONotFoundException(Exception):
+    pass
+
+class PeripheralNotFoundException(Exception):
+    pass
+
+class InvalidPeripheralTypeException(Exception):
+    pass
+
+class PeripheralEndpointNotFoundException(Exception):
+    pass
+
 class ModuleType(Enum):
     CLOCKING = 0
     FABRIC_LE = 1

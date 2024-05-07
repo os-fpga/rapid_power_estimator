@@ -58,8 +58,8 @@ errors = {
         "status": 500
     },
     "SchemaValidationError": {
-        "message": "Request is missing required fields",
-        "status": 400
+        "message": "Request schema validation error",
+        "status": 403
     },
     "ClockDescriptionPortValidationError": {
         "message": "Clock description or port already exists in the list of clocks",

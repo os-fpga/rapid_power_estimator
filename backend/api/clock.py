@@ -4,12 +4,16 @@
 #
 from flask import Blueprint, request
 from flask_restful import Api, Resource
+from marshmallow import Schema, fields, ValidationError
+from submodule.clock import Clock_State, Source
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, ClockNotFoundException
-from schema.device_clocking_schemas import ClockingSchema, ClockingResourcesConsumptionSchema
+from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, ClockNotFoundException, \
+    ClockDescriptionPortValidationException
+from schema.device_schemas import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, ClockNotExistsError, \
     ClockDescriptionPortValidationError, \
-    ClockMaxCountReachedException
+    ClockMaxCountReachedException, \
+    SchemaValidationError
 from .errors import errors
 
 #-------------------------------------------------------------------------------------------#
@@ -20,6 +24,32 @@ from .errors import errors
 # devices/<device_id>/clock/consumption   | get                     | ClockConsumptionApi   #
 #-------------------------------------------------------------------------------------------#
 
+class ClockResourcesConsumptionSchema(Schema):
+    total_clocks_available = fields.Int()
+    total_clocks_used = fields.Int()
+    total_plls_available = fields.Int()
+    total_plls_used = fields.Int()
+    total_clock_block_power = fields.Number()
+    total_clock_interconnect_power = fields.Number()
+    total_pll_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class ClockOutputSchema(Schema):
+    fan_out = fields.Int()
+    block_power = fields.Number()
+    interconnect_power = fields.Number()
+    percentage = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class ClockSchema(Schema):
+    enable = fields.Bool()
+    description = fields.Str()
+    port = fields.Str()
+    source = fields.Enum(Source, by_value=True)
+    frequency = fields.Int()
+    state = fields.Enum(Clock_State, by_value=True)
+    output = fields.Nested(ClockOutputSchema, data_key="consumption")
+
 class ClocksApi(Resource):
     def get(self, device_id : str):
         """
@@ -27,35 +57,101 @@ class ClocksApi(Resource):
         ---
         tags:
             - Clock
-        description: Returns a list of clock of a device.
+        description: Returns a list of clocks of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
+        definitions:
+            HTTPErrorMessage:
+                type: object
+                properties:
+                    message:
+                        type: string
+            ItemMessage:
+                type: object
+                properties:
+                    messages:
+                        type: array
+                        items:
+                            type: object
+                            properties:
+                                type: string
+                                text: string
+                        minItems: 0
+            Clock:
+                type: object
+                properties:
+                    description:
+                        type: string
+                    port:
+                        type: string
+                    enable:
+                        type: boolean
+                    source:
+                        type: integer
+                    frequency:
+                        type: integer
+                    state:
+                        type: integer
+                        minimum: 1
+                        maximum: 2
+            ClockConsumption:
+                type: object
+                properties:
+                    consumption:
+                        allOf:
+                            - type: object
+                              properties:
+                                fan_out:
+                                    type: integer
+                                block_power:
+                                    type: number
+                                interconnect_power:
+                                    type: number
+                                percentage:
+                                    type: number
+                            - $ref: '#/definitions/ItemMessage'
+            ClockTotalConsumptionAndResourceUsage:
+                allOf:
+                    - type: object
+                      properties:
+                        total_clocks_available:
+                            type: integer
+                        total_clocks_used:
+                            type: integer
+                        total_plls_available:
+                            type: integer
+                        total_plls_used:
+                            type: integer
+                        total_clock_block_power:
+                            type: number
+                        total_clock_interconnect_power:
+                            type: number
+                        total_pll_power:
+                            type: number
+                    - $ref: '#/definitions/ItemMessage'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: [
-                                        {
-                                            "enable": true,
-                                            "description": "Default Clock",
-                                            "port": "CLK_100",
-                                            "source": 0,
-                                            "frequency": 100000000,
-                                            "state": 1,
-                                            "consumption": {
-                                                "fan_out": 77,
-                                                "block_power": 0.001,
-                                                "interconnect_power": 0.00023099999999999998,
-                                                "percentage": 31.035543386731607,
-                                                "messages": []
-                                            }
-                                        }
-                                      ]
+                description: A list of clocks
+                schema:
+                    type: array
+                    items:
+                        allOf:
+                            - $ref: '#/definitions/Clock'
+                            - $ref: '#/definitions/ClockConsumption'
+            400:
+                description: Invalid request
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             clock_module = device.get_module(ModuleType.CLOCKING)
             clocks = clock_module.get_all()
-            schema = ClockingSchema(many=True)
+            schema = ClockSchema(many=True)
             return schema.dump(clocks)
         except DeviceNotFoundException as e:
             raise DeviceNotExistsError
@@ -64,32 +160,47 @@ class ClocksApi(Resource):
 
     def post(self, device_id : str):
         """
-        This is an endpoint that create a clock of a device
+        This is an endpoint that creates a clock of a device
         ---
         tags:
             - Clock
         description: Create a clock of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: clock
+              in: body
+              description: Create a new clock of a device
+              schema:
+                $ref: '#/definitions/Clock'
         responses:
-            200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "description": "Default Clock",
-                                        "port": "CLK_100",
-                                        "source": 0,
-                                        "frequency": 100000000,
-                                        "state": 1
-                                      }
+            201:
+                description: Successfully created a new clock
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Clock'
+                        - $ref: '#/definitions/ClockConsumption'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             clock_module = device.get_module(ModuleType.CLOCKING)
-            schema = ClockingSchema()
+            schema = ClockSchema()
             clock = clock_module.add(schema.load(request.json))
             device.compute_output_power()
-            return schema.dump(clock)
+            return schema.dump(clock), 201
+        except ValidationError as e:
+            raise SchemaValidationError
         except ClockDescriptionPortValidationException as e:
             raise ClockDescriptionPortValidationError
         except ClockMaxCountReachedException as e:
@@ -102,37 +213,38 @@ class ClocksApi(Resource):
 class ClockApi(Resource):
     def get(self, device_id : str, rownum : int):
         """
-        This is an endpoint that returns a clock details of a device 
+        This is an endpoint that returns a clock of a device by its index
         ---
         tags:
             - Clock
-        description: Returns clock details of a device
+        description: Return clock of a device by its index
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true 
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "description": "PLL Clock",
-                                        "port": "CLK_233",
-                                        "source": 0,
-                                        "frequency": 233000000,
-                                        "state": 1,
-                                        "consumption": {
-                                            "fan_out": 58,
-                                            "block_power": 0.00233,
-                                            "interconnect_power": 0.00040542,
-                                            "percentage": 68.96445661326838,
-                                            "messages": []
-                                        }
-                                      }
+                description: Successfully returned a clock details
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Clock'
+                        - $ref: '#/definitions/ClockConsumption'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             clock_module = device.get_module(ModuleType.CLOCKING)
             clock = clock_module.get(rownum)
-            schema = ClockingSchema()
+            schema = ClockSchema()
             return schema.dump(clock)
         except ClockNotFoundException as e:
             raise ClockNotExistsError
@@ -143,39 +255,51 @@ class ClockApi(Resource):
 
     def patch(self, device_id : str, rownum : int):
         """
-        This is an endpoint that update a clock of a device by index
+        This is an endpoint that updates a clock of a device by its index
         ---
         tags:
             - Clock
-        description: Update a clock of a device.
+        description: Update a clock of a device by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true
+            - name: clock
+              in: body
+              description: Update a clock of a device
+              schema:
+                $ref: '#/definitions/Clock'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "description": "Default Clock",
-                                        "port": "CLK_100",
-                                        "source": 0,
-                                        "frequency": 100000000,
-                                        "state": 1,
-                                        "consumption": {
-                                            "fan_out": 58,
-                                            "block_power": 0.00233,
-                                            "interconnect_power": 0.00040542,
-                                            "percentage": 68.96445661326838,
-                                            "messages": []
-                                        }
-                                      }
+                description: Successfully updated the clock
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Clock'
+                        - $ref: '#/definitions/ClockConsumption'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             clock_module = device.get_module(ModuleType.CLOCKING)
-            schema = ClockingSchema()
+            schema = ClockSchema()
             clock = clock_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
-            return schema.dump(clock)
+            return schema.dump(clock), 200
+        except ValidationError as e:
+            raise SchemaValidationError
         except ClockNotFoundException as e:
             raise ClockNotExistsError
         except DeviceNotFoundException as e:
@@ -185,39 +309,36 @@ class ClockApi(Resource):
 
     def delete(self, device_id : str, rownum : int):
         """
-        This is an endpoint that delete a clock of a device by index
+        This is an endpoint that deletes a clock of a device by index
         ---
         tags:
             - Clock
-        description: Delete a clock of a device.
+        description: Delete a clock of a device by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true
         responses:
-            200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "description": "Default Clock",
-                                        "port": "CLK_100",
-                                        "source": 0,
-                                        "frequency": 100000000,
-                                        "state": 1,
-                                        "consumption": {
-                                            "fan_out": 58,
-                                            "block_power": 0.00233,
-                                            "interconnect_power": 0.00040542,
-                                            "percentage": 68.96445661326838,
-                                            "messages": []
-                                        }
-                                      }
+            204:
+                description: Successfully deleted the clock
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             clock_module = device.get_module(ModuleType.CLOCKING)
-            schema = ClockingSchema()
-            clock = clock_module.remove(rownum)
+            schema = ClockSchema()
+            clock_module.remove(rownum)
             device.compute_output_power()
-            return schema.dump(clock)
+            return '', 204
         except ClockNotFoundException as e:
             raise ClockNotExistsError
         except DeviceNotFoundException as e:
@@ -233,20 +354,20 @@ class ClockConsumptionApi(Resource):
         tags:
             - Clock
         description: returns overall clock power consumption and resource utilization of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "total_clocks_available": 16,
-                                        "total_clocks_used": 2,
-                                        "total_plls_available": 4,
-                                        "total_plls_used": 0,
-                                        "total_clock_block_power": 0.00333,
-                                        "total_clock_interconnect_power": 0.00063642,
-                                        "total_pll_power": 0,
-                                        "messages": []
-                                      }
+                description: Successfully returned the power consumption and resource utilization
+                schema:
+                    $ref: '#/definitions/ClockTotalConsumptionAndResourceUsage'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -265,7 +386,7 @@ class ClockConsumptionApi(Resource):
                 'total_pll_power': consumption[2],
                 'messages': messages
             }
-            schema = ClockingResourcesConsumptionSchema()
+            schema = ClockResourcesConsumptionSchema()
             return schema.dump(data)
         except DeviceNotFoundException as e:
             raise DeviceNotExistsError

@@ -251,7 +251,7 @@ class Fabric_LeConsumptionApi(Resource):
         This is an endpoint that returns overall the fabric logic element power consumption and resource utilization of a device
         ---
         tags:
-            - Dsp
+            - Fabric Logic Element
         description: Returns overall the fabric logic element power consumption and resource utilization of a device.
         responses:
             200:

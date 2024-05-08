@@ -4,10 +4,13 @@
 #
 from flask import Blueprint, request
 from flask_restful import Api, Resource
+from marshmallow import Schema, fields, ValidationError
+from submodule.dsp import DSP_Mode, Pipelining
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, DspNotFoundException
-from schema.device_dsp_schemas import DspSchema, DspResourcesConsumptionSchema
-from .errors import DeviceNotExistsError, InternalServerError, DspNotExistsError
+from schema.device_schemas import MessageSchema
+from .errors import DeviceNotExistsError, InternalServerError, DspNotExistsError, \
+    SchemaValidationError
 from .errors import errors
 
 #-------------------------------------------------------------------------------------------#
@@ -18,6 +21,34 @@ from .errors import errors
 # devices/<device_id>/dsp/consumption     | get                     | DspConsumptionApi     #
 #-------------------------------------------------------------------------------------------#
 
+class DspResourcesConsumptionSchema(Schema):
+    total_dsp_blocks_available = fields.Int()
+    total_dsp_blocks_used = fields.Int()
+    total_dsp_block_power = fields.Number()
+    total_dsp_interconnect_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class DspOutputSchema(Schema):
+    dsp_blocks_used = fields.Number()
+    clock_frequency = fields.Int()
+    output_signal_rate = fields.Number()
+    block_power = fields.Number()
+    interconnect_power = fields.Number()
+    percentage = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class DspSchema(Schema):
+    name = fields.Str()
+    enable = fields.Bool()
+    number_of_multipliers = fields.Int()
+    dsp_mode = fields.Enum(DSP_Mode, by_value=True)
+    a_input_width = fields.Int()
+    b_input_width = fields.Int()
+    clock = fields.Str()
+    pipelining = fields.Enum(Pipelining, by_value=True)
+    toggle_rate = fields.Number()
+    output = fields.Nested(DspOutputSchema, data_key="consumption")
+
 class DspsApi(Resource):
     def get(self, device_id : str):
         """
@@ -26,32 +57,83 @@ class DspsApi(Resource):
         tags:
             - Dsp
         description: Returns a list of dsp of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
+        definitions:
+            Dsp:
+                type: object
+                properties:
+                    name:
+                        type: string
+                    enable:
+                        type: boolean
+                    number_of_multipliers:
+                        type: integer
+                    dsp_mode:
+                        type: integer
+                        minimum: 0
+                        maximum: 2
+                    a_input_width:
+                        type: integer
+                    b_input_width:
+                        type: integer
+                    clock:
+                        type: string
+                    pipelining:
+                        type: integer
+                        minimum: 0
+                        maximum: 3
+                    toggle_rate:
+                        type: number
+            DspOutput:
+                type: object
+                properties:
+                    consumption:
+                        allOf:
+                            - type: object
+                              properties:
+                                dsp_blocks_used: 
+                                    type: number
+                                clock_frequency: 
+                                    type: integer
+                                output_signal_rate: 
+                                    type: number
+                                block_power: 
+                                    type: number
+                                interconnect_power: 
+                                    type: number
+                                percentage: 
+                                    type: number
+                            - $ref: '#/definitions/ItemMessage'
+            DspConsumptionAndResourceUsage:
+                allOf:
+                    - type: object
+                      properties:
+                        total_dsp_blocks_available:
+                            type: integer
+                        total_dsp_blocks_used:
+                            type: integer
+                        total_dsp_block_power:
+                            type: number
+                        total_dsp_interconnect_power:
+                            type: number
+                    - $ref: '#/definitions/ItemMessage'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: [
-                                        {
-                                          "name": "test test 1",
-                                          "enable": true,
-                                          "number_of_multipliers": 11,
-                                          "dsp_mode": 0,
-                                          "a_input_width": 16,
-                                          "b_input_width": 16,
-                                          "clock": "CLK_100",
-                                          "pipelining": 0,
-                                          "toggle_rate": 0.125,
-                                          "consumption": {
-                                              "dsp_blocks_used": 11,
-                                              "clock_frequency": 100000000,
-                                              "output_signal_rate": 12.5,
-                                              "block_power": 0.004301000000000001,
-                                              "interconnect_power": 0.0002816,
-                                              "percentage": 28.234086242299796,
-                                              "messages": []
-                                          }
-                                        }
-                                      ]
+                description: Successfully returned a list of dsp
+                schema:
+                    type: array
+                    items:
+                        allOf:
+                            - $ref: '#/definitions/Dsp'
+                            - $ref: '#/definitions/DspOutput'
+            400:
+                description: Invalid request
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -67,35 +149,36 @@ class DspsApi(Resource):
 
     def post(self, device_id : str):
         """
-        This is an endpoint that create a dsp of a device
+        This is an endpoint that creates a dsp of a device
         ---
         tags:
             - Dsp
         description: Create a dsp of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: dsp
+              in: body
+              description: Create a new dsp of a device
+              schema:
+                $ref: '#/definitions/Dsp'
         responses:
-            200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "name": "test test 1",
-                                        "enable": true,
-                                        "number_of_multipliers": 11,
-                                        "dsp_mode": 0,
-                                        "a_input_width": 16,
-                                        "b_input_width": 16,
-                                        "clock": "CLK_100",
-                                        "pipelining": 0,
-                                        "toggle_rate": 0.125,
-                                        "consumption": {
-                                          "dsp_blocks_used": 11,
-                                          "clock_frequency": 100000000,
-                                          "output_signal_rate": 12.5,
-                                          "block_power": 0.004301000000000001,
-                                          "interconnect_power": 0.0002816,
-                                          "percentage": 28.234086242299796,
-                                          "messages": []
-                                        }
-                                      }
+            201:
+                description: Successfully created a new dsp
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Dsp'
+                        - $ref: '#/definitions/DspOutput'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -104,7 +187,9 @@ class DspsApi(Resource):
             schema = DspSchema()
             dsp = dsp_module.add(schema.load(request.json))
             device.compute_output_power()
-            return schema.dump(dsp)
+            return schema.dump(dsp), 201
+        except ValidationError as e:
+            raise SchemaValidationError
         except DeviceNotFoundException as e:
             raise DeviceNotExistsError
         except Exception as e:
@@ -113,35 +198,31 @@ class DspsApi(Resource):
 class DspApi(Resource):
     def get(self, device_id : str, rownum : int):
         """
-        This is an endpoint that returns a dsp details of a device 
+        This is an endpoint that returns a dsp details of a device by its index
         ---
         tags:
             - Dsp
-        description: Returns dsp details of a device
+        description: Returns dsp details of a device by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true 
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "name": "test test 1",
-                                        "enable": true,
-                                        "number_of_multipliers": 11,
-                                        "dsp_mode": 0,
-                                        "a_input_width": 16,
-                                        "b_input_width": 16,
-                                        "clock": "CLK_100",
-                                        "pipelining": 0,
-                                        "toggle_rate": 0.125,
-                                        "consumption": {
-                                          "dsp_blocks_used": 11,
-                                          "clock_frequency": 100000000,
-                                          "output_signal_rate": 12.5,
-                                          "block_power": 0.004301000000000001,
-                                          "interconnect_power": 0.0002816,
-                                          "percentage": 28.234086242299796,
-                                          "messages": []
-                                        }
-                                      }
+                description: Successfully returned a dsp details
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Dsp'
+                        - $ref: '#/definitions/DspOutput'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -159,35 +240,40 @@ class DspApi(Resource):
 
     def patch(self, device_id : str, rownum : int):
         """
-        This is an endpoint that update a dsp of a device by index
+        This is an endpoint that updates a dsp of a device by its index
         ---
         tags:
             - Dsp
-        description: Update a dsp of a device.
+        description: Update a dsp of a device by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true
+            - name: dsp
+              in: body
+              description: Update a dsp of a device
+              schema:
+                $ref: '#/definitions/Dsp'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "name": "test test 1",
-                                        "enable": true,
-                                        "number_of_multipliers": 11,
-                                        "dsp_mode": 0,
-                                        "a_input_width": 16,
-                                        "b_input_width": 16,
-                                        "clock": "CLK_100",
-                                        "pipelining": 0,
-                                        "toggle_rate": 0.125,
-                                        "consumption": {
-                                          "dsp_blocks_used": 11,
-                                          "clock_frequency": 100000000,
-                                          "output_signal_rate": 12.5,
-                                          "block_power": 0.004301000000000001,
-                                          "interconnect_power": 0.0002816,
-                                          "percentage": 28.234086242299796,
-                                          "messages": []
-                                        }
-                                      }
+                description: Successfully updated the clock
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Dsp'
+                        - $ref: '#/definitions/DspOutput'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -196,7 +282,9 @@ class DspApi(Resource):
             schema = DspSchema()
             dsp = dsp_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
-            return schema.dump(dsp)
+            return schema.dump(dsp), 200
+        except ValidationError as e:
+            raise SchemaValidationError
         except DspNotFoundException as e:
             raise DspNotExistsError
         except DeviceNotFoundException as e:
@@ -206,35 +294,27 @@ class DspApi(Resource):
 
     def delete(self, device_id : str, rownum : int):
         """
-        This is an endpoint that delete a dsp of a device by index
+        This is an endpoint that delete a dsp of a device by its index
         ---
         tags:
             - Dsp
-        description: Delete a dsp of a device.
+        description: Delete a dsp of a device its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true
         responses:
-            200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "name": "test test 1",
-                                        "enable": true,
-                                        "number_of_multipliers": 11,
-                                        "dsp_mode": 0,
-                                        "a_input_width": 16,
-                                        "b_input_width": 16,
-                                        "clock": "CLK_100",
-                                        "pipelining": 0,
-                                        "toggle_rate": 0.125,
-                                        "consumption": {
-                                          "dsp_blocks_used": 11,
-                                          "clock_frequency": 100000000,
-                                          "output_signal_rate": 12.5,
-                                          "block_power": 0.004301000000000001,
-                                          "interconnect_power": 0.0002816,
-                                          "percentage": 28.234086242299796,
-                                          "messages": []
-                                        }
-                                      }
+            204:
+                description: Successfully deleted the dsp
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -243,7 +323,7 @@ class DspApi(Resource):
             schema = DspSchema()
             dsp = dsp_module.remove(rownum)
             device.compute_output_power()
-            return schema.dump(dsp)
+            return '', 204
         except DspNotFoundException as e:
             raise DspNotExistsError
         except DeviceNotFoundException as e:
@@ -258,18 +338,21 @@ class DspConsumptionApi(Resource):
         ---
         tags:
             - Dsp
-        description: returns overall dsp power consumption and resource utilization of a device.
+        description: Returns overall dsp power consumption and resource utilization of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "total_dsp_blocks_available": 176,
-                                        "total_dsp_blocks_used": 23,
-                                        "total_dsp_block_power": 0.015233360000000003,
-                                        "total_dsp_interconnect_power": 0.0009973760000000003,
-                                        "messages": []
-                                      }
+                description: Successfully returned dsp power consumption and resource utilization
+                schema:
+                    $ref: '#/definitions/DspConsumptionAndResourceUsage'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()

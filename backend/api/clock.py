@@ -97,7 +97,7 @@ class ClocksApi(Resource):
                         type: integer
                         minimum: 1
                         maximum: 2
-            ClockConsumption:
+            ClockOutput:
                 type: object
                 properties:
                     consumption:
@@ -113,7 +113,7 @@ class ClocksApi(Resource):
                                 percentage:
                                     type: number
                             - $ref: '#/definitions/ItemMessage'
-            ClockTotalConsumptionAndResourceUsage:
+            ClockConsumptionAndResourceUsage:
                 allOf:
                     - type: object
                       properties:
@@ -140,7 +140,7 @@ class ClocksApi(Resource):
                     items:
                         allOf:
                             - $ref: '#/definitions/Clock'
-                            - $ref: '#/definitions/ClockConsumption'
+                            - $ref: '#/definitions/ClockOutput'
             400:
                 description: Invalid request
                 schema:
@@ -181,7 +181,7 @@ class ClocksApi(Resource):
                 schema:
                     allOf:
                         - $ref: '#/definitions/Clock'
-                        - $ref: '#/definitions/ClockConsumption'
+                        - $ref: '#/definitions/ClockOutput'
             400:
                 description: Invalid request 
                 schema:
@@ -233,7 +233,7 @@ class ClockApi(Resource):
                 schema:
                     allOf:
                         - $ref: '#/definitions/Clock'
-                        - $ref: '#/definitions/ClockConsumption'
+                        - $ref: '#/definitions/ClockOutput'
             400:
                 description: Invalid request 
                 schema:
@@ -280,7 +280,7 @@ class ClockApi(Resource):
                 schema:
                     allOf:
                         - $ref: '#/definitions/Clock'
-                        - $ref: '#/definitions/ClockConsumption'
+                        - $ref: '#/definitions/ClockOutput'
             400:
                 description: Invalid request 
                 schema:
@@ -353,7 +353,7 @@ class ClockConsumptionApi(Resource):
         ---
         tags:
             - Clock
-        description: returns overall clock power consumption and resource utilization of a device.
+        description: Returns overall clock power consumption and resource utilization of a device.
         parameters:
             - name: device_id
               in: path 
@@ -361,9 +361,9 @@ class ClockConsumptionApi(Resource):
               required: true
         responses:
             200:
-                description: Successfully returned the power consumption and resource utilization
+                description: Successfully returned clock power consumption and resource utilization
                 schema:
-                    $ref: '#/definitions/ClockTotalConsumptionAndResourceUsage'
+                    $ref: '#/definitions/ClockConsumptionAndResourceUsage'
             400:
                 description: Invalid request 
                 schema:

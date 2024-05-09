@@ -294,7 +294,7 @@ class DspApi(Resource):
 
     def delete(self, device_id : str, rownum : int):
         """
-        This is an endpoint that delete a dsp of a device by its index
+        This is an endpoint that deletes a dsp of a device by its index
         ---
         tags:
             - Dsp
@@ -321,7 +321,7 @@ class DspApi(Resource):
             device = device_mgr.get_device(device_id)
             dsp_module = device.get_module(ModuleType.DSP)
             schema = DspSchema()
-            dsp = dsp_module.remove(rownum)
+            dsp_module.remove(rownum)
             device.compute_output_power()
             return '', 204
         except DspNotFoundException as e:

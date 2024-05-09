@@ -4,9 +4,10 @@
 #
 from flask import Blueprint
 from flask_restful import Api, Resource
+from marshmallow import Schema, fields
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import DeviceNotFoundException
-from schema.device_schemas import DeviceSchema, DeviceConsumptionSchema
+from submodule.rs_message import RsMessageType
 from .errors import DeviceNotExistsError, InternalServerError
 from .errors import errors
 
@@ -18,6 +19,26 @@ from .errors import errors
 # devices/<device_id>/consumption | get             | DeviceConsumptionApi  #
 #---------------------------------------------------------------------------#
 
+class MessageSchema(Schema):
+    type = fields.Enum(RsMessageType, by_value=True)
+    text = fields.Str()
+
+class DeviceSchema(Schema):
+    id = fields.Str()
+    series = fields.Str()
+    logic_density = fields.Str()
+    package = fields.Str()
+    speedgrade = fields.Str()
+    temperature_grade = fields.Str()
+
+class DevicePowerThermalSchema(Schema):
+    total_power = fields.Number()
+    thermal = fields.Number()
+
+class DeviceConsumptionSchema(Schema):
+    worsecase = fields.Nested(DevicePowerThermalSchema)
+    typical = fields.Nested(DevicePowerThermalSchema)
+
 class DevicesApi(Resource):
     def get(self):
         """
@@ -25,12 +46,51 @@ class DevicesApi(Resource):
         ---
         tags:
             - Device
-        description: Returns a list of devices.
+        description: Return a list of devices.
+        definitions:
+            DeviceSummary:
+                type: object
+                properties:
+                    id:
+                        type: string
+                    series:
+                        type: string
+            Device:
+                type: object
+                properties:
+                    id:
+                        type: string
+                    series:
+                        type: string
+                    logic_density:
+                        type: string
+                    package:
+                        type: string
+                    speedgrade:
+                        type: string
+                    temperature_grade:
+                        type: string
+            DevicePowerThermal:
+                type: object
+                properties:
+                    total_power:
+                        type: number
+                    thermal:
+                        type: number
+            DeviceConsumption:
+                type: object
+                properties:
+                    worsecase:
+                        $ref: '#/definitions/DevicePowerThermal'
+                    typical:
+                        $ref: '#/definitions/DevicePowerThermal'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: [{"id": "MPW1", "series": "Gemini"}]
+                description: Successfully returned a list of devices
+                schema:
+                    type: array
+                    items:
+                        $ref: '#/definitions/DeviceSummary'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -42,23 +102,25 @@ class DevicesApi(Resource):
 class DeviceApi(Resource):
     def get(self, device_id : str):
         """
-        This is an endpoint that returns details of a device
+        This is an endpoint that returns the details of a device
         ---
         tags:
             - Device
-        description: Returns the details of a device.
+        description: Return the details of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "id": "MPW1",
-                                        "series": "Gemini",
-                                        "logic_density": "",
-                                        "package": "SBG484",
-                                        "speedgrade": "1",
-                                        "temperature_grade": "Industrial (-40 to 100 °C)"
-                                      }
+                description: Successfully returned the details of a device
+                schema:
+                    $ref: '#/definitions/Device'
+            400:
+                description: Invalid request
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -73,25 +135,25 @@ class DeviceApi(Resource):
 class DeviceConsumptionApi(Resource):
     def get(self, device_id : str):
         """
-        This is an endpoint to retrieve the total device's power consumption
+        This is an endpoint that returns the total power consumption of a device
         ---
         tags:
             - Device
-        description: Returns a device's power consumption.
+        description: Returns the total power consumption.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "typical": {
-                                            "total_power": 0.044426803487179485,
-                                            "thermal": 0
-                                        },
-                                        "worsecase": {
-                                            "total_power": 0.044426803487179485,
-                                            "thermal": 0
-                                        }
-                                      }
+                description: Successfully returned the total power consumption
+                schema:
+                    $ref: '#/definitions/DeviceConsumption'
+            400:
+                description: Invalid request
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()

@@ -8,7 +8,7 @@ from marshmallow import Schema, fields, ValidationError
 from submodule.dsp import DSP_Mode, Pipelining
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, DspNotFoundException
-from schema.device_schemas import MessageSchema
+from .device import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, DspNotExistsError, \
     SchemaValidationError
 from .errors import errors

@@ -9,7 +9,7 @@ from submodule.clock import Clock_State, Source
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, ClockNotFoundException, \
     ClockDescriptionPortValidationException
-from schema.device_schemas import MessageSchema
+from .device import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, ClockNotExistsError, \
     ClockDescriptionPortValidationError, \
     ClockMaxCountReachedException, \

@@ -8,7 +8,7 @@ from marshmallow import Schema, fields, ValidationError
 from submodule.bram import BRAM_Type
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, BramNotFoundException
-from schema.device_schemas import MessageSchema
+from .device import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, BramNotExistsError, \
     SchemaValidationError
 from .errors import errors

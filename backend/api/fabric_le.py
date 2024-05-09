@@ -9,7 +9,7 @@ from submodule.fabric_logic_element import Glitch_Factor
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, FabricLeNotFoundException, \
     FabricLeDescriptionAlreadyExistsException
-from schema.device_schemas import MessageSchema
+from .device import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, FabricLeNotExistsError, \
     FabricLeDescriptionAlreadyExistsError, \
     SchemaValidationError

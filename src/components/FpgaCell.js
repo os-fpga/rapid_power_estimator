@@ -9,7 +9,7 @@ import './style/base.css';
 function FpgaCell({ power, messages, title }) {
   const { selectedItem } = useSelection();
   function getBaseClass() {
-    return (selectedItem === title) ? 'one-block clickable selected' : 'one-block clickable';
+    return (selectedItem === title) ? 'clickable selected' : 'clickable';
   }
   return (
     <State messages={messages} baseClass={getBaseClass()}>

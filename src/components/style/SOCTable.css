@@ -11,10 +11,14 @@
     display: flex;
     flex-direction: row;
     column-gap: 8px;
+    height: 100%;
 }
 
 .top-l2-col1-row1-elem {
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    height: 100%;
 }
 
 .top-l2-col1-row1-elem-text {
@@ -22,6 +26,7 @@
     margin-right: 8px;
     display: flex;
     flex-direction: column;
+    height: 100%;
     row-gap: 5px;
 }
 
@@ -30,8 +35,11 @@
     display: flex;
     flex-direction: row;
     column-gap: 8px;
+    height: 100%;
 }
 
 .top-l2-col1-row2-elem {
+    display: flex;
+    flex-direction: column;
     width: 100%;
 }

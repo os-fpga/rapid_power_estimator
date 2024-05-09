@@ -13,7 +13,7 @@ import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/SOCTable.css';
 
-function SOCTable({ device, setOpenedTable }) {
+function SOCComponent({ device, setOpenedTable, peripherals }) {
   const { selectedItem } = useSelection();
   const {
     power, dynamicPower, staticPower,
@@ -63,7 +63,7 @@ function SOCTable({ device, setOpenedTable }) {
           <DMAComponent device={device} />
         </div>
         <div className="top-l2-col1-row2-elem" onClick={() => setOpenedTable(Table.Connectivity)}>
-          <ConnectivityComponent device={device} />
+          <ConnectivityComponent device={device} peripherals={peripherals} />
         </div>
       </div>
       <div onClick={() => setOpenedTable(Table.Peripherals)}>
@@ -73,13 +73,13 @@ function SOCTable({ device, setOpenedTable }) {
   );
 }
 
-SOCTable.propTypes = {
+SOCComponent.propTypes = {
   device: PropTypes.string,
   setOpenedTable: PropTypes.func.isRequired,
 };
 
-SOCTable.defaultProps = {
+SOCComponent.defaultProps = {
   device: null,
 };
 
-export default SOCTable;
+export default SOCComponent;

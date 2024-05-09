@@ -10,7 +10,7 @@ import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/MemoryComponent.css';
 
-function MemoryComponent({ device }) {
+function MemoryComponent({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
   const [memData, setMemData] = React.useState([
     {
@@ -32,21 +32,24 @@ function MemoryComponent({ device }) {
   const { power, dynamicPower } = useSocTotalPower();
   const { socState } = useGlobalState();
 
-  function update() {
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      const { memory } = data;
-      memory.forEach((mem) => {
-        const index = parseInt(mem.href.slice(-1), 10);
-        server.GET(server.peripheralPath(device, mem.href), (memJson) => {
-          const newData = memData.map((it, idx) => {
-            if (index === idx) return memJson;
-            return it;
+  const update = React.useCallback(() => {
+    if (peripherals) {
+      const { memory } = peripherals;
+      if (memory) {
+        memory.forEach((mem) => {
+          const index = parseInt(mem.href.slice(-1), 10);
+          server.GET(server.peripheralPath(device, mem.href), (memJson) => {
+            setMemData((prev) => prev.map((it, idx) => {
+              if (index === idx) return memJson;
+              return it;
+            }));
           });
-          setMemData(newData);
         });
-      });
-    });
-  }
+      }
+    }
+  }, [device, peripherals]);
+
+  React.useEffect(() => update(), [update]);
 
   React.useEffect(() => {
     subscribe('memoryChanged', update);

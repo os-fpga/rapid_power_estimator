@@ -48,6 +48,25 @@ class DevicesApi(Resource):
             - Device
         description: Return a list of devices.
         definitions:
+            HTTPErrorMessage:
+                type: object
+                properties:
+                    message:
+                        type: string
+            Message:
+                type: object
+                properties:
+                    type:
+                        type: string
+                    text:
+                        type: string
+            ItemMessage:
+                type: object
+                properties:
+                    messages:
+                        type: array
+                        items:
+                            $ref: '#/definitions/Message'
             DeviceSummary:
                 type: object
                 properties:

@@ -64,22 +64,6 @@ class ClocksApi(Resource):
               type: string
               required: true
         definitions:
-            HTTPErrorMessage:
-                type: object
-                properties:
-                    message:
-                        type: string
-            ItemMessage:
-                type: object
-                properties:
-                    messages:
-                        type: array
-                        items:
-                            type: object
-                            properties:
-                                type: string
-                                text: string
-                        minItems: 0
             Clock:
                 type: object
                 properties:

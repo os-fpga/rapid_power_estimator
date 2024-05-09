@@ -261,7 +261,7 @@ class DspApi(Resource):
                 $ref: '#/definitions/Dsp'
         responses:
             200:
-                description: Successfully updated the clock
+                description: Successfully updated the dsp
                 schema:
                     allOf:
                         - $ref: '#/definitions/Dsp'

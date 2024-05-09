@@ -4,10 +4,13 @@
 #
 from flask import Blueprint, request
 from flask_restful import Api, Resource
+from marshmallow import Schema, fields, ValidationError
+from submodule.bram import BRAM_Type
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, BramNotFoundException
-from schema.device_bram_schemas import BramSchema, BramResourcesConsumptionSchema
-from .errors import DeviceNotExistsError, InternalServerError, BramNotExistsError
+from schema.device_schemas import MessageSchema
+from .errors import DeviceNotExistsError, InternalServerError, BramNotExistsError, \
+    SchemaValidationError
 from .errors import errors
 
 #-------------------------------------------------------------------------------------------#
@@ -18,6 +21,44 @@ from .errors import errors
 # devices/<device_id>/bram/consumption    | get                     | BramConsumptionApi    #
 #-------------------------------------------------------------------------------------------#
 
+class BramResourcesConsumptionSchema(Schema):
+    total_18k_bram_available = fields.Int()
+    total_18k_bram_used = fields.Int()
+    total_36k_bram_available = fields.Int()
+    total_36k_bram_used = fields.Int()
+    total_bram_block_power = fields.Number()
+    total_bram_interconnect_power = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class BramPortPropertiesOutputSchema(Schema):
+    clock_frequency = fields.Int()
+    output_signal_rate = fields.Number()
+    ram_depth = fields.Int()
+
+class BramOutputSchema(Schema):
+    port_a = fields.Nested(BramPortPropertiesOutputSchema)
+    port_b = fields.Nested(BramPortPropertiesOutputSchema)
+    block_power = fields.Number()
+    interconnect_power = fields.Number()
+    percentage = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class BramPortPropertiesSchema(Schema):
+    clock = fields.Str()
+    width = fields.Int()
+    write_enable_rate = fields.Number()
+    read_enable_rate = fields.Number()
+    toggle_rate = fields.Number()
+
+class BramSchema(Schema):
+    enable = fields.Bool()
+    name = fields.Str()
+    type = fields.Enum(BRAM_Type, by_value=True)
+    bram_used = fields.Int()
+    port_a = fields.Nested(BramPortPropertiesSchema)
+    port_b = fields.Nested(BramPortPropertiesSchema)
+    output = fields.Nested(BramOutputSchema, data_key="consumption")
+
 class BramsApi(Resource):
     def get(self, device_id : str):
         """
@@ -26,48 +67,99 @@ class BramsApi(Resource):
         tags:
             - Block RAM
         description: Returns a list of block ram of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
+        definitions:
+            BRAMPortProperties:
+                type: object
+                properties:
+                    clock:
+                        type: string
+                    width:
+                        type: integer
+                    write_enable_rate:
+                        type: number
+                    read_enable_rate:
+                        type: number
+                    toggle_rate:
+                        type: number
+            BRAMPortPropertiesOutput:
+                type: object
+                properties:
+                    clock_frequency:
+                        type: integer
+                    output_signal_rate:
+                        type: number
+                    ram_depth:
+                        type: integer
+            BRAM:
+                type: object
+                properties:
+                    enable:
+                        type: boolean
+                    name:
+                        type: string
+                    type:
+                        type: integer
+                        minimum: 0
+                        maximum: 9
+                    bram_used:
+                        type: integer
+                    port_a:
+                        $ref: '#/definitions/BRAMPortProperties'
+                    port_b:
+                        $ref: '#/definitions/BRAMPortProperties'
+            BRAMOutput:
+                type: object
+                properties:
+                    consumption:
+                        allOf:
+                            - type: object
+                              properties:
+                                port_a:
+                                    $ref: '#/definitions/BRAMPortPropertiesOutput'
+                                port_b:
+                                    $ref: '#/definitions/BRAMPortPropertiesOutput'
+                                block_power:
+                                    type: number
+                                interconnect_power:
+                                    type: number
+                                percentage:
+                                    type: number
+                            - $ref: '#/definitions/ItemMessage'
+            BRAMConsumptionAndResourceUsage:
+                allOf:
+                    - type: object
+                      properties:
+                        total_18k_bram_available:
+                            type: integer
+                        total_18k_bram_used:
+                            type: integer
+                        total_36k_bram_available:
+                            type: integer
+                        total_36k_bram_used:
+                            type: integer
+                        total_bram_block_power:
+                            type: number
+                        total_bram_interconnect_power:
+                            type: number
+                    - $ref: '#/definitions/ItemMessage'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: [
-                                        {
-                                          "enable": true,
-                                          "name": "test 1",
-                                          "type": 2,
-                                          "bram_used": 16,
-                                          "port_a": {
-                                            "clock": "CLK_100",
-                                            "width": 16,
-                                            "write_enable_rate": 0.5,
-                                            "read_enable_rate": 0.5,
-                                            "toggle_rate": 0.125
-                                          },
-                                          "port_b": {
-                                            "clock": "CLK_233",
-                                            "width": 16,
-                                            "write_enable_rate": 0.5,
-                                            "read_enable_rate": 0.5,
-                                            "toggle_rate": 0.125
-                                          },
-                                          "consumption": {
-                                            "port_a": {
-                                              "clock_frequency": 100000000,
-                                              "output_signal_rate": 6.25,
-                                              "ram_depth": 1024
-                                            },
-                                            "port_b": {
-                                              "clock_frequency": 233000000,
-                                              "output_signal_rate": 14.5625,
-                                              "ram_depth": 1024
-                                            },
-                                            "block_power": 0.023975999999999997,
-                                            "interconnect_power": 0,
-                                            "percentage": 61.044912923923,
-                                            "messages": []
-                                          }
-                                        }
-                                      ]
+                description: Successfully returned a list of block rams
+                schema:
+                    type: array
+                    items:
+                        allOf:
+                            - $ref: '#/definitions/BRAM'
+                            - $ref: '#/definitions/BRAMOutput'
+            400:
+                description: Invalid request
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -83,51 +175,36 @@ class BramsApi(Resource):
 
     def post(self, device_id : str):
         """
-        This is an endpoint that create a block ram of a device
+        This is an endpoint that creates a block ram of a device
         ---
         tags:
             - Block RAM
         description: Create a block ram of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: bram
+              in: body
+              description: Create a new block ram of a device
+              schema:
+                $ref: '#/definitions/BRAM'
         responses:
-            200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "name": "test 2",
-                                        "type": 2,
-                                        "bram_used": 17,
-                                        "port_a": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "port_b": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "consumption": {
-                                          "port_a": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "port_b": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "block_power": 0.0153,
-                                          "interconnect_power": 0,
-                                          "percentage": 38.95508707607699,
-                                          "messages": []
-                                        }
-                                      }
+            201:
+                description: Successfully created a new block ram
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/BRAM'
+                        - $ref: '#/definitions/BRAMOutput'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -136,7 +213,9 @@ class BramsApi(Resource):
             schema = BramSchema()
             bram = bram_module.add(schema.load(request.json))
             device.compute_output_power()
-            return schema.dump(bram)
+            return schema.dump(bram), 201
+        except ValidationError as e:
+            raise SchemaValidationError
         except DeviceNotFoundException as e:
             raise DeviceNotExistsError
         except Exception as e:
@@ -145,51 +224,31 @@ class BramsApi(Resource):
 class BramApi(Resource):
     def get(self, device_id : str, rownum : int):
         """
-        This is an endpoint that returns a block ram details of a device 
+        This is an endpoint that returns a block ram details of a device by its index
         ---
         tags:
             - Block RAM
-        description: Returns block ram details of a device
+        description: Return block ram details of a device by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true 
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "name": "test 2",
-                                        "type": 2,
-                                        "bram_used": 17,
-                                        "port_a": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "port_b": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "consumption": {
-                                          "port_a": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "port_b": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "block_power": 0.0153,
-                                          "interconnect_power": 0,
-                                          "percentage": 38.95508707607699,
-                                          "messages": []
-                                        }
-                                      }
+                description: Successfully returned a block ram details
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/BRAM'
+                        - $ref: '#/definitions/BRAMOutput'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -207,51 +266,40 @@ class BramApi(Resource):
 
     def patch(self, device_id : str, rownum : int):
         """
-        This is an endpoint that update a block ram of a device by index
+        This is an endpoint that updates a block ram of a device by its index
         ---
         tags:
             - Block RAM
-        description: Update a block ram of a device.
+        description: Update a block ram of a device by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true
+            - name: bram
+              in: body
+              description: Update a block ram of a device
+              schema:
+                $ref: '#/definitions/BRAM'
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "name": "test 2",
-                                        "type": 2,
-                                        "bram_used": 17,
-                                        "port_a": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "port_b": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "consumption": {
-                                          "port_a": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "port_b": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "block_power": 0.0153,
-                                          "interconnect_power": 0,
-                                          "percentage": 38.95508707607699,
-                                          "messages": []
-                                        }
-                                      }
+                description: Successfully updated the block ram
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/BRAM'
+                        - $ref: '#/definitions/BRAMOutput'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
@@ -260,7 +308,9 @@ class BramApi(Resource):
             schema = BramSchema()
             bram = bram_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
-            return schema.dump(bram)
+            return schema.dump(bram), 200
+        except ValidationError as e:
+            raise SchemaValidationError
         except BramNotFoundException as e:
             raise BramNotExistsError
         except DeviceNotFoundException as e:
@@ -270,60 +320,36 @@ class BramApi(Resource):
 
     def delete(self, device_id : str, rownum : int):
         """
-        This is an endpoint that delete a block ram of a device by index
+        This is an endpoint that deletes a block ram of a device by its index
         ---
         tags:
             - Block RAM
-        description: Delete a block ram of a device.
+        description: Delete a block ram of a device  by its index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: rownum
+              in: path 
+              type: integer
+              required: true
         responses:
-            200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "enable": true,
-                                        "name": "test 2",
-                                        "type": 2,
-                                        "bram_used": 17,
-                                        "port_a": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "port_b": {
-                                          "clock": "CLK_100",
-                                          "width": 16,
-                                          "write_enable_rate": 0.5,
-                                          "read_enable_rate": 0.5,
-                                          "toggle_rate": 0.125
-                                        },
-                                        "consumption": {
-                                          "port_a": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "port_b": {
-                                            "clock_frequency": 100000000,
-                                            "output_signal_rate": 6.25,
-                                            "ram_depth": 1024
-                                          },
-                                          "block_power": 0.0153,
-                                          "interconnect_power": 0,
-                                          "percentage": 38.95508707607699,
-                                          "messages": []
-                                        }
-                                      }
+            204:
+                description: Successfully deleted the block ram
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             bram_module = device.get_module(ModuleType.BRAM)
             schema = BramSchema()
-            bram = bram_module.remove(rownum)
+            bram_module.remove(rownum)
             device.compute_output_power()
-            return schema.dump(bram)
+            return '', 204
         except BramNotFoundException as e:
             raise BramNotExistsError
         except DeviceNotFoundException as e:
@@ -338,20 +364,21 @@ class BramConsumptionApi(Resource):
         ---
         tags:
             - Block RAM
-        description: returns overall block ram power consumption and resource utilization of a device.
+        description: Return overall block ram power consumption and resource utilization of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
         responses:
             200:
-                description: A successful response
-                examples:
-                    application/json: {
-                                        "total_18k_bram_available": 256,
-                                        "total_18k_bram_used": 33,
-                                        "total_36k_bram_available": 128,
-                                        "total_36k_bram_used": 0,
-                                        "total_bram_block_power": 0.039276,
-                                        "total_bram_interconnect_power": 0,
-                                        "messages": []
-                                      }
+                description: Successfully returned block ram power consumption and resource utilization
+                schema:
+                    $ref: '#/definitions/BRAMConsumptionAndResourceUsage'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
             device_mgr = RsDeviceManager.get_instance()

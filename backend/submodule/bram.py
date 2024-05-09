@@ -9,11 +9,6 @@ from utilities.common_utils import update_attributes
 from .rs_device_resources import BramNotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
-class BRAM_IO_DIRECTION(Enum):
-    INPUT_ONLY = 0
-    OUTPUT_ONLY = 1
-    INPUT_AND_OUTPUT = 2
-
 class BRAM_Type(Enum):
     BRAM_18K_SDP = 0
     BRAM_36K_SDP = 1

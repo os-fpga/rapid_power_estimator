@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
 from typing import List
+from .rs_device_resources import IONotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
 class IO_Direction(Enum):
@@ -208,8 +209,7 @@ class IO_SubModule:
     def get(self, idx):
         if 0 <= idx < len(self.itemlist):
             return self.itemlist[idx]
-        else:
-            raise ValueError("Invalid index. Item doesn't exist at the specified index.")
+        raise IONotFoundException
 
     def add(self, data):
         item = update_attributes(IO(), data)
@@ -222,10 +222,8 @@ class IO_SubModule:
 
     def remove(self, idx):
         if 0 <= idx < len(self.itemlist):
-            item = self.itemlist.pop(idx)
-            return item
-        else:
-            raise ValueError("Invalid index. Item doesn't exist at the specified index.")
+            return self.itemlist.pop(idx)
+        raise IONotFoundException
 
     def compute_output_power(self):
         # todo: Get power calculation coefficients

@@ -5,6 +5,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from utilities.common_utils import update_attributes
+from .rs_device_resources import FabricLeNotFoundException, FabricLeDescriptionAlreadyExistsException
 from .rs_message import RsMessage, RsMessageManager
 
 class Glitch_Factor(Enum):
@@ -118,13 +119,12 @@ class Fabric_LE_SubModule:
     def get(self, idx):
         if 0 <= idx < len(self.itemlist):
             return self.itemlist[idx]
-        else:
-            raise ValueError("Invalid index. Fabric LEs doesn't exist at the specified index.")
-        
+        raise FabricLeNotFoundException
+
     def add(self, data):
         # check if the fabric_le already exists based on the description
         if any(item.name == data["name"] for item in self.itemlist):
-            raise ValueError("Fabric LE with same description already exists.")
+            raise FabricLeDescriptionAlreadyExistsException
         item = update_attributes(Fabric_LE(), data)
         self.itemlist.append(item)
         return item
@@ -133,8 +133,7 @@ class Fabric_LE_SubModule:
         if 0 <= idx < len(self.itemlist):
             item = self.itemlist.pop(idx)
             return item
-        else:
-            raise ValueError("Invalid index. Fabric LE doesn't exist at the specified index.")
+        raise FabricLeNotFoundException
         
     def update(self, idx, data):
         item = update_attributes(self.get(idx), data)

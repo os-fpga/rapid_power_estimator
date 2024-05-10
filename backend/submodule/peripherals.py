@@ -7,6 +7,8 @@ from utilities.common_utils import update_attributes
 from .clock import Clock
 from typing import List
 from enum import Enum
+from .rs_device_resources import PeripheralNotFoundException, InvalidPeripheralTypeException, \
+    PeripheralEndpointNotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
 class PeripheralType(Enum):
@@ -416,25 +418,27 @@ class Peripheral_SubModule:
         return self.peripherals
 
     def get_peripherals_by_type(self, periph_type):
+        if periph_type is None:
+            raise InvalidPeripheralTypeException
         return [item for item in self.peripherals if item.peripheral_type == periph_type]
 
     def get_peripheral(self, periph_type, idx):
         items = self.get_peripherals_by_type(periph_type)
         if 0 <= idx < len(items):
             return items[idx]
-        else:
-            raise ValueError("Invalid index. Item doesn't exist at the specified index.")
+        raise PeripheralNotFoundException
 
     def update_peripheral(self, periph_type, idx, data):
         item = update_attributes(self.get_peripheral(periph_type, idx), data)
         return item
 
     def get_endpoint(self, periph_type, idx, endpoint_idx):
+        if periph_type not in (PeripheralType.BCPU, PeripheralType.ACPU, PeripheralType.FPGA_COMPLEX):
+            raise InvalidPeripheralTypeException
         item = self.get_peripheral(periph_type, idx)
         if 0 <= endpoint_idx < len(item.ports):
             return item.ports[endpoint_idx]
-        else:
-            raise ValueError("Invalid index. Endpoint doesn't exist at the specified index.")
+        raise PeripheralEndpointNotFoundException
 
     def update_endpoint(self, periph_type, idx, endpoint_idx, data):
         item = update_attributes(self.get_endpoint(periph_type, idx, endpoint_idx), data)

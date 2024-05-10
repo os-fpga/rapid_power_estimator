@@ -54,10 +54,21 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "publisherName": "Rapid Silicon, Inc.",
+      "icon": "RPE_icon.png",
       "artifactName": "${name}_windows.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "mac": {
       "category": "public.app-category.productivity",
@@ -118,3 +129,4 @@
     "url": "https://github.com/os-fpga/rapid_power_estimator.git"
   }
 }
+

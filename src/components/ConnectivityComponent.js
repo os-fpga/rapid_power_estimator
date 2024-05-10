@@ -8,7 +8,7 @@ import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
 
-function ConnectivityComponent({ device }) {
+function ConnectivityComponent({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
@@ -27,18 +27,19 @@ function ConnectivityComponent({ device }) {
       server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
     }
     if (device === null) return;
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      const fpgaComplex = data.fpga_complex;
-      const { href } = fpgaComplex[0];
-      setName(fpgaComplex[0].name);
-      server.GET(server.peripheralPath(device, href), (fpgaComplexData) => {
-        fetchEndPoint(`${href}/${fpgaComplexData.ports[0].href}`, setEp0);
-        fetchEndPoint(`${href}/${fpgaComplexData.ports[1].href}`, setEp1);
-        fetchEndPoint(`${href}/${fpgaComplexData.ports[2].href}`, setEp2);
-        fetchEndPoint(`${href}/${fpgaComplexData.ports[3].href}`, setEp3);
-      });
+    if (peripherals === null) return;
+    const fpgaComplex = peripherals.fpga_complex;
+    const { href } = fpgaComplex[0];
+    setName(fpgaComplex[0].name);
+    server.GET(server.peripheralPath(device, href), (fpgaComplexData) => {
+      fetchEndPoint(`${href}/${fpgaComplexData.ports[0].href}`, setEp0);
+      fetchEndPoint(`${href}/${fpgaComplexData.ports[1].href}`, setEp1);
+      fetchEndPoint(`${href}/${fpgaComplexData.ports[2].href}`, setEp2);
+      fetchEndPoint(`${href}/${fpgaComplexData.ports[3].href}`, setEp3);
     });
-  }, [device]);
+  }, [device, peripherals]);
+
+  React.useEffect(() => update(), [update]);
 
   React.useEffect(() => {
     subscribe('interconnectChanged', update);
@@ -57,10 +58,7 @@ function ConnectivityComponent({ device }) {
   }
 
   return (
-    <State
-      messages={socState.fpga_complex}
-      baseClass={getBaseName()}
-    >
+    <State messages={socState.fpga_complex} baseClass={getBaseName()}>
       <CPUComponent
         title={Title}
         power={power.total_noc_interconnect_power}

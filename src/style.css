@@ -51,12 +51,14 @@
     display: flex;
     flex-direction: column;
     width: fit-content;
-    /* should be 8px, for some reason it doen't work, TODO */
-    row-gap: 24px;
+    row-gap: 8px;
+    height: 100%;
 }
 
 .top-l2-col2-elem {
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .power-tables {

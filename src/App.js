@@ -58,6 +58,8 @@ function App() {
   const { setClocks } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
+  const [peripherals, setPeripherals] = React.useState(null);
+  const [memoryEnable, setMemoryEnable] = React.useState(true);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -104,6 +106,10 @@ function App() {
     setDevice(newDevice);
     updateGlobalState(newDevice);
     updateTotalPower(newDevice);
+    server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
+      setMemoryEnable(data.memory !== undefined);
+      setPeripherals(data);
+    });
     if (newDevice !== null) {
       server.GET(server.api.consumption(server.Elem.clocking, newDevice), (data) => {
         const total = data.total_clock_block_power
@@ -162,6 +168,7 @@ function App() {
             <SOCComponent
               device={device}
               setOpenedTable={setOpenedTable}
+              peripherals={peripherals}
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
@@ -174,9 +181,13 @@ function App() {
                   tableOpen={setOpenedTable}
                 />
               </div>
-              <div onClick={() => setOpenedTable(Table.Memory)}>
-                <MemoryComponent device={device} />
-              </div>
+              {
+                memoryEnable && (
+                <div onClick={() => setOpenedTable(Table.Memory)}>
+                  <MemoryComponent device={device} peripherals={peripherals} />
+                </div>
+                )
+              }
             </div>
           </div>
         </div>
@@ -272,7 +283,7 @@ function App() {
         }
         {
         openedTable === Table.Memory
-        && <MemoryTable device={device} />
+        && <MemoryTable device={device} peripherals={peripherals} />
         }
         {
         openedTable === Table.DMA

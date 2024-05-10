@@ -15,7 +15,7 @@ import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
-function MemoryTable({ device }) {
+function MemoryTable({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -55,10 +55,8 @@ function MemoryTable({ device }) {
   if (dev !== device) {
     setDev(device);
     if (device !== null) {
-      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        setHref(data.memory);
-        fetchData(data.memory);
-      });
+      setHref(peripherals.memory);
+      fetchData(peripherals.memory);
     }
   }
 
@@ -154,6 +152,7 @@ function MemoryTable({ device }) {
 
 MemoryTable.propTypes = {
   device: PropTypes.string,
+  peripherals: PropTypes.oneOfType([PropTypes.object]).isRequired,
 };
 
 MemoryTable.defaultProps = {

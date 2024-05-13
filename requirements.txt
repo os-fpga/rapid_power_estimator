@@ -3,3 +3,4 @@ marshmallow
 pytest
 pyinstaller
 flasgger
+flask-restful

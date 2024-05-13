@@ -9,6 +9,7 @@ from .dsp import DSP_SubModule, DSP
 from .bram import BRAM_SubModule, BRAM, BRAM_Type, PortProperties
 from .io import IO_SubModule, IO
 from .peripherals import Peripheral_SubModule
+from utilities.common_utils import update_attributes
 from dataclasses import dataclass, field
 
 @dataclass
@@ -21,6 +22,31 @@ class RsDevice_output:
     typical: RsDevicePowerThermal = field(default_factory=RsDevicePowerThermal)
     worsecase: RsDevicePowerThermal = field(default_factory=RsDevicePowerThermal)
 
+@dataclass
+class Ambient:
+    typical: float = field(default=25.0)
+    worsecase: float = field(default=80.0)
+
+@dataclass
+class ThermalSpec:
+    theta_ja: float = field(default=10.0)
+    ambient: Ambient = field(default_factory=Ambient)
+
+@dataclass
+class TypicalDynamicScaling:
+    fpga_complex: float = field(default=25.0)
+    processing_complex: float = field(default=25.0)
+
+@dataclass
+class PowerSpec:
+    budget: float = field(default=0.5)
+    typical_dynamic_scaling: TypicalDynamicScaling = field(default_factory=TypicalDynamicScaling)
+
+@dataclass
+class Specification:
+    thermal: ThermalSpec = field(default_factory=ThermalSpec)
+    power: PowerSpec = field(default_factory=PowerSpec)
+
 class RsDevice:
 
     def __init__(self, device):
@@ -32,6 +58,7 @@ class RsDevice:
         self.package = self.resources.get_package()
         self.speedgrade = self.resources.get_speedgrade()
         self.temperature_grade = self.resources.get_temperature_grade()
+        self.specification = Specification()
         self.output = RsDevice_output()
 
         # fabric logic element module
@@ -86,3 +113,6 @@ class RsDevice:
 
     def get_power_consumption(self):
         return self.output
+
+    def update_spec(self, data):
+        return update_attributes(self.specification, data['specification'])

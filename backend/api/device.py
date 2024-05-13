@@ -2,26 +2,46 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-from flask import Blueprint
+from flask import Blueprint, request
 from flask_restful import Api, Resource
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, ValidationError
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import DeviceNotFoundException
 from submodule.rs_message import RsMessageType
-from .errors import DeviceNotExistsError, InternalServerError
+from .errors import DeviceNotExistsError, InternalServerError, SchemaValidationError
 from .errors import errors
 
 #---------------------------------------------------------------------------#
 # endpoints                       | methods         | classes               #
 #---------------------------------------------------------------------------# 
 # devices                         | get             | DevicesApi            #
-# devices/<device_id>             | get             | DeviceApi             #
+# devices/<device_id>             | get, patch      | DeviceApi             #
 # devices/<device_id>/consumption | get             | DeviceConsumptionApi  #
 #---------------------------------------------------------------------------#
 
 class MessageSchema(Schema):
     type = fields.Enum(RsMessageType, by_value=True)
     text = fields.Str()
+
+class AmbientSchema(Schema):
+    typical = fields.Number()
+    worsecase = fields.Number()
+
+class ThermalSpecSchema(Schema):
+    theta_ja = fields.Number()
+    ambient = fields.Nested(AmbientSchema)
+
+class TypicalDynamicScalingSchema(Schema):
+    fpga_complex = fields.Number()
+    processing_complex = fields.Number()
+
+class PowerSpecSchema(Schema):
+    budget = fields.Number()
+    typical_dynamic_scaling = fields.Nested(TypicalDynamicScalingSchema)
+
+class SpecificationSchema(Schema):
+    thermal = fields.Nested(ThermalSpecSchema)
+    power = fields.Nested(PowerSpecSchema)
 
 class DeviceSchema(Schema):
     id = fields.Str()
@@ -30,6 +50,7 @@ class DeviceSchema(Schema):
     package = fields.Str()
     speedgrade = fields.Str()
     temperature_grade = fields.Str()
+    specification = fields.Nested(SpecificationSchema)
 
 class DevicePowerThermalSchema(Schema):
     total_power = fields.Number()
@@ -103,6 +124,44 @@ class DevicesApi(Resource):
                         $ref: '#/definitions/DevicePowerThermal'
                     typical:
                         $ref: '#/definitions/DevicePowerThermal'
+            Ambient:
+                type: object
+                properties:
+                    typical:
+                        type: number
+                    worsecase:
+                        type: number
+            TypicalDynamicScaling:
+                type: object
+                properties:
+                    fpga_complex:
+                        type: number
+                    processing_complex:
+                        type: number
+            Thermal:
+                type: object
+                properties:
+                    theta_ja:
+                        type: number
+                    ambient:
+                        $ref: '#/definitions/Ambient'
+            Power:
+                type: object
+                properties:
+                    budget:
+                        type: number
+                    typical_dynamic_scaling:
+                        $ref: '#/definitions/TypicalDynamicScaling'
+            Specification:
+                type: object
+                properties:
+                    specification:
+                        type: object
+                        properties:
+                            thermal:
+                                $ref: '#/definitions/Thermal'
+                            power:
+                                $ref: '#/definitions/Power'
         responses:
             200:
                 description: Successfully returned a list of devices
@@ -135,7 +194,9 @@ class DeviceApi(Resource):
             200:
                 description: Successfully returned the details of a device
                 schema:
-                    $ref: '#/definitions/Device'
+                    allOf:
+                        - $ref: '#/definitions/Device'
+                        - $ref: '#/definitions/Specification'
             400:
                 description: Invalid request
                 schema:
@@ -146,6 +207,48 @@ class DeviceApi(Resource):
             device = device_mgr.get_device(device_id)
             schema = DeviceSchema()
             return schema.dump(device)
+        except DeviceNotFoundException as e:
+           raise DeviceNotExistsError
+        except Exception as e:
+           raise InternalServerError
+
+    def patch(self, device_id : str):
+        """
+        This is an endpoint that updates the power and thermal spec of a device
+        ---
+        tags:
+            - Device
+        description: Update the power and thermal spec of a device.
+        parameters:
+            - name: device_id
+              in: path
+              type: string
+              required: true
+            - name: spec
+              in: body
+              description: Update the power and thermal spec of a device
+              schema:
+                $ref: '#/definitions/Specification'
+        responses:
+            200:
+                description: Successfully updated the power and thermal spec
+                schema:
+                    allOf:
+                        - $ref: '#/definitions/Device'
+                        - $ref: '#/definitions/Specification'
+            400:
+                description: Invalid request
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+        """
+        try:
+            device_mgr = RsDeviceManager.get_instance()
+            device = device_mgr.get_device(device_id)
+            schema = DeviceSchema()
+            device.update_spec(schema.load(request.json))
+            return schema.dump(device), 200
+        except ValidationError as e:
+            raise SchemaValidationError
         except DeviceNotFoundException as e:
            raise DeviceNotExistsError
         except Exception as e:

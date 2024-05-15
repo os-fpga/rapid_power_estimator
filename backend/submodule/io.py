@@ -165,7 +165,7 @@ class IO_Usage_Allocation:
 
 @dataclass
 class IO_Usage:
-    type : str = field(default='')
+    type : IO_Bank_Type = field(default=IO_Bank_Type.HP)
     total_banks_available : int = field(default=0)
     total_io_available : int = field(default=0)
     usage : List[IO_Usage_Allocation] = field(default_factory=list)
@@ -184,8 +184,8 @@ class IO_SubModule:
         self.total_interconnect_power = 0.0
         self.total_on_die_termination_power = 0.0
         self.io_usage = [
-            IO_Usage(type="HP", usage=[IO_Usage_Allocation(voltage=1.2), IO_Usage_Allocation(voltage=1.5), IO_Usage_Allocation(voltage=1.8)]),
-            IO_Usage(type="HR", usage=[IO_Usage_Allocation(voltage=1.8), IO_Usage_Allocation(voltage=2.5), IO_Usage_Allocation(voltage=3.3)])
+            IO_Usage(type=IO_Bank_Type.HP, usage=[IO_Usage_Allocation(voltage=1.2, banks_used=1), IO_Usage_Allocation(voltage=1.5, banks_used=1), IO_Usage_Allocation(voltage=1.8, banks_used=1)]),
+            IO_Usage(type=IO_Bank_Type.HR, usage=[IO_Usage_Allocation(voltage=1.8, banks_used=1), IO_Usage_Allocation(voltage=2.5, banks_used=1), IO_Usage_Allocation(voltage=3.3, banks_used=1)])
         ]
         self.io_on_die_termination = [
             IO_On_Die_Termination(bank_number=1),

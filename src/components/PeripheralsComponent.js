@@ -1,5 +1,5 @@
 import React from 'react';
-import { fixed, percentage } from '../utils/common';
+import { fixed } from '../utils/common';
 import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
@@ -40,7 +40,7 @@ function PeripheralsComponent({ device }) {
   const [uart1, setUart1] = React.useState(0);
   const [gpio, setGPIO] = React.useState(0);
   const { selectedItem } = useSelection();
-  const { power, dynamicPower } = useSocTotalPower();
+  const { totalConsumption } = useSocTotalPower();
   const { socState } = useGlobalState();
 
   function fetchPeripherals(deviceId, key, url) {
@@ -78,16 +78,18 @@ function PeripheralsComponent({ device }) {
     return (selectedItem === Title) ? 'periph-top selected' : 'periph-top';
   }
 
+  const peripherals = totalConsumption.processing_complex.dynamic.components.find((elem) => elem.type === 'peripherals');
+
   return (
     <div className={getClassName()}>
       <div className="periph-row-head">
         <div className="periph-title bold-text-title">{Title}</div>
         <div className="peripherals-power grayed-text">
-          {fixed(power.total_peripherals_power)}
+          {fixed(peripherals ? peripherals.power : 0)}
           {' W'}
         </div>
         <div className=" peripherals-power grayed-text">
-          {percentage(power.total_peripherals_power, dynamicPower)}
+          {fixed(peripherals ? peripherals.percentage : 0, 0)}
           {' %'}
         </div>
       </div>

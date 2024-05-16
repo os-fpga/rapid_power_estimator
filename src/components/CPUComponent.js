@@ -9,7 +9,7 @@ const text = [
 ];
 
 function CPUComponent({
-  title, power, percent = '0', name, endpointText = text, ep0 = 0, ep1 = 0, ep2 = 0, ep3 = 0,
+  title, power, percent = 0, name, endpointText = text, ep0 = 0, ep1 = 0, ep2 = 0, ep3 = 0,
 }) {
   return (
     <div className="cpu-component-top">
@@ -20,7 +20,7 @@ function CPUComponent({
           {' W'}
         </div>
         <div className="cpu-component-power grayed-text">
-          {percent}
+          {fixed(percent, 0)}
           {' %'}
         </div>
       </div>
@@ -62,7 +62,7 @@ function CPUComponent({
 CPUComponent.propTypes = {
   title: PropTypes.string.isRequired,
   power: PropTypes.number.isRequired,
-  percent: PropTypes.string.isRequired,
+  percent: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   endpointText: PropTypes.arrayOf(PropTypes.string),
   ep0: PropTypes.number.isRequired,

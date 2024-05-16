@@ -11,10 +11,11 @@ import {
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function ClockingTable({ device, totalPowerCallback }) {
+function ClockingTable({ device }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -23,6 +24,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   const [powerTable, setPowerTable] = React.useState([]);
   const { setClocks } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
+  const { updateTotalPower } = useSocTotalPower();
 
   const mainTableHeader = [
     '', 'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
@@ -39,7 +41,6 @@ function ClockingTable({ device, totalPowerCallback }) {
             + consumption.total_clock_interconnect_power
             + consumption.total_pll_power;
           setPowerTotal(total);
-          totalPowerCallback(total);
           setPowerTable([
             [
               'Clocks',
@@ -69,6 +70,7 @@ function ClockingTable({ device, totalPowerCallback }) {
   function modifyDataHandler() {
     fetchClockData(device);
     updateGlobalState(device);
+    updateTotalPower(device);
   }
 
   function modifyRow(index, row) {

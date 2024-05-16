@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PeripheralsComponent from './PeripheralsComponent';
-import { Table, percentage } from '../utils/common';
+import { Table } from '../utils/common';
 import TitleComponent from './TitleComponent';
 import ABCPUComponent from './ABCPUComponent';
 import DMAComponent from './DMAComponent';
@@ -15,14 +15,17 @@ import './style/SOCTable.css';
 
 function SOCComponent({ device, setOpenedTable, peripherals }) {
   const { selectedItem } = useSelection();
-  const {
-    power, dynamicPower, staticPower,
-  } = useSocTotalPower();
+  const { totalConsumption } = useSocTotalPower();
   const { socState } = useGlobalState();
 
   function getBaseName(item) {
     return (selectedItem === item) ? 'clickable selected' : 'clickable';
   }
+
+  const processingComplex = totalConsumption.processing_complex;
+
+  const acpu = processingComplex.dynamic.components.find((elem) => elem.type === 'acpu');
+  const bcpu = processingComplex.dynamic.components.find((elem) => elem.type === 'bcpu');
 
   return (
     <div className="top-l2-col1">
@@ -33,8 +36,8 @@ function SOCComponent({ device, setOpenedTable, peripherals }) {
               device={device}
               title="ACPU"
               index="acpu"
-              power={power.total_acpu_power}
-              percent={percentage(power.total_acpu_power, dynamicPower)}
+              power={acpu ? acpu.power : 0}
+              percent={acpu ? acpu.percentage : 0}
             />
           </State>
         </div>
@@ -44,8 +47,8 @@ function SOCComponent({ device, setOpenedTable, peripherals }) {
               device={device}
               title="BCPU"
               index="bcpu"
-              power={power.total_bcpu_power}
-              percent={percentage(power.total_bcpu_power, dynamicPower)}
+              power={bcpu ? bcpu.power : 0}
+              percent={bcpu ? bcpu.percentage : 0}
             />
           </State>
         </div>
@@ -53,8 +56,18 @@ function SOCComponent({ device, setOpenedTable, peripherals }) {
           <TitleComponent
             title="SOC"
             staticText="Static"
-            dynamicPower={dynamicPower}
-            staticPower={staticPower}
+            dynamicPower={{
+              power: processingComplex.dynamic.power,
+              percentage: processingComplex.dynamic.percentage,
+            }}
+            staticPower={{
+              power: processingComplex.static.power,
+              percentage: processingComplex.static.percentage,
+            }}
+            total={{
+              power: processingComplex.total_power,
+              percentage: processingComplex.total_percentage,
+            }}
           />
         </div>
       </div>

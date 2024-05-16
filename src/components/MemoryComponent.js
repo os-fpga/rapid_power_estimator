@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as server from '../utils/serverAPI';
-import { fixed, percentage } from '../utils/common';
+import { fixed } from '../utils/common';
 import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
@@ -29,7 +29,7 @@ function MemoryComponent({ device, peripherals }) {
     },
   ]);
   const { selectedItem } = useSelection();
-  const { power, dynamicPower } = useSocTotalPower();
+  const { totalConsumption } = useSocTotalPower();
   const { socState } = useGlobalState();
 
   const update = React.useCallback(() => {
@@ -66,16 +66,18 @@ function MemoryComponent({ device, peripherals }) {
     return (selectedItem === Title) ? 'mem-container selected' : 'mem-container';
   }
 
+  const memory = totalConsumption.processing_complex.dynamic.components.find((elem) => elem.type === 'memory');
+
   return (
     <State messages={socState.memory} baseClass={getBaseClass()}>
       <div className="mem-line">
         <div className="bold-text">{Title}</div>
         <div className="grayed-text bold-text mem-value">
-          {fixed(power.total_memory_power)}
+          {fixed(memory ? memory.power : 0)}
           {' W'}
         </div>
         <div className="grayed-text bold-text mem-value">
-          {percentage(power.total_memory_power, dynamicPower)}
+          {fixed(memory ? memory.percentage : 0, 0)}
           {' %'}
         </div>
       </div>

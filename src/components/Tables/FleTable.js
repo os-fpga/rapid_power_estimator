@@ -11,10 +11,11 @@ import {
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function FleTable({ device, totalPowerCallback }) {
+function FleTable({ device }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -23,6 +24,7 @@ function FleTable({ device, totalPowerCallback }) {
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
+  const { updateTotalPower } = useSocTotalPower();
 
   function fetchFleData(deviceId) {
     if (deviceId !== null) {
@@ -31,7 +33,6 @@ function FleTable({ device, totalPowerCallback }) {
         server.GET(server.api.consumption(server.Elem.fle, deviceId), (consumption) => {
           const total = consumption.total_block_power + consumption.total_interconnect_power;
           setPowerTotal(total);
-          totalPowerCallback(total);
           setPowerTable([
             [
               'LUT6',
@@ -60,6 +61,7 @@ function FleTable({ device, totalPowerCallback }) {
   function modifyDataHandler() {
     fetchFleData(device);
     updateGlobalState(device);
+    updateTotalPower(device);
   }
 
   function modifyRow(index, row) {

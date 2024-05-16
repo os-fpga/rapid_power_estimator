@@ -401,6 +401,30 @@ class Peripheral_SubModule:
             Fpga_Complex(name="FPGA Complex", ports=[Endpoint(), Endpoint(), Endpoint(), Endpoint()])
         ]
 
+    def get_processor_output_power(self) -> float:
+        # todo
+        return 0.347
+
+    def get_peripherals_output_power(self) -> float:
+        # todo
+        return 0.024
+
+    def get_bcpu_output_power(self) -> float:
+        # todo
+        return 0.013
+
+    def get_memory_output_power(self) -> float:
+        # todo
+        return 0.001
+
+    def get_dma_output_power(self) -> float:
+        # todo
+        return 0.0001
+
+    def get_noc_output_power(self) -> float:
+        # todo
+        return 0.003
+
     def get_power_consumption(self):
         # todo
         return 0.347, 0.024, 0.013, 0.001, 0.0001, 0.003

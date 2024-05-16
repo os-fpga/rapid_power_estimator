@@ -4,7 +4,6 @@
 #
 import numpy as np
 import math
-import sys
 from .rs_device_resources import RsDeviceResources, ModuleType
 from .clock import Clock_SubModule, Clock
 from .fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
@@ -16,14 +15,67 @@ from utilities.common_utils import update_attributes
 from dataclasses import dataclass, field
 
 @dataclass
-class RsDevicePowerThermal:
+class TotalPowerTemperature:
+    type: str = field(default='')
+    power: float = field(default=0.0)
+    temperature: float = field(default=0.0)
+
+@dataclass
+class DeviceComponent:
+    type: str = field(default='')
+    power: float = field(default=0.0)
+    percentage: float = field(default=0.0)
+
+@dataclass
+class DeviceDynamic:
+    components: [DeviceComponent] = field(default_factory=list)
+    power: float = field(default=0.0)
+    percentage: float = field(default=0.0)
+
+    def compute(self) -> None:
+        self.power = sum(c.power for c in self.components)
+        for c in self.components:
+            if self.power != 0:
+                c.percentage = c.power / self.power * 100.0
+            else:
+                c.percentage = 0.0
+
+@dataclass
+class DeviceStatic:
+    components: [DeviceComponent] = field(default_factory=list)
+    power: float = field(default=0.0)
+    percentage: float = field(default=0.0)
+
+@dataclass
+class DeviceComplex:
+    dynamic: DeviceDynamic = field(default_factory=DeviceDynamic)
+    static: DeviceStatic = field(default_factory=DeviceStatic)
     total_power: float = field(default=0.0)
-    thermal: float = field(default=0.0)
+    total_percentage: float = field(default=0.0)
+
+    def compute(self) -> None:
+        self.total_power = self.dynamic.power + self.static.power
+        if self.total_power > 0:
+            self.dynamic.percentage = self.dynamic.power / self.total_power * 100.0
+            self.static.percentage = self.static.power / self.total_power * 100.0
+        else:
+            self.dynamic.percentage = 0.0
+            self.static.percentage = 0.0
 
 @dataclass
 class RsDevice_output:
-    typical: RsDevicePowerThermal = field(default_factory=RsDevicePowerThermal)
-    worsecase: RsDevicePowerThermal = field(default_factory=RsDevicePowerThermal)
+    total_power_temperature: [TotalPowerTemperature] = field(default_factory=list)
+    processing_complex: DeviceComplex = field(default_factory=DeviceComplex)
+    fpga_complex: DeviceComplex = field(default_factory=DeviceComplex)
+
+    def compute(self) -> None:
+        overall_power = self.processing_complex.total_power + self.fpga_complex.total_power
+        if overall_power > 0:
+            self.processing_complex.total_percentage = self.processing_complex.total_power / overall_power * 100
+            self.fpga_complex.total_percentage = self.fpga_complex.total_power / overall_power * 100
+        else:
+            self.processing_complex.total_percentage = 0.0
+            self.fpga_complex.total_percentage = 0.0
 
 @dataclass
 class Ambient:
@@ -37,8 +89,8 @@ class ThermalSpec:
 
 @dataclass
 class TypicalDynamicScaling:
-    fpga_complex: float = field(default=25.0)
-    processing_complex: float = field(default=25.0)
+    fpga_complex: float = field(default=0.25)
+    processing_complex: float = field(default=0.25)
 
 @dataclass
 class PowerSpec:
@@ -86,6 +138,36 @@ class StaticPowerResult():
     temperature: float = field(default=0.0)
     next_temperature: float = field(default=0.0)
 
+    def get_total_power(self) -> float:
+        total = 0.0
+        for key, value in self.__dict__.items():
+            if key == 'temperature' or key == 'next_temperature':
+                continue
+            total += value
+        return total
+
+    def get_processing_total_power(self) -> float:
+        total = 0.0
+        total += self.NOC
+        total += self.Mem_SS
+        total += self.A45
+        total += self.Config
+        total += self.VCC_BOOT_IO
+        total += self.VCC_DDR_IO
+        total += self.VCC_SOC_IO
+        total += self.VCC_GIGE_IO
+        total += self.VCC_USB_IO
+        total += self.VCC_BOOT_AUX
+        total += self.VCC_SOC_AUX
+        total += self.VCC_GIGE_AUX
+        total += self.VCC_USB_AUX
+        total += self.VCC_RC_OSC
+        total += self.VCC_PUF
+        return total
+
+    def get_fpga_total_power(self) -> float:
+        return self.get_total_power() - self.get_processing_total_power()
+
 class RsDevice:
 
     def __init__(self, device):
@@ -98,7 +180,27 @@ class RsDevice:
         self.speedgrade = self.resources.get_speedgrade()
         self.temperature_grade = self.resources.get_temperature_grade()
         self.specification = Specification()
-        self.output = RsDevice_output()
+        self.output = RsDevice_output(
+            total_power_temperature=[TotalPowerTemperature('worsecase'), TotalPowerTemperature(type='typical')],
+            fpga_complex=DeviceComplex(dynamic=DeviceDynamic(components=[
+                DeviceComponent(type='clocking'),
+                DeviceComponent(type='fabric_le'),
+                DeviceComponent(type='bram'),
+                DeviceComponent(type='dsp'),
+                DeviceComponent(type='io')
+            ])),
+            processing_complex=DeviceComplex(dynamic=DeviceDynamic(components=[
+                DeviceComponent(type='acpu'),
+                DeviceComponent(type='peripherals'),
+                DeviceComponent(type='bcpu'),
+                DeviceComponent(type='memory'),
+                DeviceComponent(type='dma'),
+                DeviceComponent(type='noc')
+            ]))
+        )
+
+        # static power output result for worse & typical cases
+        self.static_power_output = [StaticPowerResult(), StaticPowerResult()]
 
         # fabric logic element module
         self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
@@ -139,17 +241,88 @@ class RsDevice:
     def get_module(self, modtype):
         return self.resources.get_module(modtype)
 
+    def update_dynamic_power_output(self, cmplx : DeviceComplex, typ : str, power : float) -> None:
+        for elem in cmplx.dynamic.components:
+            if elem.type == typ:
+                elem.power = power
+
+    def get_module_name(self, module_type : ModuleType) -> str:
+        switch = {
+            ModuleType.CLOCKING  : "clocking",
+            ModuleType.FABRIC_LE : "fabric_le",
+            ModuleType.BRAM      : "bram",
+            ModuleType.DSP       : "dsp",
+            ModuleType.IO        : "io",
+        }
+        return switch.get(module_type, None)
+
+    def get_processing_total_static_power(self, worsecase : bool) -> float:
+        return self.static_power_output[0 if worsecase else 1].get_processing_total_power()
+
+    def get_fpga_total_static_power(self, worsecase : bool) -> float:
+        return self.static_power_output[0 if worsecase else 1].get_fpga_total_power()
+
+    def get_total_static_power(self, worsecase : bool) -> float:
+        return self.static_power_output[0 if worsecase else 1].get_total_power()
+
+    def get_junction_temperature(self, worsecase : bool) -> float:
+        return self.static_power_output[0 if worsecase else 1].next_temperature
+
+    def get_processing_total_dynamic_power(self, worsecase : bool) -> float:
+        total_power = self.output.processing_complex.dynamic.power
+        if worsecase == False:
+            total_power *= (1.0 - self.specification.power.typical_dynamic_scaling.processing_complex)
+        return total_power
+
+    def get_fpga_total_dynamic_power(self, worsecase : bool) -> float:
+        total_power = self.output.fpga_complex.dynamic.power
+        if worsecase == False:
+            total_power *= (1.0 - self.specification.power.typical_dynamic_scaling.fpga_complex)
+        return total_power
+
+    def get_total_dynamic_power(self, worsecase : bool) -> float:
+        return self.get_processing_total_dynamic_power(worsecase) + \
+            self.get_fpga_total_dynamic_power(worsecase)
+
     def compute_output_power(self):
-        self.output.typical.total_power = 0.0
-        self.output.worsecase.total_power = 0.0
-        for mod in self.resources.get_modules():
-            if mod is not None:
-                mod.compute_output_power()
-                # todo: sum all module power consumption
-                # todo: calculate static power
-                self.output.typical.total_power += mod.total_block_power + mod.total_interconnect_power
-                self.output.worsecase.total_power += mod.total_block_power + mod.total_interconnect_power
+        # compute total dynamic power of each sub modules (exclude peripherals)
+        for modtype in (ModuleType.CLOCKING, ModuleType.FABRIC_LE, ModuleType.BRAM, ModuleType.DSP, \
+                ModuleType.IO):
+            module = self.resources.get_module(modtype)
+            module.compute_output_power()
+            power = module.get_total_output_power()
+            self.update_dynamic_power_output(self.output.fpga_complex, \
+                self.get_module_name(modtype), power)
+
+        # compute total dynamic power for each sub-components of the peripherals module
+        periph_mod = self.resources.get_module(ModuleType.SOC_PERIPHERALS)
+        periph_mod.compute_output_power()
+        self.update_dynamic_power_output(self.output.processing_complex, 'acpu', periph_mod.get_processor_output_power())
+        self.update_dynamic_power_output(self.output.processing_complex, 'peripherals', periph_mod.get_peripherals_output_power())
+        self.update_dynamic_power_output(self.output.processing_complex, 'bcpu', periph_mod.get_bcpu_output_power())
+        self.update_dynamic_power_output(self.output.processing_complex, 'memory', periph_mod.get_memory_output_power())
+        self.update_dynamic_power_output(self.output.processing_complex, 'dma', periph_mod.get_dma_output_power())
+        self.update_dynamic_power_output(self.output.processing_complex, 'noc', periph_mod.get_noc_output_power())
+
+        # compute the percentage fields by the sum of the powers of the modules
+        self.output.processing_complex.dynamic.compute()
+        self.output.fpga_complex.dynamic.compute()
+
+        # compute static power output and junction temperature
         self.compute_static_power()
+        self.output.processing_complex.static.power = self.get_processing_total_static_power(True)
+        self.output.fpga_complex.static.power = self.get_fpga_total_static_power(True)
+        self.output.processing_complex.compute()
+        self.output.fpga_complex.compute()
+        self.output.compute()
+
+        # update total power output and junction temperature for worse and typical cases
+        self.output.total_power_temperature[0].temperature = self.get_junction_temperature(True)
+        self.output.total_power_temperature[0].power = self.get_total_dynamic_power(True) + \
+            self.get_total_static_power(True)
+        self.output.total_power_temperature[1].temperature = self.get_junction_temperature(False)
+        self.output.total_power_temperature[1].power = self.get_total_dynamic_power(False) + \
+            self.get_total_static_power(False)
 
     def get_power_consumption(self):
         return self.output
@@ -374,9 +547,33 @@ class RsDevice:
         )
         return result
 
+    def compute_power_junction_temperature(self, temperature : float, theta_ja : float, dynamic_power : float, \
+            worsecase : bool, N : int = 4) -> StaticPowerResult:
+        next_temperature = temperature
+        res = None
+        for i in range(N):
+            res = self.compute(next_temperature, worsecase)
+            res.next_temperature = temperature + (theta_ja * (res.get_total_power() + dynamic_power))
+            next_temperature = res.next_temperature
+            # print("[DEBUG]", i, temperature, theta_ja, dynamic_power, worsecase, next_temperature, \
+            #     res.get_total_power(), \
+            #     res.get_processing_total_power(), \
+            #     res.get_fpga_total_power(), \
+            #     # res, \
+            #     file=sys.stderr)
+        return res
+
     def compute_static_power(self):
-        # todo: remove after testing
-        wc_result = self.compute(self.specification.thermal.ambient.worsecase, True)
-        typical_result = self.compute(self.specification.thermal.ambient.typical, False)
-        print("[debug] wc", wc_result, file=sys.stderr)
-        print("[debug] typical", typical_result, file=sys.stderr)
+        # static power & junction temperature for worse case
+        self.static_power_output[0] = self.compute_power_junction_temperature( \
+            self.specification.thermal.ambient.worsecase, \
+            self.specification.thermal.theta_ja, \
+            self.get_total_dynamic_power(True),
+            True)
+
+        # static power & junction temperature for typical case
+        self.static_power_output[1] = self.compute_power_junction_temperature( \
+            self.specification.thermal.ambient.typical, \
+            self.specification.thermal.theta_ja, \
+            self.get_total_dynamic_power(False),
+            False)

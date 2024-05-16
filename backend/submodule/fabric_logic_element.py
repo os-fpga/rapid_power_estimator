@@ -99,6 +99,9 @@ class Fabric_LE_SubModule:
         self.total_interconnect_power = 0.0
         self.itemlist = itemlist
 
+    def get_total_output_power(self) -> float:
+        return sum(self.get_power_consumption())
+
     def get_power_consumption(self):
         return self.total_block_power, self.total_interconnect_power
 

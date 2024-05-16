@@ -197,6 +197,9 @@ class IO_SubModule:
     def get_resources(self):
         return self.io_usage, self.io_on_die_termination
 
+    def get_total_output_power(self) -> float:
+        return sum(self.get_power_consumption())
+
     def get_power_consumption(self):
         return self.total_block_power, self.total_interconnect_power, self.total_on_die_termination_power
 

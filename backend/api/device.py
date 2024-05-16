@@ -52,13 +52,35 @@ class DeviceSchema(Schema):
     temperature_grade = fields.Str()
     specification = fields.Nested(SpecificationSchema)
 
-class DevicePowerThermalSchema(Schema):
-    total_power = fields.Number()
-    thermal = fields.Number()
+class DeviceTotalPowerTemperatureSchema(Schema):
+    type = fields.Str()
+    power = fields.Number()
+    temperature = fields.Number()
+
+class DeviceComponentSchema(Schema):
+    type = fields.Str()
+    power = fields.Number()
+    percentage = fields.Number()
+
+class DeviceDynamicSchema(Schema):
+    components = fields.Nested(DeviceComponentSchema, many=True)
+    power = fields.Number()
+    percentage = fields.Number()
+
+class DeviceStaticSchema(Schema):
+    power = fields.Number()
+    percentage = fields.Number()
+
+class DeviceComplexSchema(Schema):
+    dynamic = fields.Nested(DeviceDynamicSchema)
+    static = fields.Nested(DeviceStaticSchema)
+    total_power = fields.Number(default=0.0)
+    total_percentage = fields.Number(default=0.0)
 
 class DeviceConsumptionSchema(Schema):
-    worsecase = fields.Nested(DevicePowerThermalSchema)
-    typical = fields.Nested(DevicePowerThermalSchema)
+    total_power_temperature = fields.Nested(DeviceTotalPowerTemperatureSchema, many=True)
+    processing_complex = fields.Nested(DeviceComplexSchema)
+    fpga_complex = fields.Nested(DeviceComplexSchema)
 
 class DevicesApi(Resource):
     def get(self):
@@ -110,20 +132,64 @@ class DevicesApi(Resource):
                         type: string
                     temperature_grade:
                         type: string
-            DevicePowerThermal:
+            DeviceTotalPowerTemperature:
                 type: object
                 properties:
+                    type:
+                        type: string
+                    power:
+                        type: number
+                    temperature:
+                        type: number
+            DeviceComponent:
+                type: object
+                properties:
+                    type:
+                        type: string
+                    power:
+                        type: number
+                    percentage:
+                        type: number
+            DeviceDynamic:
+                type: object
+                properties:
+                    components:
+                        type: array
+                        items:
+                            $ref: '#/definitions/DeviceComponent'
+                    power:
+                        type: number
+                    percentage:
+                        type: number
+            DeviceStatic:
+                type: object
+                properties:
+                    power:
+                        type: number
+                    percentage:
+                        type: number
+            DeviceComplex:
+                type: object
+                properties:
+                    dynamic:
+                        $ref: '#/definitions/DeviceDynamic'
+                    static:
+                        $ref: '#/definitions/DeviceStatic'
                     total_power:
                         type: number
-                    thermal:
+                    total_percentage:
                         type: number
             DeviceConsumption:
                 type: object
                 properties:
-                    worsecase:
-                        $ref: '#/definitions/DevicePowerThermal'
-                    typical:
-                        $ref: '#/definitions/DevicePowerThermal'
+                    total_power_temperature:
+                        type: array
+                        items:
+                            $ref: '#/definitions/DeviceTotalPowerTemperature'
+                    processing_complex:
+                        $ref: '#/definitions/DeviceComplex'
+                    fpga_complex:
+                        $ref: '#/definitions/DeviceComplex'
             Ambient:
                 type: object
                 properties:

@@ -2,7 +2,6 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
-import { percentage } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
@@ -16,7 +15,7 @@ function ConnectivityComponent({ device, peripherals }) {
   const [ep2, setEp2] = React.useState(0);
   const [ep3, setEp3] = React.useState(0);
   const { selectedItem } = useSelection();
-  const { power, dynamicPower } = useSocTotalPower();
+  const { totalConsumption } = useSocTotalPower();
   const endpoints = [
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ];
@@ -57,12 +56,14 @@ function ConnectivityComponent({ device, peripherals }) {
     return (selectedItem === Title) ? 'clickable selected' : 'clickable';
   }
 
+  const noc = totalConsumption.processing_complex.dynamic.components.find((elem) => elem.type === 'noc');
+
   return (
     <State messages={socState.fpga_complex} baseClass={getBaseName()}>
       <CPUComponent
         title={Title}
-        power={power.total_noc_interconnect_power}
-        percent={percentage(power.total_noc_interconnect_power, dynamicPower)}
+        power={noc ? noc.power : 0}
+        percent={noc ? noc.percentage : 0}
         name={name}
         ep0={ep0}
         ep1={ep1}

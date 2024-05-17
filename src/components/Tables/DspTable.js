@@ -11,10 +11,11 @@ import {
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function DspTable({ device, totalPowerCallback }) {
+function DspTable({ device }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -23,6 +24,7 @@ function DspTable({ device, totalPowerCallback }) {
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
+  const { updateTotalPower } = useSocTotalPower();
 
   const fetchDspData = (deviceId) => {
     if (deviceId !== null) {
@@ -32,7 +34,6 @@ function DspTable({ device, totalPowerCallback }) {
           const total = consumption.total_dsp_block_power
             + consumption.total_dsp_interconnect_power;
           setPowerTotal(total);
-          totalPowerCallback(total);
           setPowerTable([
             [
               'DSP Blocks',
@@ -55,6 +56,7 @@ function DspTable({ device, totalPowerCallback }) {
   function modifyDataHandler() {
     fetchDspData(device);
     updateGlobalState(device);
+    updateTotalPower(device);
   }
 
   function modifyRow(index, row) {

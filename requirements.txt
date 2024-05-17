@@ -4,3 +4,4 @@ pytest
 pyinstaller
 flasgger
 flask-restful
+numpy

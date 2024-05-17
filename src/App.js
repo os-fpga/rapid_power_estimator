@@ -36,11 +36,6 @@ function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
   const [devices, setDevices] = React.useState([]);
   const [device, setDevice] = React.useState(null);
-  const [clockingPower, setClockingPower] = React.useState(0);
-  const [flePower, setFlePower] = React.useState(0);
-  const [dspPower, setDspPower] = React.useState(0);
-  const [bramPower, setBramPower] = React.useState(0);
-  const [ioPower, setIoPower] = React.useState(0);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
   const [time, setTime] = React.useState(moment().format(timeFormat));
   const [mode, setMode] = React.useState(false);
@@ -111,30 +106,6 @@ function App() {
       setPeripherals(data);
     });
     if (newDevice !== null) {
-      server.GET(server.api.consumption(server.Elem.clocking, newDevice), (data) => {
-        const total = data.total_clock_block_power
-          + data.total_clock_interconnect_power
-          + data.total_pll_power;
-        setClockingPower(total);
-      });
-      server.GET(server.api.consumption(server.Elem.fle, newDevice), (data) => {
-        const total = data.total_block_power + data.total_interconnect_power;
-        setFlePower(total);
-      });
-      server.GET(server.api.consumption(server.Elem.dsp, newDevice), (data) => {
-        const total = data.total_dsp_block_power + data.total_dsp_interconnect_power;
-        setDspPower(total);
-      });
-      server.GET(server.api.consumption(server.Elem.bram, newDevice), (data) => {
-        const total = data.total_bram_block_power + data.total_bram_interconnect_power;
-        setBramPower(total);
-      });
-      server.GET(server.api.consumption(server.Elem.io, newDevice), (data) => {
-        const total = data.total_block_power
-          + data.total_interconnect_power
-          + data.total_on_die_termination_power;
-        setIoPower(total);
-      });
       server.GET(server.api.fetch(server.Elem.clocking, newDevice), (data) => {
         setClocks(data.map((item) => item.port));
       });
@@ -172,14 +143,7 @@ function App() {
             />
             <div className="top-l2-col2">
               <div className="top-l2-col2-elem">
-                <FpgaComponent
-                  clocking={clockingPower}
-                  fle={flePower}
-                  dsp={dspPower}
-                  bram={bramPower}
-                  io={ioPower}
-                  tableOpen={setOpenedTable}
-                />
+                <FpgaComponent tableOpen={setOpenedTable} />
               </div>
               {
                 memoryEnable && (
@@ -203,14 +167,7 @@ function App() {
             <option value={1}>Verilog</option>
             <option value={2}>HDL</option>
           </select>
-          <FPGASummaryComponent
-            device={device}
-            clocking={clockingPower}
-            fle={flePower}
-            dsp={dspPower}
-            bram={bramPower}
-            io={ioPower}
-          />
+          <FPGASummaryComponent device={device} />
         </div>
         <div className="power-tables">
           <div className="switches-container">
@@ -251,23 +208,23 @@ function App() {
       <div className="table-container main-border">
         {
         openedTable === Table.Clocking
-        && <ClockingTable device={device} totalPowerCallback={setClockingPower} />
+        && <ClockingTable device={device} />
         }
         {
         openedTable === Table.FLE
-        && <FleTable device={device} totalPowerCallback={setFlePower} />
+        && <FleTable device={device} />
         }
         {
         openedTable === Table.IO
-        && <IOTable device={device} totalPowerCallback={setIoPower} />
+        && <IOTable device={device} />
         }
         {
         openedTable === Table.BRAM
-        && <BramTable device={device} totalPowerCallback={setBramPower} />
+        && <BramTable device={device} />
         }
         {
         openedTable === Table.DSP
-        && <DspTable device={device} totalPowerCallback={setDspPower} />
+        && <DspTable device={device} />
         }
         {
         openedTable === Table.ACPU

@@ -117,6 +117,9 @@ class DSP_SubModule:
                 total_dsp_blocks_used += item.number_of_multipliers
         return total_dsp_blocks_used, self.total_dsp_blocks_available
 
+    def get_total_output_power(self) -> float:
+        return sum(self.get_power_consumption())
+
     def get_power_consumption(self):
         return self.total_block_power, self.total_interconnect_power
 

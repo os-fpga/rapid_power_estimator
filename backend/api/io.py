@@ -34,7 +34,7 @@ class IoUsageAllocationSchema(Schema):
     io_available = fields.Int()
 
 class IoUsageSchema(Schema):
-    type = fields.Str()
+    type = fields.Enum(IO_Bank_Type, by_value=True)
     total_banks_available = fields.Int()
     total_io_available = fields.Int()
     usage = fields.Nested(IoUsageAllocationSchema, many=True)

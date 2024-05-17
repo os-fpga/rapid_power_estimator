@@ -10,6 +10,7 @@ import {
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
+import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 import {
@@ -24,7 +25,7 @@ import {
   bankType,
 } from '../../utils/io';
 
-function IOTable({ device, totalPowerCallback }) {
+function IOTable({ device }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -33,6 +34,7 @@ function IOTable({ device, totalPowerCallback }) {
   const [powerTable, setPowerTable] = React.useState(null);
   const { defaultClock } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
+  const { updateTotalPower } = useSocTotalPower();
 
   const defaultPowerData = {
     io_usage: [
@@ -116,7 +118,6 @@ function IOTable({ device, totalPowerCallback }) {
           const total = power.total_block_power + power.total_interconnect_power
             + power.total_on_die_termination_power;
           setPowerTotal(total);
-          totalPowerCallback(total);
           setPowerTable(power);
         });
       });
@@ -131,6 +132,7 @@ function IOTable({ device, totalPowerCallback }) {
   function modifyDataHandler() {
     fetchIoData(device);
     updateGlobalState(device);
+    updateTotalPower(device);
   }
   function modifyRow(index, row) {
     server.PATCH(

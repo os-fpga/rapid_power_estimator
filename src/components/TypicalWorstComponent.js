@@ -23,8 +23,7 @@ function Column({
             <AiFillThunderbolt className="thunder" />
           </div>
           <div className="big-font grayed-text">
-            {temp}
-            {' C'}
+            {`${fixed(temp, 0)} °C`}
           </div>
         </div>
       </div>
@@ -33,20 +32,24 @@ function Column({
 }
 
 function TypicalWorstComponent() {
-  const { thermalData } = useSocTotalPower();
+  const { totalConsumption } = useSocTotalPower();
+
+  const typical = totalConsumption.total_power_temperature.find((elem) => elem.type === 'typical');
+  const worsecase = totalConsumption.total_power_temperature.find((elem) => elem.type === 'worsecase');
+
   return (
     <div className="twc-main main-border">
       <Column
         title="Typical"
-        power={thermalData.typical.total_power}
+        power={typical ? typical.power : 0}
         messages={[]}
-        temp={thermalData.typical.thermal}
+        temp={typical ? typical.temperature : 0}
       />
       <Column
         title="Worst case"
-        power={thermalData.worsecase.total_power}
+        power={worsecase ? worsecase.power : 0}
         messages={[]}
-        temp={thermalData.worsecase.thermal}
+        temp={worsecase ? worsecase.temperature : 0}
       />
     </div>
   );

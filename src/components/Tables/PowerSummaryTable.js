@@ -72,8 +72,7 @@ function PowerSummaryTable({
                   <td className="no-wrap">{item.text}</td>
                   <PowerCell val={item.power} />
                   <td className="no-wrap" style={{ textAlign: 'right' }}>
-                    {item.percent}
-                    {' %'}
+                    {`${fixed(item.percent, 0)} %`}
                   </td>
                   <td className="fixed-col">
                     {
@@ -95,8 +94,7 @@ function PowerSummaryTable({
       <div className="pst-bottom">
         <div className="pst-bottom-progress">
           <label htmlFor="progress-bar">
-            {fixed(percent, 0)}
-            %
+            {`${fixed(percent, 0)} %`}
           </label>
           <progress id="progress-bar" value={percent} max={100} />
         </div>

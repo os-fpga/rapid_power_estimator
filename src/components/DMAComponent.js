@@ -2,7 +2,6 @@ import React from 'react';
 import CPUComponent from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
-import { percentage } from '../utils/common';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
@@ -15,7 +14,7 @@ function DMAComponent({ device }) {
   const [ep2, setEp2] = React.useState(0);
   const [ep3, setEp3] = React.useState(0);
   const { selectedItem } = useSelection();
-  const { power, dynamicPower } = useSocTotalPower();
+  const { totalConsumption } = useSocTotalPower();
   const [dmaEndpoints, setDmaEndpoints] = React.useState([
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ]);
@@ -58,12 +57,14 @@ function DMAComponent({ device }) {
     return (selectedItem === Title) ? 'clickable selected' : 'clickable';
   }
 
+  const dma = totalConsumption.processing_complex.dynamic.components.find((elem) => elem.type === 'dma');
+
   return (
     <State messages={socState.dma} baseClass={getBaseName()}>
       <CPUComponent
         title={Title}
-        power={power.total_dma_power}
-        percent={percentage(power.total_dma_power, dynamicPower)}
+        power={dma ? dma.power : 0}
+        percent={dma ? dma.percentage : 0}
         name=""
         ep0={ep0}
         ep1={ep1}

@@ -6,21 +6,14 @@ import TitleComponent from './TitleComponent';
 import ABCPUComponent from './ABCPUComponent';
 import DMAComponent from './DMAComponent';
 import ConnectivityComponent from './ConnectivityComponent';
-import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
-import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
 
 import './style/SOCTable.css';
 
 function SOCComponent({ device, setOpenedTable, peripherals }) {
-  const { selectedItem } = useSelection();
   const { totalConsumption } = useSocTotalPower();
   const { socState } = useGlobalState();
-
-  function getBaseName(item) {
-    return (selectedItem === item) ? 'clickable selected' : 'clickable';
-  }
 
   const processingComplex = totalConsumption.processing_complex;
 
@@ -31,26 +24,26 @@ function SOCComponent({ device, setOpenedTable, peripherals }) {
     <div className="top-l2-col1">
       <div className="top-l2-col1-row1">
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.ACPU)}>
-          <State messages={socState.acpu} baseClass={getBaseName('ACPU')}>
-            <ABCPUComponent
-              device={device}
-              title="ACPU"
-              index="acpu"
-              power={acpu ? acpu.power : 0}
-              percent={acpu ? acpu.percentage : 0}
-            />
-          </State>
+          <ABCPUComponent
+            device={device}
+            title="ACPU"
+            index="acpu"
+            power={acpu ? acpu.power : 0}
+            percent={acpu ? acpu.percentage : 0}
+            messages={socState.acpu}
+            peripherals={peripherals}
+          />
         </div>
         <div className="top-l2-col1-row1-elem" onClick={() => setOpenedTable(Table.BCPU)}>
-          <State messages={socState.bcpu} baseClass={getBaseName('BCPU')}>
-            <ABCPUComponent
-              device={device}
-              title="BCPU"
-              index="bcpu"
-              power={bcpu ? bcpu.power : 0}
-              percent={bcpu ? bcpu.percentage : 0}
-            />
-          </State>
+          <ABCPUComponent
+            device={device}
+            title="BCPU"
+            index="bcpu"
+            power={bcpu ? bcpu.power : 0}
+            percent={bcpu ? bcpu.percentage : 0}
+            messages={socState.bcpu}
+            peripherals={peripherals}
+          />
         </div>
         <div className="top-l2-col1-row1-elem-text">
           <TitleComponent
@@ -73,7 +66,7 @@ function SOCComponent({ device, setOpenedTable, peripherals }) {
       </div>
       <div className="top-l2-col1-row2">
         <div className="top-l2-col1-row2-elem" onClick={() => setOpenedTable(Table.DMA)}>
-          <DMAComponent device={device} />
+          <DMAComponent device={device} peripherals={peripherals} />
         </div>
         <div className="top-l2-col1-row2-elem" onClick={() => setOpenedTable(Table.Connectivity)}>
           <ConnectivityComponent device={device} peripherals={peripherals} />

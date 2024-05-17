@@ -105,10 +105,12 @@ function MemoryComponent({ device, peripherals }) {
 
 MemoryComponent.propTypes = {
   device: PropTypes.string,
+  peripherals: PropTypes.oneOfType([PropTypes.object]),
 };
 
 MemoryComponent.defaultProps = {
   device: null,
+  peripherals: null,
 };
 
 export default MemoryComponent;

@@ -8,7 +8,7 @@ const text = [
   'Endpoint 1', 'Endpoint 2', 'Endpoint 3', 'Endpoint 4',
 ];
 
-function CPUComponent({
+export function CPUComponent({
   title, power, percent = 0, name, endpointText = text, ep0 = 0, ep1 = 0, ep2 = 0, ep3 = 0,
 }) {
   return (
@@ -59,6 +59,19 @@ function CPUComponent({
   );
 }
 
+export function CPUComponentDisabled({ title }) {
+  return (
+    <div className="cpu-component-top">
+      <div className="cpu-component-l1">
+        <div className="cpu-component-title">{title}</div>
+      </div>
+      <div className="cpu-component-l2">
+        <div className="cpu-component-power grayed-text">Not available</div>
+      </div>
+    </div>
+  );
+}
+
 CPUComponent.propTypes = {
   title: PropTypes.string.isRequired,
   power: PropTypes.number.isRequired,
@@ -74,5 +87,3 @@ CPUComponent.propTypes = {
 CPUComponent.defaultProps = {
   endpointText: text,
 };
-
-export default CPUComponent;

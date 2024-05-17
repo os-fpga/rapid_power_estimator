@@ -236,7 +236,7 @@ function App() {
         }
         {
         openedTable === Table.Connectivity
-        && <ConnectivityTable device={device} />
+        && <ConnectivityTable device={device} peripherals={peripherals} />
         }
         {
         openedTable === Table.Memory
@@ -248,7 +248,7 @@ function App() {
         }
         {
         openedTable === Table.Peripherals
-        && <PeripheralsTable device={device} />
+        && <PeripheralsTable device={device} peripheralsUrl={peripherals} />
         }
         {
         openedTable === Table.Summary

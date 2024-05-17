@@ -15,7 +15,7 @@ import { useClockSelection } from '../../ClockSelectionProvider';
 
 import '../style/ACPUTable.css';
 
-function ConnectivityTable({ device }) {
+function ConnectivityTable({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -52,12 +52,21 @@ function ConnectivityTable({ device }) {
   }
 
   function fetchData() {
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      const link = data.fpga_complex[0].href;
+    if (peripherals && peripherals.fpga_complex) {
+      const link = peripherals.fpga_complex[0].href;
       setHref(link);
       fetchConnectivityData(link);
-    });
+    } else {
+      setEndpoints([]);
+      setHref('');
+      setAddButtonDisable(true);
+    }
   }
+
+  React.useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peripherals]);
 
   if (dev !== device) {
     setDev(device);

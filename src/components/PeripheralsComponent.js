@@ -28,45 +28,74 @@ function PeripheralsBlock({
   );
 }
 
+function PeripheralsNoBlock() {
+  return (
+    <div className="periph-rowx-empty" />
+  );
+}
+
+function PeripheralRow({ data, size = 3 }) {
+  return (
+    <div className="periph-row">
+      {
+        data.map((item, index) => (
+          <PeripheralsBlock
+            // eslint-disable-next-line react/no-array-index-key
+            key={index}
+            name={item.name}
+            messages={item.messages}
+            power={item.power}
+            percents={item.percents}
+          />
+        ))
+      }
+      {
+        // eslint-disable-next-line react/no-array-index-key
+        Array.apply(0, Array(size - data.length)).map((x, i) => <PeripheralsNoBlock key={i} />)
+      }
+    </div>
+  );
+}
+
 function PeripheralsComponent({ device }) {
   const [dev, setDev] = React.useState(null);
-  const [i2c, setI2c] = React.useState(0);
-  const [spi, setSpi] = React.useState(0);
-  const [pwm, setPWM] = React.useState(0);
-  const [usb2, setUsb2] = React.useState(0);
-  const [jtag, setJtag] = React.useState(0);
-  const [gige, setGige] = React.useState(0);
-  const [uart0, setUart0] = React.useState(0);
-  const [uart1, setUart1] = React.useState(0);
-  const [gpio, setGPIO] = React.useState(0);
+  const [i2c, setI2c] = React.useState({ name: 'I2C', power: 0 });
+  const [spi, setSpi] = React.useState({ name: 'SPI', power: 0 });
+  const [pwm, setPWM] = React.useState({ name: 'PWM', power: 0 });
+  const [usb2, setUsb2] = React.useState({ name: 'USB 2.0', power: 0 });
+  const [jtag, setJtag] = React.useState({ name: 'JTAG', power: 0 });
+  const [gige, setGige] = React.useState({ name: 'GigE', power: 0 });
+  const [uart0, setUart0] = React.useState({ name: 'UART0', power: 0 });
+  const [uart1, setUart1] = React.useState({ name: 'UART1', power: 0 });
+  const [gpio, setGPIO] = React.useState({ name: 'GPIO', power: 0 });
   const { selectedItem } = useSelection();
   const { totalConsumption } = useSocTotalPower();
   const { socState } = useGlobalState();
 
-  function fetchPeripherals(deviceId, key, url) {
+  function fetchPeripherals(deviceId, key, url, name) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
-      if (key === 'i2c') setI2c(data.consumption.block_power);
-      if (key === 'spi') setSpi(data.consumption.block_power);
-      if (key === 'pwm') setPWM(data.consumption.block_power);
-      if (key === 'usb2') setUsb2(data.consumption.block_power);
-      if (key === 'jtag') setJtag(data.consumption.block_power);
-      if (key === 'gige') setGige(data.consumption.block_power);
+      if (key === 'i2c') setI2c({ name, power: data.consumption.block_power });
+      if (key === 'spi') setSpi({ name, power: data.consumption.block_power });
+      if (key === 'pwm') setPWM({ name, power: data.consumption.block_power });
+      if (key === 'usb2') setUsb2({ name, power: data.consumption.block_power });
+      if (key === 'jtag') setJtag({ name, power: data.consumption.block_power });
+      if (key === 'gige') setGige({ name, power: data.consumption.block_power });
       if (key === 'uart') {
-        if (url.slice(-1) === '0') setUart0(data.consumption.block_power);
-        else setUart1(data.consumption.block_power);
+        if (url.slice(-1) === '0') setUart0({ name, power: data.consumption.block_power });
+        else setUart1({ name, power: data.consumption.block_power });
       }
-      if (key === 'gpio') setGPIO((prev) => prev + data.consumption.block_power);
+      if (key === 'gpio') setGPIO((prev) => ({ ...prev, power: data.consumption.block_power + 1 }));
     });
   }
 
   if (dev !== device) {
     setDev(device);
     if (device !== null) {
-      setGPIO(0);
+      setGPIO({ ...gpio, power: 0 });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         Object.entries(data).forEach((entry) => {
           const [key, element] = entry;
-          element.forEach((refObj) => fetchPeripherals(device, key, refObj.href));
+          element.forEach((refObj) => fetchPeripherals(device, key, refObj.href, refObj.name));
         });
       });
     }
@@ -93,21 +122,42 @@ function PeripheralsComponent({ device }) {
           {' %'}
         </div>
       </div>
-      <div className="periph-row">
-        <PeripheralsBlock name="UART0" messages={socState.uart0} power={uart0} percents={100} />
-        <PeripheralsBlock name="UART1" messages={socState.uart1} power={uart1} percents={100} />
-        <PeripheralsBlock name="USB 2.0" messages={socState.usb2} power={usb2} percents={100} />
-      </div>
-      <div className="periph-row">
-        <PeripheralsBlock name="I2C" messages={socState.i2c} power={i2c} percents={100} />
-        <PeripheralsBlock name="GPIO" messages={socState.gpio} power={gpio} percents={100} />
-        <PeripheralsBlock name="PWM" messages={socState.pwm} power={pwm} percents={100} />
-      </div>
-      <div className="periph-row">
-        <PeripheralsBlock name="SPI/QSPI" messages={socState.spi} power={spi} percents={100} />
-        <PeripheralsBlock name="JTAG" messages={socState.jtag} power={jtag} percents={100} />
-        <PeripheralsBlock name="GigI" messages={socState.gige} power={gige} percents={100} />
-      </div>
+      <PeripheralRow
+        data={[{
+          name: uart0.name, messages: socState.uart0, power: uart0.power, percents: 100,
+        },
+        {
+          name: uart1.name, messages: socState.uart1, power: uart1.power, percents: 100,
+        },
+        {
+          name: usb2.name, messages: socState.usb2, power: usb2.power, percents: 100,
+        },
+        ]}
+      />
+      <PeripheralRow
+        data={[{
+          name: i2c.name, messages: socState.i2c, power: i2c.power, percents: 100,
+        },
+        {
+          name: gpio.name, messages: socState.gpio, power: gpio.power, percents: 100,
+        },
+        {
+          name: pwm.name, messages: socState.pwm, power: pwm.power, percents: 100,
+        },
+        ]}
+      />
+      <PeripheralRow
+        data={[{
+          name: spi.name, messages: socState.spi, power: spi.power, percents: 100,
+        },
+        {
+          name: jtag.name, messages: socState.jtag, power: jtag.power, percents: 100,
+        },
+        {
+          name: gige.name, messages: socState.gige, power: gige.power, percents: 100,
+        },
+        ]}
+      />
     </div>
   );
 }

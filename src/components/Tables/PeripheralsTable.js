@@ -10,7 +10,7 @@ import { ComponentLabel, Checkbox } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
-function PeripheralsTable({ device }) {
+function PeripheralsTable({ device, peripheralsUrl }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -108,19 +108,13 @@ function PeripheralsTable({ device }) {
   }
 
   const fetchData = (deviceId) => {
-    if (deviceId !== null) {
-      server.GET(server.api.fetch(server.Elem.peripherals, deviceId), (data) => {
-        const peripheralData = data;
-        delete peripheralData.dma;
-        delete peripheralData.memory;
-        delete peripheralData.acpu;
-        delete peripheralData.bcpu;
-        Object.entries(peripheralData).forEach((elem) => {
-          const [key, values] = elem;
-          Object.entries(values).forEach((val) => {
-            const [, obj] = val;
-            fetchPeripherals(deviceId, key, obj.href);
-          });
+    if (deviceId !== null && peripheralsUrl !== null) {
+      Object.entries(peripheralsUrl).forEach((elem) => {
+        const [key, values] = elem;
+        if (key === 'dma' || key === 'memory' || key === 'acpu' || key === 'bcpu') return;
+        Object.entries(values).forEach((val) => {
+          const [, obj] = val;
+          fetchPeripherals(deviceId, key, obj.href);
         });
       });
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import CPUComponent from './CPUComponent';
+import { CPUComponent, CPUComponentDisabled } from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
@@ -7,7 +7,7 @@ import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
 
-function DMAComponent({ device }) {
+function DMAComponent({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
@@ -19,6 +19,7 @@ function DMAComponent({ device }) {
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ]);
   const { socState } = useGlobalState();
+  const [enable, setEnable] = React.useState(true);
 
   function fetchEndPoint(href, setEp, index) {
     server.GET(server.peripheralPath(device, href), (data) => {
@@ -31,15 +32,20 @@ function DMAComponent({ device }) {
   }
 
   function update() {
-    server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      if (data.dma !== null) {
-        fetchEndPoint(`${data.dma[0].href}`, setEp0, 0);
-        fetchEndPoint(`${data.dma[1].href}`, setEp1, 1);
-        fetchEndPoint(`${data.dma[2].href}`, setEp2, 2);
-        fetchEndPoint(`${data.dma[3].href}`, setEp3, 3);
-      }
-    });
+    if (peripherals === null) return;
+    setEnable(peripherals.dma !== undefined);
+    if (peripherals.dma !== undefined) {
+      fetchEndPoint(`${peripherals.dma[0].href}`, setEp0, 0);
+      fetchEndPoint(`${peripherals.dma[1].href}`, setEp1, 1);
+      fetchEndPoint(`${peripherals.dma[2].href}`, setEp2, 2);
+      fetchEndPoint(`${peripherals.dma[3].href}`, setEp3, 3);
+    }
   }
+
+  React.useEffect(() => {
+    update();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peripherals]);
 
   React.useEffect(() => {
     subscribe('dmaChanged', update);
@@ -54,13 +60,15 @@ function DMAComponent({ device }) {
   const Title = 'DMA';
 
   function getBaseName() {
-    return (selectedItem === Title) ? 'clickable selected' : 'clickable';
+    const base = enable ? 'clickable' : 'disabled';
+    return (selectedItem === Title && enable) ? `${base} selected` : base;
   }
 
   const dma = totalConsumption.processing_complex.dynamic.components.find((elem) => elem.type === 'dma');
 
   return (
     <State messages={socState.dma} baseClass={getBaseName()}>
+      {enable && (
       <CPUComponent
         title={Title}
         power={dma ? dma.power : 0}
@@ -72,6 +80,10 @@ function DMAComponent({ device }) {
         ep3={ep3}
         endpointText={dmaEndpoints}
       />
+      )}
+      {
+        !enable && <CPUComponentDisabled title={Title} />
+      }
     </State>
   );
 }

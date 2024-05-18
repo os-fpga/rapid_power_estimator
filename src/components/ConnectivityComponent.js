@@ -1,5 +1,5 @@
 import React from 'react';
-import CPUComponent from './CPUComponent';
+import { CPUComponent, CPUComponentDisabled } from './CPUComponent';
 import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
@@ -20,6 +20,7 @@ function ConnectivityComponent({ device, peripherals }) {
     'Channel 1', 'Channel 2', 'Channel 3', 'Channel 4',
   ];
   const { socState } = useGlobalState();
+  const [enable, setEnable] = React.useState(true);
 
   const update = React.useCallback(() => {
     function fetchEndPoint(href, setEp) {
@@ -28,14 +29,17 @@ function ConnectivityComponent({ device, peripherals }) {
     if (device === null) return;
     if (peripherals === null) return;
     const fpgaComplex = peripherals.fpga_complex;
-    const { href } = fpgaComplex[0];
-    setName(fpgaComplex[0].name);
-    server.GET(server.peripheralPath(device, href), (fpgaComplexData) => {
-      fetchEndPoint(`${href}/${fpgaComplexData.ports[0].href}`, setEp0);
-      fetchEndPoint(`${href}/${fpgaComplexData.ports[1].href}`, setEp1);
-      fetchEndPoint(`${href}/${fpgaComplexData.ports[2].href}`, setEp2);
-      fetchEndPoint(`${href}/${fpgaComplexData.ports[3].href}`, setEp3);
-    });
+    setEnable(fpgaComplex !== undefined);
+    if (fpgaComplex) {
+      const { href } = fpgaComplex[0];
+      setName(fpgaComplex[0].name);
+      server.GET(server.peripheralPath(device, href), (fpgaComplexData) => {
+        fetchEndPoint(`${href}/${fpgaComplexData.ports[0].href}`, setEp0);
+        fetchEndPoint(`${href}/${fpgaComplexData.ports[1].href}`, setEp1);
+        fetchEndPoint(`${href}/${fpgaComplexData.ports[2].href}`, setEp2);
+        fetchEndPoint(`${href}/${fpgaComplexData.ports[3].href}`, setEp3);
+      });
+    }
   }, [device, peripherals]);
 
   React.useEffect(() => update(), [update]);
@@ -53,13 +57,15 @@ function ConnectivityComponent({ device, peripherals }) {
   const Title = 'Connectivity';
 
   function getBaseName() {
-    return (selectedItem === Title) ? 'clickable selected' : 'clickable';
+    const base = enable ? 'clickable' : 'disabled';
+    return (selectedItem === Title && enable) ? `${base} selected` : base;
   }
 
   const noc = totalConsumption.processing_complex.dynamic.components.find((elem) => elem.type === 'noc');
 
   return (
     <State messages={socState.fpga_complex} baseClass={getBaseName()}>
+      {enable && (
       <CPUComponent
         title={Title}
         power={noc ? noc.power : 0}
@@ -71,6 +77,8 @@ function ConnectivityComponent({ device, peripherals }) {
         ep3={ep3}
         endpointText={endpoints}
       />
+      )}
+      {!enable && <CPUComponentDisabled title={Title} />}
     </State>
   );
 }

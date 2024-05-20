@@ -85,14 +85,15 @@ export const ioDataType = [
 export const synchronization = [
   { id: 0, text: 'None' },
   { id: 1, text: 'Register' },
-  { id: 2, text: '1 to 3 SERDES' },
-  { id: 3, text: '1 to 4 SERDES' },
-  { id: 4, text: '1 to 5 SERDES' },
-  { id: 5, text: '1 to 6 SERDES' },
-  { id: 6, text: '1 to 7 SERDES' },
-  { id: 7, text: '1 to 8 SERDES' },
-  { id: 8, text: '1 to 9 SERDES' },
-  { id: 9, text: '1 to 10 SERDES' },
+  { id: 2, text: 'DDR Register' },
+  { id: 3, text: '1 to 3 SERDES' },
+  { id: 4, text: '1 to 4 SERDES' },
+  { id: 5, text: '1 to 5 SERDES' },
+  { id: 6, text: '1 to 6 SERDES' },
+  { id: 7, text: '1 to 7 SERDES' },
+  { id: 8, text: '1 to 8 SERDES' },
+  { id: 9, text: '1 to 9 SERDES' },
+  { id: 10, text: '1 to 10 SERDES' },
 ];
 
 export const ioPullUpDown = [

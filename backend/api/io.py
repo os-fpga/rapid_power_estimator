@@ -6,7 +6,7 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, ValidationError
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
-    IO_Data_Type, IO_STANDARD, IO_Synchronization, IO_Pull_up_down, IO_Bank_Type
+    IO_Data_Type, IO_Standard, IO_Synchronization, IO_Pull_up_down, IO_Bank_Type
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, IONotFoundException
 from .device import MessageSchema
@@ -62,7 +62,7 @@ class IoSchema(Schema):
     name = fields.Str()
     bus_width = fields.Int()
     direction = fields.Enum(IO_Direction, by_value=True)
-    io_standard = fields.Enum(IO_STANDARD, by_value=True)
+    io_standard = fields.Enum(IO_Standard, by_value=True)
     drive_strength = fields.Enum(IO_Drive_Strength, by_value=True)
     slew_rate = fields.Enum(IO_Slew_Rate, by_value=True)
     differential_termination = fields.Enum(IO_differential_termination, by_value=True)

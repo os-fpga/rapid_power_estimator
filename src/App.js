@@ -41,8 +41,11 @@ function App() {
   const [mode, setMode] = React.useState(false);
   const [autoSave, setAutoSave] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [notes, setNotes] = React.useState('');
-  const [topLevel, setTopLevel] = React.useState('');
+  const [projectData, setProjectData] = React.useState({
+    name: '',
+    lang: 0,
+    notes: '',
+  });
   const [config, setConfig] = React.useState({
     useDefaultFile: true,
     device_xml: '',
@@ -77,6 +80,10 @@ function App() {
     return Object.keys(object).find((key) => object[key] === value);
   }
 
+  function sendProjectData(projectDataValue) {
+    window.ipcAPI.send('projectData', projectDataValue);
+  }
+
   React.useEffect(() => {
     const key = getKeyByValue(Table, openedTable);
     toggleItemSelection(key);
@@ -86,13 +93,16 @@ function App() {
   React.useEffect(() => {
     window.ipcAPI.send('getConfig');
     if ((typeof window !== 'undefined')) {
-      window.ipcAPI.loadPreferences('preferences', (event, data) => {
+      window.ipcAPI.ipcRendererOn('preferences', (event, data) => {
         setConfig(data);
         showModal();
       });
-      window.ipcAPI.loadPreferences('loadConfig', (event, data) => {
+      window.ipcAPI.ipcRendererOn('loadConfig', (event, data) => {
         setConfig(data);
         server.setPort(data.port, setDevices);
+      });
+      window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
+        setProjectData({ notes: data.notes, lang: parseInt(data.lang, 10), name: data.name });
       });
     }
   }, []);
@@ -113,11 +123,22 @@ function App() {
   };
 
   const handleNotesChange = (data) => {
-    setNotes(data);
+    const newData = { ...projectData, notes: data };
+    setProjectData(newData);
+    sendProjectData(newData);
   };
 
   // eslint-disable-next-line no-unused-vars
   const handleLangChange = (val) => {
+    const newData = { ...projectData, lang: parseInt(val.target.value, 10) };
+    setProjectData(newData);
+    sendProjectData(newData);
+  };
+
+  const handleTopNameChange = (val) => {
+    const newData = { ...projectData, name: val.target.value };
+    setProjectData(newData);
+    sendProjectData(newData);
   };
 
   const handleConfigChange = (name, val) => {
@@ -161,9 +182,9 @@ function App() {
             <div className="last-time">{time}</div>
             <div className="save-icon" onClick={() => setTime(moment().format(timeFormat))}><FiSave /></div>
           </div>
-          <input type="text" placeholder="Top level name" value={topLevel} onChange={(e) => setTopLevel(e.target.value)} />
-          <select value={0} onChange={handleLangChange}>
-            <option value={0} disabled>HDL lang</option>
+          <input type="text" placeholder="Top level name" value={projectData.name} onChange={handleTopNameChange} />
+          <select value={projectData.lang} onChange={handleLangChange}>
+            <option value={0}>HDL lang</option>
             <option value={1}>Verilog</option>
             <option value={2}>HDL</option>
           </select>
@@ -256,7 +277,7 @@ function App() {
         }
         {modalOpen && (
         <Notes
-          defaultValue={notes}
+          defaultValue={projectData.notes}
           closeModal={() => {
             setModalOpen(false);
           }}

@@ -23,7 +23,8 @@
       "rpe.config.json",
       "node_modules/**/*",
       "package.json",
-      "cleanup.js"
+      "cleanup.js",
+      "projectFile.js"
     ],
     "directories": {
       "buildResources": "resources"

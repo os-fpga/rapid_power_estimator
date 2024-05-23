@@ -1,5 +1,5 @@
 const {
-  app, BrowserWindow, Menu, ipcMain,
+  app, BrowserWindow, Menu, ipcMain, dialog,
 } = require('electron');
 const { spawn } = require('child_process');
 const path = require('node:path');
@@ -8,12 +8,17 @@ const Store = require('electron-store');
 const log = require('electron-log');
 const config = require('./rpe.config.json');
 const { kill } = require('./cleanup');
+const {
+  openProjectRequest, saveProjectRequest, sendProjectData, fetchProjectData,
+} = require('./projectFile');
 
 const logFormat = '[{h}:{i}:{s}.{ms}] [{level}] {text}';
 log.transports.console.format = logFormat;
 log.transports.file.format = logFormat;
 log.transports.file.fileName = 'rpe.log';
 log.transports.file.maxSize = 1024 * 1024 * 10; // 10MB
+
+const untitled = 'Untitled';
 
 const schema = {
   port: {
@@ -34,7 +39,85 @@ const schema = {
 
 const store = new Store({ schema });
 
+let projectMeta = {
+  file: '',
+  notes: '',
+  lang: 0,
+  name: '',
+  changed: false,
+};
+
 let mainWindow = null;
+
+function sendProjectDataToRenderer() {
+  mainWindow.webContents.send('projectData', projectMeta);
+}
+
+function saveProjectClicked() {
+  if (projectMeta.file === '') {
+    const file = saveProjectRequest(mainWindow);
+    if (file.length > 0) {
+      projectMeta.file = file;
+      projectMeta.changed = false;
+      mainWindow.setTitle(`${path.basename(file)} - Rapid Power Estimator`);
+      sendProjectData(projectMeta);
+    }
+  } else {
+    projectMeta.changed = false;
+    sendProjectData(projectMeta);
+  }
+}
+
+function projectSaved() {
+  if (projectMeta.changed) {
+    const result = dialog.showMessageBoxSync(mainWindow, {
+      type: 'question',
+      buttons: ['Cancel', 'Yes', 'No'],
+      defaultId: 0,
+      title: 'Save changes',
+      message: 'Do you want save your changes?',
+    });
+    if (result === 1) { // Yes
+      saveProjectClicked();
+    } else if (result === 2) { // No
+      return true;
+    }
+  }
+  return !projectMeta.changed;
+}
+
+function saveAsClicked() {
+  const file = saveProjectRequest(mainWindow);
+  if (file.length > 0) {
+    projectMeta.file = file;
+    projectMeta.changed = false;
+    mainWindow.setTitle(`${path.basename(file)} - Rapid Power Estimator`);
+  }
+}
+
+function newProjectClicked() {
+  if (projectSaved()) {
+    projectMeta = {
+      file: '', notes: '', lang: '0', name: '', changed: false,
+    };
+    mainWindow.setTitle(`${untitled} - Rapid Power Estimator`);
+    sendProjectDataToRenderer();
+  }
+}
+
+function openProjectClicked() {
+  if (projectSaved()) {
+    const projectFile = openProjectRequest(mainWindow);
+    if (projectFile.length > 0) {
+      projectMeta.file = projectFile;
+      fetchProjectData(projectMeta, (data) => {
+        projectMeta = data;
+        mainWindow.setTitle(`${path.basename(projectMeta.file)} - Rapid Power Estimator`);
+        sendProjectDataToRenderer();
+      });
+    }
+  }
+}
 
 const isDev = process.argv.find((val) => val === '--development');
 if (!isDev) {
@@ -47,12 +130,23 @@ const template = [
   {
     label: 'File',
     submenu: [
-      { label: 'New Project' },
-      { label: 'Open Project' },
-      { label: 'Close Project' },
+      {
+        label: 'New Project',
+        click: () => { newProjectClicked(); },
+      },
+      {
+        label: 'Open Project',
+        click: () => { openProjectClicked(); },
+      },
       { label: 'Sample Project' },
-      { label: 'Save' },
-      { label: 'Save as...' },
+      {
+        label: 'Save',
+        click: () => { saveProjectClicked(); },
+      },
+      {
+        label: 'Save as...',
+        click: () => { saveAsClicked(); },
+      },
       { type: 'separator' },
       {
         label: 'Preferences',
@@ -144,6 +238,7 @@ const createWindow = () => {
       nodeIntegration: true,
       contextIsolation: true,
     },
+    title: `${untitled} - Rapid Power Estimator`,
   });
   const indexPath = path.join(app.getAppPath(), 'build/index.html');
   mainWindow.loadURL(`file://${indexPath}`);
@@ -167,6 +262,12 @@ const createWindow = () => {
   });
   ipcMain.on('getConfig', (event, arg) => {
     mainWindow.webContents.send('loadConfig', store.store);
+  });
+  ipcMain.on('projectData', (event, arg) => {
+    projectMeta.notes = arg.notes;
+    projectMeta.lang = arg.lang;
+    projectMeta.name = arg.name;
+    projectMeta.changed = true;
   });
 };
 

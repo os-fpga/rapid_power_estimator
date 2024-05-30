@@ -3,6 +3,8 @@
 #  Authorized use only
 #
 from enum import Enum
+from typing import Dict, Any
+import copy
 
 class RsMessageType(Enum):
     ERRO = "error"
@@ -23,6 +25,7 @@ class RsMessageManager:
         104: RsMessage(104, RsMessageType.INFO, "BRAM is disabled"),
         105: RsMessage(105, RsMessageType.INFO, "IO is disabled"),
         201: RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
+        202: RsMessage(202, RsMessageType.WARN, "Not enough {bank_type} banks powered at {voltage}V available"),
         301: RsMessage(301, RsMessageType.ERRO, "Invalid clock"),
         302: RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
         303: RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),
@@ -30,8 +33,11 @@ class RsMessageManager:
     }
 
     @staticmethod
-    def get_message(message_code: int) -> RsMessage:
+    def get_message(message_code: int, params : Dict[str, Any] = None) -> RsMessage:
         message = RsMessageManager.messages.get(message_code)
         if message is not None:
-            return message
+            copied_message = copy.deepcopy(message)
+            if params is not None:
+                copied_message.text = copied_message.text.format(**params)
+            return copied_message
         return RsMessageManager.messages[999]

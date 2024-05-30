@@ -15,6 +15,7 @@ from api.fabric_le import fabric_le_api
 from api.bram import bram_api
 from api.io import io_api
 from api.peripherals import peripherals_api
+from api.utils import attrs_api
 
 #
 # Main entry point
@@ -59,6 +60,7 @@ def main():
     app.register_blueprint(bram_api)
     app.register_blueprint(io_api)
     app.register_blueprint(peripherals_api)
+    app.register_blueprint(attrs_api)
 
     # Start Rest API server
     app.run(debug=args.debug, port=args.port)

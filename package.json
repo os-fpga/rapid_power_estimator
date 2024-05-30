@@ -65,7 +65,7 @@
       ],
       "publisherName": "Rapid Silicon, Inc.",
       "icon": "RPE_icon.png",
-      "artifactName": "${name}_windows.${ext}"
+      "artifactName": "${name}_windows_installer.${ext}"
     },
     "nsis": {
       "oneClick": false,

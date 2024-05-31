@@ -52,12 +52,6 @@
     "win": {
       "target": [
         {
-          "target": "tar.gz",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
           "target": "nsis",
           "arch": [
             "x64"
@@ -87,7 +81,7 @@
     }
   },
   "keywords": [],
-  "license": "MIT",
+  "license": "GNU",
   "devDependencies": {
     "@babel/core": "^7.23.9",
     "@babel/preset-env": "^7.24.4",

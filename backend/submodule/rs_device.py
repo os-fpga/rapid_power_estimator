@@ -4,12 +4,13 @@
 #
 import numpy as np
 import math
-from .rs_device_resources import RsDeviceResources, ModuleType
+from typing import List
+from .rs_device_resources import RsDeviceResources, ModuleType, IO_BankType
 from .clock import Clock_SubModule, Clock
 from .fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
 from .dsp import DSP_SubModule, DSP
 from .bram import BRAM_SubModule, BRAM, BRAM_Type, PortProperties
-from .io import IO_SubModule, IO, IO_Bank_Type
+from .io import IO_SubModule, IO
 from .peripherals import Peripheral_SubModule
 from utilities.common_utils import update_attributes
 from dataclasses import dataclass, field
@@ -28,7 +29,7 @@ class DeviceComponent:
 
 @dataclass
 class DeviceDynamic:
-    components: [DeviceComponent] = field(default_factory=list)
+    components: List[DeviceComponent] = field(default_factory=list)
     power: float = field(default=0.0)
     percentage: float = field(default=0.0)
 
@@ -42,7 +43,7 @@ class DeviceDynamic:
 
 @dataclass
 class DeviceStatic:
-    components: [DeviceComponent] = field(default_factory=list)
+    components: List[DeviceComponent] = field(default_factory=list)
     power: float = field(default=0.0)
     percentage: float = field(default=0.0)
 
@@ -64,7 +65,7 @@ class DeviceComplex:
 
 @dataclass
 class RsDevice_output:
-    total_power_temperature: [TotalPowerTemperature] = field(default_factory=list)
+    total_power_temperature: List[TotalPowerTemperature] = field(default_factory=list)
     processing_complex: DeviceComplex = field(default_factory=DeviceComplex)
     fpga_complex: DeviceComplex = field(default_factory=DeviceComplex)
 
@@ -330,7 +331,7 @@ class RsDevice:
     def update_spec(self, data):
         return update_attributes(self.specification, data['specification'])
 
-    def get_io_banks_used(self, bank_type : IO_Bank_Type, voltage : float = None) -> int:
+    def get_io_banks_used(self, bank_type : IO_BankType, voltage : float = None) -> int:
         num_banks = 0
         iomod = self.get_module(ModuleType.IO)
         for elem in iomod.io_usage:
@@ -341,13 +342,13 @@ class RsDevice:
                 break
         return num_banks
 
-    def get_io_banks(self, bank_type : IO_Bank_Type) -> int:
-        if bank_type == IO_Bank_Type.HP:
+    def get_io_banks(self, bank_type : IO_BankType) -> int:
+        if bank_type == IO_BankType.HP:
             return self.resources.get_num_HP_Banks()
         else:
             return self.resources.get_num_HR_Banks()
 
-    def calculate(self, temperature : float, coeffs : [[float]], factor : float = 1.0) -> float:
+    def calculate(self, temperature : float, coeffs : List[List[float]], factor : float = 1.0) -> float:
         total = 0.0
         for co in coeffs:
             values = np.polyval(co, [temperature])
@@ -398,14 +399,14 @@ class RsDevice:
         total_power = num_dsps * power
         return total_power
 
-    def compute_Gearbox_IO_bank_type(self, temperature : float, bank_type : IO_Bank_Type, worsecase : bool) -> float:
+    def compute_Gearbox_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_GEARBOX_IO_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)
         num_banks = self.get_io_banks(bank_type)
         total_power = num_banks * power
         return total_power
 
-    def compute_IO_bank_type(self, temperature : float, bank_type : IO_Bank_Type, worsecase : bool) -> float:
+    def compute_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_IO_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)
         num_banks = self.get_io_banks(bank_type)
@@ -417,14 +418,14 @@ class RsDevice:
         power = self.calculate(temperature, coeff, self.resources.get_VCC_AUX() / divfactor)
         return power
 
-    def compute_Aux_IO_bank_type(self, temperature : float, bank_type : IO_Bank_Type, worsecase : bool) -> float:
+    def compute_Aux_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_Aux_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)
         num_io_banks_used = self.get_io_banks_used(bank_type)
         total_power = power * num_io_banks_used
         return total_power
 
-    def compute_IO_bank_type_voltage(self, temperature : float, bank_type : IO_Bank_Type, voltage : float, worsecase : bool) -> float:
+    def compute_IO_bank_type_voltage(self, temperature : float, bank_type : IO_BankType, voltage : float, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_IO_bank_type_voltage(bank_type.value, voltage, worsecase)
         power = self.calculate(temperature, coeff)
         num_io_banks_used = self.get_io_banks_used(bank_type, voltage)
@@ -520,19 +521,19 @@ class RsDevice:
             CLB          = self.compute_CLB(temperature, worsecase),
             BRAM         = self.compute_BRAM(temperature, worsecase),
             DSP          = self.compute_DSP(temperature, worsecase),
-            Gearbox_HP   = self.compute_Gearbox_IO_bank_type(temperature, IO_Bank_Type.HP, worsecase),
-            Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_Bank_Type.HR, worsecase),
-            HP_IO        = self.compute_IO_bank_type(temperature, IO_Bank_Type.HP, worsecase),
-            HR_IO        = self.compute_IO_bank_type(temperature, IO_Bank_Type.HR, worsecase),
+            Gearbox_HP   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HP, worsecase),
+            Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
+            HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
+            HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             Aux          = self.compute_Aux(temperature, worsecase),
-            HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_Bank_Type.HP, worsecase),
-            HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_Bank_Type.HR, worsecase),
-            HR_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_Bank_Type.HR, 1.8, worsecase),
-            HR_IO_2_5V   = self.compute_IO_bank_type_voltage(temperature, IO_Bank_Type.HR, 2.5, worsecase),
-            HR_IO_3_3V   = self.compute_IO_bank_type_voltage(temperature, IO_Bank_Type.HR, 3.3, worsecase),
-            HP_IO_1_2V   = self.compute_IO_bank_type_voltage(temperature, IO_Bank_Type.HP, 1.2, worsecase),
-            HP_IO_1_5V   = self.compute_IO_bank_type_voltage(temperature, IO_Bank_Type.HP, 1.5, worsecase),
-            HP_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_Bank_Type.HP, 1.8, worsecase),
+            HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HP, worsecase),
+            HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HR, worsecase),
+            HR_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 1.8, worsecase),
+            HR_IO_2_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 2.5, worsecase),
+            HR_IO_3_3V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 3.3, worsecase),
+            HP_IO_1_2V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.2, worsecase),
+            HP_IO_1_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.5, worsecase),
+            HP_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.8, worsecase),
             VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
             VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
             VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),

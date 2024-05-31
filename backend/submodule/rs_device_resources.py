@@ -1,4 +1,6 @@
 from enum import Enum
+from dataclasses import dataclass, field
+from typing import List
 
 class DeviceNotFoundException(Exception):
     pass
@@ -27,6 +29,9 @@ class BramNotFoundException(Exception):
 class IONotFoundException(Exception):
     pass
 
+class IOStandardCoeffNotFoundException(Exception):
+    pass
+
 class PeripheralNotFoundException(Exception):
     pass
 
@@ -45,11 +50,121 @@ class ModuleType(Enum):
     SOC_PERIPHERALS = 5
     REGULATOR = 6
 
+class IO_BankType(Enum):
+    HP = 0
+    HR = 1
+
+class IO_Standard(Enum):
+    LVCMOS_1_2V = 0
+    LVCMOS_1_5V = 1
+    LVCMOS_1_8V_HP = 2
+    LVCMOS_1_8V_HR = 3
+    LVCMOS_2_5V = 4
+    LVCMOS_3_3V = 5
+    LVTTL = 6
+    BLVDS_Diff = 7
+    LVDS_Diff_HP = 8
+    LVDS_Diff_HR = 9
+    LVPECL_2_5V_Diff = 10
+    LVPECL_3_3V_Diff = 11
+    HSTL_1_2V_Class_I_with_ODT = 12
+    HSTL_1_2V_Class_I_without_ODT = 13
+    HSTL_1_2V_Class_II_with_ODT = 14
+    HSTL_1_2V_Class_II_without_ODT = 15
+    HSTL_1_2V_Diff = 16
+    HSTL_1_5V_Class_I_with_ODT = 17
+    HSTL_1_5V_Class_I_without_ODT = 18
+    HSTL_1_5V_Class_II_with_ODT = 19
+    HSTL_1_5V_Class_II_without_ODT = 20
+    HSTL_1_5V_Diff = 21
+    HSUL_1_2V = 22
+    HSUL_1_2V_Diff = 23
+    MIPI_Diff = 24
+    PCI66 = 25
+    PCIX133 = 26
+    POD_1_2V = 27
+    POD_1_2V_Diff = 28
+    RSDS_Diff = 29
+    SLVS_Diff = 30
+    SSTL_1_5V_Class_I = 31
+    SSTL_1_5V_Class_II = 32
+    SSTL_1_5V_Diff = 33
+    SSTL_1_8V_Class_I_HP = 34
+    SSTL_1_8V_Class_II_HP = 35
+    SSTL_1_8V_Diff_HP = 36
+    SSTL_1_8V_Class_I_HR = 37
+    SSTL_1_8V_Class_II_HR = 38
+    SSTL_2_5V_Class_I = 39
+    SSTL_2_5V_Class_II = 40
+    SSTL_3_3V_Class_I = 41
+    SSTL_3_3V_Class_II = 42
+
+@dataclass
+class IO_Standard_Coeff:
+    io_standard : IO_Standard = field(default=IO_Standard.LVCMOS_1_2V)
+    bank_type   : IO_BankType = field(default=IO_BankType.HP)
+    voltage     : float       = field(default=0.0)
+    input_ac    : float       = field(default=0.0)
+    output_ac   : float       = field(default=0.0)
+    input_dc    : float       = field(default=0.0)
+    output_dc   : float       = field(default=0.0)
+    int_inner   : float       = field(default=0.0)
+    int_outer   : float       = field(default=0.0)
+
 class RsDeviceResources:
 
     def __init__(self, device):
         self.device = device
+        self.io_standard_coeff_list = List[IO_Standard_Coeff]
         self.modules = [None, None, None, None, None, None, None]
+        self.load_IO_standard_coeff()
+
+    def load_IO_standard_coeff(self) -> None:
+        self.io_standard_coeff_list = [
+            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_5V, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000006),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000008),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.0000003, output_ac=0.000025, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_2_5V, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000012, output_ac=0.000025, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000275),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_3_3V, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.0000012, output_ac=0.000025, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000275),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVTTL, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.0000012, output_ac=0.00003, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.000002),
+            IO_Standard_Coeff(io_standard=IO_Standard.BLVDS_Diff, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.0000012, output_ac=0.000001, input_dc=0.001, output_dc=0.00002, int_inner=0.00000001, int_outer=0.00000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVDS_Diff_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000001, output_ac=0.000005, input_dc=0.002, output_dc=0.0011, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVDS_Diff_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.000001, output_ac=0.000005, input_dc=0.002, output_dc=0.0011, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVPECL_2_5V_Diff, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000007, output_ac=0.000000001, input_dc=0.00105, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.LVPECL_3_3V_Diff, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.0000007, output_ac=0.000000001, input_dc=0.00105, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_I_with_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.0102, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_I_without_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_II_with_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.0102, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_II_without_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000004, output_ac=0.0001, input_dc=0.006, output_dc=0.005, int_inner=0.00000002, int_outer=0.0000008),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_I_with_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.01425, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_I_without_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_II_with_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.01425, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_II_without_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Diff, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.0001, input_dc=0.006, output_dc=0.005, int_inner=0.00000002, int_outer=0.0000001),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSUL_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.000005, input_dc=0.003, output_dc=0.00025, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.HSUL_1_2V_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000001, output_ac=0.000009, input_dc=0.003, output_dc=0.0005, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.MIPI_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000001, output_ac=0.000007, input_dc=0.003, output_dc=0.006, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.PCI66, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.0000013, output_ac=0.000075, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.PCIX133, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000013, output_ac=0.00008, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.POD_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000005, output_ac=0.000007, input_dc=0.003, output_dc=0.006, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.POD_1_2V_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000007, output_ac=0.00000007, input_dc=0.003, output_dc=0.006, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.RSDS_Diff, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000007, output_ac=0.00000007, input_dc=0.002, output_dc=0.03, int_inner=0.00000001, int_outer=0.000004),
+            IO_Standard_Coeff(io_standard=IO_Standard.SLVS_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000001, output_ac=0.000005, input_dc=0.0023, output_dc=0.006, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_5V_Class_I, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.00004, input_dc=0.002, output_dc=0.002, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_5V_Class_II, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.00004, input_dc=0.002, output_dc=0.002, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_5V_Diff, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.00004, input_dc=0.002, output_dc=0.002, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_I_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_II_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Diff_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_I_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_II_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_2_5V_Class_I, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.000003, output_ac=0.00006, input_dc=0.003, output_dc=0.003, int_inner=0.000000015, int_outer=0.000000075),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_2_5V_Class_II, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.000003, output_ac=0.00006, input_dc=0.003, output_dc=0.003, int_inner=0.000000015, int_outer=0.000000075),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_3_3V_Class_I, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.000004, output_ac=0.00006, input_dc=0.003, output_dc=0.0035, int_inner=0.00000002, int_outer=0.0000001),
+            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_3_3V_Class_II, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.000004, output_ac=0.00006, input_dc=0.003, output_dc=0.0035, int_inner=0.00000002, int_outer=0.0000001),
+        ]
 
     def get_attr(self, name) -> int:
         return int(self.device.resources[name].num)
@@ -117,6 +232,14 @@ class RsDeviceResources:
     def get_num_HR_Banks(self) -> int:
         # todo: how to get number of hr banks?
         return 6
+
+    def get_num_HP_IOs(self) -> int:
+        # todo: how to get number of HP IOs?
+        return 120
+
+    def get_num_HR_IOs(self) -> int:
+        # todo: how to get number of HR IOs?
+        return 240
 
     def get_num_BOOT_IOs(self) -> int:
         # todo: how to get number of boot IOs?
@@ -254,25 +377,28 @@ class RsDeviceResources:
         # todo: should read from power data
         return 0.0000007
 
-    def get_divfactor_coeff_CLB(self, worsecase : bool) -> (float, [[float]]):
+    def get_IO_standard_coeff(self) -> List[IO_Standard_Coeff]:
+        return self.io_standard_coeff_list
+
+    def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000000002, -0.0000000000001, 0.00000000001, 0.0000000008, 0.00000006, 0.000002]]
         else:
             return 0.8, [[0.0000000000003, -0.00000000001, 0.0000000001, 0.00000006, 0.0000007]]
 
-    def get_divfactor_coeff_BRAM(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_BRAM(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000004, 0.00001]]
         else:
             return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_DSP(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_DSP(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000002, -0.00000000004, 0.00000000008, 0.0000005, 0.00001]]
         else:
             return 0.8, [[0.000000000002, -0.00000000008, 0.0000000007, 0.0000003, 0.000004]]
 
-    def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
         if bank_type == 0: # HP
             if worsecase:
                 return 0.8, [[0.00000000003, -0.0000000006, 0.000000001, 0.000006, 0.0002]]
@@ -284,7 +410,7 @@ class RsDeviceResources:
             else:
                 return 0.8, [[0.00000000003, -0.0000000008, 0.000000001, 0.000008, 0.0002]]
 
-    def get_divfactor_coeff_IO_bank_type(self, bank_type : int, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_IO_bank_type(self, bank_type : int, worsecase : bool):
         if bank_type == 0: # HP
             if worsecase:
                 return 0.8, [[0.0001]]
@@ -296,38 +422,38 @@ class RsDeviceResources:
             else:
                 return 0.8, [[0.00001]]
 
-    def get_divfactor_coeff_AUX(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_AUX(self, worsecase : bool):
         if worsecase:
             # return 1.8, [[0.000000003, 0.0000002, 0.00004, 0.0224], [0.0000000004, 0.0000001, 0.000005, 0.0033]] # from doc
             return 1.8, [[0.00000001, -0.0000003, 0.00004,  0.0332], [0.000000002, 0.0000004, 0.00002, 0.0133]] # from excel
         else:
             return 1.8, [[0.000000003, 0.0000002, 0.00004, 0.0224], [0.0000000004, 0.0000001, 0.000005, 0.0033]]
 
-    def get_divfactor_coeff_NOC(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_NOC(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.00000000005, -0.000000001, 0.000000002, 0.00001, 0.0003]]
         else:
             return 0.8, [[0.00000000003, -0.000000001, 0.00000001, 0.000005, 0.00006]]
 
-    def get_divfactor_coeff_Mem_SS(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_Mem_SS(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.0000000001, -0.000000003, 0.000000005, 0.00003, 0.0009]]
         else:
             return 0.8, [[0.0000000001, -0.000000006, 0.00000005, 0.00002, 0.0003]]
 
-    def get_divfactor_coeff_A45(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_A45(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.00000000000008, -0.000000000004, 0.0000000004, 0.00000003, 0.000002, 0.00008]]
         else:
             return 0.8, [[0.000000000006, -0.000000000006, -0.000000005, 0.0000007, 0.00002]]
 
-    def get_divfactor_coeff_Config(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_Config(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.0000000001, -0.000000002, 0.000000004, 0.00002, 0.0007]]
         else:
             return 0.8, [[0.0000000000005, -0.00000000002, 0.000000003, 0.0000002, 0.00001, 0.0013]]
 
-    def get_divfactor_coeff_Aux_bank_type(self, bank_type : int , worsecase : bool) -> (float, [[float]]): 
+    def get_divfactor_coeff_Aux_bank_type(self, bank_type : int , worsecase : bool):
         if bank_type == 0: # HP
             if worsecase:
                 return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
@@ -339,7 +465,7 @@ class RsDeviceResources:
             else:
                 return 1.8, [[0.000000001, 0.0000002, 0.00021, 0.0003]]
 
-    def get_divfactor_coeff_IO_bank_type_voltage(self, bank_type : int, voltage : float, worsecase : bool = True) -> (float, [[float]]):
+    def get_divfactor_coeff_IO_bank_type_voltage(self, bank_type : int, voltage : float, worsecase : bool = True):
         # todo: should read from power data
         if bank_type == 1: # HR
             if voltage == 1.8:
@@ -374,67 +500,67 @@ class RsDeviceResources:
                 else:
                     return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_VCC_BOOT_IO(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_BOOT_IO(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
         else:
             return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_VCC_DDR_IO(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_DDR_IO(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
         else:
             return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_VCC_SOC_IO(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_SOC_IO(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
         else:
             return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_VCC_GIGE_IO(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_GIGE_IO(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
         else:
             return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_VCC_USB_IO(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_USB_IO(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
         else:
             return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
-    def get_divfactor_coeff_VCC_BOOT_AUX(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_BOOT_AUX(self, worsecase : bool):
         if worsecase:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
         else:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
 
-    def get_divfactor_coeff_VCC_SOC_AUX(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_SOC_AUX(self, worsecase : bool):
         if worsecase:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
         else:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
 
-    def get_divfactor_coeff_VCC_GIGE_AUX(self, worsecase: bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_GIGE_AUX(self, worsecase: bool):
         if worsecase:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
         else:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
 
-    def get_divfactor_coeff_VCC_USB_AUX(self, worsecase: bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_USB_AUX(self, worsecase: bool):
         if worsecase:
             return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
         else:
             return 1.8, [[0.000000001, 0.0000002, 0.00021, 0.0003]]
 
-    def get_divfactor_coeff_VCC_PUF(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_PUF(self, worsecase : bool):
         if worsecase:
             return 1.8, [[0.001]]
         else:
             return 1.8, [[0.0005]]
 
-    def get_divfactor_coeff_VCC_RC_OSC(self, worsecase : bool) -> (float, [[float]]):
+    def get_divfactor_coeff_VCC_RC_OSC(self, worsecase : bool):
         if worsecase:
             return 1.8, [[0.0005]]
         else:

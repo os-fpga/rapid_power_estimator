@@ -6,9 +6,9 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, ValidationError
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
-    IO_Data_Type, IO_STANDARD, IO_Synchronization, IO_Pull_up_down, IO_Bank_Type
+    IO_Data_Type, IO_Standard, IO_Synchronization, IO_Pull_up_down
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, IONotFoundException
+from submodule.rs_device_resources import ModuleType, IO_BankType, DeviceNotFoundException, IONotFoundException
 from .device import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, IONotExistsError, \
     SchemaValidationError
@@ -32,11 +32,13 @@ class IoUsageAllocationSchema(Schema):
     banks_used = fields.Int()
     io_used = fields.Int()
     io_available = fields.Int()
+    error = fields.Bool()
 
 class IoUsageSchema(Schema):
-    type = fields.Enum(IO_Bank_Type, by_value=True)
+    type = fields.Enum(IO_BankType)
     total_banks_available = fields.Int()
     total_io_available = fields.Int()
+    percentage = fields.Number()
     usage = fields.Nested(IoUsageAllocationSchema, many=True)
 
 class IoResourcesConsumptionSchema(Schema):
@@ -48,7 +50,7 @@ class IoResourcesConsumptionSchema(Schema):
     messages = fields.Nested(MessageSchema, many=True)
 
 class IoOutputSchema(Schema):
-    bank_type = fields.Enum(IO_Bank_Type, by_value=True)
+    bank_type = fields.Enum(IO_BankType, by_value=True)
     bank_number = fields.Int()
     vccio_voltage = fields.Number()
     io_signal_rate = fields.Number()
@@ -62,7 +64,7 @@ class IoSchema(Schema):
     name = fields.Str()
     bus_width = fields.Int()
     direction = fields.Enum(IO_Direction, by_value=True)
-    io_standard = fields.Enum(IO_STANDARD, by_value=True)
+    io_standard = fields.Enum(IO_Standard, by_value=True)
     drive_strength = fields.Enum(IO_Drive_Strength, by_value=True)
     slew_rate = fields.Enum(IO_Slew_Rate, by_value=True)
     differential_termination = fields.Enum(IO_differential_termination, by_value=True)
@@ -194,6 +196,10 @@ class IosApi(Resource):
                         type: integer
                     total_io_available:
                         type: integer
+                    percentage:
+                        type: number
+                    error:
+                        type: boolean
                     usage:
                         type: array
                         items:

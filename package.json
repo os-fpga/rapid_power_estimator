@@ -1,5 +1,5 @@
 {
-  "name": "Rapid Power Estimator",
+  "name": "rapid_power_estimator",
   "version": "0.0.1",
   "description": "Rapid Power Estimation Tool allows you to estimate power consumption at various stages of your design cycle. It simplifies the input of design information through intuitive wizards and delivers comprehensive power and thermal data analysis.",
   "author": "Rapid Silicon",
@@ -65,7 +65,7 @@
       ],
       "publisherName": "Rapid Silicon, Inc.",
       "icon": "RPE_icon.png",
-      "artifactName": "${name}_windows_installer.${ext}"
+      "artifactName": "${name}_windows.${ext}"
     },
     "nsis": {
       "oneClick": false,

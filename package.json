@@ -14,7 +14,7 @@
   },
   "build": {
     "appId": "org.rapidsilicon.rapid_power_estimator",
-    "productName": "Raptor Power Estimator",
+    "productName": "Rapid Power Estimator",
     "copyright": "©2024 Rapid Silicon, Inc.",
     "files": [
       "build/**/*",

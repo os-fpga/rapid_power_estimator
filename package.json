@@ -14,6 +14,7 @@
   },
   "build": {
     "appId": "org.rapidsilicon.rapid_power_estimator",
+    "productName": "Rapid Power Estimator",
     "copyright": "©2024 Rapid Silicon, Inc.",
     "files": [
       "build/**/*",
@@ -46,16 +47,10 @@
         "tar.gz",
         "AppImage"
       ],
-      "artifactName": "${name}_linux"
+      "artifactName": "${name}_linux_installer"
     },
     "win": {
       "target": [
-        {
-          "target": "tar.gz",
-          "arch": [
-            "x64"
-          ]
-        },
         {
           "target": "nsis",
           "arch": [
@@ -65,11 +60,12 @@
       ],
       "publisherName": "Rapid Silicon, Inc.",
       "icon": "RPE_icon.png",
-      "artifactName": "${name}_windows.${ext}"
+      "artifactName": "${name}_windows_installer.${ext}"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerSidebar": "imgs/rpesidebar.bmp"
     },
     "mac": {
       "category": "public.app-category.productivity",
@@ -81,11 +77,11 @@
           ]
         }
       ],
-      "artifactName": "${name}_macos.${ext}"
+      "artifactName": "${name}_macos_installer.${ext}"
     }
   },
   "keywords": [],
-  "license": "MIT",
+  "license": "GNU",
   "devDependencies": {
     "@babel/core": "^7.23.9",
     "@babel/preset-env": "^7.24.4",

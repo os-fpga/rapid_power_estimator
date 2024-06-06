@@ -4,6 +4,13 @@ import { fixed } from '../../utils/common';
 
 import '../style/PowerTable.css';
 
+function StateCell({ value, error }) {
+  function background() {
+    return error ? 'error' : '';
+  }
+  return <td className={`${background()}`}>{value}</td>;
+}
+
 function IOPowerTable({ title, total, resources }) {
   return (
     <div className="power-table-main main-border">
@@ -48,23 +55,24 @@ function IOPowerTable({ title, total, resources }) {
                   <tr>
                     <td className="innerHeader no-wrap" rowSpan={3}>{elem.type}</td>
                     <td>{elem.usage[0].voltage}</td>
-                    <td>{elem.usage[0].banks_used}</td>
+                    <StateCell value={elem.usage[0].banks_used} error={elem.usage[0].error} />
                     <td rowSpan={3}>{elem.total_banks_available}</td>
-                    <td>{elem.usage[0].io_used}</td>
-                    <td>{elem.usage[0].io_available}</td>
+                    <StateCell value={elem.usage[0].io_used} error={elem.usage[0].error} />
+                    <StateCell value={elem.usage[0].io_available} error={elem.usage[0].error} />
                     <td rowSpan={3}>{elem.total_io_available}</td>
+                    <td rowSpan={3}>{fixed(elem.percentage, 0)}</td>
                   </tr>
                   <tr>
                     <td>{elem.usage[1].voltage}</td>
-                    <td>{elem.usage[1].banks_used}</td>
-                    <td>{elem.usage[1].io_used}</td>
-                    <td>{elem.usage[1].io_available}</td>
+                    <StateCell value={elem.usage[1].banks_used} error={elem.usage[1].error} />
+                    <StateCell value={elem.usage[1].io_used} error={elem.usage[1].error} />
+                    <StateCell value={elem.usage[1].io_available} error={elem.usage[1].error} />
                   </tr>
                   <tr>
                     <td>{elem.usage[2].voltage}</td>
-                    <td>{elem.usage[2].banks_used}</td>
-                    <td>{elem.usage[2].io_used}</td>
-                    <td>{elem.usage[2].io_available}</td>
+                    <StateCell value={elem.usage[2].banks_used} error={elem.usage[2].error} />
+                    <StateCell value={elem.usage[2].io_used} error={elem.usage[2].error} />
+                    <StateCell value={elem.usage[2].io_available} error={elem.usage[2].error} />
                   </tr>
                 </React.Fragment>
               ))

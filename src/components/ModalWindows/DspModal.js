@@ -1,7 +1,7 @@
 import React from 'react';
-import { dspMode, pipelining } from '../../utils/dsp';
 import { FieldType } from '../../utils/common';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import ModalWindow from './ModalWindow';
 
@@ -9,6 +9,11 @@ function DspModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
   const { clocks } = useClockSelection();
+  const { GetOptions } = useGlobalState();
+
+  const dspMode = GetOptions('DSP_Mode');
+  const pipelining = GetOptions('Pipelining');
+
   return (
     <ModalWindow
       title={title}

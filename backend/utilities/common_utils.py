@@ -2,6 +2,13 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+from enum import Enum
+
+class RsEnum(Enum):
+    def __init__(self, value, description = '(empty)'):
+        self._value_ = value
+        self.description = description
+
 def update_attributes(target, props, *, exclude = ['ports', 'output']):
     for key, value in props.items():
         if key not in exclude:

@@ -3,21 +3,21 @@
 #  Authorized use only
 #
 from dataclasses import dataclass, field
-from enum import Enum
-from utilities.common_utils import update_attributes
+from typing import List
+from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import DspNotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
-class Pipelining(Enum):
-    INPUT_AND_OUTPUT = 0
-    INPUT_ONLY = 1
-    OUTPUT_ONLY = 2
-    NONE = 3
+class Pipelining(RsEnum):
+    INPUT_AND_OUTPUT = 0, "Input and Output"
+    INPUT_ONLY = 1, "Input only"
+    OUTPUT_ONLY = 2, "Output only"
+    NONE = 3, "None"
 
-class DSP_Mode(Enum):
-    MULTIPLY_ACCUMULATE = 0
-    MULTIPLY_ADD_SUB = 1
-    MULTIPLY = 2
+class DSP_Mode(RsEnum):
+    MULTIPLY_ACCUMULATE = 0, "Multiply Accumulate"
+    MULTIPLY_ADD_SUB = 1, "Multiply Add Sub"
+    MULTIPLY = 2, "Multiply"
 
 @dataclass
 class DSP_output:
@@ -27,7 +27,7 @@ class DSP_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    messages : [RsMessage] = field(default_factory=list)
+    messages : List[RsMessage] = field(default_factory=list)
 
 @dataclass
 class DSP:

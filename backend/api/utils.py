@@ -80,7 +80,7 @@ class AttributesApi(Resource):
         for a in module_attrbs:
             attrb = {}
             attrb['id'] = a.__name__
-            attrb['options'] = [{ 'text' : elem.name, 'value' : str(elem.value) } \
+            attrb['options'] = [{ 'text' : elem.description if hasattr(elem, 'description') else elem.name, 'id' : str(elem.value) } \
                 for elem in a]
             attrb_list.append(attrb)
         return attrb_list

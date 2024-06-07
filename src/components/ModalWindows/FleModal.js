@@ -1,13 +1,15 @@
 import React from 'react';
-import glitchFactor from '../../utils/fle';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 function FleModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
   const { clocks } = useClockSelection();
+  const { GetOptions } = useGlobalState();
+  const glitchFactor = GetOptions('Glitch_Factor');
   return (
     <ModalWindow
       title={title}

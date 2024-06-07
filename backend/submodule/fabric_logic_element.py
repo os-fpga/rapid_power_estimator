@@ -3,15 +3,15 @@
 #  Authorized use only
 #
 from dataclasses import dataclass, field
-from enum import Enum
-from utilities.common_utils import update_attributes
+from typing import List
+from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import FabricLeNotFoundException, FabricLeDescriptionAlreadyExistsException
 from .rs_message import RsMessage, RsMessageManager
 
-class Glitch_Factor(Enum):
-    TYPICAL = 0 
-    HIGH = 1
-    VERY_HIGH = 2
+class Glitch_Factor(RsEnum):
+    TYPICAL = 0, "Typical"
+    HIGH = 1, "High"
+    VERY_HIGH = 2, "Very High"
 
 @dataclass
 class Fabric_LE_output:
@@ -20,7 +20,7 @@ class Fabric_LE_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    messages : [RsMessage] = field(default_factory=list)
+    messages : List[RsMessage] = field(default_factory=list)
 
 @dataclass
 class Fabric_LE:

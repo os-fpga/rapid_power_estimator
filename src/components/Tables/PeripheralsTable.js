@@ -1,12 +1,12 @@
 import React from 'react';
 import PeripheralsModal from '../ModalWindows/PeripheralsModal';
 import * as server from '../../utils/serverAPI';
-import { fixed } from '../../utils/common';
+import { fixed, getPerformance } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import { TableBase, Actions, StatusColumn } from './TableBase';
-import * as per from '../../utils/peripherals';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
@@ -15,67 +15,76 @@ function PeripheralsTable({ device, peripheralsUrl }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
+  const { GetOptions } = useGlobalState();
+  const usage = GetOptions('Peripherals_Usage');
+  const spiFreq = GetOptions('Qspi_Performance_Mbps');
+  const jtagFreq = GetOptions('Jtag_Clock_Frequency');
+  const i2cFreq = GetOptions('I2c_Speed');
+  const uartBound = GetOptions('Baud_Rate');
+  const usbFreq = GetOptions('Usb_Speed');
+  const gigeFreq = GetOptions('Gige_Speed');
+  const gpioFreq = GetOptions('GpioStandard');
   const [peripherals, setPeripherals] = React.useState([
     {
       id: 'spi',
-      usage: per.spi.usage,
-      performance: per.spi.clock_frequency,
+      usage,
+      performance: spiFreq,
       performance_id: 'clock_frequency',
       url: '',
       data: [],
     },
     {
       id: 'jtag',
-      usage: per.jtag.usage,
-      performance: per.jtag.clock_frequency,
+      usage,
+      performance: jtagFreq,
       performance_id: 'clock_frequency',
       url: '',
       data: [],
     },
     {
       id: 'i2c',
-      usage: per.i2c.usage,
-      performance: per.i2c.clock_frequency,
+      usage,
+      performance: i2cFreq,
       performance_id: 'clock_frequency',
       url: '',
       data: [],
     },
     {
       id: 'uart',
-      usage: per.uart.usage,
-      performance: per.uart.baudrate,
+      usage,
+      performance: uartBound,
       performance_id: 'baudrate',
       url: '',
       data: [],
     },
     {
       id: 'usb2',
-      usage: per.usb2.usage,
-      performance: per.usb2.bit_rate,
+      usage,
+      performance: usbFreq,
       performance_id: 'bit_rate',
       url: '',
       data: [],
     },
     {
       id: 'gige',
-      usage: per.gige.usage,
-      performance: per.gige.bit_rate,
+      usage,
+      performance: gigeFreq,
       performance_id: 'bit_rate',
       url: '',
       data: [],
     },
     {
       id: 'gpio',
-      usage: per.gpioPwm.usage,
-      performance: per.gpioPwm.io_standard,
+      usage,
+      performance: gpioFreq,
       performance_id: 'io_standard',
       url: '',
       data: [],
     },
     {
       id: 'pwm',
-      usage: per.gpioPwm.usage,
-      performance: per.gpioPwm.io_standard,
+      usage,
+      performance: gpioFreq,
       performance_id: 'io_standard',
       url: '',
       data: [],
@@ -129,7 +138,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
     const data = {
       usage: row.usage,
     };
-    data[peripherals[index.main].performance_id] = per.getPerformance(row);
+    data[peripherals[index.main].performance_id] = getPerformance(row);
     const { url } = peripherals[index.main].data[index.inner];
     server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
@@ -179,7 +188,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
               }}
             />
             <SelectionCell val={i.data.usage} values={row.usage} />
-            <SelectionCell val={per.getPerformance(i.data)} values={row.performance} />
+            <SelectionCell val={getPerformance(i.data)} values={row.performance} />
             <td>
               {i.data.consumption.calculated_bandwidth}
               {' MB/s'}

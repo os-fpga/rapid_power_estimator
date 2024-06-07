@@ -1,10 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { memory } from '../../utils/peripherals';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 function MemoryModal({ closeModal, onSubmit, defaultValue }) {
+  const { GetOptions } = useGlobalState();
+  const memoryUsage = GetOptions('Peripherals_Usage');
+  const memoryType = GetOptions('Memory_Type');
   return (
     <ModalWindow
       title={defaultValue.name}
@@ -17,14 +20,14 @@ function MemoryModal({ closeModal, onSubmit, defaultValue }) {
           id: 'usage',
           text: 'Usage',
           value: defaultValue.usage,
-          values: memory.usage,
+          values: memoryUsage,
         },
         {
           fieldType: FieldType.select,
           id: 'memory_type',
           text: 'Memory Type',
           value: defaultValue.memory_type,
-          values: memory.memory_type,
+          values: memoryType,
         },
         {
           fieldType: FieldType.number,

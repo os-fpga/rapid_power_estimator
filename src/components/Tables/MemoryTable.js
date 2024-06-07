@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import MemoryModal from '../ModalWindows/MemoryModal';
-import { memory } from '../../utils/peripherals';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
@@ -11,6 +10,7 @@ import {
 } from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
@@ -26,6 +26,9 @@ function MemoryTable({ device, peripherals }) {
     { id: 1, data: {} },
   ]);
   const { updateTotalPower } = useSocTotalPower();
+  const { GetOptions } = useGlobalState();
+  const memoryUsage = GetOptions('Peripherals_Usage');
+  const memoryType = GetOptions('Memory_Type');
 
   const mainTableHeader = [
     '', '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
@@ -112,8 +115,8 @@ function MemoryTable({ device, peripherals }) {
                 <Actions
                   onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
                 />
-                <SelectionCell val={row.data.usage} values={memory.usage} />
-                <SelectionCell val={row.data.memory_type} values={memory.memory_type} />
+                <SelectionCell val={row.data.usage} values={memoryUsage} />
+                <SelectionCell val={row.data.memory_type} values={memoryType} />
                 <td>{row.data.data_rate}</td>
                 <td>{row.data.width}</td>
                 <PowerCell val={row.data.consumption.write_bandwidth} />
@@ -139,8 +142,8 @@ function MemoryTable({ device, peripherals }) {
           defaultValue={(editIndex !== null && memoryData[editIndex].data) || {
             enable: true,
             name: '',
-            usage: memory.usage.at(0).id,
-            memory_type: memory.memory_type.at(0).id,
+            usage: memoryUsage.at(0).id,
+            memory_type: memoryType.at(0).id,
             data_rate: 533,
             width: 32,
           }}

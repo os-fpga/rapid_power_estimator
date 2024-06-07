@@ -1,7 +1,6 @@
 import React from 'react';
-import { FieldType } from '../../utils/common';
+import { FieldType, getPerformance } from '../../utils/common';
 import ModalWindow from './ModalWindow';
-import { getPerformance } from '../../utils/peripherals';
 
 function PeripheralsModal({
   closeModal, onSubmit, defaultValue, index,

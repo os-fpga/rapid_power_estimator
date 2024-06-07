@@ -1,22 +1,22 @@
 import React from 'react';
-import {
-  direction,
-  ioStandard,
-  driveStrength,
-  slewRate,
-  differentialTermination,
-  ioDataType,
-  synchronization,
-  ioPullUpDown,
-} from '../../utils/io';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 function IOModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
   const { clocks } = useClockSelection();
+  const { GetOptions } = useGlobalState();
+  const direction = GetOptions('IO_Direction');
+  const ioStandard = GetOptions('IO_Standard');
+  const driveStrength = GetOptions('IO_Drive_Strength');
+  const slewRate = GetOptions('IO_Slew_Rate');
+  const differentialTermination = GetOptions('IO_differential_termination');
+  const ioDataType = GetOptions('IO_Data_Type');
+  const synchronization = GetOptions('IO_Synchronization');
+  const ioPullUpDown = GetOptions('IO_Pull_up_down');
   return (
     <ModalWindow
       title={title}

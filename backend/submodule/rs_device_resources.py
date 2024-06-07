@@ -1,4 +1,5 @@
 from enum import Enum
+from utilities.common_utils import RsEnum
 from dataclasses import dataclass, field
 from typing import List
 
@@ -50,54 +51,54 @@ class ModuleType(Enum):
     SOC_PERIPHERALS = 5
     REGULATOR = 6
 
-class IO_BankType(Enum):
-    HP = 0
-    HR = 1
+class IO_BankType(RsEnum):
+    HP = 0, "HP"
+    HR = 1, "HR"
 
-class IO_Standard(Enum):
-    LVCMOS_1_2V = 0
-    LVCMOS_1_5V = 1
-    LVCMOS_1_8V_HP = 2
-    LVCMOS_1_8V_HR = 3
-    LVCMOS_2_5V = 4
-    LVCMOS_3_3V = 5
-    LVTTL = 6
-    BLVDS_Diff = 7
-    LVDS_Diff_HP = 8
-    LVDS_Diff_HR = 9
-    LVPECL_2_5V_Diff = 10
-    LVPECL_3_3V_Diff = 11
-    HSTL_1_2V_Class_I_with_ODT = 12
-    HSTL_1_2V_Class_I_without_ODT = 13
-    HSTL_1_2V_Class_II_with_ODT = 14
-    HSTL_1_2V_Class_II_without_ODT = 15
-    HSTL_1_2V_Diff = 16
-    HSTL_1_5V_Class_I_with_ODT = 17
-    HSTL_1_5V_Class_I_without_ODT = 18
-    HSTL_1_5V_Class_II_with_ODT = 19
-    HSTL_1_5V_Class_II_without_ODT = 20
-    HSTL_1_5V_Diff = 21
-    HSUL_1_2V = 22
-    HSUL_1_2V_Diff = 23
-    MIPI_Diff = 24
-    PCI66 = 25
-    PCIX133 = 26
-    POD_1_2V = 27
-    POD_1_2V_Diff = 28
-    RSDS_Diff = 29
-    SLVS_Diff = 30
-    SSTL_1_5V_Class_I = 31
-    SSTL_1_5V_Class_II = 32
-    SSTL_1_5V_Diff = 33
-    SSTL_1_8V_Class_I_HP = 34
-    SSTL_1_8V_Class_II_HP = 35
-    SSTL_1_8V_Diff_HP = 36
-    SSTL_1_8V_Class_I_HR = 37
-    SSTL_1_8V_Class_II_HR = 38
-    SSTL_2_5V_Class_I = 39
-    SSTL_2_5V_Class_II = 40
-    SSTL_3_3V_Class_I = 41
-    SSTL_3_3V_Class_II = 42
+class IO_Standard(RsEnum):
+    LVCMOS_1_2V = 0, "LVCMOS 1.2V"
+    LVCMOS_1_5V = 1, "LVCMOS 1.5V"
+    LVCMOS_1_8V_HP = 2, "LVCMOS 1.8V (HP)"
+    LVCMOS_1_8V_HR = 3, "LVCMOS 1.8V (HR)"
+    LVCMOS_2_5V = 4, "LVCMOS 2.5V"
+    LVCMOS_3_3V = 5, "LVCMOS 3.3V"
+    LVTTL = 6, "LVTTL"
+    BLVDS_Diff = 7, "BLVDS (Diff)"
+    LVDS_Diff_HP = 8, "LVDS (Diff) (HP)"
+    LVDS_Diff_HR = 9, "LVDS (Diff) (HR)"
+    LVPECL_2_5V_Diff = 10, "LVPECL 2.5V (Diff)"
+    LVPECL_3_3V_Diff = 11, "LVPECL 3.3V (Diff)"
+    HSTL_1_2V_Class_I_with_ODT = 12, "HSTL 1.2V Class-I with ODT"
+    HSTL_1_2V_Class_I_without_ODT = 13, "HSTL 1.2V Class-I w/o ODT"
+    HSTL_1_2V_Class_II_with_ODT = 14, "HSTL 1.2V Class-II with ODT"
+    HSTL_1_2V_Class_II_without_ODT = 15, "HSTL 1.2V Class-II w/o ODT"
+    HSTL_1_2V_Diff = 16, "HSTL 1.2V (Diff)"
+    HSTL_1_5V_Class_I_with_ODT = 17, "HSTL 1.5V Class-I with ODT"
+    HSTL_1_5V_Class_I_without_ODT = 18, "HSTL 1.5V Class-I w/o ODT"
+    HSTL_1_5V_Class_II_with_ODT = 19, "HSTL 1.5V Class-II with ODT"
+    HSTL_1_5V_Class_II_without_ODT = 20, "HSTL 1.5V Class-II w/o ODT"
+    HSTL_1_5V_Diff = 21, "HSTL 1.5V (Diff)"
+    HSUL_1_2V = 22, "HSUL 1.2V"
+    HSUL_1_2V_Diff = 23, "HSUL 1.2V (Diff)"
+    MIPI_Diff = 24, "MIPI (Diff)"
+    PCI66 = 25, "PCI66"
+    PCIX133 = 26, "PCIX133"
+    POD_1_2V = 27, "POD 1.2V"
+    POD_1_2V_Diff = 28, "POD 1.2V (Diff)"
+    RSDS_Diff = 29, "RSDS (Diff)"
+    SLVS_Diff = 30, "SLVS (Diff)"
+    SSTL_1_5V_Class_I = 31, "STL 1.5V Class-I"
+    SSTL_1_5V_Class_II = 32, "SSTL 1.5V Class-II"
+    SSTL_1_5V_Diff = 33, "SSTL 1.5V (Diff)"
+    SSTL_1_8V_Class_I_HP = 34, "SSTL 1.8V Class-I (HP)"
+    SSTL_1_8V_Class_II_HP = 35, "SSTL 1.8V Class-II (HP)"
+    SSTL_1_8V_Diff_HP = 36, "SSTL 1.8V (Diff) (HP)"
+    SSTL_1_8V_Class_I_HR = 37, "SSTL 1.8V Class-I (HR)"
+    SSTL_1_8V_Class_II_HR = 38, "SSTL 1.8V Class-II (HR)"
+    SSTL_2_5V_Class_I = 39, "SSTL 2.5V Class-I"
+    SSTL_2_5V_Class_II = 40, "SSTL 2.5V Class-II"
+    SSTL_3_3V_Class_I = 41, "SSTL 3.3V Class-I"
+    SSTL_3_3V_Class_II = 42, "SSTL 3.3V Class-II"
 
 @dataclass
 class IO_Standard_Coeff:

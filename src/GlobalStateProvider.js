@@ -1,5 +1,6 @@
 import React, {
   createContext, useContext, useState, useMemo,
+  useEffect,
 } from 'react';
 import * as server from './utils/serverAPI';
 
@@ -20,6 +21,11 @@ export function GlobalStateProvider({ children }) {
   const [dspState, setDspState] = useState([]);
   const [ioState, setIoState] = useState([]);
   const [socState, setSocState] = useState({});
+  const [attributes, setAttributes] = useState([]);
+
+  useEffect(() => {
+    server.GET(server.attributes(), (attr) => setAttributes(attr));
+  }, []);
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -84,6 +90,12 @@ export function GlobalStateProvider({ children }) {
       });
     }
   }
+
+  function GetOptions(id) {
+    const found = attributes.find((elem) => id === elem.id);
+    return (found === undefined) ? [] : found.options;
+  }
+
   const values = useMemo(() => ({
     updateGlobalState,
     clockingState,
@@ -92,6 +104,7 @@ export function GlobalStateProvider({ children }) {
     dspState,
     ioState,
     socState,
+    GetOptions,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [bramState, clockingState, dspState, fleState, ioState, socState]);
 

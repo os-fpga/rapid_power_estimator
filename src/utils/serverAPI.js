@@ -6,6 +6,7 @@ const { server } = config;
 let { port } = config;
 
 export function devices() { return formatString('{0}:{1}/devices', server, port); }
+export function attributes() { return formatString('{0}:{1}/attributes', server, port); }
 
 export function setPort(p, fetchDevices) {
   if (p !== undefined) {

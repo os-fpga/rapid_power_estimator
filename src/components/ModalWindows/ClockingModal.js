@@ -1,11 +1,14 @@
 import React from 'react';
-import { sources, states } from '../../utils/clocking';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 function ClockingModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
+  const { GetOptions } = useGlobalState();
+  const states = GetOptions('Clock_State');
+  const sources = GetOptions('Source');
   return (
     <ModalWindow
       title={title}

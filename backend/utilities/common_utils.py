@@ -9,6 +9,12 @@ class RsEnum(Enum):
         self._value_ = value
         self.description = description
 
+    def __new__(cls, value, description = '(empty)'):
+        member = object.__new__(cls)
+        member._value_ = value
+        member.description = description
+        return member
+
 def update_attributes(target, props, *, exclude = ['ports', 'output']):
     for key, value in props.items():
         if key not in exclude:

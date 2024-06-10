@@ -92,21 +92,21 @@ class Gpio_Type(RsEnum):
     FABRIC = 2
 
 class N22_RISC_V_Clock(RsEnum):
-    PLL_233MHz       = 0
-    BOOT_Clock_40MHz = 1
-    RC_OSC_50MHz     = 2
+    PLL_233MHz       = 0, "PLL (233 MHz)"
+    BOOT_Clock_40MHz = 1, "BOOT CLK (40 MHz)"
+    RC_OSC_50MHz     = 2, "RC OSC (50 MHz)"
 
 class Port_Activity(RsEnum):
-    IDLE   = 0
-    LOW    = 1
-    MEDIUM = 2
-    HIGH   = 3
+    IDLE   = 0, "Idle"
+    LOW    = 1, "Low"
+    MEDIUM = 2, "Medium"
+    HIGH   = 3, "High"
 
 class A45_Load(RsEnum):
-    IDLE   = 0
-    LOW    = 1
-    MEDIUM = 2
-    HIGH   = 3
+    IDLE   = 0, "Idle"
+    LOW    = 1, "Low"
+    MEDIUM = 2, "Medium"
+    HIGH   = 3, "High"
 
 class Memory_Type(RsEnum):
     SRAM = 0, "SRAM"
@@ -114,18 +114,18 @@ class Memory_Type(RsEnum):
     DDR4 = 2, "DDR4"
 
 class Dma_Activity(RsEnum):
-    IDLE   = 0
-    LOW    = 1
-    MEDIUM = 2
-    HIGH   = 3
+    IDLE   = 0, "Idle"
+    LOW    = 1, "Low"
+    MEDIUM = 2, "Mediun"
+    HIGH   = 3, "High"
 
 class Dma_Source_Destination(RsEnum):
-    NONE     = 0
-    DDR      = 1
-    OCM      = 2
-    SPI_QSPI = 3
-    I2C      = 4
-    FABRIC   = 5
+    NONE     = 0, "NONE"
+    DDR      = 1, "DDR"
+    OCM      = 2, "OCM"
+    SPI_QSPI = 3, "SPI/QSPI"
+    I2C      = 4, "I2C"
+    FABRIC   = 5, "Fabric"
 
 @dataclass
 class Peripheral_Output:

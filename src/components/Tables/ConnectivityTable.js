@@ -1,7 +1,7 @@
 import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { connectivityNames, loadActivity, findEvailableIndex } from '../../utils/cpu';
+import { connectivityNames, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
@@ -12,6 +12,7 @@ import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel } from '../ComponentsLib';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ACPUTable.css';
 
@@ -25,6 +26,8 @@ function ConnectivityTable({ device, peripherals }) {
   const [addButtonDisable, setAddButtonDisable] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
   const { defaultClock } = useClockSelection();
+  const { GetOptions } = useGlobalState();
+  const loadActivity = GetOptions('Port_Activity');
 
   function fetchPort(port, link) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {

@@ -1,11 +1,10 @@
 import React from 'react';
-import { loadActivity } from '../../utils/cpu';
 import { FieldType } from '../../utils/common';
 
 import ModalWindow from './ModalWindow';
 
 function ABCPUModal({
-  closeModal, onSubmit, defaultValue, endpoints, title,
+  closeModal, onSubmit, defaultValue, endpoints, title, loadActivity,
 }) {
   return (
     <ModalWindow

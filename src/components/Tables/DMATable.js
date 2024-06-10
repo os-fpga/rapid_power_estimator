@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import DMAModal from '../ModalWindows/DMAModal';
-import { source, loadActivity } from '../../utils/cpu';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
@@ -11,6 +10,7 @@ import {
 } from './TableBase';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
@@ -28,6 +28,9 @@ function DMATable({ device }) {
     { id: 3, data: {} },
   ]);
   const { updateTotalPower } = useSocTotalPower();
+  const { GetOptions } = useGlobalState();
+  const loadActivity = GetOptions('Dma_Activity');
+  const source = GetOptions('Dma_Source_Destination');
 
   const mainTableHeader = [
     '', 'Action', 'En', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',

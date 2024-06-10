@@ -5,11 +5,12 @@ import { SelectionProvider } from './SelectionProvider';
 import { SocTotalPowerProvider } from './SOCTotalPowerProvider';
 import { ClockSelectionProvider } from './ClockSelectionProvider';
 import { GlobalStateProvider } from './GlobalStateProvider';
+import * as server from './utils/serverAPI';
 
 const root = createRoot(document.getElementById('app'));
 root.render(
   <React.StrictMode>
-    <GlobalStateProvider>
+    <GlobalStateProvider fetch={server.GET}>
       <ClockSelectionProvider>
         <SocTotalPowerProvider>
           <SelectionProvider>

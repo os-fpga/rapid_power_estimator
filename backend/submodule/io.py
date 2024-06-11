@@ -4,58 +4,57 @@
 #
 import math
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import List
-from utilities.common_utils import update_attributes
+from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard_Coeff, IOStandardCoeffNotFoundException, \
     IONotFoundException, IO_BankType, IO_Standard
 from .rs_message import RsMessage, RsMessageManager
 
-class IO_Direction(Enum):
-    INPUT = 0
-    OUTPUT = 1
-    OPEN_DRAIN = 2
-    BI_DIRECTION = 3
+class IO_Direction(RsEnum):
+    INPUT = 0, "Input"
+    OUTPUT = 1, "Output"
+    OPEN_DRAIN = 2, "Open-Drain"
+    BI_DIRECTION = 3, "Bi-dir"
 
-class IO_Drive_Strength(Enum):
-    two = 2
-    four = 4
-    six = 6
-    eight = 8
-    ten = 12
-    sixteen = 16
+class IO_Drive_Strength(RsEnum):
+    two = 2, "2 mA"
+    four = 4, "4 mA"
+    six = 6, "6 mA"
+    eight = 8, "8 mA"
+    ten = 12, "12 mA"
+    sixteen = 16, "16 mA"
 
-class IO_Slew_Rate(Enum):
-    fast = 0
-    slow = 1
+class IO_Slew_Rate(RsEnum):
+    fast = 0, "Fast"
+    slow = 1, "Slow"
 
-class IO_differential_termination(Enum):
-    OFF = 0
-    ON = 1
+class IO_differential_termination(RsEnum):
+    OFF = 0, "Off"
+    ON = 1, "On"
 
-class IO_Data_Type(Enum):
-    SDR = 0
-    DDR = 1
-    Clock = 2
-    Async = 3
+class IO_Data_Type(RsEnum):
+    SDR = 0, "SDR"
+    DDR = 1, "DDR"
+    Clock = 2, "Clock"
+    Async = 3, "Async"
 
-class IO_Synchronization(Enum):
-    NONE = 0
-    Register = 1
-    DDR_Register = 2
-    SERDES_1_to_3 = 3
-    SERDES_1_to_4 = 4
-    SERDES_1_to_5 = 5
-    SERDES_1_to_6 = 6
-    SERDES_1_to_7 = 7
-    SERDES_1_to_8 = 8
-    SERDES_1_to_9 = 9
-    SERDES_1_to_10 = 10
+class IO_Synchronization(RsEnum):
+    NONE = 0, "None"
+    Register = 1, "Register"
+    DDR_Register = 2, "DDR Register"
+    SERDES_1_to_3 = 3, "1 to 3 SERDES"
+    SERDES_1_to_4 = 4, "1 to 4 SERDES"
+    SERDES_1_to_5 = 5, "1 to 5 SERDES"
+    SERDES_1_to_6 = 6, "1 to 6 SERDES"
+    SERDES_1_to_7 = 7, "1 to 7 SERDES"
+    SERDES_1_to_8 = 8, "1 to 8 SERDES"
+    SERDES_1_to_9 = 9, "1 to 9 SERDES"
+    SERDES_1_to_10 = 10, "1 to 10 SERDES"
 
-class IO_Pull_up_down(Enum):
-    NONE = 0
-    PULL_UP = 1
-    PULL_DOWN = 2
+class IO_Pull_up_down(RsEnum):
+    NONE = 0, "None"
+    PULL_UP = 1, "Pullup"
+    PULL_DOWN = 2, "Pulldown"
 
 @dataclass
 class IO_output:

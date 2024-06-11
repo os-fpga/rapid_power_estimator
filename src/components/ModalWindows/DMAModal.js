@@ -1,12 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { source, loadActivity } from '../../utils/cpu';
 import { FieldType } from '../../utils/common';
 import ModalWindow from './ModalWindow';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 function DMAModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
+  const { GetOptions } = useGlobalState();
+  const loadActivity = GetOptions('Dma_Activity');
+  const source = GetOptions('Dma_Source_Destination');
   return (
     <ModalWindow
       title={title}

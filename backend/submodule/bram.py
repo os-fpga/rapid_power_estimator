@@ -3,23 +3,22 @@
 #  Authorized use only
 #
 from dataclasses import dataclass, field
-from enum import Enum
-from .clock import Clock
-from utilities.common_utils import update_attributes
+from typing import List
+from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import BramNotFoundException
 from .rs_message import RsMessage, RsMessageManager
 
-class BRAM_Type(Enum):
-    BRAM_18K_SDP = 0
-    BRAM_36K_SDP = 1
-    BRAM_18k_TDP = 2
-    BRAM_36k_TDP = 3
-    BRAM_18K_SP = 4
-    BRAM_36K_SP = 5
-    BRAM_18K_FIFO = 6
-    BRAM_36K_FIFO = 7
-    BRAM_18K_ROM = 8
-    BRAM_36K_ROM = 9
+class BRAM_Type(RsEnum):
+    BRAM_18K_SDP = 0, "18k SDP"
+    BRAM_36K_SDP = 1, "36k SDP"
+    BRAM_18k_TDP = 2, "18k TDP"
+    BRAM_36k_TDP = 3, "36k TDP"
+    BRAM_18K_SP = 4, "18k SP"
+    BRAM_36K_SP = 5, "36k SP"
+    BRAM_18K_FIFO = 6, "18k FIFO"
+    BRAM_36K_FIFO = 7, "36k FIFO"
+    BRAM_18K_ROM = 8, "18k ROM"
+    BRAM_36K_ROM = 9, "18k ROM"
 
 @dataclass
 class PortOutputProperties:
@@ -34,7 +33,7 @@ class BRAM_output:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    messages : [RsMessage] = field(default_factory=list)
+    messages : List[RsMessage] = field(default_factory=list)
 
 @dataclass
 class PortProperties:

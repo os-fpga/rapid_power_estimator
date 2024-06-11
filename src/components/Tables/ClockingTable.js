@@ -1,6 +1,5 @@
 import React from 'react';
 import ClockingModal from '../ModalWindows/ClockingModal';
-import { sources, states } from '../../utils/clocking';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
@@ -23,8 +22,11 @@ function ClockingTable({ device }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { setClocks } = useClockSelection();
-  const { updateGlobalState } = useGlobalState();
+  const { updateGlobalState, GetOptions } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
+
+  const states = GetOptions('Clock_State');
+  const sources = GetOptions('Source');
 
   const mainTableHeader = [
     '', 'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',

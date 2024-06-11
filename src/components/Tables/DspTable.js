@@ -3,7 +3,6 @@ import DspModal from '../ModalWindows/DspModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
-import { dspMode, pipelining } from '../../utils/dsp';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import {
   TableBase, Actions, StatusColumn, EnableState,
@@ -23,8 +22,11 @@ function DspTable({ device }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
-  const { updateGlobalState } = useGlobalState();
+  const { updateGlobalState, GetOptions } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
+
+  const dspMode = GetOptions('DSP_Mode');
+  const pipelining = GetOptions('Pipelining');
 
   const fetchDspData = (deviceId) => {
     if (deviceId !== null) {

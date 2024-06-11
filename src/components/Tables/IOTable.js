@@ -13,17 +13,6 @@ import { useGlobalState } from '../../GlobalStateProvider';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
-import {
-  direction,
-  ioStandard,
-  driveStrength,
-  slewRate,
-  differentialTermination,
-  ioDataType,
-  synchronization,
-  ioPullUpDown,
-  bankType,
-} from '../../utils/io';
 
 function IOTable({ device }) {
   const [dev, setDev] = React.useState(null);
@@ -33,8 +22,17 @@ function IOTable({ device }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState(null);
   const { defaultClock } = useClockSelection();
-  const { updateGlobalState } = useGlobalState();
+  const { updateGlobalState, GetOptions } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
+  const direction = GetOptions('IO_Direction');
+  const ioStandard = GetOptions('IO_Standard');
+  const driveStrength = GetOptions('IO_Drive_Strength');
+  const slewRate = GetOptions('IO_Slew_Rate');
+  const differentialTermination = GetOptions('IO_differential_termination');
+  const ioDataType = GetOptions('IO_Data_Type');
+  const synchronization = GetOptions('IO_Synchronization');
+  const ioPullUpDown = GetOptions('IO_Pull_up_down');
+  const bankType = GetOptions('IO_BankType');
 
   const defaultPowerData = {
     io_usage: [

@@ -1,10 +1,10 @@
 import React from 'react';
 import { InputNumber } from 'antd';
 import { PercentSelector, Checkbox, Dropdown } from '../ComponentsLib';
-import { ioStandard } from '../../utils/io';
 import {
   ddr, ddrRate, ddrWidth, endpoints,
 } from '../../utils/designParameter';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/DesignParametesTable.css';
 
@@ -31,6 +31,8 @@ function DesignParametesTable() {
   const [ddrRateSel, setDdrRateSel] = React.useState(0);
   const [ddrWidthSel, setDdrWidthSel] = React.useState(0);
   const [ocmEndpoint, setOcmEndpoint] = React.useState(0);
+  const { GetOptions } = useGlobalState();
+  const ioStandard = GetOptions('IO_Standard');
 
   return (
     <div className="param-element-container-main">

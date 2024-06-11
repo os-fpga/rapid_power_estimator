@@ -1,5 +1,6 @@
 import React, {
   createContext, useContext, useState, useMemo,
+  useEffect,
 } from 'react';
 import * as server from './utils/serverAPI';
 
@@ -13,13 +14,18 @@ export const useGlobalState = () => {
   return context;
 };
 
-export function GlobalStateProvider({ children }) {
+export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for unit tests
   const [clockingState, setClockingState] = useState([]);
   const [fleState, setFleState] = useState([]);
   const [bramState, setBramState] = useState([]);
   const [dspState, setDspState] = useState([]);
   const [ioState, setIoState] = useState([]);
   const [socState, setSocState] = useState({});
+  const [attributes, setAttributes] = useState([]);
+
+  useEffect(() => {
+    fetch(server.attributes(), (attr) => setAttributes(attr));
+  }, [fetch]);
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -84,6 +90,12 @@ export function GlobalStateProvider({ children }) {
       });
     }
   }
+
+  function GetOptions(id) {
+    const found = attributes.find((elem) => id === elem.id);
+    return (found === undefined) ? [] : found.options;
+  }
+
   const values = useMemo(() => ({
     updateGlobalState,
     clockingState,
@@ -92,6 +104,7 @@ export function GlobalStateProvider({ children }) {
     dspState,
     ioState,
     socState,
+    GetOptions,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [bramState, clockingState, dspState, fleState, ioState, socState]);
 

@@ -5,11 +5,11 @@ import FpgaCell from '../components/FpgaCell';
 import { SelectionProvider } from '../SelectionProvider';
 import { SocTotalPowerProvider } from '../SOCTotalPowerProvider';
 import { GlobalStateProvider } from '../GlobalStateProvider';
-
+const fetch = (str, callback) => {}
 describe('FpgaCell', () => {
   it('init', () => {
     const component = render(
-      <GlobalStateProvider>
+      <GlobalStateProvider fetch={fetch}>
         <SocTotalPowerProvider>
           <SelectionProvider>
             <FpgaCell power={0} messages={[[{type: 'error', text: 'error text'}]]} title="test" />

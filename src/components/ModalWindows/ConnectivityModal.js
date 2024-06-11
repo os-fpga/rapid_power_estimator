@@ -1,7 +1,8 @@
 import React from 'react';
-import { loadActivity, connectivityNames } from '../../utils/cpu';
+import { connectivityNames } from '../../utils/cpu';
 import { FieldType } from '../../utils/common';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import ModalWindow from './ModalWindow';
 
@@ -9,6 +10,8 @@ function ConnectivityModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
   const { clocks } = useClockSelection();
+  const { GetOptions } = useGlobalState();
+  const loadActivity = GetOptions('Port_Activity');
   return (
     <ModalWindow
       title={title}

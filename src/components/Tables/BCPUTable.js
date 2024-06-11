@@ -1,15 +1,14 @@
 import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import {
-  bcpuNames, clock, loadActivity, findEvailableIndex,
-} from '../../utils/cpu';
+import { bcpuNames, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
 import { GetText } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 import { ComponentLabel, Checkbox, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
@@ -32,6 +31,9 @@ function BCPUTable({ device }) {
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
+  const { GetOptions } = useGlobalState();
+  const loadActivity = GetOptions('Port_Activity');
+  const clock = GetOptions('N22_RISC_V_Clock');
 
   function fetchPort(port, link) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -202,6 +204,7 @@ function BCPUTable({ device }) {
               toggle_rate: 0.125,
             }}
             endpoints={bcpuNames}
+            loadActivity={loadActivity}
           />
         )}
       </div>

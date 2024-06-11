@@ -1,7 +1,7 @@
 import React from 'react';
-import bramType from '../../utils/bram';
 import { FieldType } from '../../utils/common';
 import { useClockSelection } from '../../ClockSelectionProvider';
+import { useGlobalState } from '../../GlobalStateProvider';
 
 import ModalWindow from './ModalWindow';
 
@@ -9,6 +9,8 @@ function BramModal({
   closeModal, onSubmit, defaultValue, title,
 }) {
   const { clocks } = useClockSelection();
+  const { GetOptions } = useGlobalState();
+  const bramType = GetOptions('BRAM_Type');
   return (
     <ModalWindow
       title={title}

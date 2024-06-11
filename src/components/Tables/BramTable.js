@@ -3,7 +3,6 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, GetText } from '../../utils/common';
 import BramModal from '../ModalWindows/BramModal';
-import bramType from '../../utils/bram';
 import { PercentsCell, FrequencyCell, PowerCell } from './TableCells';
 import {
   TableBase, Actions, StatusColumn, EnableState,
@@ -24,8 +23,10 @@ function BramTable({ device }) {
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [powerTable, setPowerTable] = React.useState([]);
   const { defaultClock } = useClockSelection();
-  const { updateGlobalState } = useGlobalState();
+  const { updateGlobalState, GetOptions } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
+
+  const bramType = GetOptions('BRAM_Type');
 
   const fetchBramData = (deviceId) => {
     if (deviceId !== null) {

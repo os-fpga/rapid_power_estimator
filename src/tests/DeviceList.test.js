@@ -2,16 +2,17 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-//import 'isomorphic-fetch';
+// import 'isomorphic-fetch';
+// import fetch from 'isomorphic-fetch';
 import DeviceList from '../components/DeviceList';
 import { SelectionProvider } from '../SelectionProvider';
 import { SocTotalPowerProvider } from '../SOCTotalPowerProvider';
 import { GlobalStateProvider } from '../GlobalStateProvider';
-
+const fetch = (str, callback) => {}
 describe('DeviceList', () => {
   it('default value', () => {
     const { getByLabelText } = render(
-      <GlobalStateProvider>
+      <GlobalStateProvider fetch={fetch}>
         <SocTotalPowerProvider>
           <SelectionProvider>
             <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => { }} />

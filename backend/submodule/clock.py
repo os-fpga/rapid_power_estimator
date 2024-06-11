@@ -3,25 +3,25 @@
 #  Authorized use only
 #
 from dataclasses import dataclass, field
-from enum import Enum
-from utilities.common_utils import update_attributes
+from typing import List
+from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import ModuleType, ClockNotFoundException, \
     ClockDescriptionPortValidationException, \
     ClockMaxCountReachedException
 from .rs_message import RsMessage, RsMessageManager
 
-class Clock_State(Enum):
-    ACTIVE = 1
-    GATED = 2
+class Clock_State(RsEnum):
+    ACTIVE = 1, "Active"
+    GATED = 2, "Gated"
 
-class Source(Enum):
-    IO = 0
-    RC_OSCILLATOR = 1
-    BOOT_CLOCK = 2
-    PLL0_FABRIC = 3
-    PLL1_FABRIC = 4
-    PLL1_SERDES = 5
-    PLL2_SERDES = 6
+class Source(RsEnum):
+    IO = 0, "IO"
+    RC_OSCILLATOR = 1, "RC Oscillator"
+    BOOT_CLOCK = 2, "Boot Clock"
+    PLL0_FABRIC = 3, "PLL0 -> Fabric"
+    PLL1_FABRIC = 4, "PLL1 -> Fabric"
+    PLL1_SERDES = 5, "PLL1 -> SERDES"
+    PLL2_SERDES = 6, "PLL2 -> SERDES"
 
 @dataclass
 class ClockOutput:
@@ -29,7 +29,7 @@ class ClockOutput:
     block_power : float = field(default=0.0)
     interconnect_power : float = field(default=0.0)
     percentage : float = field(default=0.0)
-    messages : [RsMessage] = field(default_factory=list)
+    messages : List[RsMessage] = field(default_factory=list)
 
 @dataclass
 class Clock:

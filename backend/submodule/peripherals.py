@@ -5,7 +5,7 @@
 from dataclasses import dataclass, field, InitVar
 from enum import Enum
 from typing import List
-from utilities.common_utils import update_attributes
+from utilities.common_utils import RsEnum, update_attributes
 from .clock import Clock
 from .rs_device_resources import PeripheralNotFoundException, PeripheralEndpointNotFoundException
 from .rs_message import RsMessage, RsMessageManager
@@ -26,106 +26,106 @@ class PeripheralType(Enum):
     ACPU = 'acpu'
     FPGA_COMPLEX = 'fpga_complex'
 
-class Peripherals_Usage(Enum):
-    Boot  = 0
-    Debug = 1
-    App   = 2
+class Peripherals_Usage(RsEnum):
+    Boot  = 0, "Boot"
+    Debug = 1, "Debug"
+    App   = 2, "App"
 
-class Qspi_Performance_Mbps(Enum):
-    SPI_1Mbps    = 0
-    SPI_25Mbps   = 1
-    SPI_50Mbps   = 2
-    SPI_100Mbps  = 3
-    QSPI_4Mbps   = 4
-    QSPI_100Mbps = 5
-    QSPI_200Mbps = 6
-    QSPI_400Mbps = 7
+class Qspi_Performance_Mbps(RsEnum):
+    SPI_1Mbps    = 0, "SPI: 1 Mb/s"
+    SPI_25Mbps   = 1, "SPI: 25 Mb/s"
+    SPI_50Mbps   = 2, "SPI: 50 Mb/s"
+    SPI_100Mbps  = 3, "SPI: 100 Mb/s"
+    QSPI_4Mbps   = 4, "QSPI: 4 Mb/s"
+    QSPI_100Mbps = 5, "QSPI: 100 Mb/s"
+    QSPI_200Mbps = 6, "QSPI: 200 Mb/s"
+    QSPI_400Mbps = 7, "QSPI: 400 Mb/s"
 
-class Jtag_Clock_Frequency(Enum):
-    JTAG_10Mbps = 0
-    JTAG_20Mbps = 1
-    JTAG_40Mbps = 2
+class Jtag_Clock_Frequency(RsEnum):
+    JTAG_10Mbps = 0, "10 Mb/S"
+    JTAG_20Mbps = 1, "20 Mb/S"
+    JTAG_40Mbps = 2, "40 Mb/S"
 
 class Cpu(Enum):
     ACPU = 0
     BCPU = 1
 
-class Baud_Rate(Enum):
-    Baud_Rate_9600   = 0
-    Baud_Rate_19200  = 1
-    Baud_Rate_28800  = 2
-    Baud_Rate_57600  = 3
-    Baud_Rate_115200 = 4
-    Baud_Rate_128000 = 5
+class Baud_Rate(RsEnum):
+    Baud_Rate_9600   = 0, "9600 baud"
+    Baud_Rate_19200  = 1, "19200 baud"
+    Baud_Rate_28800  = 2, "28800 baud"
+    Baud_Rate_57600  = 3, "57600 baud"
+    Baud_Rate_115200 = 4, "115200 baud"
+    Baud_Rate_128000 = 5, "128000 baud"
 
-class I2c_Speed(Enum):
-    Standard_100Kbps = 0
-    Fast_400Kbps     = 1
-    Fast_Plus_1Mbps  = 2
+class I2c_Speed(RsEnum):
+    Standard_100Kbps = 0, "Standard (100Kb/s)"
+    Fast_400Kbps     = 1, "Fast (400Kb/s)"
+    Fast_Plus_1Mbps  = 2, "Fast+ (1Mb/s)"
 
-class Usb_Speed(Enum):
-    High_Speed_12Mbps  = 0
-    Full_Speed_480Mbps = 1
+class Usb_Speed(RsEnum):
+    High_Speed_12Mbps  = 0, "High Speed (12Mb/s)"
+    Full_Speed_480Mbps = 1, "Full Speed (480Mb/s)"
 
-class Gige_Speed(Enum):
-    Gige_10Mbps   = 0
-    Gige_100Mbps  = 1
-    Gige_1000Mbps = 2
+class Gige_Speed(RsEnum):
+    Gige_10Mbps   = 0, "10 Mb/s"
+    Gige_100Mbps  = 1, "100 Mb/s"
+    Gige_1000Mbps = 2, "1000 Mb/s"
 
-class GpioStandard(Enum):
-    LVCMOS_1_8V_HR        = 0
-    LVCMOS_2_5V           = 1
-    LVCMOS_3_3V           = 2
-    LVTTL                 = 3
-    PCI66                 = 4
-    PCIX133               = 5
-    SSTL_1_8V_Class_I_HR  = 6
-    SSTL_1_8V_Class_II_HR = 7
-    SSTL_2_5V_Class_I     = 8
-    SSTL_2_5V_Class_II    = 9
-    SSTL_3_3V_Class_I     = 10
-    SSTL_3_3V_Class_II    = 11
+class GpioStandard(RsEnum):
+    LVCMOS_1_8V_HR        = 0, "LVCMOS 1.8V (HR)"
+    LVCMOS_2_5V           = 1, "LVCMOS 2.5V"
+    LVCMOS_3_3V           = 2, "LVCMOS 3.3V"
+    LVTTL                 = 3, "LVTTL"
+    PCI66                 = 4, "PCI66"
+    PCIX133               = 5, "PCIX133"
+    SSTL_1_8V_Class_I_HR  = 6, "SSTL 1.8V Class-I (HR)"
+    SSTL_1_8V_Class_II_HR = 7, "SSTL 1.8V Class-II (HR)"
+    SSTL_2_5V_Class_I     = 8, "SSTL 2.5V Class-I"
+    SSTL_2_5V_Class_II    = 9, "SSTL 2.5V Class-II"
+    SSTL_3_3V_Class_I     = 10, "SSTL 3.3V Class-I"
+    SSTL_3_3V_Class_II    = 11, "SSTL 3.3V Class-II"
 
-class Gpio_Type(Enum):
+class Gpio_Type(RsEnum):
     BCPU   = 0
     ACPU   = 1
     FABRIC = 2
 
-class N22_RISC_V_Clock(Enum):
-    PLL_233MHz       = 0
-    BOOT_Clock_40MHz = 1
-    RC_OSC_50MHz     = 2
+class N22_RISC_V_Clock(RsEnum):
+    PLL_233MHz       = 0, "PLL (233 MHz)"
+    BOOT_Clock_40MHz = 1, "BOOT CLK (40 MHz)"
+    RC_OSC_50MHz     = 2, "RC OSC (50 MHz)"
 
-class Port_Activity(Enum):
-    IDLE   = 0
-    LOW    = 1
-    MEDIUM = 2
-    HIGH   = 3
+class Port_Activity(RsEnum):
+    IDLE   = 0, "Idle"
+    LOW    = 1, "Low"
+    MEDIUM = 2, "Medium"
+    HIGH   = 3, "High"
 
-class A45_Load(Enum):
-    IDLE   = 0
-    LOW    = 1
-    MEDIUM = 2
-    HIGH   = 3
+class A45_Load(RsEnum):
+    IDLE   = 0, "Idle"
+    LOW    = 1, "Low"
+    MEDIUM = 2, "Medium"
+    HIGH   = 3, "High"
 
-class Memory_Type(Enum):
-    SRAM = 0
-    DDR3 = 1
-    DDR4 = 2
+class Memory_Type(RsEnum):
+    SRAM = 0, "SRAM"
+    DDR3 = 1, "DDR3"
+    DDR4 = 2, "DDR4"
 
-class Dma_Activity(Enum):
-    IDLE   = 0
-    LOW    = 1
-    MEDIUM = 2
-    HIGH   = 3
+class Dma_Activity(RsEnum):
+    IDLE   = 0, "Idle"
+    LOW    = 1, "Low"
+    MEDIUM = 2, "Mediun"
+    HIGH   = 3, "High"
 
-class Dma_Source_Destination(Enum):
-    NONE     = 0
-    DDR      = 1
-    OCM      = 2
-    SPI_QSPI = 3
-    I2C      = 4
-    FABRIC   = 5
+class Dma_Source_Destination(RsEnum):
+    NONE     = 0, "NONE"
+    DDR      = 1, "DDR"
+    OCM      = 2, "OCM"
+    SPI_QSPI = 3, "SPI/QSPI"
+    I2C      = 4, "I2C"
+    FABRIC   = 5, "Fabric"
 
 @dataclass
 class Peripheral_Output:

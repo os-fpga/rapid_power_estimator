@@ -44,6 +44,9 @@ class InvalidPeripheralTypeError(Exception):
 class PeripheralEndpointNotExistsError(Exception):
     pass
 
+class PeripheralChannelNotExistsError(Exception):
+    pass
+
 errors = {
     "DeviceNotExistsError": {
         "message": "Device with given id doesn't exists",
@@ -99,6 +102,10 @@ errors = {
     },
     "PeripheralEndpointNotExistsError": {
         "message": "Peripheral endpoint with given index doesn't exists",
+        "status": 400
+    },
+    "PeripheralChannelNotExistsError": {
+        "message": "Peripheral channel with given index doesn't exists",
         "status": 400
     },
 }

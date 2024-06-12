@@ -13,8 +13,8 @@ from submodule.bram import BRAM_Type
 from submodule.rs_device_resources import IO_BankType, IO_Standard
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_Synchronization, IO_Pull_up_down
-from submodule.peripherals import Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, Cpu, Baud_Rate, \
-    I2c_Speed, Usb_Speed, Gige_Speed, GpioStandard, Gpio_Type, N22_RISC_V_Clock, Port_Activity, A45_Load, \
+from submodule.peripherals import Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, Baud_Rate, \
+    I2c_Speed, Usb_Speed, Gige_Speed, GpioStandard, N22_RISC_V_Clock, Port_Activity, A45_Load, \
     Memory_Type, Dma_Activity, Dma_Source_Destination
 
 #--------------------------------------------------------------#
@@ -71,9 +71,9 @@ class AttributesApi(Resource):
                             IO_differential_termination, IO_Data_Type, IO_Synchronization,
                             IO_Pull_up_down,
                             # Peripherals
-                            Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, Cpu,
+                            Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency,
                             Baud_Rate, I2c_Speed, Usb_Speed, Gige_Speed, GpioStandard,
-                            Gpio_Type, N22_RISC_V_Clock, Port_Activity, A45_Load,
+                            N22_RISC_V_Clock, Port_Activity, A45_Load,
                             Memory_Type, Dma_Activity, Dma_Source_Destination
                         ]
         attrb_list = []

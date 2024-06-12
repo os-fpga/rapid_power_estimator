@@ -57,7 +57,7 @@ function MemoryTable({ device, peripherals }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) {
+    if (device !== null && peripherals !== null) {
       setHref(peripherals.memory);
       fetchData(peripherals.memory);
     }
@@ -155,11 +155,12 @@ function MemoryTable({ device, peripherals }) {
 
 MemoryTable.propTypes = {
   device: PropTypes.string,
-  peripherals: PropTypes.oneOfType([PropTypes.object]).isRequired,
+  peripherals: PropTypes.oneOfType([PropTypes.object]),
 };
 
 MemoryTable.defaultProps = {
   device: null,
+  peripherals: null,
 };
 
 export default MemoryTable;

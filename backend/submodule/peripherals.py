@@ -194,8 +194,8 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
             Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
             # todo: seperate memory by its on periperal type e.g. DDR, OCM
-            Peripheral(name="DDR", type=PeripheralType.MEMORY, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333, "memory_type" : Memory_Type.DDR3 }),
-            Peripheral(name="OCM", type=PeripheralType.MEMORY, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self, init_props={ "data_rate" : 533, "memory_type" : Memory_Type.SRAM }),
+            Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR3 }),
+            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
             # Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
             Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_endpoints=4, context=self, init_props={ 'frequency' : 533000000 }),
@@ -252,7 +252,7 @@ class Peripheral_SubModule(SubModule):
 
     def compute_output_power(self) -> None:
         # memory devices first
-        for peripheral in [p for p in self.peripherals if p.type == PeripheralType.MEMORY]:
+        for peripheral in [p for p in self.peripherals if p.type in (PeripheralType.DDR, PeripheralType.OCM)]:
             peripheral.compute()
 
         # complex periperals second
@@ -260,7 +260,7 @@ class Peripheral_SubModule(SubModule):
             peripheral.compute()
 
         # simple periperals last
-        for peripheral in [p for p in self.peripherals if p.type not in (PeripheralType.ACPU, PeripheralType.BCPU, PeripheralType.FPGA_COMPLEX, PeripheralType.MEMORY)]:
+        for peripheral in [p for p in self.peripherals if p.type not in (PeripheralType.ACPU, PeripheralType.BCPU, PeripheralType.FPGA_COMPLEX, PeripheralType.DDR, PeripheralType.OCM)]:
             peripheral.compute()
 
 class IPeripheral:
@@ -350,7 +350,8 @@ class ComputeObject:
         elif type == PeripheralType.GPIO or type == PeripheralType.PWM:
             # Gpio and Pwm share the same compute object
             return Gpio0(context=context)
-        elif type == PeripheralType.MEMORY:
+        elif type == PeripheralType.DDR or type == PeripheralType.OCM:
+            # DDR and OCM share the same compute object
             return Memory0(context=context)
         elif type == PeripheralType.BCPU:
             return N22_RISC_V_BCPU(context=context)
@@ -549,8 +550,8 @@ class N22_RISC_V_BCPU(ComputeObject):
                 return peripheral
         return None
 
-    def get_power_factor(self, POWER_FACTOR: List[Power_Factor], periph_type: PeripheralType) -> float:
-        factors = [elem.factor for elem in POWER_FACTOR if elem.master == self.get_context().get_type() and elem.slave == periph_type]
+    def get_power_factor(self, POWER_FACTOR: List[Power_Factor], master_type: PeripheralType, slave_type: PeripheralType) -> float:
+        factors = [elem.factor for elem in POWER_FACTOR if elem.master == master_type and elem.slave == slave_type]
         if factors:
             return sum(factors) / len(factors)
         return 0.0
@@ -559,8 +560,23 @@ class N22_RISC_V_BCPU(ComputeObject):
         self.messages.clear()
         self.output.reset()
 
-        NOC_POWER_FACTOR = self.get_context().get_device_resources().get_peripheral_noc_power_factor()
-        VCC_CORE = self.get_context().get_device_resources().get_VCC_CORE()
+        resources = self.get_context().get_device_resources()
+        NOC_POWER_FACTOR = resources.get_peripheral_noc_power_factor()
+        VCC_CORE = resources.get_VCC_CORE()
+        BCPU_CLK_COEFF = resources.get_BCPU_CLK_COEFF()
+        BCPU_LOAD_LOW_COEFF = resources.get_BCPU_LOAD_LOW_COEFF()
+        BCPU_LOAD_HIGH_COEFF = resources.get_BCPU_LOAD_HIGH_COEFF()
+
+        # determine boot mode (assume first SPI device)
+        spi_boot_devices = [peripheral for peripheral in self.get_context().get_submodule().get_peripherals() \
+                            if peripheral.get_type() == PeripheralType.SPI]
+        if spi_boot_devices:
+            if 'QSPI' in spi_boot_devices[0].get_properties()['clock_frequency'].name:
+                self.output.boot_mode = 'QSPI'
+            else:
+                self.output.boot_mode = 'SPI'
+        else:
+            self.output.boot_mode = '<UNK>'
 
         for endpoint in self.get_context().get_endpoints():
             endpoint.output.reset()
@@ -578,15 +594,20 @@ class N22_RISC_V_BCPU(ComputeObject):
 
             # calculate bandwidth
             if endpoint.activity == Port_Activity.HIGH:
-                endpoint.output.calculated_bandwidth = peripheral.get_bandwidth() * 0.75
+                calculated_bandwidth = peripheral.get_bandwidth() * 0.75
             elif endpoint.activity == Port_Activity.MEDIUM:
-                endpoint.output.calculated_bandwidth = peripheral.get_bandwidth() * 0.5
+                calculated_bandwidth = peripheral.get_bandwidth() * 0.5
             elif endpoint.activity == Port_Activity.LOW:
-                endpoint.output.calculated_bandwidth = peripheral.get_bandwidth() * 0.25
+                calculated_bandwidth = peripheral.get_bandwidth() * 0.25
+            else:
+                calculated_bandwidth = 0
+
+            # cap bandwidth
+            endpoint.output.calculated_bandwidth = min(266.0 * 4, calculated_bandwidth)
 
             # calculate noc power
             # calculated bandwidth * toggle rate * power_factor * VCC_CORE ^ 2
-            power_factor = self.get_power_factor(NOC_POWER_FACTOR, peripheral.get_type())
+            power_factor = self.get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
             endpoint.output.noc_power = endpoint.output.calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
             print(f'[DEBUG] {self.get_context().get_name() = }', file=sys.stderr)
             print(f'[DEBUG]   {peripheral.get_name() = }', file=sys.stderr)
@@ -595,6 +616,24 @@ class N22_RISC_V_BCPU(ComputeObject):
             print(f'[DEBUG]   {VCC_CORE = }', file=sys.stderr)
             print(f'[DEBUG]   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
             print(f'[DEBUG]   {endpoint.output.noc_power = }', file=sys.stderr)
+
+        # compute active power
+        if self.properties.clock == N22_RISC_V_Clock.PLL_233MHz:
+            clock_freq = 233
+        elif self.properties.clock == N22_RISC_V_Clock.RC_OSC_50MHz:
+            clock_freq = 50
+        else:
+            # default N22_RISC_V_Clock.BOOT_Clock_40MHz
+            clock_freq = 40
+        self.output.active_power = clock_freq * VCC_CORE ** 2 * (BCPU_LOAD_LOW_COEFF + BCPU_CLK_COEFF)
+
+        # compute boot power
+        power_factor = self.get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), PeripheralType.CONFIG)
+        boot_power = clock_freq * VCC_CORE ** 2 * (BCPU_LOAD_HIGH_COEFF + power_factor + BCPU_CLK_COEFF)
+        if self.properties.encryption_used:
+            self.output.boot_power = boot_power + 0.005
+        else:
+            self.output.boot_power = boot_power
 
 @dataclass
 class Memory0(ComputeObject):
@@ -633,6 +672,10 @@ class Memory0(ComputeObject):
 
     def set_properties(self, props: Dict[str, Any]) -> None:
         return update_attributes(self.properties, props)
+
+    def get_bandwidth(self) -> float:
+        bandwidth = (self.properties.data_rate / 1000000.0) * self.properties.width / 8.0
+        return bandwidth
 
     def compute(self) -> bool:
         self.messages.clear()

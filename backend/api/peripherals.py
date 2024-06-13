@@ -107,6 +107,7 @@ class PeripheralSchema(Schema):
     type = fields.Enum(PeripheralType, by_value=True)
     name = fields.Str()
     index = fields.Int()
+    targets = fields.Enum(PeripheralTarget, by_value=True)
 
     @classmethod
     def create_schema(cls, peripheral_type):
@@ -126,7 +127,7 @@ class PeripheralSchema(Schema):
             return GpioSchema()
         elif peripheral_type == PeripheralType.PWM:
             return PwmSchema()
-        elif peripheral_type == PeripheralType.MEMORY:
+        elif peripheral_type == PeripheralType.DDR or peripheral_type == PeripheralType.OCM:
             return MemorySchema()
         elif peripheral_type == PeripheralType.DMA:
             return DmaSchema()
@@ -454,10 +455,16 @@ class PeripheralsApi(Resource):
                 peripherals_by_type = {}
                 # group peripherals by their type
                 for peripheral in peripherals:
-                    if peripheral.type.value in peripherals_by_type:
-                        peripherals_by_type[peripheral.type.value].append(peripheral)
+                    if peripheral.type == PeripheralType.DDR or peripheral.type == PeripheralType.OCM:
+                        if 'memory' in peripherals_by_type:
+                            peripherals_by_type['memory'].append(peripheral)
+                        else:
+                            peripherals_by_type['memory'] = [peripheral]
                     else:
-                        peripherals_by_type[peripheral.type.value] = [peripheral]
+                        if peripheral.type.value in peripherals_by_type:
+                            peripherals_by_type[peripheral.type.value].append(peripheral)
+                        else:
+                            peripherals_by_type[peripheral.type.value] = [peripheral]
                 schema = PeripheralUrlSchema()
                 return schema.dump(peripherals_by_type)
             else:

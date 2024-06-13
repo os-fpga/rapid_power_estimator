@@ -64,7 +64,6 @@ class PeripheralType(Enum):
     GIGE = 'gige'
     GPIO = 'gpio'
     PWM  = 'pwm'
-    MEMORY = 'memory'
     DMA  = 'dma'
     BCPU = 'bcpu'
     ACPU = 'acpu'
@@ -473,6 +472,22 @@ class RsDeviceResources:
 
     def get_IO_standard_coeff(self) -> List[IO_Standard_Coeff]:
         return self.io_standard_coeff_list
+
+    def get_BCPU_CLK_COEFF(self) -> float:
+        # todo: should read from power data
+        return 0.0000321306659727
+
+    def get_BCPU_LOAD_LOW_COEFF(self) -> float:
+        # todo: should read from power data
+        return 6.22030740524698E-06
+
+    def get_BCPU_LOAD_MEDIUM_COEFF(self) -> float:
+        # todo: should read from power data
+        return 7.03786731129023E-06
+
+    def get_BCPU_LOAD_HIGH_COEFF(self) -> float:
+        # todo: should read from power data
+        return 0.0000105978995482262
 
     def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:

@@ -473,21 +473,60 @@ class RsDeviceResources:
     def get_IO_standard_coeff(self) -> List[IO_Standard_Coeff]:
         return self.io_standard_coeff_list
 
-    def get_BCPU_CLK_COEFF(self) -> float:
+    def get_BCPU_CLK_FACTOR(self) -> float:
         # todo: should read from power data
         return 0.0000321306659727
 
-    def get_BCPU_LOAD_LOW_COEFF(self) -> float:
+    def get_BCPU_LOW_LOAD_FACTOR(self) -> float:
         # todo: should read from power data
         return 6.22030740524698E-06
 
-    def get_BCPU_LOAD_MEDIUM_COEFF(self) -> float:
+    def get_BCPU_MEDIUM_LOAD_FACTOR(self) -> float:
         # todo: should read from power data
         return 7.03786731129023E-06
 
-    def get_BCPU_LOAD_HIGH_COEFF(self) -> float:
+    def get_BCPU_HIGH_LOAD_FACTOR(self) -> float:
         # todo: should read from power data
         return 0.0000105978995482262
+
+    def get_ACPU_CLK_FACTOR(self) -> float:
+        return 0.0000321306659727
+
+    def get_ACPU_LOW_LOAD_FACTOR(self) -> float:
+        return 6.22030740524698E-06
+
+    def get_ACPU_MEDIUM_LOAD_FACTOR(self) -> float:
+        return 7.03786731129023E-06
+
+    def get_ACPU_HIGH_LOAD_FACTOR(self) -> float:
+        return 0.0000105978995482262
+
+    def get_I2C_CLK_FACTOR(self) -> float:
+        return 0.0000180345864661654
+
+    def get_I2C_SWITCHING_FACTOR(self) -> float:
+        return 0.0000846668045655417
+
+    def get_I2C_IO_FACTOR(self) -> float:
+        return 0.000056634
+
+    def get_JTAG_CLK_FACTOR(self) -> float:
+        return 0.000407953336466165
+
+    def get_JTAG_SWITCHING_FACTOR(self) -> float:
+        return 0.000264495634397032
+
+    def get_JTAG_IO_FACTOR(self) -> float:
+        return 0.00004367522
+
+    def get_QSPI_CLK_FACTOR(self) -> float:
+        return 0.0000154995864661654
+
+    def get_QSPI_SWITCHING_FACTOR(self) -> float:
+        return 0.00156512937507589
+
+    def get_QSPI_IO_FACTOR(self) -> float:
+        return 0.0001270766
 
     def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:

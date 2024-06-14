@@ -2,20 +2,20 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import IntFlag
 import sys
 from typing import Any, List, Dict
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralChannelNotFoundException, \
+from .rs_device_resources import IO_Standard, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralChannelNotFoundException, \
      PeripheralEndpointNotFoundException, PeripheralType
 from .rs_message import RsMessage, RsMessageManager
 
 class Peripherals_Usage(RsEnum):
     Boot  = 0, "Boot"
     Debug = 1, "Debug"
-    App   = 2, "App"
+    App   = 2, "Application"
 
 class Qspi_Performance_Mbps(RsEnum):
     SPI_1Mbps    = 0, "SPI: 1 Mb/s"
@@ -111,6 +111,15 @@ class PeripheralTarget(IntFlag):
     BCPU   = 2
     FABRIC = 4
 
+def find_highest_bandwidth_endpoint(name: str, peripherals: List['Peripheral']) -> 'Endpoint':
+    endpoint: Endpoint = None
+    for peripheral in peripherals:
+        for ep in peripheral.get_endpoints() or []:
+            if ep.name == name:
+                if endpoint is None or ep.output.calculated_bandwidth > endpoint.output.calculated_bandwidth:
+                    endpoint = ep
+    return endpoint
+
 @dataclass
 class Endpoint_Output:
     calculated_bandwidth: float = field(default=0.0)
@@ -160,7 +169,7 @@ class Channel:
     def set_properties(self, props: Dict[str, Any]) -> None:
         update_attributes(self, props)
 
-class SubModule:
+class SubModule(ABC):
     @abstractmethod
     def get_device_resources(self) -> RsDeviceResources:
         pass
@@ -170,7 +179,7 @@ class SubModule:
         pass
 
     @abstractmethod
-    def compute_dynamic_power(self) -> None:
+    def compute_output_power(self) -> None:
         pass
 
 class Peripheral_SubModule(SubModule):
@@ -263,7 +272,7 @@ class Peripheral_SubModule(SubModule):
         for peripheral in [p for p in self.peripherals if p.type not in (PeripheralType.ACPU, PeripheralType.BCPU, PeripheralType.FPGA_COMPLEX, PeripheralType.DDR, PeripheralType.OCM)]:
             peripheral.compute()
 
-class IPeripheral:
+class IPeripheral(ABC):
     @abstractmethod
     def is_enabled(self) -> bool:
         pass
@@ -305,31 +314,24 @@ class ComputeObject:
 
     context: IPeripheral
 
-    @abstractmethod
     def get_context(self) -> IPeripheral:
         return self.context
 
-    @abstractmethod
     def get_properties(self) -> Dict[str, Any]:
         return {}
 
-    @abstractmethod
     def get_output(self) -> Dict[str, Any]:
         return {}
 
-    @abstractmethod
     def get_messages(self) -> List[RsMessage]:
         return []
 
-    @abstractmethod
     def get_bandwidth(self) -> float:
         return 0.0
 
-    @abstractmethod
     def set_properties(self, props: Dict[str, Any]) -> None:
         pass
 
-    @abstractmethod
     def compute(self) -> bool:
         return False
 
@@ -975,14 +977,32 @@ class Qspi0(ComputeObject):
     def get_messages(self) -> List[RsMessage]:
         return self.messages
 
-    def get_bandwidth(self) -> float:
+    def get_speed(self) -> bandwidth_:
         for row in self.bandwidth_table:
             if row.type == self.properties.clock_frequency:
-                return row.bandwidth
+                return row
+
+    def get_bandwidth(self) -> float:
+        row = self.get_speed()
+        if row:
+            return row.bandwidth
         return 0.0
+
+    def get_freq(self) -> int:
+        row = self.get_speed()
+        if row:
+            return row.frequency
+        return 0
 
     def set_properties(self, props: Dict[str, Any]) -> None:
         return update_attributes(self.properties, props)
+
+    def get_io_coeff(self, voltage: float) -> List[float]:
+        for coeff in self.get_context().get_device_resources().get_IO_standard_coeff():
+            if coeff.io_standard in (IO_Standard.LVCMOS_1_8V_HR, IO_Standard.LVCMOS_2_5V, IO_Standard.LVCMOS_3_3V):
+                if coeff.voltage == voltage:
+                    return coeff.output_ac, coeff.output_dc
+        return 0.0, 0.0
 
     def compute(self) -> bool:
         self.messages.clear()
@@ -992,7 +1012,37 @@ class Qspi0(ComputeObject):
             self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
             return False
 
-        # todo: populate output properties
+        ep = find_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        if ep is None:
+            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+            return False
+
+        # highest calculated bandwidth
+        bandwidth = ep.output.calculated_bandwidth
+
+        # compule block power
+        resources = self.get_context().get_device_resources()
+        VCC_CORE = resources.get_VCC_CORE()
+        VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
+        OUTPUT_AC, OUTPUT_DC = self.get_io_coeff(VCC_BOOT_IO)
+        QSPI_PWR_FACTOR_CLK = 0.0000154995864661654
+        QSPI_PWR_FACTOR_SWITCHING = 0.00156512937507589
+        QSPI_PWR_FACTOR_IO = 0.0001270766
+
+        # core power calculation
+        core_power = ((QSPI_PWR_FACTOR_CLK * (self.get_freq() / 1000000.0)) + (QSPI_PWR_FACTOR_SWITCHING * bandwidth)) * VCC_CORE ** 2
+        io_core_power = QSPI_PWR_FACTOR_IO * bandwidth * ep.toggle_rate * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * ep.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
+        io_vcc_aux_power = io_vcco_power * 0.1
+        print(f'[DEBUG] QSPI: {core_power = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {io_core_power = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {io_vcco_power = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {io_vcc_aux_power = }', file=sys.stderr)
+
+        # update output properties
+        self.output.calculated_bandwidth = bandwidth
+        self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
+        return True
 
 @dataclass
 class Uart0(ComputeObject):
@@ -1031,11 +1081,22 @@ class Uart0(ComputeObject):
     def get_messages(self) -> List[RsMessage]:
         return self.messages
 
-    def get_bandwidth(self) -> float:
+    def get_baudrate(self) -> bandwidth_:
         for row in self.bandwidth_table:
             if row.type == self.properties.baudrate:
-                return (row.frequency / 1000000.0) * 0.8
+                return row
+
+    def get_bandwidth(self) -> float:
+        row = self.get_baudrate()
+        if row:
+            return (row.frequency / 1000000.0) * 0.8
         return 0.0
+
+    def get_freq(self) -> int:
+        row = self.get_baudrate()
+        if row:
+            return row.frequency
+        return 0
 
     def set_properties(self, props: Dict[str, Any]) -> None:
         return update_attributes(self.properties, props)
@@ -1048,7 +1109,23 @@ class Uart0(ComputeObject):
             self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
             return False
 
-        # todo: get coeffient / power factor
-        VCC_CORE = self.get_context().get_device_resources().get_VCC_CORE()
-        self.output.block_power = 1234.0 * VCC_CORE ** 2
+        # endpoint = get_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        # if endpoint is None:
+        #     self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+        #     return False
+
+        # # compute calculated bandwidth
+        # self.output.calculated_bandwidth = endpoint.output.calculated_bandwidth
+
+        # # compule block power
+        # resources = self.get_context().get_device_resources()
+        # VCC_CORE = resources.get_VCC_CORE()
+        # QSPI_PWR_FACTOR_CLK = 0.0000154995864661654
+        # QSPI_PWR_FACTOR_SWITCHING = 0.00156512937507589
+        # QSPI_PWR_FACTOR_IO = 0.0001270766
+
+        # # core power calculation: ((QSPI_PWR_FACTOR_CLK * freq) + (QSPI_PWR_FACTOR_SWITCHING * calculated_bandwidth)) * VCC_CORE^2
+        # core_power = ((QSPI_PWR_FACTOR_CLK * self.get_freq()) + (QSPI_PWR_FACTOR_SWITCHING * self.output.calculated_bandwidth)) * VCC_CORE ** 2
+        # self.output.block_power = core_power
+
         return True

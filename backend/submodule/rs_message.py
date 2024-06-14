@@ -28,7 +28,7 @@ class RsMessageManager:
         RsMessage(106, RsMessageType.INFO, "Peripheral '{name}' is disabled"),
         RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
         RsMessage(202, RsMessageType.WARN, "Not enough {bank_type} banks powered at {voltage}V available"),
-        RsMessage(203, RsMessageType.WARN, "Specify what this peripheral is communicating"),
+        RsMessage(203, RsMessageType.WARN, "Peripheral '{name}' is not connected"),
         RsMessage(301, RsMessageType.ERRO, "Invalid clock"),
         RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
         RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),

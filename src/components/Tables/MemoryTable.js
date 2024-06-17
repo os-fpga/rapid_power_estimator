@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import MemoryModal from '../ModalWindows/MemoryModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { fixed } from '../../utils/common';
+import { fixed, getPeripherals } from '../../utils/common';
 import { PowerCell, SelectionCell } from './TableCells';
 import {
   TableBase, Actions, StatusColumn, EnableState,
@@ -20,7 +20,6 @@ function MemoryTable({ device, peripherals }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerTotal, setPowerTotal] = React.useState(0);
-  const [href, setHref] = React.useState([]);
   const [memoryData, setMemoryData] = React.useState([
     { id: 0, data: {} },
     { id: 1, data: {} },
@@ -29,6 +28,9 @@ function MemoryTable({ device, peripherals }) {
   const { GetOptions } = useGlobalState();
   const memoryUsage = GetOptions('Peripherals_Usage');
   const memoryType = GetOptions('Memory_Type');
+  const ddr = getPeripherals(peripherals, 'ddr');
+  const ocm = getPeripherals(peripherals, 'ocm');
+  const href = [...ddr, ...ocm];
 
   const mainTableHeader = [
     '', '', 'Memory', 'Action', 'Usage', 'Memory Type', 'Data Rate', 'Width', 'R Bandwidth',
@@ -49,7 +51,7 @@ function MemoryTable({ device, peripherals }) {
     if (device !== null) {
       setPowerTotal(0);
       lhref.forEach((mem) => {
-        const index = parseInt(mem.href.slice(-1), 10);
+        const index = lhref.indexOf(mem);
         fetchMemoryData(index, mem.href);
       });
     }
@@ -57,9 +59,8 @@ function MemoryTable({ device, peripherals }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null && peripherals !== null) {
-      setHref(peripherals.memory);
-      fetchData(peripherals.memory);
+    if (device !== null) {
+      fetchData(href);
     }
   }
 
@@ -155,12 +156,11 @@ function MemoryTable({ device, peripherals }) {
 
 MemoryTable.propTypes = {
   device: PropTypes.string,
-  peripherals: PropTypes.oneOfType([PropTypes.object]),
+  peripherals: PropTypes.oneOfType([PropTypes.array]).isRequired,
 };
 
 MemoryTable.defaultProps = {
   device: null,
-  peripherals: null,
 };
 
 export default MemoryTable;

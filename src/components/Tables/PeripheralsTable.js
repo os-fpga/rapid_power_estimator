@@ -15,7 +15,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions } = useGlobalState();
+  const { GetOptions, updateGlobalState } = useGlobalState();
   const usage = GetOptions('Peripherals_Usage');
   const spiFreq = GetOptions('Qspi_Performance_Mbps');
   const jtagFreq = GetOptions('Jtag_Clock_Frequency');
@@ -117,14 +117,12 @@ function PeripheralsTable({ device, peripheralsUrl }) {
   }
 
   const fetchData = (deviceId) => {
-    if (deviceId !== null && peripheralsUrl !== null) {
-      Object.entries(peripheralsUrl).forEach((elem) => {
-        const [key, values] = elem;
-        if (key === 'dma' || key === 'memory' || key === 'acpu' || key === 'bcpu') return;
-        Object.entries(values).forEach((val) => {
-          const [, obj] = val;
-          fetchPeripherals(deviceId, key, obj.href);
-        });
+    if (deviceId !== null) {
+      peripheralsUrl.forEach((elem) => {
+        const { type } = elem;
+        if (type === 'dma' || type === 'ocm' || type === 'acpu' || type === 'bcpu' || type === 'ddr') return;
+        const { href } = elem;
+        fetchPeripherals(deviceId, type, href);
       });
     }
   };
@@ -132,6 +130,11 @@ function PeripheralsTable({ device, peripheralsUrl }) {
   if (dev !== device) {
     setDev(device);
     if (device !== null) fetchData(device);
+  }
+
+  function modifyDataHandler() {
+    updateTotalPower(device);
+    updateGlobalState(device);
   }
 
   function modifyRow(index, row) {
@@ -142,7 +145,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
     const { url } = peripherals[index.main].data[index.inner];
     server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
-      updateTotalPower(device);
+      modifyDataHandler();
     });
   }
 
@@ -157,7 +160,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
     const { url } = peripherals[index].data[idx];
     server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
-      updateTotalPower(device);
+      modifyDataHandler();
     });
   }
 

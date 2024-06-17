@@ -50,3 +50,7 @@ export function getPerformance(object) {
   if (object.io_standard) return object.io_standard;
   return 0;
 }
+
+export function getPeripherals(peripherals, type) {
+  return peripherals.filter((item) => item.type === type);
+}

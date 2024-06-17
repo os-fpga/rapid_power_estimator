@@ -31,7 +31,7 @@ function BCPUTable({ device }) {
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions } = useGlobalState();
+  const { GetOptions, updateGlobalState } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
   const clock = GetOptions('N22_RISC_V_Clock');
 
@@ -83,14 +83,19 @@ function BCPUTable({ device }) {
     if (device !== null) fetchData();
   }
 
+  function modifyDataHandler() {
+    publish('cpuChanged', 'bcpu');
+    updateTotalPower(device);
+    updateGlobalState(device);
+  }
+
   const handleChange = (name, val) => {
     const newData = { ...bcpuData, [name]: val };
     setBcpuData(newData);
     if (device !== null && href !== '') {
       server.PATCH(server.peripheralPath(device, href), newData, () => fetchAcpuData(href));
     }
-    publish('cpuChanged', 'bcpu');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   const header = ['', 'Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
@@ -106,8 +111,7 @@ function BCPUTable({ device }) {
     const val = endpoints[index].data;
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchAcpuData(href));
-    publish('cpuChanged', 'bcpu');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   function addRow(newData) {
@@ -121,8 +125,7 @@ function BCPUTable({ device }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    publish('cpuChanged', 'bcpu');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   const powerHeader = ['Power', '%'];

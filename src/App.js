@@ -56,7 +56,7 @@ function App() {
   const { setClocks } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
-  const [peripherals, setPeripherals] = React.useState(null);
+  const [peripherals, setPeripherals] = React.useState([]);
   const [memoryEnable, setMemoryEnable] = React.useState(true);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -111,8 +111,7 @@ function App() {
     setDevice(newDevice);
     updateGlobalState(newDevice);
     updateTotalPower(newDevice);
-    server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
-      setMemoryEnable(data.memory !== undefined);
+    server.GET(server.api.fetchPeripherals(server.Elem.peripherals, newDevice), (data) => {
       setPeripherals(data);
     });
     if (newDevice !== null) {

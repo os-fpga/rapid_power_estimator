@@ -34,18 +34,19 @@ function MemoryComponent({ device, peripherals }) {
 
   const update = React.useCallback(() => {
     if (peripherals) {
-      const { memory } = peripherals;
-      if (memory) {
-        memory.forEach((mem) => {
-          const index = parseInt(mem.href.slice(-1), 10);
-          server.GET(server.peripheralPath(device, mem.href), (memJson) => {
-            setMemData((prev) => prev.map((it, idx) => {
-              if (index === idx) return memJson;
-              return it;
-            }));
-          });
-        });
-      }
+      // TODO
+      // const { memory } = peripherals;
+      // if (memory) {
+      //   memory.forEach((mem) => {
+      //     const index = parseInt(mem.href.slice(-1), 10);
+      //     server.GET(server.peripheralPath(device, mem.href), (memJson) => {
+      //       setMemData((prev) => prev.map((it, idx) => {
+      //         if (index === idx) return memJson;
+      //         return it;
+      //       }));
+      //     });
+      //   });
+      // }
     }
   }, [device, peripherals]);
 
@@ -105,12 +106,11 @@ function MemoryComponent({ device, peripherals }) {
 
 MemoryComponent.propTypes = {
   device: PropTypes.string,
-  peripherals: PropTypes.oneOfType([PropTypes.object]),
+  peripherals: PropTypes.oneOfType([PropTypes.array]).isRequired,
 };
 
 MemoryComponent.defaultProps = {
   device: null,
-  peripherals: null,
 };
 
 export default MemoryComponent;

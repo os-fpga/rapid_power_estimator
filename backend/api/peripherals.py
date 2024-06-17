@@ -250,7 +250,7 @@ class AcpuSchema(PeripheralSchema):
     output = fields.Nested(AcpuOutputSchema, data_key="consumption")
 
 class FpgaComplexSchema(PeripheralSchema):
-    ports = EndpointUrlField()
+    endpoints = EndpointUrlField(data_key='ports')
 
 class ChannelOutputSchema(Schema):
     calculated_bandwidth = fields.Number()

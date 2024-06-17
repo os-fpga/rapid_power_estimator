@@ -6,6 +6,7 @@ import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
+import { getPeripherals } from '../utils/common';
 
 function DMAComponent({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
@@ -20,6 +21,7 @@ function DMAComponent({ device, peripherals }) {
   ]);
   const { socState } = useGlobalState();
   const [enable, setEnable] = React.useState(true);
+  const dmaType = getPeripherals(peripherals, 'dma');
 
   function fetchEndPoint(href, setEp, index) {
     server.GET(server.peripheralPath(device, href), (data) => {
@@ -32,13 +34,15 @@ function DMAComponent({ device, peripherals }) {
   }
 
   function update() {
-    if (peripherals === null) return;
-    setEnable(peripherals.dma !== undefined);
-    if (peripherals.dma !== undefined) {
-      fetchEndPoint(`${peripherals.dma[0].href}`, setEp0, 0);
-      fetchEndPoint(`${peripherals.dma[1].href}`, setEp1, 1);
-      fetchEndPoint(`${peripherals.dma[2].href}`, setEp2, 2);
-      fetchEndPoint(`${peripherals.dma[3].href}`, setEp3, 3);
+    if (device === null) return;
+    setEnable(dmaType.length !== 0);
+    if (dmaType.length !== 0) {
+      server.GET(server.peripheralPath(device, dmaType[0].href), (data) => {
+        fetchEndPoint(`${dmaType[0].href}/${data.channels[0].href}`, setEp0, 0);
+        fetchEndPoint(`${dmaType[0].href}/${data.channels[1].href}`, setEp1, 1);
+        fetchEndPoint(`${dmaType[0].href}/${data.channels[2].href}`, setEp2, 2);
+        fetchEndPoint(`${dmaType[0].href}/${data.channels[3].href}`, setEp3, 3);
+      });
     }
   }
 

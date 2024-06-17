@@ -31,10 +31,10 @@ function PowerSummaryTable({
     return warnings;
   }
   function buildMessage(messages) {
-    return messages.reduce((sum, item) => {
+    return messages.reduce((sum, item, currentIndex) => {
       item.forEach((i, index) => sum.push(
         // eslint-disable-next-line react/no-array-index-key
-        <span key={index}>
+        <span key={`${currentIndex}+${index}`}>
           {i.text}
           <br />
         </span>,
@@ -66,8 +66,9 @@ function PowerSummaryTable({
         <table className="pst-table">
           <tbody>
             {
-              data.map((item) => (
-                <tr key={item.text}>
+              data.map((item, index) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <tr key={index}>
                   <td className="dot-td"><State messages={item.messages} baseClass="dot" /></td>
                   <td className="no-wrap">{item.text}</td>
                   <PowerCell val={item.power} />

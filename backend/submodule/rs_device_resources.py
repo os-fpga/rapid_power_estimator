@@ -537,6 +537,15 @@ class RsDeviceResources:
     def get_USB2_IO_FACTOR(self) -> float:
         return 0.00166056666666667
 
+    def get_GIGE_CLK_FACTOR(self) -> float:
+        return 0.000124771586466165
+
+    def get_GIGE_SWITCHING_FACTOR(self) -> float:
+        return 0.00504040314066422
+
+    def get_GIGE_IO_FACTOR(self) -> float:
+        return 0.000071487696
+
     def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000000002, -0.0000000000001, 0.00000000001, 0.0000000008, 0.00000006, 0.000002]]

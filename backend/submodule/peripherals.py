@@ -111,7 +111,9 @@ class PeripheralTarget(IntFlag):
     BCPU   = 2
     FABRIC = 4
 
-def find_highest_bandwidth_endpoint(name: str, peripherals: List['Peripheral']) -> 'Endpoint':
+def find_highest_bandwidth_endpoint(context: 'IPeripheral') -> 'Endpoint':
+    peripherals = context.get_submodule().get_peripherals()
+    name = context.get_name()
     endpoint: Endpoint = None
     for peripheral in peripherals:
         for ep in peripheral.get_endpoints() or []:
@@ -857,7 +859,7 @@ class Usb2_0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        ep = find_highest_bandwidth_endpoint(self.get_context())
         if ep is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -905,6 +907,7 @@ class GigE_0(ComputeObject):
     @dataclass
     class bandwidth_:
         type: Gige_Speed
+        bitrate: int
         frequency: int
 
     def __post_init__(self) -> None:
@@ -912,9 +915,9 @@ class GigE_0(ComputeObject):
         self.output = GigE_0.output_()
         self.messages: List[RsMessage] = []
         self.bandwidth_table = [
-            GigE_0.bandwidth_(type=Gige_Speed.Gige_10Mbps  , frequency=  10000000),
-            GigE_0.bandwidth_(type=Gige_Speed.Gige_100Mbps , frequency= 100000000),
-            GigE_0.bandwidth_(type=Gige_Speed.Gige_1000Mbps, frequency=1000000000),
+            GigE_0.bandwidth_(type=Gige_Speed.Gige_10Mbps  , bitrate=  10000000, frequency=  2500000),
+            GigE_0.bandwidth_(type=Gige_Speed.Gige_100Mbps , bitrate= 100000000, frequency= 25000000),
+            GigE_0.bandwidth_(type=Gige_Speed.Gige_1000Mbps, bitrate=1000000000, frequency=125000000),
         ]
 
     def get_properties(self) -> Dict[str, Any]:
@@ -926,24 +929,66 @@ class GigE_0(ComputeObject):
     def get_messages(self) -> List[RsMessage]:
         return self.messages
 
-    def get_bandwidth(self) -> float:
+    def get_perf(self) -> bandwidth_:
         for row in self.bandwidth_table:
             if row.type == self.properties.bit_rate:
-                return (row.frequency / 1000000.0) / 8.0
+                return row
+
+    def get_bandwidth(self) -> float:
+        row = self.get_perf()
+        if row:
+            return (row.bitrate / 1000000.0) / 8.0
         return 0.0
+
+    def get_freq(self) -> int:
+        row = self.get_perf()
+        if row:
+            return row.frequency
+        return 0
 
     def set_properties(self, props: Dict[str, Any]) -> None:
         return update_attributes(self.properties, props)
 
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        # todo: populate output properties
+        endpoint = find_highest_bandwidth_endpoint(self.get_context())
+        if endpoint is None:
+            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+            return False
+
+        # highest calculated bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
+
+        # compule block power
+        resources = self.get_context().get_device_resources()
+        VCC_CORE = resources.get_VCC_CORE()
+        GIGE_CLK_FACTOR = resources.get_GIGE_CLK_FACTOR()
+        GIGE_SWITCHING_FACTOR = resources.get_GIGE_SWITCHING_FACTOR()
+        GIGE_IO_FACTOR = resources.get_GIGE_IO_FACTOR()
+
+        # core power calculation
+        core_power = ((GIGE_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (GIGE_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
+        io_core_power = GIGE_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
+
+        # update output properties
+        self.output.calculated_bandwidth = bandwidth
+        self.output.block_power = core_power + io_core_power
+
+        # debug info
+        print(f'[DEBUG] GIGE: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {endpoint.toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {core_power = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {io_core_power = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {self.output.calculated_bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] GIGE: {self.output.block_power = }', file=sys.stderr)
+
+        return True
 
 @dataclass
 class I2c0(ComputeObject):
@@ -1004,11 +1049,10 @@ class I2c0(ComputeObject):
         self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        ep = find_highest_bandwidth_endpoint(self.get_context())
         if ep is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1108,11 +1152,10 @@ class Jtag0(ComputeObject):
         self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        ep = find_highest_bandwidth_endpoint(self.get_context())
         if ep is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1215,11 +1258,10 @@ class Qspi0(ComputeObject):
         self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        ep = find_highest_bandwidth_endpoint(self.get_context())
         if ep is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False

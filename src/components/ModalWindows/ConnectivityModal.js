@@ -1,5 +1,4 @@
 import React from 'react';
-import { connectivityNames } from '../../utils/cpu';
 import { FieldType } from '../../utils/common';
 import { useClockSelection } from '../../ClockSelectionProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
@@ -7,7 +6,7 @@ import { useGlobalState } from '../../GlobalStateProvider';
 import ModalWindow from './ModalWindow';
 
 function ConnectivityModal({
-  closeModal, onSubmit, defaultValue, title,
+  closeModal, onSubmit, defaultValue, title, connectivityNames,
 }) {
   const { clocks } = useClockSelection();
   const { GetOptions } = useGlobalState();

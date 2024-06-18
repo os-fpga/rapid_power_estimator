@@ -1,11 +1,10 @@
 import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { acpuNames, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
-import { GetText } from '../../utils/common';
+import { GetText, findEvailableIndex } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
@@ -27,7 +26,7 @@ function ACPUTable({ device }) {
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions, updateGlobalState } = useGlobalState();
+  const { GetOptions, updateGlobalState, acpuNames } = useGlobalState();
   const loadActivity = GetOptions('A45_Load');
 
   function fetchPort(port, link) {

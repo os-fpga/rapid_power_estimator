@@ -54,3 +54,9 @@ export function getPerformance(object) {
 export function getPeripherals(peripherals, type) {
   return peripherals.filter((item) => item.type === type);
 }
+
+export function findEvailableIndex(array) {
+  const found = array.find((item) => item.data !== undefined && item.data.name === '');
+  if (found) return found.ep;
+  return 0;
+}

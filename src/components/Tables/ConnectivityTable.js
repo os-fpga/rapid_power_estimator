@@ -1,13 +1,14 @@
 import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { connectivityNames, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
   PowerCell, SelectionCell, PercentsCell, FrequencyCell,
 } from './TableCells';
-import { GetText, fixed, getPeripherals } from '../../utils/common';
+import {
+  GetText, fixed, getPeripherals, findEvailableIndex,
+} from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel } from '../ComponentsLib';
@@ -26,7 +27,7 @@ function ConnectivityTable({ device, peripherals }) {
   const [addButtonDisable, setAddButtonDisable] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
   const { defaultClock } = useClockSelection();
-  const { GetOptions, updateGlobalState } = useGlobalState();
+  const { GetOptions, updateGlobalState, connectivityNames } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
   const fpgaComplex = getPeripherals(peripherals, 'fpga_complex');
 
@@ -184,6 +185,7 @@ function ConnectivityTable({ device, peripherals }) {
             read_write_rate: 0.5,
             toggle_rate: 0.125,
           }}
+          connectivityNames={connectivityNames}
         />
         )}
       </div>

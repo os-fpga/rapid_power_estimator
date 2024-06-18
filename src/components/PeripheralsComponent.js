@@ -81,7 +81,7 @@ function PeripheralsComponent({ device }) {
       if (key === 'jtag') setJtag({ name, power: data.consumption.block_power });
       if (key === 'gige') setGige({ name, power: data.consumption.block_power });
       if (key === 'uart') {
-        if (url.slice(-1) === '0') setUart0({ name, power: data.consumption.block_power });
+        if (data.index === 0) setUart0({ name, power: data.consumption.block_power });
         else setUart1({ name, power: data.consumption.block_power });
       }
       if (key === 'gpio') setGPIO((prev) => ({ ...prev, power: data.consumption.block_power + 1 }));

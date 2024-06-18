@@ -139,6 +139,13 @@ def get_power_factor(POWER_FACTOR: List[Power_Factor], master_type: PeripheralTy
         return sum(factors) / len(factors)
     return 0.0
 
+def sanity_check(output: List[RsMessage], context: 'IPeripheral') -> bool:
+    output.clear()
+    if context.is_enabled() == False:
+        output.append(RsMessageManager.get_message(106, { 'name' : context.get_name() }))
+        return False
+    return True
+
 @dataclass
 class Endpoint_Output:
     calculated_bandwidth: float = field(default=0.0)
@@ -824,24 +831,66 @@ class Usb2_0(ComputeObject):
     def get_messages(self) -> List[RsMessage]:
         return self.messages
 
-    def get_bandwidth(self) -> float:
+    def get_perf(self) -> bandwidth_:
         for row in self.bandwidth_table:
             if row.type == self.properties.bit_rate:
-                return row.bandwidth
+                return row
+
+    def get_bandwidth(self) -> float:
+        row = self.get_perf()
+        if row:
+            return row.bandwidth
         return 0.0
+
+    def get_freq(self) -> int:
+        row = self.get_perf()
+        if row:
+            return row.frequency
+        return 0
 
     def set_properties(self, props: Dict[str, Any]) -> None:
         return update_attributes(self.properties, props)
 
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        # todo: populate output properties
+        ep = find_highest_bandwidth_endpoint(self.get_context().get_name(), self.get_context().get_submodule().get_peripherals())
+        if ep is None:
+            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+            return False
+
+        # highest calculated bandwidth
+        bandwidth = ep.output.calculated_bandwidth
+
+        # compule block power
+        resources = self.get_context().get_device_resources()
+        VCC_CORE = resources.get_VCC_CORE()
+        USB2_CLK_FACTOR = resources.get_USB2_CLK_FACTOR()
+        USB2_SWITCHING_FACTOR = resources.get_USB2_SWITCHING_FACTOR()
+        USB2_IO_FACTOR = resources.get_USB2_IO_FACTOR()
+
+        # core power calculation
+        core_power = ((USB2_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (USB2_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
+        io_core_power = USB2_IO_FACTOR * bandwidth * ep.toggle_rate * VCC_CORE ** 2
+
+        # update output properties
+        self.output.calculated_bandwidth = bandwidth
+        self.output.block_power = core_power + io_core_power
+
+        # debug info
+        print(f'[DEBUG] USB2: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {ep.toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {ep.toggle_rate * bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {core_power = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {io_core_power = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {self.output.calculated_bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {self.output.block_power = }', file=sys.stderr)
+
+        return True
 
 @dataclass
 class GigE_0(ComputeObject):

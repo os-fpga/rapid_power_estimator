@@ -17,7 +17,7 @@ export function setPort(p, fetchDevices) {
 }
 
 export function peripheralPath(deviceId, url) {
-  return formatString('{0}/{1}/peripherals/{2}?flag=1', devices(), deviceId, url);
+  return formatString('{0}/{1}/peripherals/{2}', devices(), deviceId, url);
 }
 
 export function deviceInfo(deviceId) {
@@ -36,10 +36,6 @@ export const Elem = {
 export const api = {
   fetch(func, deviceId) {
     return formatString('{0}/{1}/{2}', devices(), deviceId, func);
-  },
-
-  fetchPeripherals(func, deviceId) {
-    return formatString('{0}/{1}/{2}?flag=1', devices(), deviceId, func);
   },
 
   consumption(func, deviceId) {

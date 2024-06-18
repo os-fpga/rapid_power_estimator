@@ -25,7 +25,7 @@ function MemoryTable({ device, peripherals }) {
     { id: 1, data: {} },
   ]);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions } = useGlobalState();
+  const { GetOptions, updateGlobalState } = useGlobalState();
   const memoryUsage = GetOptions('Peripherals_Usage');
   const memoryType = GetOptions('Memory_Type');
   const ddr = getPeripherals(peripherals, 'ddr');
@@ -68,6 +68,7 @@ function MemoryTable({ device, peripherals }) {
     fetchData(href);
     publish('memoryChanged');
     updateTotalPower(device);
+    updateGlobalState(device);
   }
 
   function modifyRow(index, row) {

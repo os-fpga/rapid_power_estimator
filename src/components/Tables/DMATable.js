@@ -67,7 +67,7 @@ function DMATable({ device }) {
   if (dev !== device) {
     setDev(device);
     if (device !== null) {
-      server.GET(server.api.fetchPeripherals(server.Elem.peripherals, device), (data) => {
+      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         const dma = data.find((elem) => elem.type === 'dma');
         if (dma !== undefined) {
           setDmaHref(dma.href);

@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 import React, {
   createContext, useContext, useState, useMemo,
   useEffect,
@@ -22,6 +21,7 @@ const PeripheralTarget = {
 };
 
 function isTarget(targets, target) {
+  // eslint-disable-next-line no-bitwise
   return (targets & target) === target;
 }
 
@@ -121,7 +121,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       server.GET(server.api.fetch(server.Elem.io, device), (data) => {
         setIoState(data.map((item) => item.consumption.messages));
       });
-      server.GET(server.api.fetchPeripherals(server.Elem.peripherals, device), (data) => {
+      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         setPeripherals(data);
         data.forEach((item) => {
           updatePeripherals(device, item.href, item.type);

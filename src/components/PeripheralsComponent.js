@@ -93,9 +93,8 @@ function PeripheralsComponent({ device }) {
     if (device !== null) {
       setGPIO({ ...gpio, power: 0 });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        Object.entries(data).forEach((entry) => {
-          const [key, element] = entry;
-          element.forEach((refObj) => fetchPeripherals(device, key, refObj.href, refObj.name));
+        data.forEach((entry) => {
+          fetchPeripherals(device, entry.type, entry.href, entry.name);
         });
       });
     }

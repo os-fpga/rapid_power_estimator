@@ -4,7 +4,7 @@ import * as server from '../../utils/serverAPI';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
-import { GetText, findEvailableIndex } from '../../utils/common';
+import { GetText, findEvailableIndex, getPeripherals } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
@@ -65,9 +65,12 @@ function ACPUTable({ device }) {
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      const link = data.acpu[0].href;
-      setHref(link);
-      fetchAcpuData(link);
+      const acpu = getPeripherals(data, 'acpu');
+      if (acpu.length > 0) {
+        const link = acpu[0].href;
+        setHref(link);
+        fetchAcpuData(link);
+      }
     });
   }
 

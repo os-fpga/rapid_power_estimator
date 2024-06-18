@@ -16,7 +16,7 @@ import DMATable from './components/Tables/DMATable';
 import ConnectivityTable from './components/Tables/ConnectivityTable';
 import MemoryTable from './components/Tables/MemoryTable';
 import DesignParametesTable from './components/Tables/DesignParametesTable';
-import { Table } from './utils/common';
+import { Table, getPeripherals } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
 import SOCComponent from './components/SOCComponent';
@@ -111,7 +111,10 @@ function App() {
     setDevice(newDevice);
     updateGlobalState(newDevice);
     updateTotalPower(newDevice);
-    server.GET(server.api.fetchPeripherals(server.Elem.peripherals, newDevice), (data) => {
+    server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
+      const ddr = getPeripherals(data, 'ddr');
+      const ocm = getPeripherals(data, 'ocm');
+      setMemoryEnable(ddr.length > 0 || ocm.length > 0);
       setPeripherals(data);
     });
     if (newDevice !== null) {

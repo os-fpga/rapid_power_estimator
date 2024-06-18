@@ -4,7 +4,7 @@ import * as server from '../../utils/serverAPI';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
-import { GetText, findEvailableIndex } from '../../utils/common';
+import { GetText, findEvailableIndex, getPeripherals } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
@@ -72,8 +72,11 @@ function BCPUTable({ device }) {
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      setHref(data.bcpu[0].href);
-      fetchAcpuData(data.bcpu[0].href);
+      const bcpu = getPeripherals(data, 'bcpu');
+      if (bcpu.length > 0) {
+        setHref(bcpu[0].href);
+        fetchAcpuData(bcpu[0].href);
+      }
     });
   }
 

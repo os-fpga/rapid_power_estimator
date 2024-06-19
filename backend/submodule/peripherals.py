@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import IntFlag
 import sys
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Tuple
 from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard, IO_Standard_Coeff, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralChannelNotFoundException, \
      PeripheralEndpointNotFoundException, PeripheralType
@@ -111,16 +111,18 @@ class PeripheralTarget(IntFlag):
     BCPU   = 2
     FABRIC = 4
 
-def find_highest_bandwidth_endpoint(context: 'IPeripheral') -> 'Endpoint':
+def find_highest_bandwidth_peripheral_endpoint(context: 'IPeripheral') -> Tuple['Endpoint', 'Peripheral']:
     peripherals = context.get_submodule().get_peripherals()
     name = context.get_name()
+    peripheral: IPeripheral = None
     endpoint: Endpoint = None
-    for peripheral in peripherals:
-        for ep in peripheral.get_endpoints() or []:
+    for p in peripherals:
+        for ep in p.get_endpoints() or []:
             if ep.name == name:
                 if endpoint is None or ep.output.calculated_bandwidth > endpoint.output.calculated_bandwidth:
+                    peripheral = p
                     endpoint = ep
-    return endpoint
+    return endpoint, peripheral
 
 def find_peripheral(peripherals: List['IPeripheral'], name: str) -> 'IPeripheral':
     for peripheral in peripherals:
@@ -666,7 +668,7 @@ class N22_RISC_V_BCPU(ComputeObject):
                 endpoint.output.messages.append(RsMessageManager.get_message(305, { 'name' : endpoint.name }))
                 continue
 
-            if peripheral.is_enabled() == False:
+            if peripheral.get_type() != PeripheralType.GPIO and peripheral.is_enabled() == False:
                 endpoint.output.messages.append(RsMessageManager.get_message(304, { 'name' : endpoint.name }))
                 continue
 
@@ -786,6 +788,19 @@ class Gpio0(ComputeObject):
     def get_messages(self) -> List[RsMessage]:
         return self.messages
 
+    def get_bandwidth(self) -> float:
+        return self.properties.io_used * 200.0 / 8.0
+
+    def get_freq(self, peripheral: 'Peripheral') -> int:
+        if peripheral.get_type() == PeripheralType.BCPU:
+            return 233000000 # hardcoded in excel
+        elif peripheral.get_type() == PeripheralType.ACPU:
+            return 533000000 # hardcoded in excel
+        elif peripheral.get_type() == PeripheralType.FPGA_COMPLEX:
+            # todo: props = peripheral.get_properties()
+            return 0
+        return 0
+
     def set_properties(self, props: Dict[str, Any]) -> None:
         return update_attributes(self.properties, props)
 
@@ -793,11 +808,53 @@ class Gpio0(ComputeObject):
         self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        endpoint, peripheral = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
+            self.messages.append(RsMessageManager.get_message(203, { "name" : self.get_context().get_name() }))
             return False
 
-        # todo: populate output properties
+        # highest calculated bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
+
+        # compule block power
+        resources = self.get_context().get_device_resources()
+        VCC_CORE = resources.get_VCC_CORE()
+        VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
+        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
+        OUTPUT_AC, OUTPUT_DC = get_io_coeff(IO_STANDARD_COEFF, VCC_BOOT_IO)
+        GPIO_CLK_FACTOR = resources.get_GPIO_CLK_FACTOR()
+        GPIO_SWITCHING_FACTOR = resources.get_GPIO_SWITCHING_FACTOR()
+        GPIO_IO_FACTOR = resources.get_GPIO_IO_FACTOR()
+
+        # core power calculation
+        core_power = ((GPIO_CLK_FACTOR * (self.get_freq(peripheral) / 1000000.0)) + (GPIO_SWITCHING_FACTOR * bandwidth * self.properties.io_used)) * VCC_CORE ** 2
+        if peripheral.get_type() == PeripheralType.BCPU:
+            io_core_power = GPIO_IO_FACTOR * bandwidth * self.properties.io_used * VCC_CORE ** 2
+        elif peripheral.get_type() == PeripheralType.ACPU:
+            io_core_power = GPIO_IO_FACTOR * bandwidth * endpoint.toggle_rate * self.properties.io_used * VCC_CORE ** 2
+        elif peripheral.get_type() == PeripheralType.FPGA_COMPLEX:
+            # todo
+            pass
+        io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * self.properties.io_used * VCC_BOOT_IO ** 2
+        io_vcc_aux_power = io_vcco_power * 0.1
+
+        # update output properties
+        self.output.calculated_bandwidth = bandwidth
+        self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
+
+        # debug info
+        print(f'[DEBUG] GPIO: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {self.get_freq(peripheral) / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {endpoint.toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {core_power = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {io_core_power = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {io_vcco_power = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {io_vcc_aux_power = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {self.output.calculated_bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {self.output.block_power = }', file=sys.stderr)
+
+        return True
 
 @dataclass
 class Usb2_0(ComputeObject):
@@ -859,13 +916,13 @@ class Usb2_0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context())
-        if ep is None:
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
         # highest calculated bandwidth
-        bandwidth = ep.output.calculated_bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
 
         # compule block power
         resources = self.get_context().get_device_resources()
@@ -876,7 +933,7 @@ class Usb2_0(ComputeObject):
 
         # core power calculation
         core_power = ((USB2_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (USB2_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
-        io_core_power = USB2_IO_FACTOR * bandwidth * ep.toggle_rate * VCC_CORE ** 2
+        io_core_power = USB2_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
 
         # update output properties
         self.output.calculated_bandwidth = bandwidth
@@ -885,8 +942,8 @@ class Usb2_0(ComputeObject):
         # debug info
         print(f'[DEBUG] USB2: {bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] USB2: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {ep.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {ep.toggle_rate * bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {endpoint.toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] USB2: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] USB2: {core_power = }', file=sys.stderr)
         print(f'[DEBUG] USB2: {io_core_power = }', file=sys.stderr)
         print(f'[DEBUG] USB2: {self.output.calculated_bandwidth = }', file=sys.stderr)
@@ -955,7 +1012,7 @@ class GigE_0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        endpoint = find_highest_bandwidth_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1052,13 +1109,13 @@ class I2c0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context())
-        if ep is None:
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
         # highest calculated bandwidth
-        bandwidth = ep.output.calculated_bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
 
         # compule block power
         resources = self.get_context().get_device_resources()
@@ -1072,8 +1129,8 @@ class I2c0(ComputeObject):
 
         # core power calculation
         core_power = ((I2C_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (I2C_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
-        io_core_power = I2C_IO_FACTOR * bandwidth * ep.toggle_rate * VCC_CORE ** 2
-        io_vcco_power = ((OUTPUT_AC * bandwidth * ep.toggle_rate) + OUTPUT_DC) * 2 * VCC_BOOT_IO ** 2
+        io_core_power = I2C_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * 2 * VCC_BOOT_IO ** 2
         io_vcc_aux_power = io_vcco_power * 0.1
 
         # update output properties
@@ -1083,8 +1140,8 @@ class I2c0(ComputeObject):
         # debug info
         print(f'[DEBUG] I2C: {bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] I2C: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {ep.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {ep.toggle_rate * bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] I2C: {endpoint.toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] I2C: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] I2C: {core_power = }', file=sys.stderr)
         print(f'[DEBUG] I2C: {io_core_power = }', file=sys.stderr)
         print(f'[DEBUG] I2C: {io_vcco_power = }', file=sys.stderr)
@@ -1155,13 +1212,13 @@ class Jtag0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context())
-        if ep is None:
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
         # highest calculated bandwidth
-        bandwidth = ep.output.calculated_bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
 
         # compule block power
         resources = self.get_context().get_device_resources()
@@ -1175,8 +1232,8 @@ class Jtag0(ComputeObject):
 
         # core power calculation
         core_power = ((JTAG_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (JTAG_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
-        io_core_power = JTAG_IO_FACTOR * bandwidth * ep.toggle_rate * VCC_CORE ** 2
-        io_vcco_power = ((OUTPUT_AC * bandwidth * ep.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
+        io_core_power = JTAG_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
         io_vcc_aux_power = io_vcco_power * 0.1
 
         # update output properties
@@ -1261,13 +1318,13 @@ class Qspi0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        ep = find_highest_bandwidth_endpoint(self.get_context())
-        if ep is None:
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
         # highest calculated bandwidth
-        bandwidth = ep.output.calculated_bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
 
         # compule block power
         resources = self.get_context().get_device_resources()
@@ -1281,8 +1338,8 @@ class Qspi0(ComputeObject):
 
         # core power calculation
         core_power = ((QSPI_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (QSPI_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
-        io_core_power = QSPI_IO_FACTOR * bandwidth * ep.toggle_rate * VCC_CORE ** 2
-        io_vcco_power = ((OUTPUT_AC * bandwidth * ep.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
+        io_core_power = QSPI_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
         io_vcc_aux_power = io_vcco_power * 0.1
 
         # update output properties

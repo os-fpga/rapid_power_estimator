@@ -94,7 +94,7 @@ class Memory_Type(RsEnum):
 class Dma_Activity(RsEnum):
     IDLE   = 0, "Idle"
     LOW    = 1, "Low"
-    MEDIUM = 2, "Mediun"
+    MEDIUM = 2, "Medium"
     HIGH   = 3, "High"
 
 class Dma_Source_Destination(RsEnum):
@@ -234,7 +234,7 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
             Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR3 }),
             Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
-            # Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
+            Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
             Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_endpoints=4, context=self, init_props={ 'frequency' : 533000000 }),
             Peripheral(name='FPGA Complex', type=PeripheralType.FPGA_COMPLEX, enable=True, max_endpoints=4, context=self),

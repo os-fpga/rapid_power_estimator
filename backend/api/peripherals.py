@@ -61,23 +61,7 @@ class ChannelUrlField(fields.Field):
         if value:
             return [{'name': item.name, 'href': f'channel/{index}'} for index, item in enumerate(value)]
 
-# todo: obsolete
 class PeripheralUrlSchema(Schema):
-    spi  = UrlField()
-    jtag = UrlField()
-    i2c  = UrlField()
-    uart = UrlField()
-    usb2 = UrlField()
-    gige = UrlField()
-    gpio = UrlField()
-    pwm  = UrlField()
-    dma  = UrlField()
-    bcpu = UrlField()
-    acpu = UrlField()
-    memory = UrlField()
-    fpga_complex = UrlField()
-
-class PeripheralUrlSchema2(Schema):
     type = fields.Enum(PeripheralType, by_value=True)
     name = fields.Str()
 
@@ -282,51 +266,27 @@ class PeripheralsApi(Resource):
               in: path 
               type: string
               required: true
-            - name: flag
-              in: query
-              description: Set to 1 to return response in array format
-              required: false
-              schema:
-                type: integer
         definitions:
             Url:
-                type: array
-                items:
-                    type: object
-                    properties:
-                        href:
-                            type: string
-                        name:
-                            type: string
-            PeripheralUrl:
                 type: object
                 properties:
-                    spi:
-                        $ref: '#/definitions/Url'
-                    jtag:
-                        $ref: '#/definitions/Url'
-                    i2c:
-                        $ref: '#/definitions/Url'
-                    uart:
-                        $ref: '#/definitions/Url'
-                    usb2:
-                        $ref: '#/definitions/Url'
-                    gige:
-                        $ref: '#/definitions/Url'
-                    gpio:
-                        $ref: '#/definitions/Url'
-                    pwm:
-                        $ref: '#/definitions/Url'
-                    dma:
-                        $ref: '#/definitions/Url'
-                    bcpu:
-                        $ref: '#/definitions/Url'
-                    acpu:
-                        $ref: '#/definitions/Url'
-                    memory:
-                        $ref: '#/definitions/Url'
-                    fpga_complex:
-                        $ref: '#/definitions/Url'
+                    type:
+                        type: string
+                    name:
+                        type: string
+                    href:
+                        type: string
+            Url2:
+                type: object
+                properties:
+                    name:
+                        type: string
+                    href:
+                        type: string
+            PeripheralUrl:
+                type: array
+                items:
+                    $ref: '#/definitions/Url'
             PeripheralConsumptionAndResourceUsage:
                 allOf:
                     - type: object
@@ -352,28 +312,39 @@ class PeripheralsApi(Resource):
                 type: object
                 properties:
                     ports:
-                        $ref: '#/definitions/Url'
-            ACPUOutput:
+                        type: array
+                        items:
+                            $ref: '#/definitions/Url2'
+            ChannelUrl:
+                type: object
+                properties:
+                    channels:
+                        type: array
+                        items:
+                            $ref: '#/definitions/Url2'
+            PeripheralOutput:
                 type: object
                 properties:
                     consumption:
                         type: object
                         properties:
+                            calculated_bandwidth:
+                                type: number
                             block_power:
                                 type: number
-            ACPU:
+            Peripheral:
                 type: object
                 properties:
+                    type:
+                        type: string
                     name:
                         type: string
+                    index:
+                        type: integer
                     enable:
                         type: boolean
-                    frequency:
+                    targets:
                         type: integer
-                    load:
-                        type: integer
-                        minimum: 0
-                        maximum: 3
             Endpoint:
                 type: object
                 properties:
@@ -450,26 +421,8 @@ class PeripheralsApi(Resource):
         """
         try:
             peripherals = RsDeviceManager.get_instance().get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripherals()
-            if request.args.get('flag', 1) == 0:
-                # todo: obsolete in favorite of array format (in else part). Remember to remove 'flag' query pamerater define in API define above
-                peripherals_by_type = {}
-                # group peripherals by their type
-                for peripheral in peripherals:
-                    if peripheral.type == PeripheralType.DDR or peripheral.type == PeripheralType.OCM:
-                        if 'memory' in peripherals_by_type:
-                            peripherals_by_type['memory'].append(peripheral)
-                        else:
-                            peripherals_by_type['memory'] = [peripheral]
-                    else:
-                        if peripheral.type.value in peripherals_by_type:
-                            peripherals_by_type[peripheral.type.value].append(peripheral)
-                        else:
-                            peripherals_by_type[peripheral.type.value] = [peripheral]
-                schema = PeripheralUrlSchema()
-                return schema.dump(peripherals_by_type)
-            else:
-                schema = PeripheralUrlSchema2(many=True)
-                return schema.dump(peripherals)
+            schema = PeripheralUrlSchema(many=True)
+            return schema.dump(peripherals)
         except DeviceNotFoundException as e:
             raise DeviceNotExistsError
         except Exception as e:
@@ -548,9 +501,10 @@ class PeripheralApi(Resource):
                 description: Successfully returned peripheral details
                 schema:
                     allOf:
-                        - $ref: '#/definitions/ACPU'
+                        - $ref: '#/definitions/Peripheral'
                         - $ref: '#/definitions/EndpointUrl'
-                        - $ref: '#/definitions/ACPUOutput'
+                        - $ref: '#/definitions/ChannelUrl'
+                        - $ref: '#/definitions/PeripheralOutput'
             400:
                 description: Invalid request 
                 schema:
@@ -599,9 +553,10 @@ class PeripheralApi(Resource):
                 description: Successfully updated the peripheral
                 schema:
                     allOf:
-                        - $ref: '#/definitions/ACPU'
+                        - $ref: '#/definitions/Peripheral'
                         - $ref: '#/definitions/EndpointUrl'
-                        - $ref: '#/definitions/ACPUOutput'
+                        - $ref: '#/definitions/ChannelUrl'
+                        - $ref: '#/definitions/PeripheralOutput'
             400:
                 description: Invalid request 
                 schema:

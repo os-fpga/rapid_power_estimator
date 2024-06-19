@@ -380,9 +380,10 @@ class ComputeObject:
             return Usb2_0(context=context)
         elif type == PeripheralType.GIGE:
             return GigE_0(context=context)
-        elif type == PeripheralType.GPIO or type == PeripheralType.PWM:
-            # Gpio and Pwm share the same compute object
+        elif type == PeripheralType.GPIO:
             return Gpio0(context=context)
+        elif type == PeripheralType.PWM:
+            return Pwm0(context=context)
         elif type == PeripheralType.DDR or type == PeripheralType.OCM:
             # DDR and OCM share the same compute object
             return Memory0(context=context)
@@ -490,6 +491,46 @@ class common_output_:
         self.calculated_bandwidth = 0.0
         self.block_power = 0.0
         self.percentage = 0.0
+
+@dataclass
+class Pwm0(ComputeObject):
+    @dataclass
+    class properties_:
+        io_used: int
+        io_standard: GpioStandard
+
+    @dataclass
+    class output_(common_output_):
+        pass
+
+    def __post_init__(self) -> None:
+        self.properties = Gpio0.properties_(io_used=4, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
+        self.output = Gpio0.output_()
+        self.messages: List[RsMessage] = []
+
+    def get_properties(self) -> Dict[str, Any]:
+        return self.properties.__dict__
+
+    def get_output(self) -> Dict[str, Any]:
+        return self.output.__dict__
+
+    def get_messages(self) -> List[RsMessage]:
+        return self.messages
+
+    def set_properties(self, props: Dict[str, Any]) -> None:
+        return update_attributes(self.properties, props)
+
+    def compute(self) -> bool:
+        self.messages.clear()
+        self.output.reset()
+
+        if self.properties.io_used <= 0:
+            return False
+
+        self.output.calculated_bandwidth = 0.0001 # hardcoded in excel
+        self.output.block_power = self.properties.io_used * 0.001 # hardcoded in excel
+
+        return True
 
 @dataclass
 class Dma0(ComputeObject):
@@ -892,7 +933,7 @@ class Gpio0(ComputeObject):
         self.output.reset()
 
         if self.properties.io_used <= 0:
-            return
+            return False
 
         endpoint, peripheral = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:

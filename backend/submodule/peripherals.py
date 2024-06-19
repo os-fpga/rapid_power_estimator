@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from enum import IntFlag
 import sys
 from typing import Any, List, Dict, Tuple
+from submodule.clock import Clock
 from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard, IO_Standard_Coeff, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralChannelNotFoundException, \
      PeripheralEndpointNotFoundException, PeripheralType
@@ -124,13 +125,14 @@ def find_highest_bandwidth_peripheral_endpoint(context: 'IPeripheral') -> Tuple[
                     endpoint = ep
     return endpoint, peripheral
 
-def find_peripheral(peripherals: List['IPeripheral'], name: str) -> 'IPeripheral':
-    for peripheral in peripherals:
+def find_peripheral(context: 'IPeripheral', name: str) -> 'IPeripheral':
+    for peripheral in context.get_submodule().get_peripherals():
         if peripheral.get_name() == name:
             return peripheral
     return None
 
-def get_io_coeff(IO_STANDARD_COEFF: List[IO_Standard_Coeff], voltage: float) -> List[float]:
+def get_io_output_coeff(context: 'IPeripheral', voltage: float) -> List[float]:
+    IO_STANDARD_COEFF = context.get_device_resources().get_IO_standard_coeff()
     for coeff in IO_STANDARD_COEFF:
         if coeff.io_standard in (IO_Standard.LVCMOS_1_8V_HR, IO_Standard.LVCMOS_2_5V, IO_Standard.LVCMOS_3_3V):
             if coeff.voltage == voltage:
@@ -226,14 +228,14 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name='I2C', type=PeripheralType.I2C, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
             Peripheral(name='UART0 (BCPU)', type=PeripheralType.UART, index=0, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.BCPU, context=self),
             Peripheral(name='UART1 (ACPU)', type=PeripheralType.UART, index=1, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU, context=self),
-            Peripheral(name='USB 2.0', type=PeripheralType.USB2, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, context=self),
+            Peripheral(name='USB 2.0', type=PeripheralType.USB2, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
             Peripheral(name='GigE', type=PeripheralType.GIGE, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
             Peripheral(name="GPIO (BCPU)", type=PeripheralType.GPIO, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self),
             Peripheral(name="GPIO (ACPU)", type=PeripheralType.GPIO, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, enable=True, context=self),
             Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
             Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
             Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR3 }),
-            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
+            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, enable=True, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
             Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
             Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_endpoints=4, context=self, init_props={ 'frequency' : 533000000 }),
@@ -497,9 +499,69 @@ class Dma0(ComputeObject):
 
 @dataclass
 class FPGA_Fabric(ComputeObject):
-    def compute(self) -> bool:
-        # todo: populate output properties
+    def __post_init__(self) -> None:
         pass
+
+    def compute(self) -> bool:
+        resources = self.get_context().get_device_resources()
+        NOC_POWER_FACTOR = resources.get_peripheral_noc_power_factor()
+        VCC_CORE = resources.get_VCC_CORE()
+
+        for endpoint in self.get_context().get_endpoints():
+            endpoint.output.reset()
+            if endpoint.name == '':
+                continue
+
+            peripheral = find_peripheral(self.get_context(), endpoint.name)
+            if peripheral is None:
+                endpoint.output.messages.append(RsMessageManager.get_message(305, { 'name': endpoint.name }))
+                continue
+
+            if peripheral.is_enabled() == False:
+                endpoint.output.messages.append(RsMessageManager.get_message(304, { 'name': endpoint.name }))
+                continue
+
+            # find clock frequency
+            clock = self.get_context().get_device_resources().get_clock(endpoint.clock)
+            if clock is None:
+                endpoint.output.messages.append(RsMessageManager.get_message(301, { 'clock': endpoint.clock }))
+                continue
+
+            if peripheral.get_type() == PeripheralType.GPIO:
+                bandwidth = peripheral.get_bandwidth() * (clock.frequency / 1000000.0)
+            else:
+                bandwidth = peripheral.get_bandwidth()
+
+            # calculate bandwidth
+            if endpoint.activity == Port_Activity.HIGH:
+                calculated_bandwidth = bandwidth * 0.75
+            elif endpoint.activity == Port_Activity.MEDIUM:
+                calculated_bandwidth = bandwidth * 0.5
+            elif endpoint.activity == Port_Activity.LOW:
+                calculated_bandwidth = bandwidth * 0.25
+            else:
+                calculated_bandwidth = 0
+
+            # calculate noc power
+            power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
+            noc_power = calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
+
+            # update output
+            endpoint.output.clock_frequency = clock.frequency
+            endpoint.output.calculated_bandwidth = calculated_bandwidth
+            endpoint.output.noc_power = noc_power
+
+            # debug info
+            print(f'[DEBUG] FPGA: {self.get_context().get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {peripheral.get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {power_factor = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {endpoint.activity = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {endpoint.toggle_rate = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {VCC_CORE = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] FPGA:   {endpoint.output.noc_power = }', file=sys.stderr)
+
+        return True
 
 @dataclass
 class A45_RISC_V_ACPU(ComputeObject):
@@ -560,7 +622,7 @@ class A45_RISC_V_ACPU(ComputeObject):
             if endpoint.name == '':
                 continue
 
-            peripheral = find_peripheral(peripherals, endpoint.name)
+            peripheral = find_peripheral(self.get_context(), endpoint.name)
             if peripheral is None:
                 endpoint.output.messages.append(RsMessageManager.get_message(305, { 'name' : endpoint.name }))
                 continue
@@ -569,29 +631,38 @@ class A45_RISC_V_ACPU(ComputeObject):
                 endpoint.output.messages.append(RsMessageManager.get_message(304, { 'name' : endpoint.name }))
                 continue
 
+            if peripheral.get_type() == PeripheralType.GPIO:
+                bandwidth = peripheral.get_bandwidth() * 200 # no idea hardcoded in excel
+            else:
+                bandwidth = peripheral.get_bandwidth()
+
             # calculate bandwidth
             if endpoint.activity == Port_Activity.HIGH:
-                calculated_bandwidth = peripheral.get_bandwidth() * 0.75
+                calculated_bandwidth = bandwidth * 0.75
             elif endpoint.activity == Port_Activity.MEDIUM:
-                calculated_bandwidth = peripheral.get_bandwidth() * 0.5
+                calculated_bandwidth = bandwidth * 0.5
             elif endpoint.activity == Port_Activity.LOW:
-                calculated_bandwidth = peripheral.get_bandwidth() * 0.25
+                calculated_bandwidth = bandwidth * 0.25
             else:
                 calculated_bandwidth = 0
 
-            # cap bandwidth
-            endpoint.output.calculated_bandwidth = min(266.0 * 4, calculated_bandwidth)
-
             # calculate noc power
             power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
-            endpoint.output.noc_power = endpoint.output.calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
-            print(f'[DEBUG] {self.get_context().get_name() = }', file=sys.stderr)
-            print(f'[DEBUG]   {peripheral.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG]   {power_factor = }', file=sys.stderr)
-            print(f'[DEBUG]   {endpoint.toggle_rate = }', file=sys.stderr)
-            print(f'[DEBUG]   {VCC_CORE = }', file=sys.stderr)
-            print(f'[DEBUG]   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG]   {endpoint.output.noc_power = }', file=sys.stderr)
+            noc_power = calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
+
+            # update output
+            endpoint.output.calculated_bandwidth = calculated_bandwidth
+            endpoint.output.noc_power = noc_power
+
+            # debug info
+            print(f'[DEBUG] ACPU: {self.get_context().get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {peripheral.get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {power_factor = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {endpoint.activity = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {endpoint.toggle_rate = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {VCC_CORE = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] ACPU:   {endpoint.output.noc_power = }', file=sys.stderr)
 
         # compute block power
         block_power = (LOAD_FACTOR + ACPU_CLK_FACTOR) * (self.properties.frequency / 1000000.0) * VCC_CORE ** 2
@@ -663,7 +734,7 @@ class N22_RISC_V_BCPU(ComputeObject):
             if endpoint.name == '':
                 continue
 
-            peripheral = find_peripheral(peripherals, endpoint.name)
+            peripheral = find_peripheral(self.get_context(), endpoint.name)
             if peripheral is None:
                 endpoint.output.messages.append(RsMessageManager.get_message(305, { 'name' : endpoint.name }))
                 continue
@@ -672,29 +743,41 @@ class N22_RISC_V_BCPU(ComputeObject):
                 endpoint.output.messages.append(RsMessageManager.get_message(304, { 'name' : endpoint.name }))
                 continue
 
+            if peripheral.get_type() == PeripheralType.GPIO:
+                bandwidth = peripheral.get_bandwidth() * 200 # no idea hardcoded in excel
+            else:
+                bandwidth = peripheral.get_bandwidth()
+
             # calculate bandwidth
             if endpoint.activity == Port_Activity.HIGH:
-                calculated_bandwidth = peripheral.get_bandwidth() * 0.75
+                calculated_bandwidth = bandwidth * 0.75
             elif endpoint.activity == Port_Activity.MEDIUM:
-                calculated_bandwidth = peripheral.get_bandwidth() * 0.5
+                calculated_bandwidth = bandwidth * 0.5
             elif endpoint.activity == Port_Activity.LOW:
-                calculated_bandwidth = peripheral.get_bandwidth() * 0.25
+                calculated_bandwidth = bandwidth * 0.25
             else:
                 calculated_bandwidth = 0
 
             # cap bandwidth
-            endpoint.output.calculated_bandwidth = min(266.0 * 4, calculated_bandwidth)
+            calculated_bandwidth = min(266.0 * 4, calculated_bandwidth)
 
             # calculate noc power
             power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
-            endpoint.output.noc_power = endpoint.output.calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
-            print(f'[DEBUG] {self.get_context().get_name() = }', file=sys.stderr)
-            print(f'[DEBUG]   {peripheral.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG]   {power_factor = }', file=sys.stderr)
-            print(f'[DEBUG]   {endpoint.toggle_rate = }', file=sys.stderr)
-            print(f'[DEBUG]   {VCC_CORE = }', file=sys.stderr)
-            print(f'[DEBUG]   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG]   {endpoint.output.noc_power = }', file=sys.stderr)
+            noc_power = calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
+
+            # update output
+            endpoint.output.calculated_bandwidth = calculated_bandwidth
+            endpoint.output.noc_power = noc_power
+
+            # debug info
+            print(f'[DEBUG] BCPU: {self.get_context().get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {peripheral.get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {power_factor = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {endpoint.activity = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {endpoint.toggle_rate = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {VCC_CORE = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] BCPU:   {endpoint.output.noc_power = }', file=sys.stderr)
 
         # compute active power
         if self.properties.clock == N22_RISC_V_Clock.PLL_233MHz:
@@ -789,16 +872,16 @@ class Gpio0(ComputeObject):
         return self.messages
 
     def get_bandwidth(self) -> float:
-        return self.properties.io_used * 200.0 / 8.0
+        return self.properties.io_used / 8.0
 
-    def get_freq(self, peripheral: 'Peripheral') -> int:
+    def get_freq(self, peripheral: Peripheral, endpoint: Endpoint) -> int:
         if peripheral.get_type() == PeripheralType.BCPU:
             return 233000000 # hardcoded in excel
         elif peripheral.get_type() == PeripheralType.ACPU:
             return 533000000 # hardcoded in excel
         elif peripheral.get_type() == PeripheralType.FPGA_COMPLEX:
-            # todo: props = peripheral.get_properties()
-            return 0
+            clock = self.get_context().get_device_resources().get_clock(endpoint.clock)
+            return clock.frequency if clock else 0
         return 0
 
     def set_properties(self, props: Dict[str, Any]) -> None:
@@ -807,6 +890,9 @@ class Gpio0(ComputeObject):
     def compute(self) -> bool:
         self.messages.clear()
         self.output.reset()
+
+        if self.properties.io_used <= 0:
+            return
 
         endpoint, peripheral = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
@@ -820,21 +906,22 @@ class Gpio0(ComputeObject):
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
-        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
-        OUTPUT_AC, OUTPUT_DC = get_io_coeff(IO_STANDARD_COEFF, VCC_BOOT_IO)
+        OUTPUT_AC, OUTPUT_DC = get_io_output_coeff(self.get_context(), VCC_BOOT_IO)
         GPIO_CLK_FACTOR = resources.get_GPIO_CLK_FACTOR()
         GPIO_SWITCHING_FACTOR = resources.get_GPIO_SWITCHING_FACTOR()
         GPIO_IO_FACTOR = resources.get_GPIO_IO_FACTOR()
 
         # core power calculation
-        core_power = ((GPIO_CLK_FACTOR * (self.get_freq(peripheral) / 1000000.0)) + (GPIO_SWITCHING_FACTOR * bandwidth * self.properties.io_used)) * VCC_CORE ** 2
+        clock_frequency = self.get_freq(peripheral, endpoint)
+        core_power = ((GPIO_CLK_FACTOR * (clock_frequency / 1000000.0)) + (GPIO_SWITCHING_FACTOR * bandwidth * self.properties.io_used)) * VCC_CORE ** 2
+
         if peripheral.get_type() == PeripheralType.BCPU:
             io_core_power = GPIO_IO_FACTOR * bandwidth * self.properties.io_used * VCC_CORE ** 2
         elif peripheral.get_type() == PeripheralType.ACPU:
             io_core_power = GPIO_IO_FACTOR * bandwidth * endpoint.toggle_rate * self.properties.io_used * VCC_CORE ** 2
         elif peripheral.get_type() == PeripheralType.FPGA_COMPLEX:
-            # todo
-            pass
+            io_core_power = GPIO_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
+
         io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * self.properties.io_used * VCC_BOOT_IO ** 2
         io_vcc_aux_power = io_vcco_power * 0.1
 
@@ -844,7 +931,7 @@ class Gpio0(ComputeObject):
 
         # debug info
         print(f'[DEBUG] GPIO: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {self.get_freq(peripheral) / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] GPIO: {clock_frequency = }', file=sys.stderr)
         print(f'[DEBUG] GPIO: {endpoint.toggle_rate = }', file=sys.stderr)
         print(f'[DEBUG] GPIO: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] GPIO: {core_power = }', file=sys.stderr)
@@ -1121,8 +1208,7 @@ class I2c0(ComputeObject):
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
-        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
-        OUTPUT_AC, OUTPUT_DC = get_io_coeff(IO_STANDARD_COEFF, VCC_BOOT_IO)
+        OUTPUT_AC, OUTPUT_DC = get_io_output_coeff(self.get_context(), VCC_BOOT_IO)
         I2C_CLK_FACTOR = resources.get_I2C_CLK_FACTOR()
         I2C_SWITCHING_FACTOR = resources.get_I2C_SWITCHING_FACTOR()
         I2C_IO_FACTOR = resources.get_I2C_IO_FACTOR()
@@ -1224,8 +1310,7 @@ class Jtag0(ComputeObject):
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
-        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
-        OUTPUT_AC, OUTPUT_DC = get_io_coeff(IO_STANDARD_COEFF, VCC_BOOT_IO) 
+        OUTPUT_AC, OUTPUT_DC = get_io_output_coeff(self.get_context(), VCC_BOOT_IO)
         JTAG_CLK_FACTOR = resources.get_JTAG_CLK_FACTOR()
         JTAG_SWITCHING_FACTOR = resources.get_JTAG_SWITCHING_FACTOR()
         JTAG_IO_FACTOR = resources.get_JTAG_IO_FACTOR()
@@ -1330,8 +1415,7 @@ class Qspi0(ComputeObject):
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
-        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
-        OUTPUT_AC, OUTPUT_DC = get_io_coeff(IO_STANDARD_COEFF, VCC_BOOT_IO)
+        OUTPUT_AC, OUTPUT_DC = get_io_output_coeff(self.get_context(), VCC_BOOT_IO)
         QSPI_CLK_FACTOR = resources.get_QSPI_CLK_FACTOR()
         QSPI_SWITCHING_FACTOR = resources.get_QSPI_SWITCHING_FACTOR()
         QSPI_IO_FACTOR = resources.get_QSPI_IO_FACTOR()

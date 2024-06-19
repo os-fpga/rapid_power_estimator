@@ -57,7 +57,7 @@ class DSP:
         self.output.messages.clear()
 
         if clock == None:
-            self.output.messages.append(RsMessageManager.get_message(301))
+            self.output.messages.append(RsMessageManager.get_message(301, { 'clock': self.clock }))
             return
 
         if self.enable == False:

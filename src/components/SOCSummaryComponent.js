@@ -63,7 +63,7 @@ function SOCSummaryComponent({ device }) {
     Object.entries(socState).forEach((item) => {
       if (item.length > 1) {
         const [key, array] = item;
-        if (key !== 'acpu' && key !== 'bcpu' && key !== 'memory' && key !== 'dma' && key !== 'fpga_complex') {
+        if (key !== 'acpu' && key !== 'bcpu' && key !== 'ocm' && key !== 'ddr' && key !== 'dma' && key !== 'fpga_complex') {
           arr = arr.concat(array);
         }
       }

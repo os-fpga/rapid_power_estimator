@@ -6,6 +6,7 @@ import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
 import { State } from './ComponentsLib';
 import { useGlobalState } from '../GlobalStateProvider';
+import { getPeripherals } from '../utils/common';
 
 function ConnectivityComponent({ device, peripherals }) {
   const [dev, setDev] = React.useState(null);
@@ -21,16 +22,15 @@ function ConnectivityComponent({ device, peripherals }) {
   ];
   const { socState } = useGlobalState();
   const [enable, setEnable] = React.useState(true);
+  const fpgaComplex = getPeripherals(peripherals, 'fpga_complex');
 
   const update = React.useCallback(() => {
     function fetchEndPoint(href, setEp) {
       server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
     }
     if (device === null) return;
-    if (peripherals === null) return;
-    const fpgaComplex = peripherals.fpga_complex;
-    setEnable(fpgaComplex !== undefined);
-    if (fpgaComplex) {
+    setEnable(fpgaComplex.length !== 0);
+    if (fpgaComplex.length !== 0) {
       const { href } = fpgaComplex[0];
       setName(fpgaComplex[0].name);
       server.GET(server.peripheralPath(device, href), (fpgaComplexData) => {
@@ -40,7 +40,7 @@ function ConnectivityComponent({ device, peripherals }) {
         fetchEndPoint(`${href}/${fpgaComplexData.ports[3].href}`, setEp3);
       });
     }
-  }, [device, peripherals]);
+  }, [device, fpgaComplex]);
 
   React.useEffect(() => update(), [update]);
 

@@ -4,6 +4,7 @@ import * as server from '../utils/serverAPI';
 import { subscribe, unsubscribe } from '../utils/events';
 import { State } from './ComponentsLib';
 import { useSelection } from '../SelectionProvider';
+import { getPeripherals } from '../utils/common';
 
 function ABCPUComponent({
   device, title, index, power, percent, peripherals, messages,
@@ -16,16 +17,17 @@ function ABCPUComponent({
   const [ep3, setEp3] = React.useState(0);
   const [enable, setEnable] = React.useState(true);
   const { selectedItem } = useSelection();
+  const cpu = getPeripherals(peripherals, index);
 
   function fetchEndPoint(href, setEp) {
     server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
   }
 
   function update() {
-    if ((device !== null) && (peripherals !== null)) {
-      setEnable(peripherals[index] !== undefined);
-      if (peripherals[index] !== undefined) {
-        const { href } = peripherals[index][0];
+    if (device !== null) {
+      setEnable(cpu.length !== 0);
+      if (cpu.length !== 0) {
+        const { href } = cpu[0];
         server.GET(server.peripheralPath(device, href), (cpuData) => {
           setName(cpuData.name);
           fetchEndPoint(`${href}/${cpuData.ports[0].href}`, setEp0);

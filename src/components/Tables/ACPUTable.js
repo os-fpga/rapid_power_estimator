@@ -1,11 +1,10 @@
 import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { acpuNames, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
 import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
-import { GetText } from '../../utils/common';
+import { GetText, findEvailableIndex, getPeripherals } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { useGlobalState } from '../../GlobalStateProvider';
@@ -27,7 +26,7 @@ function ACPUTable({ device }) {
   const [href, setHref] = React.useState('');
   const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions } = useGlobalState();
+  const { GetOptions, updateGlobalState, acpuNames } = useGlobalState();
   const loadActivity = GetOptions('A45_Load');
 
   function fetchPort(port, link) {
@@ -66,9 +65,12 @@ function ACPUTable({ device }) {
 
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-      const link = data.acpu[0].href;
-      setHref(link);
-      fetchAcpuData(link);
+      const acpu = getPeripherals(data, 'acpu');
+      if (acpu.length > 0) {
+        const link = acpu[0].href;
+        setHref(link);
+        fetchAcpuData(link);
+      }
     });
   }
 
@@ -77,14 +79,19 @@ function ACPUTable({ device }) {
     if (device !== null) fetchData();
   }
 
+  function modifyDataHandler() {
+    publish('cpuChanged', 'acpu');
+    updateTotalPower(device);
+    updateGlobalState(device);
+  }
+
   const handleChange = (name, val) => {
     const newData = { ...acpuData, [name]: val };
     setAcpuData(newData);
     if (device !== null && href !== '') {
       server.PATCH(server.peripheralPath(device, href), newData, () => fetchAcpuData(href));
     }
-    publish('cpuChanged', 'acpu');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   const header = ['', 'Action', 'Endpoint', 'Activity', 'R/W', 'Toggle Rate', 'Bandwidth', 'Noc Power'];
@@ -100,8 +107,7 @@ function ACPUTable({ device }) {
     const val = endpoints[index].data;
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchAcpuData(href));
-    publish('cpuChanged', 'acpu');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   function addRow(newData) {
@@ -115,8 +121,7 @@ function ACPUTable({ device }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    publish('cpuChanged', 'acpu');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   const powerHeader = ['Power', '%'];

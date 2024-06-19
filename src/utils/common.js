@@ -50,3 +50,13 @@ export function getPerformance(object) {
   if (object.io_standard) return object.io_standard;
   return 0;
 }
+
+export function getPeripherals(peripherals, type) {
+  return peripherals.filter((item) => item.type === type);
+}
+
+export function findEvailableIndex(array) {
+  const found = array.find((item) => item.data !== undefined && item.data.name === '');
+  if (found) return found.ep;
+  return 0;
+}

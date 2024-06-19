@@ -1,13 +1,14 @@
 import React from 'react';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { connectivityNames, findEvailableIndex } from '../../utils/cpu';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
   PowerCell, SelectionCell, PercentsCell, FrequencyCell,
 } from './TableCells';
-import { GetText, fixed } from '../../utils/common';
+import {
+  GetText, fixed, getPeripherals, findEvailableIndex,
+} from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel } from '../ComponentsLib';
@@ -26,8 +27,9 @@ function ConnectivityTable({ device, peripherals }) {
   const [addButtonDisable, setAddButtonDisable] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
   const { defaultClock } = useClockSelection();
-  const { GetOptions } = useGlobalState();
+  const { GetOptions, updateGlobalState, connectivityNames } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
+  const fpgaComplex = getPeripherals(peripherals, 'fpga_complex');
 
   function fetchPort(port, link) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -55,8 +57,8 @@ function ConnectivityTable({ device, peripherals }) {
   }
 
   function fetchData() {
-    if (peripherals && peripherals.fpga_complex) {
-      const link = peripherals.fpga_complex[0].href;
+    if (fpgaComplex.length > 0) {
+      const link = fpgaComplex[0].href;
       setHref(link);
       fetchConnectivityData(link);
     } else {
@@ -86,13 +88,18 @@ function ConnectivityTable({ device, peripherals }) {
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), data, () => fetchConnectivityData(href));
   }
 
+  function modifyDataHandler() {
+    publish('interconnectChanged');
+    updateTotalPower(device);
+    updateGlobalState(device);
+  }
+
   const deleteRow = (index) => {
     // no delete method for acpu. this is just clear name of the endpoint which mean disable
     const val = endpoints[index].data;
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchConnectivityData(href));
-    publish('interconnectChanged');
-    updateTotalPower(device);
+    modifyDataHandler(device);
   };
 
   function addRow(newData) {
@@ -106,8 +113,7 @@ function ConnectivityTable({ device, peripherals }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    publish('interconnectChanged');
-    updateTotalPower(device);
+    modifyDataHandler(device);
   };
 
   const powerHeader = ['Power', '%'];
@@ -179,6 +185,7 @@ function ConnectivityTable({ device, peripherals }) {
             read_write_rate: 0.5,
             toggle_rate: 0.125,
           }}
+          connectivityNames={connectivityNames}
         />
         )}
       </div>

@@ -450,7 +450,7 @@ class PeripheralsApi(Resource):
         """
         try:
             peripherals = RsDeviceManager.get_instance().get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripherals()
-            if request.args.get('flag', 0) == 0:
+            if request.args.get('flag', 1) == 0:
                 # todo: obsolete in favorite of array format (in else part). Remember to remove 'flag' query pamerater define in API define above
                 peripherals_by_type = {}
                 # group peripherals by their type

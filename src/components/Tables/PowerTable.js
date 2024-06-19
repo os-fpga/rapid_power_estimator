@@ -41,7 +41,7 @@ function PowerTable({
                 // eslint-disable-next-line react/no-array-index-key
                 <tr key={index}>
                   <td className="innerHeader no-wrap">{item[0]}</td>
-                  <td>{item[1]}</td>
+                  <td>{fixed(item[1], 2)}</td>
                   <td className="no-wrap">
                     {item[2]}
                     {item.length === 3 ? ' %' : ''}

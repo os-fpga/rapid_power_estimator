@@ -4,7 +4,7 @@ import MemoryModal from '../ModalWindows/MemoryModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed, getPeripherals } from '../../utils/common';
-import { PowerCell, SelectionCell } from './TableCells';
+import { PowerCell, SelectionCell, BandwidthCell } from './TableCells';
 import {
   TableBase, Actions, StatusColumn, EnableState,
 } from './TableBase';
@@ -121,8 +121,8 @@ function MemoryTable({ device, peripherals }) {
                 <SelectionCell val={row.data.memory_type} values={memoryType} />
                 <td>{row.data.data_rate}</td>
                 <td>{row.data.width}</td>
-                <PowerCell val={row.data.consumption.write_bandwidth} />
-                <PowerCell val={row.data.consumption.read_bandwidth} />
+                <BandwidthCell val={row.data.consumption.write_bandwidth} />
+                <BandwidthCell val={row.data.consumption.read_bandwidth} />
                 <PowerCell val={row.data.consumption.block_power} />
                 <td>
                   {fixed(row.data.consumption.percentage, 0)}

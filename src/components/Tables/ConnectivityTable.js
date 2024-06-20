@@ -4,7 +4,7 @@ import * as server from '../../utils/serverAPI';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ConnectivityModal from '../ModalWindows/ConnectivityModal';
 import {
-  PowerCell, SelectionCell, PercentsCell, FrequencyCell,
+  PowerCell, SelectionCell, PercentsCell, FrequencyCell, BandwidthCell,
 } from './TableCells';
 import {
   GetText, fixed, getPeripherals, findEvailableIndex,
@@ -150,7 +150,7 @@ function ConnectivityTable({ device, peripherals }) {
                 <SelectionCell val={row.data.activity} values={loadActivity} />
                 <PercentsCell val={row.data.read_write_rate} />
                 <PercentsCell val={row.data.toggle_rate} precition={1} />
-                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <BandwidthCell val={row.data.consumption.calculated_bandwidth} />
                 <PowerCell val={row.data.consumption.noc_power} />
                 <td>
                   {fixed(row.data.consumption.percentage, 0)}

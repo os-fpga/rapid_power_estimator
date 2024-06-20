@@ -32,3 +32,7 @@ export function PowerCell({ rowSpan, val }) {
 export function SelectionCell({ val, values }) {
   return <td>{GetText(val, values)}</td>;
 }
+
+export function BandwidthCell({ val }) {
+  return <td>{`${val} MB/s`}</td>;
+}

@@ -111,6 +111,7 @@ class PeripheralTarget(IntFlag):
     ACPU   = 1
     BCPU   = 2
     FABRIC = 4
+    DMA    = 8
 
 def find_highest_bandwidth_peripheral_endpoint(context: 'IPeripheral') -> Tuple['Endpoint', 'Peripheral']:
     peripherals = context.get_submodule().get_peripherals()
@@ -235,7 +236,7 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
             Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
             Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR3 }),
-            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, enable=True, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
+            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
             Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
             Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_endpoints=4, context=self, init_props={ 'frequency' : 533000000 }),
@@ -1231,7 +1232,6 @@ class I2c0(ComputeObject):
         return update_attributes(self.properties, props)
 
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
         if sanity_check(self.messages, self.get_context()) == False:
@@ -1333,7 +1333,6 @@ class Jtag0(ComputeObject):
         return update_attributes(self.properties, props)
 
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
         if sanity_check(self.messages, self.get_context()) == False:
@@ -1438,7 +1437,6 @@ class Qspi0(ComputeObject):
         return update_attributes(self.properties, props)
 
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
         if sanity_check(self.messages, self.get_context()) == False:
@@ -1539,11 +1537,48 @@ class Uart0(ComputeObject):
         return update_attributes(self.properties, props)
 
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
-        if self.get_context().is_enabled() == False:
-            self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
+        if sanity_check(self.messages, self.get_context()) == False:
             return False
+
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
+            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+            return False
+
+        # highest calculated bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
+
+        # compule block power
+        resources = self.get_context().get_device_resources()
+        VCC_CORE = resources.get_VCC_CORE()
+        VCC_BOOT_IO = resources.get_VCC_BOOT_IO()
+        OUTPUT_AC, OUTPUT_DC = get_io_output_coeff(self.get_context(), VCC_BOOT_IO)
+        UART_CLK_FACTOR = resources.get_UART_CLK_FACTOR()
+        UART_SWITCHING_FACTOR = resources.get_UART_SWITCHING_FACTOR()
+        UART_IO_FACTOR = resources.get_UART_IO_FACTOR()
+
+        # core power calculation
+        core_power = ((UART_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (UART_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
+        io_core_power = UART_IO_FACTOR * bandwidth * 0.25 * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * 0.25) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
+        io_vcc_aux_power = io_vcco_power * 0.1
+
+        # update output properties
+        self.output.calculated_bandwidth = bandwidth
+        self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
+
+        # debug info
+        print(f'[DEBUG] UART: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {endpoint.toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {core_power = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {io_core_power = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {io_vcco_power = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {io_vcc_aux_power = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {self.output.calculated_bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] UART: {self.output.block_power = }', file=sys.stderr)
 
         return True

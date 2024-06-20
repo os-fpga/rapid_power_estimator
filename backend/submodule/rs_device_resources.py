@@ -555,6 +555,15 @@ class RsDeviceResources:
     def get_GPIO_IO_FACTOR(self) -> float:
         return 0.0000001688475
 
+    def get_UART_CLK_FACTOR(self) -> float:
+        return 0.00130836512711466
+
+    def get_UART_SWITCHING_FACTOR(self) -> float:
+        return 0.0924457233313814
+
+    def get_UART_IO_FACTOR(self) -> float:
+        return 0.00639794692
+
     def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000000002, -0.0000000000001, 0.00000000001, 0.0000000008, 0.00000006, 0.000002]]

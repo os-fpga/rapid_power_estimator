@@ -14,6 +14,17 @@ export const useGlobalState = () => {
   return context;
 };
 
+const PeripheralTarget = {
+  ACPU: 1,
+  BCPU: 2,
+  FABRIC: 4,
+};
+
+function isTarget(targets, target) {
+  // eslint-disable-next-line no-bitwise
+  return (targets & target) === target;
+}
+
 export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for unit tests
   const [clockingState, setClockingState] = useState([]);
   const [fleState, setFleState] = useState([]);
@@ -22,6 +33,15 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   const [ioState, setIoState] = useState([]);
   const [socState, setSocState] = useState({});
   const [attributes, setAttributes] = useState([]);
+  const [peripherals, setPeripherals] = useState([]);
+  const [acpuNames, setAcpuNames] = useState([]);
+  const [bcpuNames, setBcpuNames] = useState([]);
+  const [connectivityNames, setConnectivityNames] = useState([]);
+
+  let peripheralsMessages = {};
+  const acpuNamesLocal = [];
+  const bcpuNamesLocal = [];
+  const connectivityNamesLocal = [];
 
   useEffect(() => {
     fetch(server.attributes(), (attr) => setAttributes(attr));
@@ -29,11 +49,12 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
-      const prev = socState;
+      const prev = peripheralsMessages;
       const { messages } = data.consumption;
       if (prev[key] !== undefined && prev[key].length > 0) prev[key] = [...prev[key], messages];
       else prev[key] = [messages];
-      setSocState({ ...prev });
+      peripheralsMessages = { ...prev };
+      setSocState(peripheralsMessages);
     });
   }
 
@@ -41,10 +62,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     server.GET(server.peripheralPath(device, href), (componentData) => {
       if (componentData.consumption !== undefined) {
         if (componentData.consumption.messages !== undefined) {
-          const prev = socState;
+          const prev = peripheralsMessages;
           const { messages } = componentData.consumption;
           if (key === 'uart') {
-            const index = `${key}${href.slice(-1)}`;
+            const { index } = componentData;
             if (prev[index] !== undefined && prev[index].length > 0) {
               prev[index] = [...prev[index], messages];
             } else {
@@ -55,11 +76,30 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
           } else {
             prev[key] = [messages];
           }
-          setSocState({ ...prev });
+          peripheralsMessages = { ...prev };
+          setSocState(peripheralsMessages);
         }
       }
       if (componentData.ports !== undefined) {
         componentData.ports.forEach((port) => fetchPort(device, href, port, key));
+      }
+      if (componentData.targets !== undefined) {
+        const { targets } = componentData;
+        if (isTarget(targets, PeripheralTarget.ACPU)) {
+          acpuNamesLocal.push({ id: acpuNamesLocal.length, text: componentData.name });
+          setAcpuNames(acpuNamesLocal);
+        }
+        if (isTarget(targets, PeripheralTarget.BCPU)) {
+          bcpuNamesLocal.push({ id: bcpuNamesLocal.length, text: componentData.name });
+          setBcpuNames(bcpuNamesLocal);
+        }
+        if (isTarget(targets, PeripheralTarget.FABRIC)) {
+          connectivityNamesLocal.push({
+            id: connectivityNamesLocal.length,
+            text: componentData.name,
+          });
+          setConnectivityNames(connectivityNamesLocal);
+        }
       }
     });
   }
@@ -82,10 +122,9 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
         setIoState(data.map((item) => item.consumption.messages));
       });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        setSocState({});
-        Object.entries(data).forEach((item) => {
-          const [key, value] = item;
-          value.forEach((i) => updatePeripherals(device, i.href, key));
+        setPeripherals(data);
+        data.forEach((item) => {
+          updatePeripherals(device, item.href, item.type);
         });
       });
     }
@@ -105,6 +144,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     ioState,
     socState,
     GetOptions,
+    peripherals,
+    acpuNames,
+    bcpuNames,
+    connectivityNames,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [bramState, clockingState, dspState, fleState, ioState, socState]);
 

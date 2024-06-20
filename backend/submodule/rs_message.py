@@ -18,26 +18,30 @@ class RsMessage:
         self.text = message_text
 
 class RsMessageManager:
-    messages = {
-        101: RsMessage(101, RsMessageType.INFO, "This clock is disabled"),
-        102: RsMessage(102, RsMessageType.INFO, "DSP is disabled"),
-        103: RsMessage(103, RsMessageType.INFO, "Logic Element is disabled"),
-        104: RsMessage(104, RsMessageType.INFO, "BRAM is disabled"),
-        105: RsMessage(105, RsMessageType.INFO, "IO is disabled"),
-        201: RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
-        202: RsMessage(202, RsMessageType.WARN, "Not enough {bank_type} banks powered at {voltage}V available"),
-        301: RsMessage(301, RsMessageType.ERRO, "Invalid clock"),
-        302: RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
-        303: RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),
-        999: RsMessage(999, RsMessageType.ERRO, "Unknown error")
-    }
+    messages = [
+        RsMessage(999, RsMessageType.ERRO, "Unknown error"),
+        RsMessage(101, RsMessageType.INFO, "This clock is disabled"),
+        RsMessage(102, RsMessageType.INFO, "DSP is disabled"),
+        RsMessage(103, RsMessageType.INFO, "Logic Element is disabled"),
+        RsMessage(104, RsMessageType.INFO, "BRAM is disabled"),
+        RsMessage(105, RsMessageType.INFO, "IO is disabled"),
+        RsMessage(106, RsMessageType.INFO, "Peripheral '{name}' is disabled"),
+        RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
+        RsMessage(202, RsMessageType.WARN, "Not enough {bank_type} banks powered at {voltage}V available"),
+        RsMessage(203, RsMessageType.WARN, "Peripheral '{name}' is not connected"),
+        RsMessage(301, RsMessageType.ERRO, "Invalid clock '{clock}'"),
+        RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
+        RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),
+        RsMessage(304, RsMessageType.ERRO, "{name} is selected but not enabled"),
+        RsMessage(305, RsMessageType.ERRO, "{name} not found"),
+    ]
 
     @staticmethod
     def get_message(message_code: int, params : Dict[str, Any] = None) -> RsMessage:
-        message = RsMessageManager.messages.get(message_code)
-        if message is not None:
-            copied_message = copy.deepcopy(message)
+        message = [m for m in RsMessageManager.messages if m.code == message_code]
+        if message:
+            copied_message = copy.deepcopy(message[0])
             if params is not None:
                 copied_message.text = copied_message.text.format(**params)
             return copied_message
-        return RsMessageManager.messages[999]
+        return RsMessageManager.messages[0]

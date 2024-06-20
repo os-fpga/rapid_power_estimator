@@ -81,7 +81,7 @@ function PeripheralsComponent({ device }) {
       if (key === 'jtag') setJtag({ name, power: data.consumption.block_power });
       if (key === 'gige') setGige({ name, power: data.consumption.block_power });
       if (key === 'uart') {
-        if (url.slice(-1) === '0') setUart0({ name, power: data.consumption.block_power });
+        if (data.index === 0) setUart0({ name, power: data.consumption.block_power });
         else setUart1({ name, power: data.consumption.block_power });
       }
       if (key === 'gpio') setGPIO((prev) => ({ ...prev, power: data.consumption.block_power + 1 }));
@@ -93,9 +93,8 @@ function PeripheralsComponent({ device }) {
     if (device !== null) {
       setGPIO({ ...gpio, power: 0 });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        Object.entries(data).forEach((entry) => {
-          const [key, element] = entry;
-          element.forEach((refObj) => fetchPeripherals(device, key, refObj.href, refObj.name));
+        data.forEach((entry) => {
+          fetchPeripherals(device, entry.type, entry.href, entry.name);
         });
       });
     }

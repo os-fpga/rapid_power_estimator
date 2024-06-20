@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as server from '../utils/serverAPI';
-import { fixed } from '../utils/common';
+import { fixed, getPeripherals } from '../utils/common';
 import { subscribe, unsubscribe } from '../utils/events';
 import { useSelection } from '../SelectionProvider';
 import { useSocTotalPower } from '../SOCTotalPowerProvider';
@@ -31,22 +31,21 @@ function MemoryComponent({ device, peripherals }) {
   const { selectedItem } = useSelection();
   const { totalConsumption } = useSocTotalPower();
   const { socState } = useGlobalState();
+  const ddr = getPeripherals(peripherals, 'ddr');
+  const ocm = getPeripherals(peripherals, 'ocm');
+  const href = [...ddr, ...ocm];
 
   const update = React.useCallback(() => {
-    if (peripherals) {
-      const { memory } = peripherals;
-      if (memory) {
-        memory.forEach((mem) => {
-          const index = parseInt(mem.href.slice(-1), 10);
-          server.GET(server.peripheralPath(device, mem.href), (memJson) => {
-            setMemData((prev) => prev.map((it, idx) => {
-              if (index === idx) return memJson;
-              return it;
-            }));
-          });
-        });
-      }
-    }
+    href.forEach((mem) => {
+      const index = href.indexOf(mem);
+      server.GET(server.peripheralPath(device, mem.href), (memJson) => {
+        setMemData((prev) => prev.map((it, idx) => {
+          if (index === idx) return memJson;
+          return it;
+        }));
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device, peripherals]);
 
   React.useEffect(() => update(), [update]);
@@ -105,12 +104,11 @@ function MemoryComponent({ device, peripherals }) {
 
 MemoryComponent.propTypes = {
   device: PropTypes.string,
-  peripherals: PropTypes.oneOfType([PropTypes.object]),
+  peripherals: PropTypes.oneOfType([PropTypes.array]).isRequired,
 };
 
 MemoryComponent.defaultProps = {
   device: null,
-  peripherals: null,
 };
 
 export default MemoryComponent;

@@ -248,7 +248,7 @@ class IO:
 
         # verify input paramters
         if clock is None:
-            self.output.messages.append(RsMessageManager.get_message(301))
+            self.output.messages.append(RsMessageManager.get_message(301, { 'clock': self.clock }))
             return
 
         if self.enable == False:

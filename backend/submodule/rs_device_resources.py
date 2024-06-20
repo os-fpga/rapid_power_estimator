@@ -42,6 +42,9 @@ class InvalidPeripheralTypeException(Exception):
 class PeripheralEndpointNotFoundException(Exception):
     pass
 
+class PeripheralChannelNotFoundException(Exception):
+    pass
+
 class ModuleType(Enum):
     CLOCKING = 0
     FABRIC_LE = 1
@@ -50,6 +53,24 @@ class ModuleType(Enum):
     IO = 4
     SOC_PERIPHERALS = 5
     REGULATOR = 6
+
+class PeripheralType(Enum):
+    NONE = 'none'
+    SPI  = 'spi'
+    JTAG = 'jtag'
+    I2C  = 'i2c'
+    UART = 'uart'
+    USB2 = 'usb2'
+    GIGE = 'gige'
+    GPIO = 'gpio'
+    PWM  = 'pwm'
+    DMA  = 'dma'
+    BCPU = 'bcpu'
+    ACPU = 'acpu'
+    FPGA_COMPLEX = 'fpga_complex'
+    DDR  = 'ddr'
+    OCM  = 'ocm'
+    CONFIG = 'config'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"
@@ -112,15 +133,23 @@ class IO_Standard_Coeff:
     int_inner   : float       = field(default=0.0)
     int_outer   : float       = field(default=0.0)
 
+@dataclass
+class Power_Factor:
+    master : PeripheralType = field(default=PeripheralType.NONE)
+    slave  : PeripheralType = field(default=PeripheralType.NONE)
+    note   : str = field(default='')
+    factor : float = field(default=0.0)
+
 class RsDeviceResources:
 
     def __init__(self, device):
         self.device = device
-        self.io_standard_coeff_list = List[IO_Standard_Coeff]
+        self.io_standard_coeff_list : List[IO_Standard_Coeff]
+        self.peripheral_noc_power_factor : List[Power_Factor]
         self.modules = [None, None, None, None, None, None, None]
-        self.load_IO_standard_coeff()
+        self.load()
 
-    def load_IO_standard_coeff(self) -> None:
+    def load(self) -> None:
         self.io_standard_coeff_list = [
             IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000004),
             IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_5V, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000006),
@@ -166,6 +195,69 @@ class RsDeviceResources:
             IO_Standard_Coeff(io_standard=IO_Standard.SSTL_3_3V_Class_I, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.000004, output_ac=0.00006, input_dc=0.003, output_dc=0.0035, int_inner=0.00000002, int_outer=0.0000001),
             IO_Standard_Coeff(io_standard=IO_Standard.SSTL_3_3V_Class_II, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.000004, output_ac=0.00006, input_dc=0.003, output_dc=0.0035, int_inner=0.00000002, int_outer=0.0000001),
         ]
+
+        self.peripheral_noc_power_factor = [
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=4.6207E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=5.03289E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=2.76698E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.OCM, note='OCM', factor=4.81266E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.FPGA_COMPLEX, note='Fabric', factor=4.61688E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DMA, note='DMA', factor=4.61538E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.USB2, note='USB 2.0', factor=4.61194E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.GIGE, note='GigE', factor=4.60939E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.64542E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.65952E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.I2C, note='I2C', factor=4.52828E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.UART, note='UART1 (ACPU)', factor=4.5345E-06),
+            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.GPIO, note='GPIO (ACPU)', factor=4.53407E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DDR, note='DDR', factor=4.6133E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DDR, note='DDR', factor=5.24858E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DDR, note='DDR', factor=2.68637E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.OCM, note='OCM', factor=4.86676E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.5947E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.FPGA_COMPLEX, note='Fabric', factor=4.65149E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DMA, note='DMA', factor=4.63211E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.USB2, note='USB 2.0', factor=4.60778E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.GIGE, note='GigE', factor=4.63853E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.63756E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.64902E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.I2C, note='I2C', factor=4.55653E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.UART, note='UART0 (BCPU)', factor=4.52801E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.UART, note='UART', factor=4.52801E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.GPIO, note='GPIO (BCPU)', factor=4.55519E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.55632E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.5486E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.57513E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.54766E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.62188E-06),
+            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.JTAG, note='JTAG', factor=3.50E-08),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=4.95086E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=2.72392E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=4.50652E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=4.93121E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=2.67781E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.OCM, note='OCM', factor=4.74494E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DMA, note='DMA', factor=4.50289E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.USB2, note='USB 2.0', factor=4.50167E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.GIGE, note='GigE', factor=4.50934E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.51407E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.51605E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.I2C, note='I2C', factor=4.41253E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.UART, note='UART1 (ACPU)', factor=4.40617E-06),
+            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.GPIO, note='GPIO (Fabric)', factor=4.40782E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.FPGA_COMPLEX, note='Fabric', factor=4.50286E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.53998E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.I2C, note='I2C', factor=4.42115E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.UART, note='UART1 (ACPU)', factor=4.41946E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.DDR, note='DDR', factor=5.13089E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.DDR, note='DDR', factor=2.63756E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.OCM, note='OCM', factor=4.64649E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.OCM, note='OCM', factor=4.74549E-06),
+            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.OCM, note='OCM', factor=4.69132E-06),
+        ]
+
+    def get_peripheral_noc_power_factor(self) -> List[Power_Factor]:
+        return self.peripheral_noc_power_factor
 
     def get_attr(self, name) -> int:
         return int(self.device.resources[name].num)
@@ -380,6 +472,109 @@ class RsDeviceResources:
 
     def get_IO_standard_coeff(self) -> List[IO_Standard_Coeff]:
         return self.io_standard_coeff_list
+
+    def get_BCPU_CLK_FACTOR(self) -> float:
+        # todo: should read from power data
+        return 0.0000321306659727
+
+    def get_BCPU_LOW_LOAD_FACTOR(self) -> float:
+        # todo: should read from power data
+        return 6.22030740524698E-06
+
+    def get_BCPU_MEDIUM_LOAD_FACTOR(self) -> float:
+        # todo: should read from power data
+        return 7.03786731129023E-06
+
+    def get_BCPU_HIGH_LOAD_FACTOR(self) -> float:
+        # todo: should read from power data
+        return 0.0000105978995482262
+
+    def get_ACPU_CLK_FACTOR(self) -> float:
+        return 0.0000321306659727
+
+    def get_ACPU_LOW_LOAD_FACTOR(self) -> float:
+        return 6.22030740524698E-06
+
+    def get_ACPU_MEDIUM_LOAD_FACTOR(self) -> float:
+        return 7.03786731129023E-06
+
+    def get_ACPU_HIGH_LOAD_FACTOR(self) -> float:
+        return 0.0000105978995482262
+
+    def get_I2C_CLK_FACTOR(self) -> float:
+        return 0.0000180345864661654
+
+    def get_I2C_SWITCHING_FACTOR(self) -> float:
+        return 0.0000846668045655417
+
+    def get_I2C_IO_FACTOR(self) -> float:
+        return 0.000056634
+
+    def get_JTAG_CLK_FACTOR(self) -> float:
+        return 0.000407953336466165
+
+    def get_JTAG_SWITCHING_FACTOR(self) -> float:
+        return 0.000264495634397032
+
+    def get_JTAG_IO_FACTOR(self) -> float:
+        return 0.00004367522
+
+    def get_QSPI_CLK_FACTOR(self) -> float:
+        return 0.0000154995864661654
+
+    def get_QSPI_SWITCHING_FACTOR(self) -> float:
+        return 0.00156512937507589
+
+    def get_QSPI_IO_FACTOR(self) -> float:
+        return 0.0001270766
+
+    def get_USB2_CLK_FACTOR(self) -> float:
+        return 0.0000261772947994987
+
+    def get_USB2_SWITCHING_FACTOR(self) -> float:
+        return 0.0000440759304744493
+
+    def get_USB2_IO_FACTOR(self) -> float:
+        return 0.00166056666666667
+
+    def get_GIGE_CLK_FACTOR(self) -> float:
+        return 0.000124771586466165
+
+    def get_GIGE_SWITCHING_FACTOR(self) -> float:
+        return 0.00504040314066422
+
+    def get_GIGE_IO_FACTOR(self) -> float:
+        return 0.000071487696
+
+    def get_GPIO_CLK_FACTOR(self) -> float:
+        return 0.0000773683364661654
+
+    def get_GPIO_SWITCHING_FACTOR(self) -> float:
+        return 5.89015486234265E-06
+
+    def get_GPIO_IO_FACTOR(self) -> float:
+        return 0.0000001688475
+
+    def get_UART_CLK_FACTOR(self) -> float:
+        return 0.00130836512711466
+
+    def get_UART_SWITCHING_FACTOR(self) -> float:
+        return 0.0924457233313814
+
+    def get_UART_IO_FACTOR(self) -> float:
+        return 0.00639794692
+
+    def get_DDR_CLK_FACTOR(self) -> float:
+        return 0.0000281154101977619
+
+    def get_DDR_WRITE_FACTOR(self) -> float:
+        return 0.0000421054185139638
+
+    def get_DDR_READ_FACTOR(self) -> float:
+        return 0.0000397024214264236
+
+    def get_DDR_ACPU_CLK_FACTOR(self) -> float:
+        return 0.0000688892039916618
 
     def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:

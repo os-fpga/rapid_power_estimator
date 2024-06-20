@@ -16,7 +16,7 @@ import DMATable from './components/Tables/DMATable';
 import ConnectivityTable from './components/Tables/ConnectivityTable';
 import MemoryTable from './components/Tables/MemoryTable';
 import DesignParametesTable from './components/Tables/DesignParametesTable';
-import { Table } from './utils/common';
+import { Table, getPeripherals } from './utils/common';
 import PeripheralsTable from './components/Tables/PeripheralsTable';
 import * as server from './utils/serverAPI';
 import SOCComponent from './components/SOCComponent';
@@ -56,7 +56,7 @@ function App() {
   const { setClocks } = useClockSelection();
   const { updateGlobalState } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
-  const [peripherals, setPeripherals] = React.useState(null);
+  const [peripherals, setPeripherals] = React.useState([]);
   const [memoryEnable, setMemoryEnable] = React.useState(true);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -112,7 +112,9 @@ function App() {
     updateGlobalState(newDevice);
     updateTotalPower(newDevice);
     server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
-      setMemoryEnable(data.memory !== undefined);
+      const ddr = getPeripherals(data, 'ddr');
+      const ocm = getPeripherals(data, 'ocm');
+      setMemoryEnable(ddr.length > 0 || ocm.length > 0);
       setPeripherals(data);
     });
     if (newDevice !== null) {

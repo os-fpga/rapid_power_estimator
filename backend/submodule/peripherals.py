@@ -570,6 +570,8 @@ class FPGA_Fabric(ComputeObject):
 
             if peripheral.get_type() == PeripheralType.GPIO:
                 bandwidth = peripheral.get_bandwidth() * (clock.frequency / 1000000.0)
+            elif peripheral.get_type() == PeripheralType.DDR:
+                bandwidth = min((clock.frequency / 1000000.0) * 8, peripheral.get_bandwidth())
             else:
                 bandwidth = peripheral.get_bandwidth()
 

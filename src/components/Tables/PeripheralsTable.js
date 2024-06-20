@@ -2,7 +2,7 @@ import React from 'react';
 import PeripheralsModal from '../ModalWindows/PeripheralsModal';
 import * as server from '../../utils/serverAPI';
 import { fixed, getPerformance } from '../../utils/common';
-import { PowerCell, SelectionCell } from './TableCells';
+import { PowerCell, SelectionCell, DisabledCell } from './TableCells';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 import { ComponentLabel, Checkbox } from '../ComponentsLib';
@@ -30,6 +30,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: spiFreq,
       performance_id: 'clock_frequency',
+      io_used: false,
       url: '',
       data: [],
     },
@@ -38,6 +39,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: jtagFreq,
       performance_id: 'clock_frequency',
+      io_used: false,
       url: '',
       data: [],
     },
@@ -46,6 +48,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: i2cFreq,
       performance_id: 'clock_frequency',
+      io_used: false,
       url: '',
       data: [],
     },
@@ -54,6 +57,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: uartBound,
       performance_id: 'baudrate',
+      io_used: false,
       url: '',
       data: [],
     },
@@ -62,6 +66,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: usbFreq,
       performance_id: 'bit_rate',
+      io_used: false,
       url: '',
       data: [],
     },
@@ -70,6 +75,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: gigeFreq,
       performance_id: 'bit_rate',
+      io_used: false,
       url: '',
       data: [],
     },
@@ -78,6 +84,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: gpioFreq,
       performance_id: 'io_standard',
+      io_used: true,
       url: '',
       data: [],
     },
@@ -86,13 +93,14 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage,
       performance: gpioFreq,
       performance_id: 'io_standard',
+      io_used: true,
       url: '',
       data: [],
     },
   ]);
 
   const mainTableHeader = [
-    '', '', '', 'Action', 'Usage', 'Performance', 'Bandwidth', 'Block Power', '%',
+    '', '', '', 'Action', 'Usage', 'Performance', 'IO used', 'Bandwidth', 'Block Power', '%',
   ];
 
   function peripheralMatch(component, data, url) {
@@ -142,6 +150,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
       usage: row.usage,
     };
     data[peripherals[index.main].performance_id] = getPerformance(row);
+    if (peripherals[index.main].io_used) data.io_used = row.io_used;
     const { url } = peripherals[index.main].data[index.inner];
     server.PATCH(server.peripheralPath(device, url), data, () => {
       fetchData(device);
@@ -192,6 +201,7 @@ function PeripheralsTable({ device, peripheralsUrl }) {
             />
             <SelectionCell val={i.data.usage} values={row.usage} />
             <SelectionCell val={getPerformance(i.data)} values={row.performance} />
+            <DisabledCell val={row.io_used ? i.data.io_used : -1} />
             <td>
               {i.data.consumption.calculated_bandwidth}
               {' MB/s'}

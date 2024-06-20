@@ -100,6 +100,7 @@ function ModalWindow({
         <form>
           {
           fields.map((item) => {
+            if (item.disable !== undefined && item.disable) return <div key={item.id} />;
             if (Object.prototype.hasOwnProperty.call(item, 'internal')) {
               return (
                 <div key={item.id} className="form-group">

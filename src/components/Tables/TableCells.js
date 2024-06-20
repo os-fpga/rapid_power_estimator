@@ -36,3 +36,7 @@ export function SelectionCell({ val, values }) {
 export function BandwidthCell({ val }) {
   return <td>{`${val} MB/s`}</td>;
 }
+
+export function DisabledCell({ val }) {
+  return <td>{val === -1 ? '' : val}</td>;
+}

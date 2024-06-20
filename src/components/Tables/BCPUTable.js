@@ -3,7 +3,9 @@ import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { TableBase, Actions, StatusColumn } from './TableBase';
 import ABCPUModal from '../ModalWindows/ABCPUModal';
-import { PowerCell, SelectionCell, PercentsCell } from './TableCells';
+import {
+  PowerCell, SelectionCell, PercentsCell, BandwidthCell,
+} from './TableCells';
 import { GetText, findEvailableIndex, getPeripherals } from '../../utils/common';
 import { publish } from '../../utils/events';
 import { useSocTotalPower } from '../../SOCTotalPowerProvider';
@@ -180,7 +182,7 @@ function BCPUTable({ device }) {
                 <SelectionCell val={row.data.activity} values={loadActivity} />
                 <PercentsCell val={row.data.read_write_rate} />
                 <PercentsCell val={row.data.toggle_rate} precition={1} />
-                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <BandwidthCell val={row.data.consumption.calculated_bandwidth} />
                 <PowerCell val={row.data.consumption.noc_power} />
               </tr>
               )

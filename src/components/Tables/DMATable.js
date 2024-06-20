@@ -4,7 +4,9 @@ import DMAModal from '../ModalWindows/DMAModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
 import { fixed } from '../../utils/common';
-import { PercentsCell, PowerCell, SelectionCell } from './TableCells';
+import {
+  PercentsCell, PowerCell, SelectionCell, BandwidthCell,
+} from './TableCells';
 import {
   TableBase, Actions, StatusColumn, EnableState,
 } from './TableBase';
@@ -160,7 +162,7 @@ function DMATable({ device }) {
                 <SelectionCell val={row.data.activity} values={loadActivity} />
                 <PercentsCell val={row.data.read_write_rate} />
                 <PercentsCell val={row.data.toggle_rate} precition={1} />
-                <PowerCell val={row.data.consumption.calculated_bandwidth} />
+                <BandwidthCell val={row.data.consumption.calculated_bandwidth} />
                 <PowerCell val={row.data.consumption.block_power} />
                 <td>
                   {fixed(row.data.consumption.percentage, 0)}

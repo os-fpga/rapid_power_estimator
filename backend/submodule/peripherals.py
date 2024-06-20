@@ -90,7 +90,6 @@ class Memory_Type(RsEnum):
     SRAM = 0, "SRAM"
     DDR3 = 1, "DDR3"
     DDR4 = 2, "DDR4"
-    NONE = 3, "NONE"
 
 class Dma_Activity(RsEnum):
     IDLE   = 0, "Idle"
@@ -235,7 +234,7 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name="GPIO (ACPU)", type=PeripheralType.GPIO, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, enable=True, context=self),
             Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
             Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
-            Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR3 }),
+            Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR4 }),
             Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
             Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
@@ -292,12 +291,12 @@ class Peripheral_SubModule(SubModule):
         raise PeripheralNotFoundException
 
     def compute_output_power(self) -> None:
-        # memory devices first
-        for peripheral in [p for p in self.peripherals if p.type in (PeripheralType.DDR, PeripheralType.OCM)]:
+        # complex periperals first
+        for peripheral in [p for p in self.peripherals if p.type in (PeripheralType.ACPU, PeripheralType.BCPU, PeripheralType.FPGA_COMPLEX)]:
             peripheral.compute()
 
-        # complex periperals second
-        for peripheral in [p for p in self.peripherals if p.type in (PeripheralType.ACPU, PeripheralType.BCPU, PeripheralType.FPGA_COMPLEX)]:
+        # memory devices send
+        for peripheral in [p for p in self.peripherals if p.type in (PeripheralType.DDR, PeripheralType.OCM)]:
             peripheral.compute()
 
         # simple periperals last
@@ -644,7 +643,6 @@ class A45_RISC_V_ACPU(ComputeObject):
             self.messages.append(RsMessageManager.get_message(106, {"name" : self.get_context().get_name()}))
             return False
 
-        peripherals = self.get_context().get_submodule().get_peripherals()
         resources = self.get_context().get_device_resources()
         NOC_POWER_FACTOR = resources.get_peripheral_noc_power_factor()
         VCC_CORE = resources.get_VCC_CORE()
@@ -862,7 +860,7 @@ class Memory0(ComputeObject):
             self.percentage = 0.0
 
     def __post_init__(self) -> None:
-        self.properties = Memory0.properties_(memory_type=Memory_Type.NONE, data_rate=0, width=32)
+        self.properties = Memory0.properties_(memory_type=Memory_Type.DDR4, data_rate=1333000000, width=32)
         self.output = Memory0.output_(write_bandwidth=0.0, read_bandwidth=0.0, block_power=0.0, percentage=0.0)
         self.messages: List[RsMessage] = []
 
@@ -882,11 +880,71 @@ class Memory0(ComputeObject):
         bandwidth = (self.properties.data_rate / 1000000.0) * self.properties.width / 8.0
         return bandwidth
 
+    def get_ddr_io_power_coeff(self, io_std: IO_Standard) -> IO_Standard_Coeff:
+        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
+        for coeff in IO_STANDARD_COEFF:
+            if coeff.io_standard == io_std:
+                return coeff
+
+    def compute_ddr_io_power(self, read_bandwidth: float, write_bandwidth: float, read_write_rate: float) -> float:
+        if self.properties.memory_type == Memory_Type.DDR4:
+            io_coeff = self.get_ddr_io_power_coeff(IO_Standard.POD_1_2V)
+        else:
+            io_coeff = self.get_ddr_io_power_coeff(IO_Standard.SSTL_1_5V_Class_I)
+        read_power = read_bandwidth / 8 * io_coeff.input_ac * (self.properties.width + 10)
+        write_power = write_bandwidth / 8 * io_coeff.output_ac * (self.properties.width + 10)
+        a = (1 - read_write_rate) * io_coeff.input_dc * (self.properties.width + 10)
+        b = read_write_rate * io_coeff.output_dc * (self.properties.width + 10)
+        return read_power + write_power + a + b
+
     def compute(self) -> bool:
-        self.messages.clear()
         self.output.reset()
 
-        # todo: populate output properties
+        if sanity_check(self.messages, self.get_context()) == False:
+            return False
+
+        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        if endpoint is None:
+            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+            return False
+
+        resources = self.get_context().get_device_resources()
+        VCC_CORE = resources.get_VCC_CORE()
+        DDR_CLK_FACTOR = resources.get_DDR_CLK_FACTOR()
+        DDR_WRITE_FACTOR = resources.get_DDR_WRITE_FACTOR()
+        DDR_READ_FACTOR = resources.get_DDR_READ_FACTOR()
+        DDR_ACPU_CLK_FACTOR = resources.get_DDR_ACPU_CLK_FACTOR()
+
+        # highest calculated bandwidth
+        bandwidth = endpoint.output.calculated_bandwidth
+
+        # compute write bandwidth
+        write_bandwidth = bandwidth * endpoint.read_write_rate
+        read_bandwidth = bandwidth * (1.0 - endpoint.read_write_rate)
+
+        # compute block power
+        if self.get_context().get_type() == PeripheralType.DDR:
+            block_power = VCC_CORE ** 2 * (((self.properties.data_rate / 1000000.0) * DDR_CLK_FACTOR) + (533 * DDR_ACPU_CLK_FACTOR / 2) + \
+                                           (write_bandwidth * DDR_WRITE_FACTOR) + (read_bandwidth * DDR_READ_FACTOR)) + \
+                                            self.compute_ddr_io_power(read_bandwidth, write_bandwidth, endpoint.read_write_rate)
+        else:
+            # todo
+            block_power = 0.0
+
+        # update output
+        self.output.write_bandwidth = write_bandwidth
+        self.output.read_bandwidth = read_bandwidth
+        self.output.block_power = block_power
+
+        # debug info
+        print(f'[DEBUG] MEM0: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] MEM0: {self.properties.data_rate / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] MEM0: {endpoint.read_write_rate = }', file=sys.stderr)
+        print(f'[DEBUG] MEM0: {self.output.write_bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] MEM0: {self.output.read_bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] MEM0: {self.output.block_power = }', file=sys.stderr)
+
+        return True
 
 @dataclass
 class Gpio0(ComputeObject):

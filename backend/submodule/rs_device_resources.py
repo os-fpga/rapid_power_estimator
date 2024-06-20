@@ -564,6 +564,18 @@ class RsDeviceResources:
     def get_UART_IO_FACTOR(self) -> float:
         return 0.00639794692
 
+    def get_DDR_CLK_FACTOR(self) -> float:
+        return 0.0000281154101977619
+
+    def get_DDR_WRITE_FACTOR(self) -> float:
+        return 0.0000421054185139638
+
+    def get_DDR_READ_FACTOR(self) -> float:
+        return 0.0000397024214264236
+
+    def get_DDR_ACPU_CLK_FACTOR(self) -> float:
+        return 0.0000688892039916618
+
     def get_divfactor_coeff_CLB(self, worsecase : bool):
         if worsecase:
             return 0.8, [[0.000000000000002, -0.0000000000001, 0.00000000001, 0.0000000008, 0.00000006, 0.000002]]

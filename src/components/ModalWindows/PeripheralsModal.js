@@ -26,6 +26,13 @@ function PeripheralsModal({
           value: getPerformance(defaultValue.data[index].data),
           values: defaultValue.performance,
         },
+        {
+          disable: !defaultValue.io_used,
+          fieldType: FieldType.number,
+          id: 'io_used',
+          text: 'IO Used',
+          value: defaultValue.data.io_used,
+        },
       ]}
     />
   );

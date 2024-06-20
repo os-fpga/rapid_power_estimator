@@ -81,7 +81,10 @@ function SOCSummaryComponent({ device }) {
       if (memory) {
         newData[0].power = memory.power;
         newData[0].percent = memory.percentage;
-        newData[0].messages = socState.memory;
+        let memoryMessages = [];
+        if (socState.ddr !== undefined) memoryMessages = [...socState.ddr];
+        if (socState.ocm !== undefined) memoryMessages = [...memoryMessages, ...socState.ocm];
+        newData[0].messages = memoryMessages;
       }
       const peripherals = dynamic.components.find((element) => element.type === 'peripherals');
       if (peripherals) {

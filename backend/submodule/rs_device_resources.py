@@ -573,7 +573,13 @@ class RsDeviceResources:
     def get_DDR_READ_FACTOR(self) -> float:
         return 0.0000397024214264236
 
-    def get_DDR_ACPU_CLK_FACTOR(self) -> float:
+    def get_SRAM_WRITE_FACTOR(self) -> float:
+        return 0.000142810846268152
+
+    def get_SRAM_READ_FACTOR(self) -> float:
+        return 0.000140428615087023
+
+    def get_ACLK_FACTOR(self) -> float:
         return 0.0000688892039916618
 
     def get_divfactor_coeff_CLB(self, worsecase : bool):

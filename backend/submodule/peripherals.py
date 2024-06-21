@@ -1027,6 +1027,10 @@ class Gpio0(ComputeObject):
         if self.properties.io_used <= 0:
             return False
 
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            # no calculation in excel for boot usage
+            return True
+
         endpoint, peripheral = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, { "name" : self.get_context().get_name() }))
@@ -1136,6 +1140,10 @@ class Usb2_0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            # no calculation in excel for boot usage
+            return True
+
         endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
@@ -1232,6 +1240,10 @@ class GigE_0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            # no calculation in excel for boot usage
+            return True
+
         endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
@@ -1327,6 +1339,10 @@ class I2c0(ComputeObject):
 
         if sanity_check(self.messages, self.get_context()) == False:
             return False
+
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            # no calculation in excel for boot usage
+            return True
 
         endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
@@ -1429,13 +1445,17 @@ class Jtag0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
-        if endpoint is None:
-            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
-            return False
-
-        # highest calculated bandwidth
-        bandwidth = endpoint.output.calculated_bandwidth
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            bandwidth = self.get_bandwidth() * 0.75 # always use high activity for boot usage
+            toggle_rate = 0.25 # always use this toggle rate for boot usage
+        else:
+            endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+            if endpoint is None:
+                self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+                return False
+            # highest calculated bandwidth
+            bandwidth = endpoint.output.calculated_bandwidth
+            toggle_rate = endpoint.toggle_rate
 
         # compule block power
         resources = self.get_context().get_device_resources()
@@ -1447,9 +1467,9 @@ class Jtag0(ComputeObject):
         JTAG_IO_FACTOR = resources.get_JTAG_IO_FACTOR()
 
         # core power calculation
-        core_power = ((JTAG_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (JTAG_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
-        io_core_power = JTAG_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
-        io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
+        core_power = ((JTAG_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (JTAG_SWITCHING_FACTOR * bandwidth * toggle_rate)) * VCC_CORE ** 2
+        io_core_power = JTAG_IO_FACTOR * bandwidth * toggle_rate * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
         io_vcc_aux_power = io_vcco_power * 0.1
 
         # update output properties
@@ -1457,6 +1477,17 @@ class Jtag0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
+        print(f'[DEBUG] JTAG: {self.get_context().get_usage() = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {bandwidth * toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {VCC_BOOT_IO = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {OUTPUT_AC = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {OUTPUT_DC = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {JTAG_CLK_FACTOR = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {JTAG_SWITCHING_FACTOR = }', file=sys.stderr)
+        print(f'[DEBUG] JTAG: {JTAG_IO_FACTOR = }', file=sys.stderr)
         print(f'[DEBUG] JTAG: {core_power = }', file=sys.stderr)
         print(f'[DEBUG] JTAG: {io_core_power = }', file=sys.stderr)
         print(f'[DEBUG] JTAG: {io_vcco_power = }', file=sys.stderr)
@@ -1533,13 +1564,17 @@ class Qspi0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
-        if endpoint is None:
-            self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
-            return False
-
-        # highest calculated bandwidth
-        bandwidth = endpoint.output.calculated_bandwidth
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            bandwidth = self.get_bandwidth() * 0.75 # always use high activity for boot usage
+            toggle_rate = 0.25 # always use this toggle rate for boot usage
+        else:
+            endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+            if endpoint is None:
+                self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
+                return False
+            # highest calculated bandwidth
+            bandwidth = endpoint.output.calculated_bandwidth
+            toggle_rate = endpoint.toggle_rate
 
         # compule block power
         resources = self.get_context().get_device_resources()
@@ -1552,8 +1587,8 @@ class Qspi0(ComputeObject):
 
         # core power calculation
         core_power = ((QSPI_CLK_FACTOR * (self.get_freq() / 1000000.0)) + (QSPI_SWITCHING_FACTOR * bandwidth)) * VCC_CORE ** 2
-        io_core_power = QSPI_IO_FACTOR * bandwidth * endpoint.toggle_rate * VCC_CORE ** 2
-        io_vcco_power = ((OUTPUT_AC * bandwidth * endpoint.toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
+        io_core_power = QSPI_IO_FACTOR * bandwidth * toggle_rate * VCC_CORE ** 2
+        io_vcco_power = ((OUTPUT_AC * bandwidth * toggle_rate) + OUTPUT_DC) * 4 * VCC_BOOT_IO ** 2
         io_vcc_aux_power = io_vcco_power * 0.1
 
         # update output properties
@@ -1561,6 +1596,15 @@ class Qspi0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
+        print(f'[DEBUG] QSPI: {self.get_context().get_usage() = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {bandwidth = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {toggle_rate = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {VCC_BOOT_IO = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {OUTPUT_AC = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {OUTPUT_DC = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {QSPI_CLK_FACTOR = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {QSPI_SWITCHING_FACTOR = }', file=sys.stderr)
+        print(f'[DEBUG] QSPI: {QSPI_IO_FACTOR = }', file=sys.stderr)
         print(f'[DEBUG] QSPI: {core_power = }', file=sys.stderr)
         print(f'[DEBUG] QSPI: {io_core_power = }', file=sys.stderr)
         print(f'[DEBUG] QSPI: {io_vcco_power = }', file=sys.stderr)
@@ -1633,6 +1677,10 @@ class Uart0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
+        if self.get_context().get_usage() == Peripherals_Usage.Boot:
+            # no calculation in excel for boot usage
+            return True
+
         endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
@@ -1663,8 +1711,6 @@ class Uart0(ComputeObject):
         # debug info
         print(f'[DEBUG] UART: {bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] UART: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {endpoint.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] UART: {core_power = }', file=sys.stderr)
         print(f'[DEBUG] UART: {io_core_power = }', file=sys.stderr)
         print(f'[DEBUG] UART: {io_vcco_power = }', file=sys.stderr)

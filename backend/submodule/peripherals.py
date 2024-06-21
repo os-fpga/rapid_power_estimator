@@ -242,32 +242,32 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name='FPGA Complex', type=PeripheralType.FPGA_COMPLEX, enable=True, max_endpoints=4, context=self),
         ]
 
+        self.total_memory_block_power = 0.0
+        self.total_peripherals_block_power = 0.0
+        self.total_acpu_block_power = 0.0
+        self.total_bcpu_block_power = 0.0
+
     def get_device_resources(self) -> RsDeviceResources:
         return self.resources
 
     def get_processor_output_power(self) -> float:
-        # todo
-        return 0.347
+        return self.total_acpu_block_power
 
     def get_peripherals_output_power(self) -> float:
-        # todo
-        return 0.024
+        return self.total_peripherals_block_power
 
     def get_bcpu_output_power(self) -> float:
-        # todo
-        return 0.013
+        return self.total_bcpu_block_power
 
     def get_memory_output_power(self) -> float:
-        # todo
-        return 0.001
+        return self.total_memory_block_power
 
     def get_dma_output_power(self) -> float:
         # todo
         return 0.0001
 
     def get_noc_output_power(self) -> float:
-        # todo
-        return 0.003
+        return self.total_interconnect_power
 
     def get_power_consumption(self):
         # todo
@@ -283,6 +283,19 @@ class Peripheral_SubModule(SubModule):
 
     def get_peripherals(self) -> List['Peripheral']:
         return self.peripherals
+
+    def get_peripheral_types(self) -> List[PeripheralType]:
+        types = [
+            PeripheralType.SPI,
+            PeripheralType.JTAG,
+            PeripheralType.I2C,
+            PeripheralType.UART,
+            PeripheralType.USB2,
+            PeripheralType.GIGE,
+            PeripheralType.GPIO,
+            PeripheralType.PWM
+        ]
+        return types
 
     def get_peripheral(self, type: PeripheralType, idx: int) -> 'Peripheral':
         for peripheral in self.peripherals:
@@ -302,6 +315,18 @@ class Peripheral_SubModule(SubModule):
         # simple periperals last
         for peripheral in [p for p in self.peripherals if p.type not in (PeripheralType.ACPU, PeripheralType.BCPU, PeripheralType.FPGA_COMPLEX, PeripheralType.DDR, PeripheralType.OCM)]:
             peripheral.compute()
+
+        # calculate total power by sybsystem
+        self.total_memory_block_power = sum([p.get_output()['block_power'] for p in self.peripherals if p.type in (PeripheralType.DDR, PeripheralType.OCM)])
+        self.total_peripherals_block_power = sum([p.get_output()['block_power'] for p in self.peripherals if p.usage == Peripherals_Usage.App and p.type in self.get_peripheral_types()])
+        self.total_acpu_block_power = sum([p.get_output()['block_power'] for p in self.peripherals if p.type == PeripheralType.ACPU])
+        self.total_bcpu_block_power = sum([p.get_output()['active_power'] for p in self.peripherals if p.type == PeripheralType.BCPU])
+
+        # calculate interconnect power from all endpoints and channels
+        total_noc_power = 0.0
+        for p in self.peripherals:
+            total_noc_power += sum([ep.output.noc_power for ep in p.get_endpoints() or []]) + sum([ch.output.noc_power for ch in p.get_channels() or []])
+        self.total_interconnect_power = total_noc_power
 
 class IPeripheral(ABC):
     @abstractmethod
@@ -504,7 +529,7 @@ class Pwm0(ComputeObject):
         pass
 
     def __post_init__(self) -> None:
-        self.properties = Gpio0.properties_(io_used=4, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
+        self.properties = Gpio0.properties_(io_used=0, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
         self.output = Gpio0.output_()
         self.messages: List[RsMessage] = []
 

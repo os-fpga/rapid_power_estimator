@@ -328,6 +328,14 @@ class Peripheral_SubModule(SubModule):
             total_noc_power += sum([ep.output.noc_power for ep in p.get_endpoints() or []]) + sum([ch.output.noc_power for ch in p.get_channels() or []])
         self.total_interconnect_power = total_noc_power
 
+        # calculate peripheral power usage percentage
+        for peripheral in [p for p in self.peripherals if p.usage == Peripherals_Usage.App and p.type in self.get_peripheral_types()]:
+            output = peripheral.get_output()
+            if self.total_peripherals_block_power > 0:
+                output['percentage'] = output['block_power'] / self.total_peripherals_block_power * 100.0
+            else:
+                output['percentage'] = 0.0
+
 class IPeripheral(ABC):
     @abstractmethod
     def is_enabled(self) -> bool:

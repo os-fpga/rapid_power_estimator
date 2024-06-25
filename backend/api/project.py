@@ -52,10 +52,6 @@ class ProjectApi(Resource):
                         type: string
                     status:
                         type: string
-                    messages:
-                        type: array
-                        items:
-                            $ref: '#/definitions/Message'
             ProjectFile:
                 type: object
                 properties:
@@ -65,7 +61,14 @@ class ProjectApi(Resource):
             200:
                 description: Successfully returned project-specific details
                 schema:
-                    $ref: '#/definitions/Project'
+                    allOf:
+                        - $ref: '#/definitions/Project'
+                        - type: object
+                          properties:
+                            messages:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Message'
         """
         try:
             proj_mgr = RsProjectManager.get_instance()

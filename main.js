@@ -138,6 +138,10 @@ const template = [
         label: 'Open Project',
         click: () => { openProjectClicked(); },
       },
+      {
+        label: 'Close Project',
+        click: () => { newProjectClicked(); },
+      },
       { label: 'Sample Project' },
       {
         label: 'Save',

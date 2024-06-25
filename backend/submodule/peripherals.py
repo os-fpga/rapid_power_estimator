@@ -943,6 +943,9 @@ class Memory0(ComputeObject):
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
+        if endpoint.activity == Port_Activity.IDLE:
+            return True
+
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         ACLK_FACTOR = resources.get_ACLK_FACTOR()
@@ -1043,6 +1046,9 @@ class Gpio0(ComputeObject):
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, { "name" : self.get_context().get_name() }))
             return False
+
+        if endpoint.activity == Port_Activity.IDLE:
+            return True
 
         # highest calculated bandwidth
         bandwidth = endpoint.output.calculated_bandwidth
@@ -1157,6 +1163,9 @@ class Usb2_0(ComputeObject):
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
+        if endpoint.activity == Port_Activity.IDLE:
+            return True
+
         # highest calculated bandwidth
         bandwidth = endpoint.output.calculated_bandwidth
 
@@ -1257,6 +1266,9 @@ class GigE_0(ComputeObject):
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
 
+        if endpoint.activity == Port_Activity.IDLE:
+            return True
+
         # highest calculated bandwidth
         bandwidth = endpoint.output.calculated_bandwidth
 
@@ -1356,6 +1368,9 @@ class I2c0(ComputeObject):
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
+
+        if endpoint.activity == Port_Activity.IDLE:
+            return True
 
         # highest calculated bandwidth
         bandwidth = endpoint.output.calculated_bandwidth
@@ -1461,6 +1476,10 @@ class Jtag0(ComputeObject):
             if endpoint is None:
                 self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
                 return False
+
+            if endpoint.activity == Port_Activity.IDLE:
+                return True
+
             # highest calculated bandwidth
             bandwidth = endpoint.output.calculated_bandwidth
             toggle_rate = endpoint.toggle_rate
@@ -1580,6 +1599,10 @@ class Qspi0(ComputeObject):
             if endpoint is None:
                 self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
                 return False
+
+            if endpoint.activity == Port_Activity.IDLE:
+                return True
+
             # highest calculated bandwidth
             bandwidth = endpoint.output.calculated_bandwidth
             toggle_rate = endpoint.toggle_rate
@@ -1693,6 +1716,9 @@ class Uart0(ComputeObject):
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
+
+        if endpoint.activity == Port_Activity.IDLE:
+            return True
 
         # highest calculated bandwidth
         bandwidth = endpoint.output.calculated_bandwidth

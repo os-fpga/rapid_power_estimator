@@ -4,12 +4,12 @@
 #
 import numpy as np
 import math
-from typing import List
+from typing import Any, Dict, List
 from submodule.rs_message import RsMessage
 from utilities.common_utils import RsEnum, update_attributes
 from dataclasses import dataclass, field
 
-class RsProjectStatus(RsEnum):
+class RsProjectState(RsEnum):
     UNLOADED = 0, 'Unloaded'
     LOADED = 1,  'Loaded'
 
@@ -20,8 +20,9 @@ class RsProject:
     filepath: str = field(default='')
     lang: str = field(default='')
     name: str = field(default='')
-    version: str = field(default='')
-    status: RsProjectStatus = field(default=RsProjectStatus.UNLOADED)
+    notes: str = field(default='')
+    version: str = field(default='0.0.1')
+    state: RsProjectState = field(default=RsProjectState.UNLOADED)
     messages: List[RsMessage] = field(default_factory=list)
 
 class RsProjectManager:
@@ -38,15 +39,20 @@ class RsProjectManager:
         return RsProjectManager.__instance
 
     def __init__(self) -> None:
-        self.project = RsProject()
+        self.projects: List[RsProject] = [RsProject()]
 
     def get(self) -> RsProject:
-        return self.project
+        return self.projects[0]
 
     def close(self) -> bool:
-        pass
+        self.projects[0] = RsProject()
+        return True
 
-    def update(self) -> bool:
+    def update(self, data: Dict[str, Any]) -> bool:
+        update_attributes(self.projects[0], data, exclude=['filepath', 'version', 'state', 'messages'])
+        return True
+
+    def load(self, filepath: str) -> bool:
         pass
 
     def save(self) -> bool:

@@ -6,57 +6,63 @@ import sys
 from flask import Blueprint, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, ValidationError
-from api.errors import InternalServerError
+from api.errors import InternalServerError, SchemaValidationError
 from api.device import MessageSchema
-from submodule.rs_project import RsProjectManager, RsProjectStatus
+from submodule.rs_project import RsProjectManager, RsProjectState
+from .errors import errors
 
 #-----------------------------------------------------------------------#
 # endpoints         | methods                   | classes               #
 #-----------------------------------------------------------------------#
-# /project          | get, post, patch, delete  | ProjectApi            #
+# /project          | GET, POST, PATCH, DELETE  | ProjectApi            #
 #-----------------------------------------------------------------------#
 
-class ProjectSchema(Schema):
+class ProjectDataSchema(Schema):
     autosave = fields.Bool()
     device = fields.Str()
-    filepath = fields.Str()
     lang = fields.Str()
     name = fields.Str()
+    notes = fields.Str()
+
+class ProjectSchema(ProjectDataSchema):
+    filepath = fields.Str()
     version = fields.Str()
-    status = fields.Enum(RsProjectStatus, by_value=True)
+    state = fields.Enum(RsProjectState, by_value=True)
     messages = fields.Nested(MessageSchema, many=True)
 
 class ProjectApi(Resource):
     def get(self):
         """
-        This endpoint returns project-specific details e.g. notes, status etc.
+        This endpoint returns project-specific details e.g. notes, state etc.
         ---
         tags:
             - Project
         description: Returns project-specific details.
         definitions:
-            Project:
+            ProjectData:
                 type: object
                 properties:
                     autosave:
                         type: boolean
                     device:
                         type: string
-                    filepath:
-                        type: string
                     lang:
                         type: string
                     name:
                         type: string
-                    version:
+                    notes:
                         type: string
-                    status:
-                        type: string
-            ProjectFile:
-                type: object
-                properties:
-                    filepath:
-                        type: string
+            Project:
+                allOf:
+                    - $ref: '#/definitions/ProjectData'
+                    - type: object
+                      properties:
+                        filepath:
+                            type: string
+                        version:
+                            type: string
+                        state:
+                            type: string
         responses:
             200:
                 description: Successfully returned project-specific details
@@ -89,14 +95,28 @@ class ProjectApi(Resource):
               in: body
               description: Specify file path to save or open
               schema:
-                $ref: '#/definitions/ProjectFile'
+                type: object
+                properties:
+                    filepath:
+                        type: string
         responses:
-            200:
+            201:
                 description: Successfully opened/saved project-specific details
                 schema:
-                    $ref: '#/definitions/Project'
+                    allOf:
+                        - $ref: '#/definitions/Project'
+                        - type: object
+                          properties:
+                            messages:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Message'
             400:
                 description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error
                 schema:
                     $ref: '#/definitions/HTTPErrorMessage'
         """
@@ -112,20 +132,38 @@ class ProjectApi(Resource):
         parameters:
             - name: project
               in: body
-              description: Specify file path to save or open
+              description: Data attributes to update
               schema:
-                $ref: '#/definitions/Project'
+                $ref: '#/definitions/ProjectData'
         responses:
             200:
                 description: Successfully updated project-specific details
                 schema:
-                    $ref: '#/definitions/Project'
+                    allOf:
+                        - $ref: '#/definitions/Project'
+                        - type: object
+                          properties:
+                            messages:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Message'
             400:
                 description: Invalid request 
                 schema:
                     $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
         """
-        pass
+        try:
+            proj_mgr = RsProjectManager.get_instance()
+            proj_mgr.update(ProjectDataSchema().load(request.json))
+            return ProjectSchema().dump(proj_mgr.get()), 200
+        except ValidationError as e:
+            raise SchemaValidationError
+        except Exception as e:
+            raise InternalServerError
 
     def delete(self):
         """
@@ -145,5 +183,5 @@ class ProjectApi(Resource):
         pass
 
 project_api = Blueprint('project_api', __name__)
-api = Api(project_api)
+api = Api(project_api, errors=errors)
 api.add_resource(ProjectApi, '/project')

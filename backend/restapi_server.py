@@ -16,6 +16,7 @@ from api.bram import bram_api
 from api.io import io_api
 from api.peripherals import peripherals_api
 from api.utils import attrs_api
+from api.project import project_api
 
 #
 # Main entry point
@@ -61,6 +62,7 @@ def main():
     app.register_blueprint(io_api)
     app.register_blueprint(peripherals_api)
     app.register_blueprint(attrs_api)
+    app.register_blueprint(project_api)
 
     # Start Rest API server
     app.run(debug=args.debug, port=args.port)

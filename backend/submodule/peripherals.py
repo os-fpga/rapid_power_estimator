@@ -9,7 +9,7 @@ import sys
 from typing import Any, List, Dict, Tuple
 from submodule.clock import Clock
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard, IO_Standard_Coeff, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralChannelNotFoundException, \
+from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralChannelNotFoundException, \
      PeripheralEndpointNotFoundException, PeripheralType
 from .rs_message import RsMessage, RsMessageManager
 
@@ -565,6 +565,7 @@ class Dma0(ComputeObject):
 
     def compute(self) -> bool:
         VCC_CORE = self.get_context().get_device_resources().get_VCC_CORE()
+        total_dma_block_power = 0.0
 
         for channel in self.get_context().get_channels():
             channel.output.reset()
@@ -619,6 +620,7 @@ class Dma0(ComputeObject):
             channel.output.calculated_bandwidth = calculated_bandwidth
             channel.output.noc_power = noc_power
             channel.output.block_power = block_power
+            total_dma_block_power += block_power
 
             # debug info
             print(f'[DEBUG] DMA: {self.get_context().get_name() = }', file=sys.stderr)
@@ -636,6 +638,13 @@ class Dma0(ComputeObject):
             print(f'[DEBUG] DMA:   {channel.output.noc_power = }', file=sys.stderr)
             print(f'[DEBUG] DMA:   {channel.output.block_power = }', file=sys.stderr)
 
+        # calculate block power distribution in percentage among channels
+        if total_dma_block_power > 0:
+            for channel in self.get_context().get_channels():
+                if channel.enable == False:
+                    continue
+                channel.output.percentage = channel.output.block_power / total_dma_block_power * 100.0
+
         return True
 
 @dataclass
@@ -644,8 +653,13 @@ class FPGA_Fabric(ComputeObject):
         pass
 
     def get_bandwidth(self) -> float:
-        # todo: query clock module for max clock frequency configured
-        return 233.0 * 32
+        # get max clock frequency configured according excel formula
+        clock_module = self.get_context().get_device_resources().get_module(ModuleType.CLOCKING)
+        clock = None
+        for elmt in clock_module.get_all():
+            if clock is None or clock.frequency < elmt.frequency:
+                clock = elmt
+        return clock.frequency / 1000000.0 * 32 if clock else 0.0
 
     def compute(self) -> bool:
         resources = self.get_context().get_device_resources()

@@ -10,7 +10,7 @@ from marshmallow import Schema, fields, ValidationError, post_dump
 from utilities.common_utils import get_enum_by_value
 from submodule.peripherals import Endpoint, Peripheral, PeripheralTarget, PeripheralType, Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, \
     I2c_Speed, Baud_Rate, Usb_Speed, Gige_Speed, GpioStandard, Memory_Type, \
-    Dma_Source_Destination, Dma_Activity, N22_RISC_V_Clock, Port_Activity, A45_Load
+    N22_RISC_V_Clock, Port_Activity, A45_Load
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, PeripheralChannelNotFoundException, PeripheralNotFoundException, \
     InvalidPeripheralTypeException, PeripheralEndpointNotFoundException
@@ -246,9 +246,9 @@ class ChannelOutputSchema(Schema):
 class ChannelSchema(Schema):
     enable = fields.Bool()
     name = fields.Str()
-    source = fields.Enum(Dma_Source_Destination, by_value=True)
-    destination = fields.Enum(Dma_Source_Destination, by_value=True)
-    activity = fields.Enum(Dma_Activity, by_value=True)
+    source = fields.Str()
+    destination = fields.Str()
+    activity = fields.Enum(Port_Activity, by_value=True)
     read_write_rate = fields.Number()
     toggle_rate = fields.Number()
     output = fields.Nested(ChannelOutputSchema, data_key="consumption")
@@ -378,13 +378,9 @@ class PeripheralsApi(Resource):
                     name:
                         type: string
                     source:
-                        type: integer
-                        minimum: 0
-                        maximum: 5
+                        type: string
                     destination:
-                        type: integer
-                        minimum: 0
-                        maximum: 5
+                        type: string
                     activity:
                         type: integer
                         minimum: 0

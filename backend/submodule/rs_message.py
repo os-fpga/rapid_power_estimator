@@ -29,11 +29,14 @@ class RsMessageManager:
         RsMessage(201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
         RsMessage(202, RsMessageType.WARN, "Not enough {bank_type} banks powered at {voltage}V available"),
         RsMessage(203, RsMessageType.WARN, "Peripheral '{name}' is not connected"),
+        RsMessage(204, RsMessageType.WARN, "DMA {name} source not specified"),
+        RsMessage(205, RsMessageType.WARN, "DMA {name} destination not specified"),
+        RsMessage(205, RsMessageType.WARN, "DMA {name} cannot have the same source and destination"),
         RsMessage(301, RsMessageType.ERRO, "Invalid clock '{clock}'"),
         RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
         RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),
-        RsMessage(304, RsMessageType.ERRO, "{name} is selected but not enabled"),
-        RsMessage(305, RsMessageType.ERRO, "{name} not found"),
+        RsMessage(304, RsMessageType.ERRO, "Peripheral '{name}' is selected but not enabled"),
+        RsMessage(305, RsMessageType.ERRO, "Peripheral '{name}' not found"),
     ]
 
     @staticmethod

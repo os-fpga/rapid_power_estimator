@@ -91,20 +91,6 @@ class Memory_Type(RsEnum):
     DDR3 = 1, "DDR3"
     DDR4 = 2, "DDR4"
 
-class Dma_Activity(RsEnum):
-    IDLE   = 0, "Idle"
-    LOW    = 1, "Low"
-    MEDIUM = 2, "Medium"
-    HIGH   = 3, "High"
-
-class Dma_Source_Destination(RsEnum):
-    NONE     = 0, "NONE"
-    DDR      = 1, "DDR"
-    OCM      = 2, "OCM"
-    SPI_QSPI = 3, "SPI/QSPI"
-    I2C      = 4, "I2C"
-    FABRIC   = 5, "Fabric"
-
 class PeripheralTarget(IntFlag):
     NONE   = 0
     ACPU   = 1
@@ -139,7 +125,8 @@ def get_io_output_coeff(context: 'IPeripheral', voltage: float) -> List[float]:
                 return coeff.output_ac, coeff.output_dc
     return 0.0, 0.0
 
-def get_power_factor(POWER_FACTOR: List[Power_Factor], master_type: PeripheralType, slave_type: PeripheralType) -> float:
+def get_power_factor(context: 'IPeripheral', master_type: PeripheralType, slave_type: PeripheralType) -> float:
+    POWER_FACTOR = context.get_device_resources().get_peripheral_noc_power_factor()
     factors = [elem.factor for elem in POWER_FACTOR if elem.master == master_type and elem.slave == slave_type]
     if factors:
         return sum(factors) / len(factors)
@@ -187,13 +174,20 @@ class Channel_Output:
     percentage: float = field(default=0.0)
     messages: List[RsMessage] = field(default_factory=list)
 
+    def reset(self):
+        self.messages.clear()
+        self.calculated_bandwidth = 0.0
+        self.block_power = 0.0
+        self.noc_power = 0.0
+        self.percentage = 0.0
+
 @dataclass
 class Channel:
     enable: bool = field(default=False)
     name: str = field(default='')
-    source: Dma_Source_Destination = field(default=Dma_Source_Destination.NONE)
-    destination: Dma_Source_Destination = field(default=Dma_Source_Destination.NONE)
-    activity: Dma_Activity = field(default=Dma_Activity.MEDIUM)
+    source: str = field(default='')
+    destination: str = field(default='')
+    activity: Port_Activity = field(default=Port_Activity.IDLE)
     read_write_rate: float = field(default=0.5)
     toggle_rate: float = field(default=0.125)
     output: Channel_Output = field(default_factory=Channel_Output)
@@ -239,13 +233,14 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
             Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_endpoints=4, context=self, init_props={ 'frequency' : 533000000 }),
-            Peripheral(name='FPGA Complex', type=PeripheralType.FPGA_COMPLEX, enable=True, max_endpoints=4, context=self),
+            Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, max_endpoints=4, context=self),
         ]
 
         self.total_memory_block_power = 0.0
         self.total_peripherals_block_power = 0.0
         self.total_acpu_block_power = 0.0
         self.total_bcpu_block_power = 0.0
+        self.total_dma_block_power = 0.0
 
     def get_device_resources(self) -> RsDeviceResources:
         return self.resources
@@ -263,19 +258,10 @@ class Peripheral_SubModule(SubModule):
         return self.total_memory_block_power
 
     def get_dma_output_power(self) -> float:
-        # todo
-        return 0.0001
+        return self.total_dma_block_power
 
     def get_noc_output_power(self) -> float:
         return self.total_interconnect_power
-
-    def get_power_consumption(self):
-        # todo
-        return 0.347, 0.024, 0.013, 0.001, 0.0001, 0.003
-
-    def get_resources(self):
-        # todo
-        return 20, 40
 
     def get_all_messages(self):
         # todo
@@ -335,6 +321,13 @@ class Peripheral_SubModule(SubModule):
                 output['percentage'] = output['block_power'] / self.total_peripherals_block_power * 100.0
             else:
                 output['percentage'] = 0.0
+
+        # calculate total dma block power
+        total_dma_power = 0.0
+        for peripheral in self.peripherals:
+            if peripheral.get_type() == PeripheralType.DMA:
+                total_dma_power = sum([channel.output.block_power for channel in peripheral.get_channels()])
+        self.total_dma_block_power = total_dma_power
 
 class IPeripheral(ABC):
     @abstractmethod
@@ -567,18 +560,95 @@ class Pwm0(ComputeObject):
 
 @dataclass
 class Dma0(ComputeObject):
-    def compute(self) -> bool:
-        # todo: populate output properties
+    def __post_init__(self) -> None:
         pass
+
+    def compute(self) -> bool:
+        VCC_CORE = self.get_context().get_device_resources().get_VCC_CORE()
+
+        for channel in self.get_context().get_channels():
+            channel.output.reset()
+            if channel.enable == False:
+                continue
+
+            if channel.source == '' or channel.destination == '':
+                channel.output.messages.append(RsMessageManager.get_message(204 if channel.source == '' else 205, { 'name': channel.name }))
+                continue
+
+            if channel.source == channel.destination:
+                channel.output.messages.append(RsMessageManager.get_message(206, { 'name': channel.name }))
+                continue
+
+            source = find_peripheral(self.get_context(), channel.source)
+            if source is None:
+                channel.output.messages.append(RsMessageManager.get_message(305, { 'name': channel.source }))
+                continue
+
+            destination = find_peripheral(self.get_context(), channel.destination)
+            if destination is None:
+                channel.output.messages.append(RsMessageManager.get_message(305, { 'name': channel.destination }))
+                continue
+
+            if source.is_enabled() == False or destination.is_enabled() == False:
+                channel.output.messages.append(RsMessageManager.get_message(304, { 'name': source.get_name() if not source.is_enabled() else destination.get_name() }))
+                continue
+
+            # calculate bandwidth
+            source_bandwidth = source.get_bandwidth()
+            destination_bandwidth = destination.get_bandwidth()
+            bandwidth = min(source_bandwidth, destination_bandwidth)
+            if channel.activity == Port_Activity.HIGH:
+                calculated_bandwidth = bandwidth * 0.75
+            elif channel.activity == Port_Activity.MEDIUM:
+                calculated_bandwidth = bandwidth * 0.5
+            elif channel.activity == Port_Activity.LOW:
+                calculated_bandwidth = bandwidth * 0.25
+            else:
+                calculated_bandwidth = 0
+
+            # noc power
+            source_power_factor = get_power_factor(self.get_context(), self.get_context().get_type(), source.get_type())
+            destination_power_factor = get_power_factor(self.get_context(), self.get_context().get_type(), destination.get_type())
+            noc_power = channel.toggle_rate * calculated_bandwidth * (source_power_factor + destination_power_factor) * VCC_CORE ** 2
+
+            # block power
+            # 0.005 + (calculated_bandwidth * $BO$22 * toggle-rate * 0.0000003)
+            block_power = 0.005 + (calculated_bandwidth * 266.0 * channel.toggle_rate * 0.0000003) # 266.0 is hardcoded in excel
+
+            # update output
+            channel.output.calculated_bandwidth = calculated_bandwidth
+            channel.output.noc_power = noc_power
+            channel.output.block_power = block_power
+
+            # debug info
+            print(f'[DEBUG] DMA: {self.get_context().get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {source.get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {destination.get_name() = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {source_power_factor = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {destination_power_factor = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {source_bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {destination_bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {VCC_CORE = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {channel.activity = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {channel.toggle_rate = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {channel.output.calculated_bandwidth = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {channel.output.noc_power = }', file=sys.stderr)
+            print(f'[DEBUG] DMA:   {channel.output.block_power = }', file=sys.stderr)
+
+        return True
 
 @dataclass
 class FPGA_Fabric(ComputeObject):
     def __post_init__(self) -> None:
         pass
 
+    def get_bandwidth(self) -> float:
+        # todo: query clock module for max clock frequency configured
+        return 233.0 * 32
+
     def compute(self) -> bool:
         resources = self.get_context().get_device_resources()
-        NOC_POWER_FACTOR = resources.get_peripheral_noc_power_factor()
         VCC_CORE = resources.get_VCC_CORE()
 
         for endpoint in self.get_context().get_endpoints():
@@ -619,7 +689,7 @@ class FPGA_Fabric(ComputeObject):
                 calculated_bandwidth = 0
 
             # calculate noc power
-            power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
+            power_factor = get_power_factor(self.get_context(), self.get_context().get_type(), peripheral.get_type())
             noc_power = calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
 
             # update output
@@ -679,7 +749,6 @@ class A45_RISC_V_ACPU(ComputeObject):
             return False
 
         resources = self.get_context().get_device_resources()
-        NOC_POWER_FACTOR = resources.get_peripheral_noc_power_factor()
         VCC_CORE = resources.get_VCC_CORE()
         ACPU_CLK_FACTOR = resources.get_ACPU_CLK_FACTOR()
 
@@ -722,7 +791,7 @@ class A45_RISC_V_ACPU(ComputeObject):
                 calculated_bandwidth = 0
 
             # calculate noc power
-            power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
+            power_factor = get_power_factor(self.get_context(), self.get_context().get_type(), peripheral.get_type())
             noc_power = calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
 
             # update output
@@ -787,7 +856,6 @@ class N22_RISC_V_BCPU(ComputeObject):
 
         peripherals = self.get_context().get_submodule().get_peripherals()
         resources = self.get_context().get_device_resources()
-        NOC_POWER_FACTOR = resources.get_peripheral_noc_power_factor()
         VCC_CORE = resources.get_VCC_CORE()
         BCPU_CLK_FACTOR = resources.get_BCPU_CLK_FACTOR()
         BCPU_LOW_LOAD_FACTOR = resources.get_BCPU_LOW_LOAD_FACTOR()
@@ -837,7 +905,7 @@ class N22_RISC_V_BCPU(ComputeObject):
             calculated_bandwidth = min(266.0 * 4, calculated_bandwidth)
 
             # calculate noc power
-            power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), peripheral.get_type())
+            power_factor = get_power_factor(self.get_context(), self.get_context().get_type(), peripheral.get_type())
             noc_power = calculated_bandwidth * endpoint.toggle_rate * power_factor * (VCC_CORE ** 2)
 
             # update output
@@ -865,7 +933,7 @@ class N22_RISC_V_BCPU(ComputeObject):
         self.output.active_power = clock_freq * VCC_CORE ** 2 * (BCPU_LOW_LOAD_FACTOR + BCPU_CLK_FACTOR)
 
         # compute boot power
-        power_factor = get_power_factor(NOC_POWER_FACTOR, self.get_context().get_type(), PeripheralType.CONFIG)
+        power_factor = get_power_factor(self.get_context(), self.get_context().get_type(), PeripheralType.CONFIG)
         boot_power = clock_freq * VCC_CORE ** 2 * (BCPU_HIGH_LOAD_FACTOR + power_factor + BCPU_CLK_FACTOR)
         if self.properties.encryption_used:
             self.output.boot_power = boot_power + 0.005

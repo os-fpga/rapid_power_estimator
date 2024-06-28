@@ -215,9 +215,9 @@ class Peripheral_SubModule(SubModule):
         # todo: add peripherals for testing. actual configuration should be retrieved from device.xml when
         # this data is availiable
         self.peripherals : List[Peripheral] = [
-            Peripheral(name='SPI/QSPI', type=PeripheralType.SPI, usage=Peripherals_Usage.Boot, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, context=self),
+            Peripheral(name='SPI/QSPI', type=PeripheralType.SPI, usage=Peripherals_Usage.Boot, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
             Peripheral(name='JTAG', type=PeripheralType.JTAG, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU, context=self),
-            Peripheral(name='I2C', type=PeripheralType.I2C, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
+            Peripheral(name='I2C', type=PeripheralType.I2C, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
             Peripheral(name='UART0 (BCPU)', type=PeripheralType.UART, index=0, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.BCPU, context=self),
             Peripheral(name='UART1 (ACPU)', type=PeripheralType.UART, index=1, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU, context=self),
             Peripheral(name='USB 2.0', type=PeripheralType.USB2, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
@@ -226,12 +226,12 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name="GPIO (ACPU)", type=PeripheralType.GPIO, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, enable=True, context=self),
             Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
             Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
-            Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR4 }),
-            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
+            Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR4 }),
+            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
             Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_channels=4, context=self),
             Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_endpoints=4, context=self),
             Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_endpoints=4, context=self, init_props={ 'frequency' : 533000000 }),
-            Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, max_endpoints=4, context=self),
+            Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, targets=PeripheralTarget.DMA, max_endpoints=4, context=self),
         ]
 
         # todo: total io available should be populated from device xml

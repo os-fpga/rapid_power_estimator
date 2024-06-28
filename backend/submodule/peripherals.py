@@ -212,8 +212,6 @@ class Peripheral_SubModule(SubModule):
 
     def __init__(self, resources : RsDeviceResources):
         self.resources = resources
-        self.total_interconnect_power = 0.0
-        self.total_block_power = 0.0
         # todo: add peripherals for testing. actual configuration should be retrieved from device.xml when
         # this data is availiable
         self.peripherals : List[Peripheral] = [
@@ -236,6 +234,11 @@ class Peripheral_SubModule(SubModule):
             Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, max_endpoints=4, context=self),
         ]
 
+        # todo: total io available should be populated from device xml
+        self.total_io_available = 40
+        self.total_io_used = 0
+        self.total_power = 0.0
+        self.total_interconnect_power = 0.0
         self.total_memory_block_power = 0.0
         self.total_peripherals_block_power = 0.0
         self.total_acpu_block_power = 0.0
@@ -262,6 +265,13 @@ class Peripheral_SubModule(SubModule):
 
     def get_noc_output_power(self) -> float:
         return self.total_interconnect_power
+
+    def get_power_consumption(self) -> List[float]:
+        return self.total_memory_block_power, self.total_peripherals_block_power, self.total_acpu_block_power, self.total_dma_block_power, \
+            self.total_interconnect_power, self.total_bcpu_block_power, self.total_power
+
+    def get_resources(self) -> List[float]:
+        return self.total_io_available, self.total_io_used
 
     def get_all_messages(self):
         # todo
@@ -328,6 +338,18 @@ class Peripheral_SubModule(SubModule):
             if peripheral.get_type() == PeripheralType.DMA:
                 total_dma_power = sum([channel.output.block_power for channel in peripheral.get_channels()])
         self.total_dma_block_power = total_dma_power
+
+        # todo: soc io usage
+        self.total_io_available = 40
+        self.total_io_used = 0
+
+        # sum total power
+        self.total_power  = self.total_interconnect_power
+        self.total_power += self.total_memory_block_power
+        self.total_power += self.total_peripherals_block_power
+        self.total_power += self.total_acpu_block_power
+        self.total_power += self.total_bcpu_block_power
+        self.total_power += self.total_dma_block_power
 
 class IPeripheral(ABC):
     @abstractmethod

@@ -543,7 +543,7 @@ class PeripheralApi(Resource):
               in: body
               description: Update a peripheral of a device
               schema:
-                $ref: '#/definitions/ACPU'
+                $ref: '#/definitions/Peripheral'
         responses:
             200:
                 description: Successfully updated the peripheral

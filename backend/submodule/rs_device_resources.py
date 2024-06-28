@@ -39,10 +39,7 @@ class PeripheralNotFoundException(Exception):
 class InvalidPeripheralTypeException(Exception):
     pass
 
-class PeripheralEndpointNotFoundException(Exception):
-    pass
-
-class PeripheralChannelNotFoundException(Exception):
+class PeripheralPortNotFoundException(Exception):
     pass
 
 class ModuleType(Enum):

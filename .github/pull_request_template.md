@@ -5,14 +5,11 @@
 > ### Describe the technical details
 > #### What is currently done? (Provide issue link if applicable)
 > <!-- Please provide a list of limitations if not specified in any issue -->
-> <!-- Below is a template, uncomment upon your needs -->
 > <!-- Currently, RPE has the following limitations: -->
 > <!-- - [ ] technical details about limitation  -->
-> <!-- - [ ] more limitations  -->
 >
 > #### What does this pull request change?
 > <!-- Please provide a list of highlights of your changes. -->
-> <!-- Below is a template, uncomment upon your needs -->
 > <!-- This PR improves in the following aspects: -->
 > <!-- - [ ] details about the technical highlight -->
 > <!-- - [ ] <more technical highlights -->
@@ -21,9 +18,8 @@
 > <!-- In general, modification on existing submodules are not acceptable. You should push changes to upstream. -->
 > - [ ] Frontend: <Specify frontend components>
 > - [ ] Backend: <Specify backend components>
-> - [ ] Library: <Specify the library name>
-> - [ ] Plug-in: <Specify the plugin name>
-> - [ ] Engine
+> - [ ] Library: <Specify the library name, e.g. npm packages>
+> - [ ] Plug-in: <Specify the plugin name, e.g. Webpack, jtest>
 > - [ ] Documentation
 > - [ ] Regression tests
 > - [ ] Continuous Integration (CI) scripts
@@ -31,4 +27,4 @@
 > ### Impact of the pull request
 
 > - [ ] Require a change on Quality of Results (QoR)
-> - [ ] Break back-compatibility. If so, please list who may be influenced.
+> - [ ] Break backward-compatibility. If so, please list who may be influenced.

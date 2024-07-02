@@ -88,15 +88,7 @@ class RsProjectManager:
         return True
 
     def close(self) -> bool:
-        self.projects[0].state = RsProjectState.NOTLOADED
-        self.projects[0].filepath = ""
-        return True
-
-    def reset(self) -> bool:
-        if self.projects[0].state == RsProjectState.LOADED:
-            self.projects[0] = RsProject(state=self.projects[0].state, filepath=self.projects[0].filepath, modified=True)
-        else:
-            self.projects[0] = RsProject()
+        self.projects[0] = RsProject()
         return True
 
     def create(self, filepath: str) -> bool:

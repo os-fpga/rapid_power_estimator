@@ -55,6 +55,9 @@ class RsProjectManager:
             RsProjectManager()
         return RsProjectManager.__instance
 
+    def get_excluded_fields(self) -> List[str]:
+        return ['filepath', 'version', 'state', 'modified', 'messages']
+
     def __init__(self) -> None:
         self.projects: List[RsProject] = [RsProject()]
 
@@ -62,12 +65,18 @@ class RsProjectManager:
         return self.projects[0]
 
     def update(self, data: Dict[str, Any]) -> bool:
-        update_attributes(self.projects[0], data, exclude=['filepath', 'version', 'state', 'modified', 'messages'])
+        update_attributes(self.projects[0], data, exclude=self.get_excluded_fields())
         self.projects[0].modified = True
         return True
 
     def load(self, filepath: str) -> bool:
-        pass
+        with open(filepath, 'r') as fd:
+            data = RsProjectSchema().load(json.load(fd))
+        update_attributes(self.projects[0], data['project'], exclude=self.get_excluded_fields())
+        self.projects[0].state = RsProjectState.LOADED
+        self.projects[0].filepath = filepath
+        self.projects[0].modified = False
+        return True
 
     def save(self) -> bool:
         if self.projects[0].state == RsProjectState.LOADED:

@@ -47,6 +47,12 @@ class PeripheralEndpointNotExistsError(Exception):
 class PeripheralChannelNotExistsError(Exception):
     pass
 
+class CreateProjectPermissionError(Exception):
+    pass
+
+class ProjectNotLoadedError(Exception):
+    pass
+
 errors = {
     "DeviceNotExistsError": {
         "message": "Device with given id doesn't exists",
@@ -106,6 +112,14 @@ errors = {
     },
     "PeripheralChannelNotExistsError": {
         "message": "Peripheral channel with given index doesn't exists",
+        "status": 400
+    },
+    "CreateProjectPermissionError": {
+        "message": "Failed to create project file. Permission error",
+        "status": 400
+    },
+    "ProjectNotLoadedError": {
+        "message": "Project not loaded",
         "status": 400
     },
 }

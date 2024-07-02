@@ -175,30 +175,6 @@ class ProjectApi(Resource):
         except Exception as e:
             raise InternalServerError
 
-    def delete(self):
-        """
-        This endpoint resets the project attributes and device inputs back to the initial state in memory.
-        ---
-        tags:
-            - Project
-        description: Reset project attributes and device inputs to initial state.
-        responses:
-            204:
-                description: Successfully reset project attributes and device inputs.
-            400:
-                description: Invalid request
-                schema:
-                    $ref: '#/definitions/HTTPErrorMessage'
-        """
-        try:
-            proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.reset()
-            return "", 204
-        except ValidationError as e:
-            raise SchemaValidationError
-        except Exception as e:
-            raise InternalServerError
-
 class ProjectCreateApi(Resource):
     def post(self):
         """

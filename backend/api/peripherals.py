@@ -8,12 +8,11 @@ from flask import Blueprint, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, ValidationError, post_dump
 from utilities.common_utils import get_enum_by_value
-from submodule.peripherals import Endpoint, Peripheral, PeripheralTarget, PeripheralType, Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, \
+from submodule.peripherals import Peripheral, PeripheralTarget, PeripheralType, Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, \
     I2c_Speed, Baud_Rate, Usb_Speed, Gige_Speed, GpioStandard, Memory_Type, \
-    Dma_Source_Destination, Dma_Activity, N22_RISC_V_Clock, Port_Activity, A45_Load
+    N22_RISC_V_Clock, Port_Activity, A45_Load
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, PeripheralChannelNotFoundException, PeripheralNotFoundException, \
-    InvalidPeripheralTypeException, PeripheralEndpointNotFoundException
+from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, PeripheralNotFoundException, InvalidPeripheralTypeException, PeripheralPortNotFoundException
 from .device import MessageSchema
 from .errors import DeviceNotExistsError, InternalServerError, PeripheralChannelNotExistsError, PeripheralNotExistsError, \
     InvalidPeripheralTypeError, PeripheralEndpointNotExistsError, \
@@ -190,7 +189,7 @@ class MemorySchema(PeripheralSchema):
     output = fields.Nested(MemoryOutputSchema, data_key="consumption")
 
 class DmaSchema(PeripheralSchema):
-    channels = ChannelUrlField()
+    ports = ChannelUrlField(data_key="channels")
 
 class EndpointOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
@@ -212,7 +211,7 @@ class BcpuOutputSchema(Schema):
 class BcpuSchema(PeripheralSchema):
     encryption_used = fields.Bool()
     clock = fields.Enum(N22_RISC_V_Clock, by_value=True)
-    endpoints = EndpointUrlField(data_key='ports')
+    ports = EndpointUrlField()
     output = fields.Nested(BcpuOutputSchema, data_key="consumption")
 
 class FpgaComplexEndpointOutputSchema(EndpointOutputSchema):
@@ -230,11 +229,11 @@ class AcpuSchema(PeripheralSchema):
     enable = fields.Bool()
     frequency = fields.Int()
     load = fields.Enum(A45_Load, by_value=True)
-    endpoints = EndpointUrlField(data_key='ports')
+    ports = EndpointUrlField()
     output = fields.Nested(AcpuOutputSchema, data_key="consumption")
 
 class FpgaComplexSchema(PeripheralSchema):
-    endpoints = EndpointUrlField(data_key='ports')
+    ports = EndpointUrlField()
 
 class ChannelOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
@@ -246,9 +245,9 @@ class ChannelOutputSchema(Schema):
 class ChannelSchema(Schema):
     enable = fields.Bool()
     name = fields.Str()
-    source = fields.Enum(Dma_Source_Destination, by_value=True)
-    destination = fields.Enum(Dma_Source_Destination, by_value=True)
-    activity = fields.Enum(Dma_Activity, by_value=True)
+    source = fields.Str()
+    destination = fields.Str()
+    activity = fields.Enum(Port_Activity, by_value=True)
     read_write_rate = fields.Number()
     toggle_rate = fields.Number()
     output = fields.Nested(ChannelOutputSchema, data_key="consumption")
@@ -378,13 +377,9 @@ class PeripheralsApi(Resource):
                     name:
                         type: string
                     source:
-                        type: integer
-                        minimum: 0
-                        maximum: 5
+                        type: string
                     destination:
-                        type: integer
-                        minimum: 0
-                        maximum: 5
+                        type: string
                     activity:
                         type: integer
                         minimum: 0
@@ -547,7 +542,7 @@ class PeripheralApi(Resource):
               in: body
               description: Update a peripheral of a device
               schema:
-                $ref: '#/definitions/ACPU'
+                $ref: '#/definitions/Peripheral'
         responses:
             200:
                 description: Successfully updated the peripheral
@@ -622,10 +617,10 @@ class PeripheralEndpointApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            ep = RsDeviceManager.get_instance().get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_endpoint(endpoint)
+            ep = RsDeviceManager.get_instance().get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_port(endpoint)
             schema = get_endpoint_schema(periph)
             return schema.dump(ep)
-        except PeripheralEndpointNotFoundException as e:
+        except PeripheralPortNotFoundException as e:
             raise PeripheralEndpointNotExistsError
         except InvalidPeripheralTypeException as e:
             raise InvalidPeripheralTypeError
@@ -683,14 +678,14 @@ class PeripheralEndpointApi(Resource):
         """
         try:
             device = RsDeviceManager.get_instance().get_device(device_id)
-            ep = device.get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_endpoint(endpoint)
+            ep = device.get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_port(endpoint)
             schema = get_endpoint_schema(periph)
             ep.set_properties(schema.load(request.json))
             device.compute_output_power()
             return schema.dump(ep), 200
         except ValidationError as e:
             raise SchemaValidationError
-        except PeripheralEndpointNotFoundException as e:
+        except PeripheralPortNotFoundException as e:
             raise PeripheralEndpointNotExistsError
         except InvalidPeripheralTypeException as e:
             raise InvalidPeripheralTypeError
@@ -739,10 +734,10 @@ class PeripheralChannelApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            channel = RsDeviceManager.get_instance().get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_channel(chnum)
+            channel = RsDeviceManager.get_instance().get_device(device_id).get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_port(chnum)
             schema = ChannelSchema()
             return schema.dump(channel)
-        except PeripheralChannelNotFoundException as e:
+        except PeripheralPortNotFoundException as e:
             raise PeripheralChannelNotExistsError
         except InvalidPeripheralTypeException as e:
             raise InvalidPeripheralTypeError
@@ -800,14 +795,14 @@ class PeripheralChannelApi(Resource):
         """
         try:
             device = RsDeviceManager.get_instance().get_device(device_id)
-            channel = device.get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_channel(chnum)
+            channel = device.get_module(ModuleType.SOC_PERIPHERALS).get_peripheral(get_type(periph), rownum).get_port(chnum)
             schema = ChannelSchema()
             channel.set_properties(schema.load(request.json))
             device.compute_output_power()
             return schema.dump(channel), 200
         except ValidationError as e:
             raise SchemaValidationError
-        except PeripheralChannelNotFoundException as e:
+        except PeripheralPortNotFoundException as e:
             raise PeripheralChannelNotExistsError
         except InvalidPeripheralTypeException as e:
             raise InvalidPeripheralTypeError

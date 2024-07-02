@@ -14,8 +14,7 @@ from submodule.rs_device_resources import IO_BankType, IO_Standard
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_Synchronization, IO_Pull_up_down
 from submodule.peripherals import Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency, Baud_Rate, \
-    I2c_Speed, Usb_Speed, Gige_Speed, GpioStandard, N22_RISC_V_Clock, Port_Activity, A45_Load, \
-    Memory_Type, Dma_Activity, Dma_Source_Destination
+    I2c_Speed, Usb_Speed, Gige_Speed, GpioStandard, N22_RISC_V_Clock, Port_Activity, A45_Load, Memory_Type
 
 #--------------------------------------------------------------#
 # endpoints         | methods          | classes               #
@@ -74,7 +73,7 @@ class AttributesApi(Resource):
                             Peripherals_Usage, Qspi_Performance_Mbps, Jtag_Clock_Frequency,
                             Baud_Rate, I2c_Speed, Usb_Speed, Gige_Speed, GpioStandard,
                             N22_RISC_V_Clock, Port_Activity, A45_Load,
-                            Memory_Type, Dma_Activity, Dma_Source_Destination
+                            Memory_Type
                         ]
         attrb_list = []
         for a in module_attrbs:

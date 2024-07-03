@@ -32,6 +32,18 @@ import { useClockSelection } from './ClockSelectionProvider';
 import { useGlobalState } from './GlobalStateProvider';
 import { useSocTotalPower } from './SOCTotalPowerProvider';
 
+const Language = [
+  {
+    id: 0, text: 'HDL lang',
+  },
+  {
+    id: 1, text: 'Verilog',
+  },
+  {
+    id: 2, text: 'HDL',
+  },
+];
+
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
   const [devices, setDevices] = React.useState([]);
@@ -45,6 +57,7 @@ function App() {
     name: '',
     lang: 0,
     notes: '',
+    device: '',
   });
   const [config, setConfig] = React.useState({
     useDefaultFile: true,
@@ -64,6 +77,26 @@ function App() {
     setPreferencesChanged(false);
     setIsModalOpen(true);
   };
+
+  function fetchProjectData() {
+    server.GET(server.project(), (data) => {
+      const { lang } = data;
+      const newData = {
+        ...projectData,
+        name: data.name,
+        device: data.device,
+        notes: data.notes,
+      };
+      const findLang = Language.find((i) => i.text === lang);
+      if (findLang !== undefined) newData.lang = findLang.id;
+      else newData.lang = Language[0].id;
+      setProjectData(newData);
+      if (data.device !== device) {
+        // TODO, switch device
+      }
+    });
+  }
+
   const handleOk = () => {
     // this will restart app
     if (preferencesChanged) {
@@ -78,10 +111,6 @@ function App() {
 
   function getKeyByValue(object, value) {
     return Object.keys(object).find((key) => object[key] === value);
-  }
-
-  function sendProjectData(projectDataValue) {
-    window.ipcAPI.send('projectData', projectDataValue);
   }
 
   React.useEffect(() => {
@@ -102,9 +131,13 @@ function App() {
         server.setPort(data.port, setDevices);
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
-        setProjectData({ notes: data.notes, lang: parseInt(data.lang, 10), name: data.name });
+        if (data.action === 'new') server.POST(server.projectClose(), {}, fetchProjectData);
+        if (data.action === 'open') {
+          server.POST(server.projectOpen(), { filepath: data.filepath }, fetchProjectData);
+        }
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const deviceChanged = (newDevice) => {
@@ -122,30 +155,45 @@ function App() {
         setClocks(data.map((item) => item.port));
       });
     }
+    const data = {
+      device: newDevice,
+    };
+    server.PATCH(server.project(), data, fetchProjectData);
   };
 
-  const handleNotesChange = (data) => {
-    const newData = { ...projectData, notes: data };
-    setProjectData(newData);
-    sendProjectData(newData);
+  const handleNotesChange = (notes) => {
+    const data = {
+      notes,
+    };
+    server.PATCH(server.project(), data, fetchProjectData);
   };
 
   // eslint-disable-next-line no-unused-vars
   const handleLangChange = (val) => {
-    const newData = { ...projectData, lang: parseInt(val.target.value, 10) };
-    setProjectData(newData);
-    sendProjectData(newData);
+    const data = {
+      lang: Language.find((i) => i.id === parseInt(val.target.value, 10)).text,
+    };
+    server.PATCH(server.project(), data, fetchProjectData);
   };
 
   const handleTopNameChange = (val) => {
-    const newData = { ...projectData, name: val.target.value };
-    setProjectData(newData);
-    sendProjectData(newData);
+    const data = {
+      name: val.target.value,
+    };
+    server.PATCH(server.project(), data, fetchProjectData);
   };
 
   const handleConfigChange = (name, val) => {
     setPreferencesChanged(true);
     setConfig({ ...config, [name]: val });
+  };
+
+  const autoSaveChanged = (newValue) => {
+    setAutoSave(newValue);
+    const data = {
+      autosave: newValue,
+    };
+    server.PATCH(server.project(), data);
   };
 
   return (
@@ -186,9 +234,9 @@ function App() {
           </div>
           <input type="text" placeholder="Top level name" value={projectData.name} onChange={handleTopNameChange} />
           <select value={projectData.lang} onChange={handleLangChange}>
-            <option value={0}>HDL lang</option>
-            <option value={1}>Verilog</option>
-            <option value={2}>HDL</option>
+            {
+              Language.map((opt) => <option key={opt.id} value={opt.id}>{opt.text}</option>)
+            }
           </select>
           <FPGASummaryComponent device={device} />
         </div>
@@ -198,7 +246,7 @@ function App() {
               <div className="switch">Auto save</div>
               <Switch
                 checked={autoSave}
-                onChange={setAutoSave}
+                onChange={autoSaveChanged}
                 onColor="#f11f5e"
                 uncheckedIcon={false}
                 checkedIcon={false}

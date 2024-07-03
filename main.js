@@ -49,8 +49,8 @@ let projectMeta = {
 
 let mainWindow = null;
 
-function sendProjectDataToRenderer() {
-  mainWindow.webContents.send('projectData', projectMeta);
+function sendProjectDataToRenderer(action = '') {
+  mainWindow.webContents.send('projectData', action);
 }
 
 function saveProjectClicked() {
@@ -96,12 +96,19 @@ function saveAsClicked() {
 }
 
 function newProjectClicked() {
-  if (projectSaved()) {
+  const result = dialog.showMessageBoxSync(mainWindow, {
+    type: 'question',
+    buttons: ['Cancel', 'Yes', 'No'],
+    defaultId: 0,
+    title: 'Reset',
+    message: 'All data will be reset. Do you want to continue?',
+  });
+  if (result === 1) { // Yes
     projectMeta = {
       file: '', notes: '', lang: '0', name: '', changed: false,
     };
     mainWindow.setTitle(`${untitled} - Rapid Power Estimator`);
-    sendProjectDataToRenderer();
+    sendProjectDataToRenderer({ action: 'new' });
   }
 }
 
@@ -113,7 +120,7 @@ function openProjectClicked() {
       fetchProjectData(projectMeta, (data) => {
         projectMeta = data;
         mainWindow.setTitle(`${path.basename(projectMeta.file)} - Rapid Power Estimator`);
-        sendProjectDataToRenderer();
+        sendProjectDataToRenderer({ action: 'open', filepath: projectFile });
       });
     }
   }

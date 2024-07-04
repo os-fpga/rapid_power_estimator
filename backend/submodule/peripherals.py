@@ -249,8 +249,12 @@ class Peripheral_SubModule(SubModule):
         return self.total_io_available, self.total_io_used
 
     def get_all_messages(self):
-        # todo
-        return []
+        messages = []
+        for periph in self.peripherals:
+            messages.extend(periph.get_messages())
+            for port in periph.get_ports() or []:
+                messages.extend(port.output.messages)
+        return messages
 
     def get_peripherals(self) -> List['Peripheral']:
         return self.peripherals

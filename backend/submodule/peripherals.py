@@ -300,10 +300,16 @@ class Peripheral_SubModule(SubModule):
         self.total_interconnect_power = total_noc_power
 
         # calculate peripheral power usage percentage
-        for peripheral in [p for p in self.peripherals if p.usage == Peripherals_Usage.App and p.type in self.get_peripheral_types()]:
+        for peripheral in self.peripherals:
+            if peripheral.usage == Peripherals_Usage.App and peripheral.type in self.get_peripheral_types():
+                total_power = self.total_peripherals_block_power
+            elif peripheral.type in (PeripheralType.DDR, PeripheralType.OCM):
+                total_power = self.total_memory_block_power
+            else:
+                total_power = 0.0
             output = peripheral.get_output()
-            if self.total_peripherals_block_power > 0:
-                output['percentage'] = output['block_power'] / self.total_peripherals_block_power * 100.0
+            if total_power > 0:
+                output['percentage'] = output['block_power'] / total_power * 100.0
             else:
                 output['percentage'] = 0.0
 

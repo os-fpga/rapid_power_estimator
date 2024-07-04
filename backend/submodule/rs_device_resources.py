@@ -45,6 +45,9 @@ class PeripheralPortNotFoundException(Exception):
 class ProjectNotLoadedException(Exception):
     pass
 
+class ProjectNotLoadedException(Exception):
+    pass
+
 class ModuleType(Enum):
     CLOCKING = 0
     FABRIC_LE = 1

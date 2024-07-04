@@ -97,18 +97,18 @@ class PeripheralTarget(IntFlag):
     FABRIC = 4
     DMA    = 8
 
-def find_highest_bandwidth_peripheral_endpoint(context: 'IPeripheral') -> Tuple['Port', 'Peripheral']:
+def find_highest_bandwidth_peripheral_port(context: 'IPeripheral') -> Tuple['Port', 'Peripheral']:
     peripherals = context.get_submodule().get_peripherals()
     name = context.get_name()
     peripheral: IPeripheral = None
-    endpoint: Port = None
+    port: Port = None
     for p in peripherals:
-        for ep in p.get_ports() or []:
-            if ep.name == name:
-                if endpoint is None or ep.output.calculated_bandwidth > endpoint.output.calculated_bandwidth:
+        for t in p.get_ports() or []:
+            if t.name == name or t.source == name or t.destination == name:
+                if port is None or t.output.calculated_bandwidth > port.output.calculated_bandwidth:
                     peripheral = p
-                    endpoint = ep
-    return endpoint, peripheral
+                    port = t
+    return port, peripheral
 
 def find_peripheral(context: 'IPeripheral', name: str) -> 'IPeripheral':
     for peripheral in context.get_submodule().get_peripherals():
@@ -249,8 +249,12 @@ class Peripheral_SubModule(SubModule):
         return self.total_io_available, self.total_io_used
 
     def get_all_messages(self):
-        # todo
-        return []
+        messages = []
+        for periph in self.peripherals:
+            messages.extend(periph.get_messages())
+            for port in periph.get_ports() or []:
+                messages.extend(port.output.messages)
+        return messages
 
     def get_peripherals(self) -> List['Peripheral']:
         return self.peripherals
@@ -300,10 +304,16 @@ class Peripheral_SubModule(SubModule):
         self.total_interconnect_power = total_noc_power
 
         # calculate peripheral power usage percentage
-        for peripheral in [p for p in self.peripherals if p.usage == Peripherals_Usage.App and p.type in self.get_peripheral_types()]:
+        for peripheral in self.peripherals:
+            if peripheral.usage == Peripherals_Usage.App and peripheral.type in self.get_peripheral_types():
+                total_power = self.total_peripherals_block_power
+            elif peripheral.type in (PeripheralType.DDR, PeripheralType.OCM):
+                total_power = self.total_memory_block_power
+            else:
+                total_power = 0.0
             output = peripheral.get_output()
-            if self.total_peripherals_block_power > 0:
-                output['percentage'] = output['block_power'] / self.total_peripherals_block_power * 100.0
+            if total_power > 0:
+                output['percentage'] = output['block_power'] / total_power * 100.0
             else:
                 output['percentage'] = 0.0
 
@@ -650,6 +660,7 @@ class FPGA_Fabric(ComputeObject):
     def compute(self) -> bool:
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
+        total_noc_power = 0.0
 
         for endpoint in self.get_context().get_ports():
             endpoint.output.reset()
@@ -696,6 +707,7 @@ class FPGA_Fabric(ComputeObject):
             endpoint.output.clock_frequency = clock.frequency
             endpoint.output.calculated_bandwidth = calculated_bandwidth
             endpoint.output.noc_power = noc_power
+            total_noc_power += noc_power
 
             # debug info
             print(f'[DEBUG] FPGA: {self.get_context().get_name() = }', file=sys.stderr)
@@ -706,6 +718,11 @@ class FPGA_Fabric(ComputeObject):
             print(f'[DEBUG] FPGA:   {VCC_CORE = }', file=sys.stderr)
             print(f'[DEBUG] FPGA:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
             print(f'[DEBUG] FPGA:   {endpoint.output.noc_power = }', file=sys.stderr)
+
+        # calculate noc power distribution in percentage among endpoints
+        if total_noc_power > 0:
+            for ep in self.get_context().get_ports():
+                ep.output.percentage = ep.output.noc_power / total_noc_power * 100.0
 
         return True
 
@@ -1006,7 +1023,7 @@ class Memory0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1110,7 +1127,7 @@ class Gpio0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, peripheral = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, peripheral = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, { "name" : self.get_context().get_name() }))
             return False
@@ -1226,7 +1243,7 @@ class Usb2_0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1329,7 +1346,7 @@ class GigE_0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1432,7 +1449,7 @@ class I2c0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1540,7 +1557,7 @@ class Jtag0(ComputeObject):
             bandwidth = self.get_bandwidth() * 0.75 # always use high activity for boot usage
             toggle_rate = 0.25 # always use this toggle rate for boot usage
         else:
-            endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+            endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
             if endpoint is None:
                 self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
                 return False
@@ -1663,7 +1680,7 @@ class Qspi0(ComputeObject):
             bandwidth = self.get_bandwidth() * 0.75 # always use high activity for boot usage
             toggle_rate = 0.25 # always use this toggle rate for boot usage
         else:
-            endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+            endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
             if endpoint is None:
                 self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
                 return False
@@ -1780,7 +1797,7 @@ class Uart0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False

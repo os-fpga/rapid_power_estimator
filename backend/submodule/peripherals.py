@@ -97,18 +97,18 @@ class PeripheralTarget(IntFlag):
     FABRIC = 4
     DMA    = 8
 
-def find_highest_bandwidth_peripheral_endpoint(context: 'IPeripheral') -> Tuple['Port', 'Peripheral']:
+def find_highest_bandwidth_peripheral_port(context: 'IPeripheral') -> Tuple['Port', 'Peripheral']:
     peripherals = context.get_submodule().get_peripherals()
     name = context.get_name()
     peripheral: IPeripheral = None
-    endpoint: Port = None
+    port: Port = None
     for p in peripherals:
-        for ep in p.get_ports() or []:
-            if ep.name == name:
-                if endpoint is None or ep.output.calculated_bandwidth > endpoint.output.calculated_bandwidth:
+        for t in p.get_ports() or []:
+            if t.name == name or t.source == name or t.destination == name:
+                if port is None or t.output.calculated_bandwidth > port.output.calculated_bandwidth:
                     peripheral = p
-                    endpoint = ep
-    return endpoint, peripheral
+                    port = t
+    return port, peripheral
 
 def find_peripheral(context: 'IPeripheral', name: str) -> 'IPeripheral':
     for peripheral in context.get_submodule().get_peripherals():
@@ -1006,7 +1006,7 @@ class Memory0(ComputeObject):
         if sanity_check(self.messages, self.get_context()) == False:
             return False
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1110,7 +1110,7 @@ class Gpio0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, peripheral = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, peripheral = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, { "name" : self.get_context().get_name() }))
             return False
@@ -1226,7 +1226,7 @@ class Usb2_0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1329,7 +1329,7 @@ class GigE_0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1432,7 +1432,7 @@ class I2c0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False
@@ -1540,7 +1540,7 @@ class Jtag0(ComputeObject):
             bandwidth = self.get_bandwidth() * 0.75 # always use high activity for boot usage
             toggle_rate = 0.25 # always use this toggle rate for boot usage
         else:
-            endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+            endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
             if endpoint is None:
                 self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
                 return False
@@ -1663,7 +1663,7 @@ class Qspi0(ComputeObject):
             bandwidth = self.get_bandwidth() * 0.75 # always use high activity for boot usage
             toggle_rate = 0.25 # always use this toggle rate for boot usage
         else:
-            endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+            endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
             if endpoint is None:
                 self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
                 return False
@@ -1780,7 +1780,7 @@ class Uart0(ComputeObject):
             # no calculation in excel for boot usage
             return True
 
-        endpoint, _ = find_highest_bandwidth_peripheral_endpoint(self.get_context())
+        endpoint, _ = find_highest_bandwidth_peripheral_port(self.get_context())
         if endpoint is None:
             self.messages.append(RsMessageManager.get_message(203, {"name" : self.get_context().get_name()}))
             return False

@@ -656,6 +656,7 @@ class FPGA_Fabric(ComputeObject):
     def compute(self) -> bool:
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
+        total_noc_power = 0.0
 
         for endpoint in self.get_context().get_ports():
             endpoint.output.reset()
@@ -702,6 +703,7 @@ class FPGA_Fabric(ComputeObject):
             endpoint.output.clock_frequency = clock.frequency
             endpoint.output.calculated_bandwidth = calculated_bandwidth
             endpoint.output.noc_power = noc_power
+            total_noc_power += noc_power
 
             # debug info
             print(f'[DEBUG] FPGA: {self.get_context().get_name() = }', file=sys.stderr)
@@ -712,6 +714,11 @@ class FPGA_Fabric(ComputeObject):
             print(f'[DEBUG] FPGA:   {VCC_CORE = }', file=sys.stderr)
             print(f'[DEBUG] FPGA:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
             print(f'[DEBUG] FPGA:   {endpoint.output.noc_power = }', file=sys.stderr)
+
+        # calculate noc power distribution in percentage among endpoints
+        if total_noc_power > 0:
+            for ep in self.get_context().get_ports():
+                ep.output.percentage = ep.output.noc_power / total_noc_power * 100.0
 
         return True
 

@@ -49,6 +49,15 @@ let projectMeta = {
 
 let mainWindow = null;
 
+function updateTitle(titleInfo) {
+  let title = '';
+  if (titleInfo.modified) title += '*';
+  if (titleInfo.filepath.length === 0) title += `${untitled}`;
+  else title += `${path.basename(titleInfo.filepath)}`;
+  title += ' - Rapid Power Estimator';
+  mainWindow.setTitle(title);
+}
+
 function sendProjectDataToRenderer(action = '') {
   mainWindow.webContents.send('projectData', action);
 }
@@ -59,7 +68,7 @@ function saveProjectClicked() {
     if (file.length > 0) {
       projectMeta.file = file;
       projectMeta.changed = false;
-      mainWindow.setTitle(`${path.basename(file)} - Rapid Power Estimator`);
+      updateTitle({ modified: false, filepath: projectMeta.file });
       sendProjectData(projectMeta);
     }
   } else {
@@ -91,7 +100,7 @@ function saveAsClicked() {
   if (file.length > 0) {
     projectMeta.file = file;
     projectMeta.changed = false;
-    mainWindow.setTitle(`${path.basename(file)} - Rapid Power Estimator`);
+    updateTitle({ modified: false, filepath: projectMeta.file });
   }
 }
 
@@ -104,10 +113,6 @@ function newProjectClicked() {
     message: 'All data will be reset. Do you want to continue?',
   });
   if (result === 1) { // Yes
-    projectMeta = {
-      file: '', notes: '', lang: '0', name: '', changed: false,
-    };
-    mainWindow.setTitle(`${untitled} - Rapid Power Estimator`);
     sendProjectDataToRenderer({ action: 'new' });
   }
 }
@@ -119,7 +124,7 @@ function openProjectClicked() {
       projectMeta.file = projectFile;
       fetchProjectData(projectMeta, (data) => {
         projectMeta = data;
-        mainWindow.setTitle(`${path.basename(projectMeta.file)} - Rapid Power Estimator`);
+        updateTitle({ modified: false, filepath: projectMeta.file });
         sendProjectDataToRenderer({ action: 'open', filepath: projectFile });
       });
     }
@@ -275,10 +280,7 @@ const createWindow = () => {
     mainWindow.webContents.send('loadConfig', store.store);
   });
   ipcMain.on('projectData', (event, arg) => {
-    projectMeta.notes = arg.notes;
-    projectMeta.lang = arg.lang;
-    projectMeta.name = arg.name;
-    projectMeta.changed = true;
+    updateTitle(arg);
   });
 };
 

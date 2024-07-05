@@ -78,6 +78,10 @@ function App() {
     setIsModalOpen(true);
   };
 
+  function sendProjectData(projectDataValue) {
+    window.ipcAPI.send('projectData', projectDataValue);
+  }
+
   function fetchProjectData() {
     server.GET(server.project(), (data) => {
       const { lang } = data;
@@ -91,9 +95,10 @@ function App() {
       if (findLang !== undefined) newData.lang = findLang.id;
       else newData.lang = Language[0].id;
       setProjectData(newData);
-      if (data.device !== device) {
+      if (data.device.length !== 0 && data.device !== device) {
         // TODO, switch device
       }
+      sendProjectData({ modified: data.modified, filepath: data.filepath });
     });
   }
 

@@ -7,6 +7,9 @@ let { port } = config;
 
 export function devices() { return formatString('{0}:{1}/devices', server, port); }
 export function attributes() { return formatString('{0}:{1}/attributes', server, port); }
+export function project() { return formatString('{0}:{1}/project', server, port); }
+export function projectClose() { return `${project()}/close`; }
+export function projectOpen() { return `${project()}/open`; }
 
 export function setPort(p, fetchDevices) {
   if (p !== undefined) {

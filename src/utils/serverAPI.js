@@ -1,15 +1,14 @@
-import { formatString } from './common';
-
 const config = require('../../rpe.config.json');
 
 const { server } = config;
 let { port } = config;
 
-export function devices() { return formatString('{0}:{1}/devices', server, port); }
-export function attributes() { return formatString('{0}:{1}/attributes', server, port); }
-export function project() { return formatString('{0}:{1}/project', server, port); }
+export function devices() { return `${server}:${port}/devices`; }
+export function attributes() { return `${server}:${port}/attributes`; }
+export function project() { return `${server}:${port}/project`; }
 export function projectClose() { return `${project()}/close`; }
 export function projectOpen() { return `${project()}/open`; }
+export function projectSave() { return `${project()}/create`; }
 
 export function setPort(p, fetchDevices) {
   if (p !== undefined) {
@@ -20,11 +19,11 @@ export function setPort(p, fetchDevices) {
 }
 
 export function peripheralPath(deviceId, url) {
-  return formatString('{0}/{1}/peripherals/{2}', devices(), deviceId, url);
+  return `${devices()}/${deviceId}/peripherals/${url}`;
 }
 
 export function deviceInfo(deviceId) {
-  return formatString('{0}/{1}', devices(), deviceId);
+  return `${devices()}/${deviceId}`;
 }
 
 export const Elem = {
@@ -38,15 +37,15 @@ export const Elem = {
 
 export const api = {
   fetch(func, deviceId) {
-    return formatString('{0}/{1}/{2}', devices(), deviceId, func);
+    return `${devices()}/${deviceId}/${func}`;
   },
 
   consumption(func, deviceId) {
-    return formatString('{0}/{1}/{2}/consumption', devices(), deviceId, func);
+    return `${devices()}/${deviceId}/${func}/consumption`;
   },
 
   index(func, deviceId, index) {
-    return formatString('{0}/{1}/{2}/{3}', devices(), deviceId, func, index);
+    return `${devices()}/${deviceId}/${func}/${index}`;
   },
 };
 

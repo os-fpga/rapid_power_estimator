@@ -13,8 +13,6 @@ export const Table = {
   Summary: 11,
 };
 
-export const formatString = (template, ...args) => template.replace(/{([0-9]+)}/g, (match, index) => (typeof args[index] === 'undefined' ? match : args[index]));
-
 export const fixed = (number, precition = 3) => number.toFixed(precition);
 
 export function GetText(id, map) {

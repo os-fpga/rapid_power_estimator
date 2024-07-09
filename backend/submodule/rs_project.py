@@ -16,11 +16,11 @@ class RsProjectState(RsEnum):
     LOADED = 1,  'Loaded'
 
 class RsProjectAttributesSchema(Schema):
-    autosave = fields.Bool()
     device = fields.Str()
     lang = fields.Str()
     name = fields.Str()
     notes = fields.Str()
+    version = fields.Str()
 
 class RsProjectDeviceSchema(Schema):
     pass
@@ -56,7 +56,7 @@ class RsProjectManager:
         return RsProjectManager.__instance
 
     def get_excluded_fields(self) -> List[str]:
-        return ['filepath', 'version', 'state', 'modified', 'messages']
+        return ['filepath', 'version', 'state', 'modified', 'messages', 'autosave']
 
     def __init__(self) -> None:
         self.projects: List[RsProject] = [RsProject()]
@@ -72,7 +72,7 @@ class RsProjectManager:
     def load(self, filepath: str) -> bool:
         with open(filepath, 'r') as fd:
             data = RsProjectSchema().load(json.load(fd))
-        update_attributes(self.projects[0], data['project'], exclude=self.get_excluded_fields())
+            update_attributes(self.projects[0], data['project'], exclude=self.get_excluded_fields())
         self.projects[0].state = RsProjectState.LOADED
         self.projects[0].filepath = filepath
         self.projects[0].modified = False

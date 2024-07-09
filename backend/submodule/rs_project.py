@@ -2,6 +2,7 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+from datetime import datetime
 from marshmallow import Schema, fields
 import numpy as np
 import json
@@ -21,6 +22,7 @@ class RsProjectAttributesSchema(Schema):
     lang = fields.Str()
     name = fields.Str()
     notes = fields.Str()
+    last_edited = fields.DateTime()
 
 class RsProjectDeviceSchema(Schema):
     pass
@@ -40,6 +42,7 @@ class RsProject:
     version: str = field(default='0.0.1')
     state: RsProjectState = field(default=RsProjectState.NOTLOADED)
     modified: bool = field(default=False)
+    last_edited: datetime = field(default=None)
     messages: List[RsMessage] = field(default_factory=list)
 
 class RsProjectManager:
@@ -80,6 +83,7 @@ class RsProjectManager:
 
     def save(self) -> bool:
         if self.projects[0].state == RsProjectState.LOADED:
+            self.projects[0].last_edited = datetime.now()
             with open(self.projects[0].filepath, 'w') as fd:
                 json.dump(RsProjectSchema().dump({ 'project': self.projects[0] }), fd, indent=4)
             self.projects[0].modified = False
@@ -92,6 +96,7 @@ class RsProjectManager:
         return True
 
     def create(self, filepath: str) -> bool:
+        self.projects[0].last_edited = datetime.now()
         with open(filepath, 'w') as fd:
             json.dump(RsProjectSchema().dump({ 'project': self.projects[0] }), fd, indent=4)
         self.projects[0].state = RsProjectState.LOADED

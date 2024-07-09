@@ -33,6 +33,7 @@ class ProjectSchema(ProjectAttributesSchema):
     version = fields.Str()
     state = fields.Enum(RsProjectState, by_value=True)
     modified = fields.Bool()
+    last_edited = fields.DateTime()
     messages = fields.Nested(MessageSchema, many=True)
 
 class ProjectFilepathSchema(Schema):
@@ -73,6 +74,8 @@ class ProjectApi(Resource):
                             type: string
                         modified:
                             type: boolean
+                        last_edited:
+                            type: dateTime
         responses:
             200:
                 description: Successfully returned project-specific details

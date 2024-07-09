@@ -63,6 +63,7 @@ function App() {
     useDefaultFile: true,
     device_xml: '',
     port,
+    autoSave,
   });
   const { toggleItemSelection } = useSelection();
   const [preferencesChanged, setPreferencesChanged] = React.useState(false);
@@ -125,14 +126,16 @@ function App() {
   }, [openedTable]);
 
   React.useEffect(() => {
-    window.ipcAPI.send('getConfig');
     if ((typeof window !== 'undefined')) {
+      window.ipcAPI.send('getConfig');
       window.ipcAPI.ipcRendererOn('preferences', (event, data) => {
         setConfig(data);
+        setAutoSave(data.autoSave);
         showModal();
       });
       window.ipcAPI.ipcRendererOn('loadConfig', (event, data) => {
         setConfig(data);
+        setAutoSave(data.autoSave);
         server.setPort(data.port, setDevices);
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
@@ -205,6 +208,9 @@ function App() {
 
   const autoSaveChanged = (newValue) => {
     setAutoSave(newValue);
+    if ((typeof window !== 'undefined')) {
+      window.ipcAPI.send('autoSave', { autoSave: newValue });
+    }
     const data = {
       autosave: newValue,
     };

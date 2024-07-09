@@ -1,5 +1,6 @@
 const {
-  app, BrowserWindow, Menu, ipcMain, dialog,
+  app, BrowserWindow, Menu, ipcMain, dialog, shell,
+// eslint-disable-next-line import/no-extraneous-dependencies
 } = require('electron');
 const { spawn } = require('child_process');
 const path = require('node:path');
@@ -8,9 +9,7 @@ const Store = require('electron-store');
 const log = require('electron-log');
 const config = require('./rpe.config.json');
 const { kill } = require('./cleanup');
-const {
-  openProjectRequest, saveProjectRequest, sendProjectData, fetchProjectData,
-} = require('./projectFile');
+const { openProjectRequest, saveProjectRequest } = require('./projectFile');
 
 const logFormat = '[{h}:{i}:{s}.{ms}] [{level}] {text}';
 log.transports.console.format = logFormat;
@@ -39,7 +38,7 @@ const schema = {
 
 const store = new Store({ schema });
 
-let projectMeta = {
+const projectMeta = {
   file: '',
   notes: '',
   lang: 0,
@@ -69,42 +68,14 @@ function saveProjectClicked() {
       projectMeta.file = file;
       projectMeta.changed = false;
       updateTitle({ modified: false, filepath: projectMeta.file });
-      sendProjectData(projectMeta);
+      sendProjectDataToRenderer({ action: 'saveAs', filepath: file });
     }
   } else {
-    projectMeta.changed = false;
-    sendProjectData(projectMeta);
+    sendProjectDataToRenderer({ action: 'save' });
   }
 }
 
-function projectSaved() {
-  if (projectMeta.changed) {
-    const result = dialog.showMessageBoxSync(mainWindow, {
-      type: 'question',
-      buttons: ['Cancel', 'Yes', 'No'],
-      defaultId: 0,
-      title: 'Save changes',
-      message: 'Do you want save your changes?',
-    });
-    if (result === 1) { // Yes
-      saveProjectClicked();
-    } else if (result === 2) { // No
-      return true;
-    }
-  }
-  return !projectMeta.changed;
-}
-
-function saveAsClicked() {
-  const file = saveProjectRequest(mainWindow);
-  if (file.length > 0) {
-    projectMeta.file = file;
-    projectMeta.changed = false;
-    updateTitle({ modified: false, filepath: projectMeta.file });
-  }
-}
-
-function newProjectClicked() {
+function acceptReset(accept) {
   const result = dialog.showMessageBoxSync(mainWindow, {
     type: 'question',
     buttons: ['Cancel', 'Yes', 'No'],
@@ -113,22 +84,36 @@ function newProjectClicked() {
     message: 'All data will be reset. Do you want to continue?',
   });
   if (result === 1) { // Yes
-    sendProjectDataToRenderer({ action: 'new' });
+    accept();
   }
 }
 
+function saveAsClicked() {
+  const file = saveProjectRequest(mainWindow);
+  if (file.length > 0) {
+    projectMeta.file = file;
+    projectMeta.changed = false;
+    updateTitle({ modified: false, filepath: projectMeta.file });
+    sendProjectDataToRenderer({ action: 'saveAs', filepath: file });
+  }
+}
+
+function newProjectClicked() {
+  acceptReset(() => {
+    projectMeta.file = '';
+    sendProjectDataToRenderer({ action: 'new' });
+  });
+}
+
 function openProjectClicked() {
-  if (projectSaved()) {
+  acceptReset(() => {
     const projectFile = openProjectRequest(mainWindow);
     if (projectFile.length > 0) {
       projectMeta.file = projectFile;
-      fetchProjectData(projectMeta, (data) => {
-        projectMeta = data;
-        updateTitle({ modified: false, filepath: projectMeta.file });
-        sendProjectDataToRenderer({ action: 'open', filepath: projectFile });
-      });
+      updateTitle({ modified: false, filepath: projectMeta.file });
+      sendProjectDataToRenderer({ action: 'open', filepath: projectFile });
     }
-  }
+  });
 }
 
 const isDev = process.argv.find((val) => val === '--development');
@@ -144,10 +129,12 @@ const template = [
     submenu: [
       {
         label: 'New Project',
+        accelerator: 'CmdOrCtrl+N',
         click: () => { newProjectClicked(); },
       },
       {
         label: 'Open Project',
+        accelerator: 'CmdOrCtrl+O',
         click: () => { openProjectClicked(); },
       },
       {
@@ -157,6 +144,7 @@ const template = [
       { label: 'Sample Project' },
       {
         label: 'Save',
+        accelerator: 'CmdOrCtrl+S',
         click: () => { saveProjectClicked(); },
       },
       {
@@ -195,7 +183,6 @@ const template = [
       {
         role: 'help',
         click: async () => {
-          const { shell } = require('electron');
           await shell.openExternal('https://github.com/os-fpga/rapid_power_estimator/blob/main/README.md');
         },
       },
@@ -276,11 +263,12 @@ const createWindow = () => {
     app.relaunch();
     app.quit();
   });
-  ipcMain.on('getConfig', (event, arg) => {
+  ipcMain.on('getConfig', () => {
     mainWindow.webContents.send('loadConfig', store.store);
   });
   ipcMain.on('projectData', (event, arg) => {
-    updateTitle(arg);
+    if (arg.saveRequest) saveProjectClicked();
+    else updateTitle(arg);
   });
 };
 

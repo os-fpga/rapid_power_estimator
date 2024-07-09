@@ -1,4 +1,5 @@
 const { dialog } = require('electron');
+const path = require('path');
 
 function openProjectRequest(parent) {
   const result = dialog.showOpenDialogSync(parent, {
@@ -13,28 +14,19 @@ function openProjectRequest(parent) {
 }
 
 function saveProjectRequest(parent) {
-  const result = dialog.showSaveDialogSync(parent, {
+  let filename = dialog.showSaveDialogSync(parent, {
     properties: ['showOverwriteConfirmation'],
     title: 'Save project file...',
     filters: [{ name: 'Project file (*.rpe)', extensions: ['rpe'] }],
+    defaultPath: 'project.rpe',
   });
-  return result === undefined ? '' : result;
-}
-
-function sendProjectData(projectData) {
-  // TODO pending API
-}
-
-function fetchProjectData(projectData, callback) {
-  // TODO pending API
-  callback({ // TODO, replace with real data
-    file: projectData.file, lang: '1', name: 'Name', notes: 'some notes', changed: false,
-  });
+  if (filename !== undefined) {
+    if (path.extname(filename) !== '.rpe') filename += '.rpe';
+  }
+  return filename === undefined ? '' : filename;
 }
 
 module.exports = {
   openProjectRequest,
   saveProjectRequest,
-  sendProjectData,
-  fetchProjectData,
 };

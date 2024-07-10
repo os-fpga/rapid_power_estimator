@@ -49,7 +49,6 @@ function App() {
   const [devices, setDevices] = React.useState([]);
   const [device, setDevice] = React.useState(null);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
-  const [lastSaveTime, setLastSaveTime] = React.useState(moment().format(timeFormat));
   const [mode, setMode] = React.useState(false);
   const [autoSave, setAutoSave] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -58,6 +57,7 @@ function App() {
     lang: 0,
     notes: '',
     device: '',
+    lastEdited: moment().format(timeFormat),
   });
   const [config, setConfig] = React.useState({
     useDefaultFile: true,
@@ -91,6 +91,7 @@ function App() {
         name: data.name,
         device: data.device,
         notes: data.notes,
+        lastEdited: moment(data.last_edited).format(timeFormat),
       };
       const findLang = Language.find((i) => i.text === lang);
       if (findLang !== undefined) newData.lang = findLang.id;
@@ -145,11 +146,9 @@ function App() {
           server.POST(server.projectOpen(), openData, fetchProjectData);
         }
         if (data.action === 'save') {
-          setLastSaveTime(moment().format(timeFormat));
           server.POST(server.project(), {}, fetchProjectData);
         }
         if (data.action === 'saveAs') {
-          setLastSaveTime(moment().format(timeFormat));
           const saveData = { filepath: data.filepath };
           server.POST(server.projectSave(), saveData, fetchProjectData);
         }
@@ -250,7 +249,7 @@ function App() {
         <div className="power-tables pt-group">
           <div className="edit-line">
             <div className="grayed-text no-wrap">Last Edited</div>
-            <div className="last-time">{lastSaveTime}</div>
+            <div className="last-time">{projectData.lastEdited}</div>
             <div className="save-icon" onClick={() => sendProjectData({ saveRequest: true })}><FiSave /></div>
           </div>
           <input type="text" placeholder="Top level name" value={projectData.name} onChange={handleTopNameChange} />

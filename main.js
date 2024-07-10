@@ -34,6 +34,10 @@ const schema = {
     type: 'string',
     default: '',
   },
+  autoSave: {
+    type: 'boolean',
+    default: true,
+  },
 };
 
 const store = new Store({ schema });
@@ -269,6 +273,9 @@ const createWindow = () => {
   ipcMain.on('projectData', (event, arg) => {
     if (arg.saveRequest) saveProjectClicked();
     else updateTitle(arg);
+  });
+  ipcMain.on('autoSave', (event, arg) => {
+    store.set('autoSave', arg.autoSave);
   });
 };
 

@@ -205,32 +205,32 @@ class RsDevice:
 
         # fabric logic element module
         self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
-            Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=20, flip_flop=50),
-            Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=10, flip_flop=30)
+            # Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=20, flip_flop=50),
+            # Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=10, flip_flop=30)
         ]))
 
         # dsp module
         self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
-            DSP(number_of_multipliers=11, enable=True, name="test test 1", clock='CLK_100'),
-            DSP(number_of_multipliers=12, enable=True, name="test test 2", clock='CLK_233')
+            # DSP(number_of_multipliers=11, enable=True, name="test test 1", clock='CLK_100'),
+            # DSP(number_of_multipliers=12, enable=True, name="test test 2", clock='CLK_233')
         ]))
 
         # bram module
         self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
-            BRAM(name="test 1", bram_used=16, enable=True, type=BRAM_Type.BRAM_18k_TDP, port_a=PortProperties(clock='CLK_100'), port_b=PortProperties(clock='CLK_233')),
-            BRAM(name="test 2", bram_used=17, enable=True, type=BRAM_Type.BRAM_18k_TDP)
+            # BRAM(name="test 1", bram_used=16, enable=True, type=BRAM_Type.BRAM_18k_TDP, port_a=PortProperties(clock='CLK_100'), port_b=PortProperties(clock='CLK_233')),
+            # BRAM(name="test 2", bram_used=17, enable=True, type=BRAM_Type.BRAM_18k_TDP)
         ]))
 
         # io module
         self.resources.register_module(ModuleType.IO, IO_SubModule(self.resources, [
-            IO(name="test 1", clock="CLK_100", enable=True),
-            IO(name="test 2", clock="CLK_233")
+            # IO(name="test 1", clock="CLK_100", enable=True),
+            # IO(name="test 2", clock="CLK_233")
         ]))
 
         # clocking module
         self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, [
             Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
-            Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
+            # Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
 
         # soc peripherals module

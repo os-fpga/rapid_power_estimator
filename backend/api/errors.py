@@ -53,6 +53,9 @@ class CreateProjectPermissionError(Exception):
 class ProjectNotLoadedError(Exception):
     pass
 
+class ProjectFileNotFoundError(Exception):
+    pass
+
 errors = {
     "DeviceNotExistsError": {
         "message": "Device with given id doesn't exists",
@@ -120,6 +123,10 @@ errors = {
     },
     "ProjectNotLoadedError": {
         "message": "Project not loaded",
+        "status": 400
+    },
+    "ProjectFileNotFoundError": {
+        "message": "Project file not found",
         "status": 400
     },
 }

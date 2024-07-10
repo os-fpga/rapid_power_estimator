@@ -10,12 +10,12 @@ from api.errors import InternalServerError, SchemaValidationError
 from api.device import MessageSchema
 from submodule.rs_device_resources import ProjectNotLoadedException
 from submodule.rs_project import RsProjectManager, RsProjectState
-from .errors import CreateProjectPermissionError, ProjectNotLoadedError, errors
+from .errors import CreateProjectPermissionError, ProjectFileNotFoundError, ProjectNotLoadedError, errors
 
 #-----------------------------------------------------------------------#
 # endpoints         | methods                   | classes               #
 #-----------------------------------------------------------------------#
-# /project          | GET, POST, PATCH, DELETE  | ProjectApi            #
+# /project          | GET, POST, PATCH          | ProjectApi            #
 # /project/create   | POST                      | ProjectCreateApi      #
 # /project/open     | POST                      | ProjectOpenApi        #
 # /project/close    | POST                      | ProjectCloseApi       #
@@ -243,6 +243,8 @@ class ProjectOpenApi(Resource):
             proj_mgr = RsProjectManager.get_instance()
             proj_mgr.load(ProjectFilepathSchema().load(request.json)['filepath'])
             return "", 204
+        except FileNotFoundError as e:
+            raise ProjectFileNotFoundError
         except ValidationError as e:
             raise SchemaValidationError
         except Exception as e:

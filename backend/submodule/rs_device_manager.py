@@ -2,6 +2,7 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+from typing import List
 from device.device_xml_parser import parse_device_xml, DeviceList
 from .rs_device_resources import ModuleType, DeviceNotFoundException
 from .rs_device import RsDevice
@@ -27,7 +28,7 @@ class RsDeviceManager:
         for res in self.device_list.devices:
             self.devices.append(RsDevice(res))
 
-    def get_device_all(self):
+    def get_device_all(self) -> List[RsDevice]:
         return self.devices
 
     def get_device(self, device_id : str) -> RsDevice:

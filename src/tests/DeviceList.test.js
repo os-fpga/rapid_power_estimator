@@ -15,7 +15,7 @@ describe('DeviceList', () => {
       <GlobalStateProvider fetch={fetch}>
         <SocTotalPowerProvider>
           <SelectionProvider>
-            <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => { }} />
+            <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} selectedDevice={'selectDev'} handleDeviceChange={() => {}}/>
           </SelectionProvider>
         </SocTotalPowerProvider>
       </GlobalStateProvider>,

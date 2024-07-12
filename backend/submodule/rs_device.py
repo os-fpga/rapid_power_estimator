@@ -229,7 +229,7 @@ class RsDevice:
 
         # clocking module
         self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, [
-            Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
+            # Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
             # Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
         ]))
 
@@ -578,3 +578,9 @@ class RsDevice:
             self.specification.thermal.theta_ja, \
             self.get_total_dynamic_power(False),
             False)
+
+    def clear(self) -> None:
+        # clear all device inputs by user
+        for module in self.resources.get_modules():
+            if module:
+                module.clear()

@@ -263,7 +263,9 @@ class RsDeviceResources:
         return self.peripheral_noc_power_factor
 
     def get_attr(self, name) -> int:
-        return int(self.device.resources[name].num)
+        if name in self.device.resources:
+            return int(self.device.resources[name].num)
+        return 0
 
     def get_num_Clocks(self):
         # NOTE:
@@ -356,6 +358,31 @@ class RsDeviceResources:
     def get_num_USB_IOs(self) -> int:
         # todo: how to get number of Gige peripheral?
         return 5
+
+    def get_num_USBs(self) -> int:
+        return self.get_attr('usb')
+
+    def get_num_GIGEs(self) -> int:
+        return self.get_attr('gbe')
+
+    def get_num_DDRs(self) -> int:
+        return self.get_attr('ddr')
+
+    def get_num_I2Cs(self) -> int:
+        return self.get_attr('i2c')
+
+    def get_num_UARTs(self) -> int:
+        return self.get_attr('uart')
+
+    def get_num_JTAGs(self) -> int:
+        return self.get_attr('jtag')
+
+    def get_num_PWMs(self) -> int:
+        return self.get_attr('pwm')
+
+    def get_num_DMAs(self) -> int:
+        # todo: how to get number of DMA peripheral and channel?
+        return 1
 
     def get_CLK_CAP(self) -> float:
         # todo: read from power data. Coeffient to calculate clock block power

@@ -7,6 +7,7 @@ from marshmallow import Schema, fields
 import numpy as np
 import json
 from typing import Any, Dict, List
+from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ProjectNotLoadedException
 from submodule.rs_message import RsMessage
 from utilities.common_utils import RsEnum, update_attributes
@@ -72,9 +73,15 @@ class RsProjectManager:
         self.projects[0].modified = True
         return True
 
+    def clear_devices(self) -> None:
+        # clear all devices inputs
+        devmgr = RsDeviceManager.get_instance()
+        devmgr.clear_all_device_inputs()
+
     def load(self, filepath: str) -> bool:
         with open(filepath, 'r') as fd:
             data = RsProjectSchema().load(json.load(fd))
+            self.clear_devices()
             update_attributes(self.projects[0], data['project'], exclude=self.get_excluded_fields())
         self.projects[0].state = RsProjectState.LOADED
         self.projects[0].filepath = filepath
@@ -93,6 +100,7 @@ class RsProjectManager:
 
     def close(self) -> bool:
         self.projects[0] = RsProject()
+        self.clear_devices()
         return True
 
     def create(self, filepath: str) -> bool:

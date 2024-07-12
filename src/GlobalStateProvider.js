@@ -17,6 +17,7 @@ const PeripheralTarget = {
   ACPU: 1,
   BCPU: 2,
   FABRIC: 4,
+  DMA: 8,
 };
 
 function isTarget(targets, target) {
@@ -36,11 +37,13 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   const [acpuNames, setAcpuNames] = useState([]);
   const [bcpuNames, setBcpuNames] = useState([]);
   const [connectivityNames, setConnectivityNames] = useState([]);
+  const [dmaNames, setDmaNames] = useState([]);
 
   let peripheralsMessages = {};
   const acpuNamesLocal = [];
   const bcpuNamesLocal = [];
   const connectivityNamesLocal = [];
+  const dmaNamesLocal = [];
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -95,6 +98,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
           });
           setConnectivityNames(connectivityNamesLocal);
         }
+        if (isTarget(targets, PeripheralTarget.DMA)) {
+          dmaNamesLocal.push({ id: dmaNamesLocal.length, text: componentData.name });
+          setDmaNames(dmaNamesLocal);
+        }
       }
     });
   }
@@ -147,6 +154,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     acpuNames,
     bcpuNames,
     connectivityNames,
+    dmaNames,
     fetchAttributes,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [bramState, clockingState, dspState, fleState, ioState, socState]);

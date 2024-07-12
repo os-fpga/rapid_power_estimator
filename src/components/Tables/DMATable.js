@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import DMAModal from '../ModalWindows/DMAModal';
 import PowerTable from './PowerTable';
 import * as server from '../../utils/serverAPI';
-import { fixed } from '../../utils/common';
+import { GetText, fixed } from '../../utils/common';
 import {
   PercentsCell, PowerCell, SelectionCell, BandwidthCell,
 } from './TableCells';
@@ -31,13 +31,13 @@ function DMATable({ device }) {
     { id: 3, data: {} },
   ]);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions } = useGlobalState();
-  const loadActivity = GetOptions('Dma_Activity');
-  const source = GetOptions('Dma_Source_Destination');
+  const { GetOptions, dmaNames } = useGlobalState();
+  const loadActivity = GetOptions('Port_Activity');
+  console.log(dmaNames);
 
   const mainTableHeader = [
     '', 'Action', 'En', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
-    'Bandwidth', 'Block Power', '%',
+    'Bandwidth', 'NOC Power', 'Block Power', '%',
   ];
 
   function toChannelHref(index) {
@@ -80,6 +80,10 @@ function DMATable({ device }) {
   }
 
   function modifyRow(index, row) {
+    console.log(row);
+    const newData = row;
+    newData.source = GetText(row.source, dmaNames);
+    newData.destination = GetText(row.destination, dmaNames);
     server.PATCH(
       server.peripheralPath(device, toChannelHref(index)),
       row,
@@ -157,12 +161,13 @@ function DMATable({ device }) {
                   checkHandler={(state) => enableChanged(index, state)}
                 />
                 <td>{row.data.name}</td>
-                <SelectionCell val={row.data.source} values={source} />
-                <SelectionCell val={row.data.destination} values={source} />
+                <td>{row.data.source}</td>
+                <td>{row.data.destination}</td>
                 <SelectionCell val={row.data.activity} values={loadActivity} />
                 <PercentsCell val={row.data.read_write_rate} />
                 <PercentsCell val={row.data.toggle_rate} precition={1} />
                 <BandwidthCell val={row.data.consumption.calculated_bandwidth} />
+                <PowerCell val={row.data.consumption.noc_power} />
                 <PowerCell val={row.data.consumption.block_power} />
                 <td>
                   {fixed(row.data.consumption.percentage, 0)}
@@ -182,7 +187,19 @@ function DMATable({ device }) {
             setEditIndex(null);
           }}
           onSubmit={handleSubmit}
-          defaultValue={(editIndex !== null && dmaData[editIndex].data) || {
+          defaultValue={(editIndex !== null && {
+            enable: true,
+            name: dmaData[editIndex].data.name,
+            source: dmaData[editIndex].data.source !== '' ? dmaNames.indexOf(dmaNames.find(
+              (elem) => elem.text === dmaData[editIndex].data.source,
+            )) : 0,
+            destination: dmaData[editIndex].data.destination !== '' ? dmaNames.indexOf(dmaNames.find(
+              (elem) => elem.text === dmaData[editIndex].data.destination,
+            )) : 0,
+            activity: dmaData[editIndex].data.activity,
+            read_write_rate: dmaData[editIndex].data.read_write_rate,
+            toggle_rate: dmaData[editIndex].data.toggle_rate,
+          }) || {
             enable: true,
             name: '',
             source: 0,
@@ -191,6 +208,8 @@ function DMATable({ device }) {
             read_write_rate: 0,
             toggle_rate: 0,
           }}
+          loadActivity={loadActivity}
+          source={dmaNames}
         />
       )}
     </div>

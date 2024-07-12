@@ -103,12 +103,12 @@ class DSP:
 
 class DSP_SubModule:
 
-    def __init__(self, resources, itemlist):
+    def __init__(self, resources, itemlist: List[DSP] = None):
         self.resources = resources
         self.total_dsp_blocks_available = resources.get_num_DSP_BLOCKs()
         self.total_interconnect_power = 0.0
         self.total_block_power = 0.0
-        self.itemlist = itemlist
+        self.itemlist: List[DSP] = itemlist or []
 
     def get_resources(self):
         total_dsp_blocks_used = 0
@@ -148,6 +148,9 @@ class DSP_SubModule:
             item = self.itemlist.pop(idx)
             return item
         raise DspNotFoundException
+
+    def clear(self) -> None:
+        self.itemlist.clear()
 
     def compute_output_power(self):
         # Get power calculation coefficients

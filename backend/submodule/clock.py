@@ -65,14 +65,14 @@ class Clock:
 
 class Clock_SubModule:
 
-    def __init__(self, resources, itemlist):
+    def __init__(self, resources, itemlist: List[Clock] = None):
         self.resources = resources
         self.total_clock_available = resources.get_num_Clocks()
         self.total_pll_available = resources.get_num_PLLs()
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
         self.total_pll_power = 0.0
-        self.itemlist = itemlist
+        self.itemlist: List[Clock] = itemlist or []
 
     def get_total_output_power(self) -> float:
         return sum(self.get_power_consumption())
@@ -110,6 +110,9 @@ class Clock_SubModule:
             item = self.itemlist.pop(idx)
             return item
         raise ClockNotFoundException
+
+    def clear(self) -> None:
+        self.itemlist.clear()
 
     def update(self, idx, data):
         item = update_attributes(self.get(idx), data)

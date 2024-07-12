@@ -175,13 +175,13 @@ class BRAM:
 
 class BRAM_SubModule:
 
-    def __init__(self, resources, itemlist):
+    def __init__(self, resources, itemlist: List[BRAM] = None):
         self.resources = resources
         self.total_18k_bram_available = resources.get_num_18K_BRAM()
         self.total_36k_bram_available = resources.get_num_36K_BRAM()
         self.total_interconnect_power = 0.0
         self.total_block_power = 0.0
-        self.itemlist = itemlist
+        self.itemlist: List[BRAM] = itemlist or []
 
     def get_resources(self):
         total_18k_bram_used = 0
@@ -223,6 +223,9 @@ class BRAM_SubModule:
         if 0 <= idx < len(self.itemlist):
             return self.itemlist.pop(idx)
         raise BramNotFoundException
+
+    def clear(self) -> None:
+        self.itemlist.clear()
 
     def compute_output_power(self):
         # Get power calculation coefficients

@@ -91,13 +91,13 @@ class Fabric_LE:
         
 class Fabric_LE_SubModule:
 
-    def __init__(self, resources, itemlist):
+    def __init__(self, resources, itemlist: List[Fabric_LE] = None):
         self.resources = resources
         self.total_lut6_available = resources.get_num_LUTs()
         self.total_flipflop_available = resources.get_num_FFs()
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
-        self.itemlist = itemlist
+        self.itemlist: List[Fabric_LE] = itemlist or []
 
     def get_total_output_power(self) -> float:
         return sum(self.get_power_consumption())
@@ -137,7 +137,10 @@ class Fabric_LE_SubModule:
             item = self.itemlist.pop(idx)
             return item
         raise FabricLeNotFoundException
-        
+
+    def clear(self) -> None:
+        self.itemlist.clear()
+
     def update(self, idx, data):
         item = update_attributes(self.get(idx), data)
         return item

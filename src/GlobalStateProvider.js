@@ -1,6 +1,5 @@
 import React, {
   createContext, useContext, useState, useMemo,
-  useEffect,
 } from 'react';
 import * as server from './utils/serverAPI';
 
@@ -42,10 +41,6 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   const acpuNamesLocal = [];
   const bcpuNamesLocal = [];
   const connectivityNamesLocal = [];
-
-  useEffect(() => {
-    fetch(server.attributes(), (attr) => setAttributes(attr));
-  }, [fetch]);
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -135,6 +130,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     return (found === undefined) ? [] : found.options;
   }
 
+  function fetchAttributes() {
+    fetch(server.attributes(), (attr) => setAttributes(attr));
+  }
+
   const values = useMemo(() => ({
     updateGlobalState,
     clockingState,
@@ -148,6 +147,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     acpuNames,
     bcpuNames,
     connectivityNames,
+    fetchAttributes,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [bramState, clockingState, dspState, fleState, ioState, socState]);
 

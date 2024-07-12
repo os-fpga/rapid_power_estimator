@@ -68,7 +68,7 @@ function App() {
   const { toggleItemSelection } = useSelection();
   const [preferencesChanged, setPreferencesChanged] = React.useState(false);
   const { setClocks } = useClockSelection();
-  const { updateGlobalState } = useGlobalState();
+  const { updateGlobalState, fetchAttributes } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
   const [peripherals, setPeripherals] = React.useState([]);
   const [memoryEnable, setMemoryEnable] = React.useState(true);
@@ -157,6 +157,7 @@ function App() {
         setConfig(data);
         setAutoSave(data.autoSave);
         server.setPort(data.port, setDevices);
+        fetchAttributes();
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
         if (data.action === 'new') server.POST(server.projectClose(), {}, fetchProjectData);

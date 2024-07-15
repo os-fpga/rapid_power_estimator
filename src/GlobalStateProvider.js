@@ -77,6 +77,9 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       if (componentData.ports !== undefined) {
         componentData.ports.forEach((port) => fetchPort(device, href, port, key));
       }
+      if (componentData.channels !== undefined) {
+        componentData.channels.forEach((channel) => fetchPort(device, href, channel, key));
+      }
       if (componentData.targets !== undefined) {
         const { targets } = componentData;
         if (isTarget(targets, PeripheralTarget.ACPU)) {

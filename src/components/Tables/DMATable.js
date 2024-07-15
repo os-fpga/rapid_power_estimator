@@ -31,9 +31,8 @@ function DMATable({ device }) {
     { id: 3, data: {} },
   ]);
   const { updateTotalPower } = useSocTotalPower();
-  const { GetOptions, dmaNames } = useGlobalState();
+  const { GetOptions, dmaNames, updateGlobalState } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
-  console.log(dmaNames);
 
   const mainTableHeader = [
     '', 'Action', 'En', 'Channel name', 'Source', 'Destination', 'Activity', 'R/W', 'Toggle Rate',
@@ -79,8 +78,13 @@ function DMATable({ device }) {
     }
   }
 
+  function modifyDataHandler() {
+    publish('dmaChanged');
+    updateTotalPower(device);
+    updateGlobalState(device);
+  }
+
   function modifyRow(index, row) {
-    console.log(row);
     const newData = row;
     newData.source = GetText(row.source, dmaNames);
     newData.destination = GetText(row.destination, dmaNames);
@@ -107,8 +111,7 @@ function DMATable({ device }) {
   const handleSubmit = (newRow) => {
     if (editIndex !== null) modifyRow(editIndex, newRow);
     else addRow(newRow);
-    publish('dmaChanged');
-    updateTotalPower(device);
+    modifyDataHandler();
   };
 
   const resourcesHeaders = [
@@ -124,8 +127,7 @@ function DMATable({ device }) {
       data,
       () => fetchData(dmaHref),
     );
-    publish('dmaChanged');
-    updateTotalPower(device);
+    modifyDataHandler();
   }
 
   const title = 'DMA';

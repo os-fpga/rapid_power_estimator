@@ -68,10 +68,11 @@ function App() {
   const { toggleItemSelection } = useSelection();
   const [preferencesChanged, setPreferencesChanged] = React.useState(false);
   const { setClocks } = useClockSelection();
-  const { updateGlobalState } = useGlobalState();
+  const { updateGlobalState, fetchAttributes } = useGlobalState();
   const { updateTotalPower } = useSocTotalPower();
   const [peripherals, setPeripherals] = React.useState([]);
   const [memoryEnable, setMemoryEnable] = React.useState(true);
+  const [selectedDevice, setSelectedDevice] = React.useState('selectDev');
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -82,6 +83,23 @@ function App() {
   function sendProjectData(projectDataValue) {
     window.ipcAPI.send('projectData', projectDataValue);
   }
+
+  const deviceChanged = (newDevice) => {
+    setDevice(newDevice);
+    updateGlobalState(newDevice);
+    updateTotalPower(newDevice);
+    server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
+      const ddr = getPeripherals(data, 'ddr');
+      const ocm = getPeripherals(data, 'ocm');
+      setMemoryEnable(ddr.length > 0 || ocm.length > 0);
+      setPeripherals(data);
+    });
+    if (newDevice !== null) {
+      server.GET(server.api.fetch(server.Elem.clocking, newDevice), (data) => {
+        setClocks(data.map((item) => item.port));
+      });
+    }
+  };
 
   function fetchProjectData() {
     server.GET(server.project(), (data) => {
@@ -98,7 +116,8 @@ function App() {
       else newData.lang = Language[0].id;
       setProjectData(newData);
       if (data.device.length !== 0 && data.device !== device) {
-        // TODO, switch device
+        setSelectedDevice(data.device);
+        deviceChanged(data.device);
       }
       sendProjectData({ modified: data.modified, filepath: data.filepath });
     });
@@ -138,6 +157,7 @@ function App() {
         setConfig(data);
         setAutoSave(data.autoSave);
         server.setPort(data.port, setDevices);
+        fetchAttributes();
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
         if (data.action === 'new') server.POST(server.projectClose(), {}, fetchProjectData);
@@ -156,27 +176,6 @@ function App() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const deviceChanged = (newDevice) => {
-    setDevice(newDevice);
-    updateGlobalState(newDevice);
-    updateTotalPower(newDevice);
-    server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
-      const ddr = getPeripherals(data, 'ddr');
-      const ocm = getPeripherals(data, 'ocm');
-      setMemoryEnable(ddr.length > 0 || ocm.length > 0);
-      setPeripherals(data);
-    });
-    if (newDevice !== null) {
-      server.GET(server.api.fetch(server.Elem.clocking, newDevice), (data) => {
-        setClocks(data.map((item) => item.port));
-      });
-    }
-    const data = {
-      device: newDevice,
-    };
-    server.PATCH(server.project(), data, fetchProjectData);
-  };
 
   const handleNotesChange = (notes) => {
     const data = {
@@ -216,6 +215,15 @@ function App() {
     server.PATCH(server.project(), data);
   };
 
+  const handleDeviceChange = (deviceId) => {
+    setSelectedDevice(deviceId);
+    deviceChanged(deviceId);
+    const data = {
+      device: deviceId,
+    };
+    server.PATCH(server.project(), data, fetchProjectData);
+  };
+
   return (
     <div className="rpe-head">
       <div className="top-row-container">
@@ -223,7 +231,8 @@ function App() {
           <div className="top-l1 main-bottom-border" onClick={() => setOpenedTable(Table.Summary)}>
             <DeviceList
               devices={devices}
-              setDevice={deviceChanged}
+              selectedDevice={selectedDevice}
+              handleDeviceChange={handleDeviceChange}
             />
           </div>
           <div className="top-l2">

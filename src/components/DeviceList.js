@@ -3,10 +3,9 @@ import * as server from '../utils/serverAPI';
 import { useSelection } from '../SelectionProvider';
 import './style/DeviceList.css';
 
-function DeviceList({ devices, setDevice }) {
+function DeviceList({ devices, selectedDevice, handleDeviceChange }) {
   const [deviceInfo, setDeviceInfo] = React.useState({});
   const { selectedItem } = useSelection();
-  const [selectedDevice, setSelectedDevice] = React.useState('selectDev');
 
   function getDeviceInfo(id) {
     server.GET(server.deviceInfo(id), (data) => setDeviceInfo(data));
@@ -14,9 +13,8 @@ function DeviceList({ devices, setDevice }) {
 
   function DeviceOnChange(event) {
     const deviceId = event.target.value;
-    setSelectedDevice(deviceId);
     getDeviceInfo(deviceId);
-    setDevice(deviceId);
+    handleDeviceChange(deviceId);
   }
 
   function getBaseName() {

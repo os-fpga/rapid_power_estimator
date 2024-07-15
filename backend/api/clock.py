@@ -8,11 +8,10 @@ from marshmallow import Schema, fields, ValidationError
 from submodule.clock import Clock_State, Source
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, DeviceNotFoundException, ClockNotFoundException, \
-    ClockDescriptionPortValidationException
+    ClockDescriptionPortValidationException, ClockMaxCountReachedException
 from .device import MessageSchema
-from .errors import DeviceNotExistsError, InternalServerError, ClockNotExistsError, \
+from .errors import ClockMaxCountReachedError, DeviceNotExistsError, InternalServerError, ClockNotExistsError, \
     ClockDescriptionPortValidationError, \
-    ClockMaxCountReachedException, \
     SchemaValidationError
 from .errors import errors
 

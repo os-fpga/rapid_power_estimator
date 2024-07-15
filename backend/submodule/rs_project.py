@@ -7,8 +7,13 @@ from marshmallow import Schema, fields
 import numpy as np
 import json
 from typing import Any, Dict, List
+from api.clock import ClockSchema
+from api.dsp import DspSchema
+from api.fabric_le import FabricLogicElementSchema
+from api.bram import BramSchema
+from api.io import IoSchema
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import ProjectNotLoadedException
+from submodule.rs_device_resources import ModuleType, ProjectNotLoadedException
 from submodule.rs_message import RsMessage
 from utilities.common_utils import RsEnum, update_attributes
 from dataclasses import dataclass, field
@@ -25,8 +30,16 @@ class RsProjectAttributesSchema(Schema):
     version = fields.Str()
     last_edited = fields.DateTime()
 
+class RsDeviceConfig(Schema):
+    clocking = fields.Nested(ClockSchema, many=True, exclude=['output'])
+    dsp = fields.Nested(DspSchema, many=True, exclude=['output'])
+    fabric_le = fields.Nested(FabricLogicElementSchema, many=True, exclude=['output'])
+    bram = fields.Nested(BramSchema, many=True, exclude=['output'])
+    io = fields.Nested(IoSchema, many=True, exclude=['output'])
+
 class RsProjectDeviceSchema(Schema):
-    pass
+    name = fields.Str()
+    configuration = fields.Nested(RsDeviceConfig)
 
 class RsProjectSchema(Schema):
     project = fields.Nested(RsProjectAttributesSchema)
@@ -88,11 +101,29 @@ class RsProjectManager:
         self.projects[0].modified = False
         return True
 
+    def write_file(self, project: RsProject, filepath: str) -> None:
+        with open(filepath, 'w') as fd:
+            # collect inputs from all devices
+            devices = []
+            for device in RsDeviceManager.get_instance().get_device_all():
+                data = {
+                    'name': device.id,
+                    'configuration': {
+                        'clocking': device.get_module(ModuleType.CLOCKING).get_all(),
+                        'dsp': device.get_module(ModuleType.DSP).get_all(),
+                        'fabric_le': device.get_module(ModuleType.FABRIC_LE).get_all(),
+                        'bram': device.get_module(ModuleType.BRAM).get_all(),
+                        'io': device.get_module(ModuleType.IO).get_all(),
+                        'peripherals': []
+                    }
+                }
+                devices.append(data)
+            json.dump(RsProjectSchema().dump({ 'project': project, 'devices': devices }), fd, indent=2)
+
     def save(self) -> bool:
         if self.projects[0].state == RsProjectState.LOADED:
             self.projects[0].last_edited = datetime.now()
-            with open(self.projects[0].filepath, 'w') as fd:
-                json.dump(RsProjectSchema().dump({ 'project': self.projects[0] }), fd, indent=4)
+            self.write_file(self.projects[0], self.projects[0].filepath)
             self.projects[0].modified = False
         else:
             raise ProjectNotLoadedException
@@ -105,8 +136,7 @@ class RsProjectManager:
 
     def create(self, filepath: str) -> bool:
         self.projects[0].last_edited = datetime.now()
-        with open(filepath, 'w') as fd:
-            json.dump(RsProjectSchema().dump({ 'project': self.projects[0] }), fd, indent=4)
+        self.write_file(self.projects[0], filepath)
         self.projects[0].state = RsProjectState.LOADED
         self.projects[0].filepath = filepath
         self.projects[0].modified = False

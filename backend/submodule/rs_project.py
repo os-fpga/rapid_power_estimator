@@ -13,8 +13,8 @@ from api.fabric_le import FabricLogicElementSchema
 from api.bram import BramSchema
 from api.io import IoSchema
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import ModuleType, ProjectNotLoadedException
-from submodule.rs_message import RsMessage
+from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, ProjectNotLoadedException
+from submodule.rs_message import RsMessage, RsMessageManager
 from utilities.common_utils import RsEnum, update_attributes
 from dataclasses import dataclass, field
 
@@ -91,11 +91,33 @@ class RsProjectManager:
         devmgr = RsDeviceManager.get_instance()
         devmgr.clear_all_device_inputs()
 
-    def load(self, filepath: str) -> bool:
+    def load_module(self, module, items: List, messages: List[RsMessage]) -> None:
+        for data in items:
+            try:
+                module.add(data)
+            except Exception as e:
+                messages.append(RsMessageManager.get_message(307, { 'message': e.args[0] }))
+
+    def load_devices(self, devices: List, messages: List[RsMessage]) -> None:
+        for data in devices:
+            try:
+                device = RsDeviceManager.get_instance().get_device(data['name'])
+                self.load_module(device.get_module(ModuleType.CLOCKING), data['configuration']['clocking'], messages)
+                self.load_module(device.get_module(ModuleType.DSP), data['configuration']['dsp'], messages)
+                self.load_module(device.get_module(ModuleType.FABRIC_LE), data['configuration']['fabric_le'], messages)
+                self.load_module(device.get_module(ModuleType.BRAM), data['configuration']['bram'], messages)
+                self.load_module(device.get_module(ModuleType.IO), data['configuration']['io'], messages)
+                device.compute_output_power()
+            except DeviceNotFoundException as e:
+                messages.append(RsMessageManager.get_message(306, { 'name': data['name'] }))
+
+    def open(self, filepath: str) -> bool:
         with open(filepath, 'r') as fd:
             data = RsProjectSchema().load(json.load(fd))
+            self.projects[0].messages.clear()
             self.clear_devices()
             update_attributes(self.projects[0], data['project'], exclude=self.get_excluded_fields())
+            self.load_devices(data['devices'], self.projects[0].messages)
         self.projects[0].state = RsProjectState.LOADED
         self.projects[0].filepath = filepath
         self.projects[0].modified = False

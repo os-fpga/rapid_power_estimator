@@ -241,7 +241,7 @@ class ProjectOpenApi(Resource):
         """
         try:
             proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.load(ProjectFilepathSchema().load(request.json)['filepath'])
+            proj_mgr.open(ProjectFilepathSchema().load(request.json)['filepath'])
             return "", 204
         except FileNotFoundError as e:
             raise ProjectFileNotFoundError

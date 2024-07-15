@@ -37,6 +37,8 @@ class RsMessageManager:
         RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),
         RsMessage(304, RsMessageType.ERRO, "Peripheral '{name}' is selected but not enabled"),
         RsMessage(305, RsMessageType.ERRO, "Peripheral '{name}' not found"),
+        RsMessage(306, RsMessageType.ERRO, "Device '{name}' not found"),
+        RsMessage(307, RsMessageType.ERRO, "Load error: {message}"),
     ]
 
     @staticmethod

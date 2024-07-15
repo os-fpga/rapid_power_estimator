@@ -3,50 +3,66 @@ from utilities.common_utils import RsEnum
 from dataclasses import dataclass, field
 from typing import List
 
-class DeviceNotFoundException(Exception):
-    pass
+class RsCustomException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
-class ClockNotFoundException(Exception):
-    pass
+class DeviceNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Device with given id doesn't exists")
 
-class ClockDescriptionPortValidationException(Exception):
-    pass
+class ClockNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Clock with given index doesn't exists")
 
-class ClockMaxCountReachedException(Exception):
-    pass
+class ClockDescriptionPortValidationException(RsCustomException):
+    def __init__(self):
+        super().__init__("Clock description or port already exists in the list of clocks")
 
-class DspNotFoundException(Exception):
-    pass
+class ClockMaxCountReachedException(RsCustomException):
+    def __init__(self):
+        super().__init__("Maximum number of clocks reached")
 
-class FabricLeNotFoundException(Exception):
-    pass
+class DspNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Dsp with given index doesn't exists")
 
-class FabricLeDescriptionAlreadyExistsException(Exception):
-    pass
+class FabricLeNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Fabric logic element with given index doesn't exists")
 
-class BramNotFoundException(Exception):
-    pass
+class FabricLeDescriptionAlreadyExistsException(RsCustomException):
+    def __init__(self):
+        super().__init__("Fabric logic element with same description already exists")
 
-class IONotFoundException(Exception):
-    pass
+class BramNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Block RAM with given index doesn't exists")
 
-class IOStandardCoeffNotFoundException(Exception):
-    pass
+class IONotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("IO with given index doesn't exists")
 
-class PeripheralNotFoundException(Exception):
-    pass
+class IOStandardCoeffNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("IO standard coefficient not found")
 
-class InvalidPeripheralTypeException(Exception):
-    pass
+class PeripheralNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Peripheral with given index doesn't exists")
 
-class PeripheralPortNotFoundException(Exception):
-    pass
+class InvalidPeripheralTypeException(RsCustomException):
+    def __init__(self):
+        super().__init__("Invalid peripheral type")
 
-class ProjectNotLoadedException(Exception):
-    pass
+class PeripheralPortNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Peripheral port with given index doesn't exists")
 
-class ProjectNotLoadedException(Exception):
-    pass
+class ProjectNotLoadedException(RsCustomException):
+    def __init__(self):
+        super().__init__("Project not loaded")
 
 class ModuleType(Enum):
     CLOCKING = 0

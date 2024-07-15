@@ -40,10 +40,6 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   const [dmaNames, setDmaNames] = useState([]);
 
   let peripheralsMessages = {};
-  const acpuNamesLocal = [];
-  const bcpuNamesLocal = [];
-  const connectivityNamesLocal = [];
-  const dmaNamesLocal = [];
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -84,23 +80,19 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       if (componentData.targets !== undefined) {
         const { targets } = componentData;
         if (isTarget(targets, PeripheralTarget.ACPU)) {
-          acpuNamesLocal.push({ id: acpuNamesLocal.length, text: componentData.name });
-          setAcpuNames(acpuNamesLocal);
+          setAcpuNames((prev) => [...prev, { id: prev.length, text: componentData.name }]);
         }
         if (isTarget(targets, PeripheralTarget.BCPU)) {
-          bcpuNamesLocal.push({ id: bcpuNamesLocal.length, text: componentData.name });
-          setBcpuNames(bcpuNamesLocal);
+          setBcpuNames((prev) => [...prev, { id: prev.length, text: componentData.name }]);
         }
         if (isTarget(targets, PeripheralTarget.FABRIC)) {
-          connectivityNamesLocal.push({
-            id: connectivityNamesLocal.length,
+          setConnectivityNames((prev) => [...prev, {
+            id: prev.length,
             text: componentData.name,
-          });
-          setConnectivityNames(connectivityNamesLocal);
+          }]);
         }
         if (isTarget(targets, PeripheralTarget.DMA)) {
-          dmaNamesLocal.push({ id: dmaNamesLocal.length, text: componentData.name });
-          setDmaNames(dmaNamesLocal);
+          setDmaNames((prev) => [...prev, { id: prev.length, text: componentData.name }]);
         }
       }
     });
@@ -125,6 +117,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         setPeripherals(data);
+        setDmaNames([]);
+        setConnectivityNames([]);
+        setAcpuNames([]);
+        setBcpuNames([]);
         data.forEach((item) => {
           updatePeripherals(device, item.href, item.type);
         });

@@ -17,6 +17,7 @@ const PeripheralTarget = {
   ACPU: 1,
   BCPU: 2,
   FABRIC: 4,
+  DMA: 8,
 };
 
 function isTarget(targets, target) {
@@ -36,11 +37,9 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   const [acpuNames, setAcpuNames] = useState([]);
   const [bcpuNames, setBcpuNames] = useState([]);
   const [connectivityNames, setConnectivityNames] = useState([]);
+  const [dmaNames, setDmaNames] = useState([]);
 
   let peripheralsMessages = {};
-  const acpuNamesLocal = [];
-  const bcpuNamesLocal = [];
-  const connectivityNamesLocal = [];
 
   function fetchPort(device, link, port, key) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
@@ -78,22 +77,25 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       if (componentData.ports !== undefined) {
         componentData.ports.forEach((port) => fetchPort(device, href, port, key));
       }
+      if (componentData.channels !== undefined) {
+        componentData.channels.forEach((channel) => fetchPort(device, href, channel, key));
+      }
       if (componentData.targets !== undefined) {
         const { targets } = componentData;
         if (isTarget(targets, PeripheralTarget.ACPU)) {
-          acpuNamesLocal.push({ id: acpuNamesLocal.length, text: componentData.name });
-          setAcpuNames(acpuNamesLocal);
+          setAcpuNames((prev) => [...prev, { id: prev.length, text: componentData.name }]);
         }
         if (isTarget(targets, PeripheralTarget.BCPU)) {
-          bcpuNamesLocal.push({ id: bcpuNamesLocal.length, text: componentData.name });
-          setBcpuNames(bcpuNamesLocal);
+          setBcpuNames((prev) => [...prev, { id: prev.length, text: componentData.name }]);
         }
         if (isTarget(targets, PeripheralTarget.FABRIC)) {
-          connectivityNamesLocal.push({
-            id: connectivityNamesLocal.length,
+          setConnectivityNames((prev) => [...prev, {
+            id: prev.length,
             text: componentData.name,
-          });
-          setConnectivityNames(connectivityNamesLocal);
+          }]);
+        }
+        if (isTarget(targets, PeripheralTarget.DMA)) {
+          setDmaNames((prev) => [...prev, { id: prev.length, text: componentData.name }]);
         }
       }
     });
@@ -118,6 +120,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         setPeripherals(data);
+        setDmaNames([]);
+        setConnectivityNames([]);
+        setAcpuNames([]);
+        setBcpuNames([]);
         data.forEach((item) => {
           updatePeripherals(device, item.href, item.type);
         });
@@ -147,6 +153,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     acpuNames,
     bcpuNames,
     connectivityNames,
+    dmaNames,
     fetchAttributes,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [bramState, clockingState, dspState, fleState, ioState, socState]);

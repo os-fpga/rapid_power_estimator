@@ -288,7 +288,7 @@ class IO_On_Die_Termination:
 
 class IO_SubModule:
 
-    def __init__(self, resources, itemlist : List[IO] = None):
+    def __init__(self, resources, itemlist: List[IO] = None):
         self.resources = resources
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
@@ -320,7 +320,7 @@ class IO_SubModule:
             IO_On_Die_Termination(bank_number=2),
             IO_On_Die_Termination(bank_number=3)
         ]
-        self.itemlist : List[IO] = itemlist if itemlist is not None else []
+        self.itemlist: List[IO] = itemlist or []
 
     def get_resources(self):
         return self.io_usage, self.io_on_die_termination
@@ -355,6 +355,9 @@ class IO_SubModule:
         if 0 <= idx < len(self.itemlist):
             return self.itemlist.pop(idx)
         raise IONotFoundException
+
+    def clear(self) -> None:
+        self.itemlist.clear()
 
     def find_coeff(self, io_std_coeff_list : List[IO_Standard_Coeff], io_std : IO_Standard) -> IO_Standard_Coeff:
         result : List[IO_Standard_Coeff] = [x for x in io_std_coeff_list if x.io_standard == io_std]
@@ -419,4 +422,7 @@ class IO_SubModule:
                 io_alloc.io_available += (io_bank.total_banks_available - io_bank.total_banks_used) * 40
                 total_io_used += io_alloc.io_used
             # compute io usage in percentage
-            io_bank.percentage = (total_io_used / io_bank.total_io_available) * 100
+            if io_bank.total_io_available > 0:
+                io_bank.percentage = (total_io_used / io_bank.total_io_available) * 100
+            else:
+                io_bank.percentage = 0.0

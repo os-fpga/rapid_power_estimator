@@ -17,7 +17,7 @@ class SchemaValidationError(Exception):
 class ClockDescriptionPortValidationError(Exception):
     pass
 
-class ClockMaxCountReachedException(Exception):
+class ClockMaxCountReachedError(Exception):
     pass
 
 class DspNotExistsError(Exception):
@@ -77,7 +77,7 @@ errors = {
         "message": "Clock description or port already exists in the list of clocks",
         "status": 400
     },
-    "ClockMaxCountReachedException": {
+    "ClockMaxCountReachedError": {
         "message": "Maximum number of clocks reached",
         "status": 403
     },

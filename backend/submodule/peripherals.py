@@ -187,27 +187,29 @@ class Peripheral_SubModule(SubModule):
 
     def __init__(self, resources : RsDeviceResources):
         self.resources = resources
-        # todo: add peripherals for testing. actual configuration should be retrieved from device.xml when
-        # this data is availiable
-        self.peripherals : List[Peripheral] = [
-            Peripheral(name='SPI/QSPI', type=PeripheralType.SPI, usage=Peripherals_Usage.Boot, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
-            Peripheral(name='JTAG', type=PeripheralType.JTAG, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU, context=self),
-            Peripheral(name='I2C', type=PeripheralType.I2C, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
-            Peripheral(name='UART0 (BCPU)', type=PeripheralType.UART, index=0, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.BCPU, context=self),
-            Peripheral(name='UART1 (ACPU)', type=PeripheralType.UART, index=1, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU, context=self),
-            Peripheral(name='USB 2.0', type=PeripheralType.USB2, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
-            Peripheral(name='GigE', type=PeripheralType.GIGE, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
-            Peripheral(name="GPIO (BCPU)", type=PeripheralType.GPIO, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self),
-            Peripheral(name="GPIO (ACPU)", type=PeripheralType.GPIO, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, enable=True, context=self),
-            Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
-            Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
-            Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR4 }),
-            Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
-            Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_ports=4, context=self),
-            Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_ports=4, context=self),
-            Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_ports=4, context=self, init_props={ 'frequency' : 533000000 }),
-            Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, targets=PeripheralTarget.DMA, max_ports=4, context=self),
-        ]
+
+        # for debugging usage
+        # self.peripherals : List[Peripheral] = [
+        #     Peripheral(name='SPI/QSPI', type=PeripheralType.SPI, usage=Peripherals_Usage.Boot, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
+        #     Peripheral(name='JTAG', type=PeripheralType.JTAG, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU, context=self),
+        #     Peripheral(name='I2C', type=PeripheralType.I2C, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
+        #     Peripheral(name='UART0 (BCPU)', type=PeripheralType.UART, index=0, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.BCPU, context=self),
+        #     Peripheral(name='UART1 (ACPU)', type=PeripheralType.UART, index=1, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU, context=self),
+        #     Peripheral(name='USB 2.0', type=PeripheralType.USB2, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
+        #     Peripheral(name='GigE', type=PeripheralType.GIGE, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
+        #     Peripheral(name="GPIO (BCPU)", type=PeripheralType.GPIO, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self),
+        #     Peripheral(name="GPIO (ACPU)", type=PeripheralType.GPIO, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, enable=True, context=self),
+        #     Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
+        #     Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
+        #     Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR4 }),
+        #     Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
+        #     Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_ports=4, context=self),
+        #     Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_ports=4, context=self),
+        #     Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_ports=4, context=self, init_props={ 'frequency' : 533000000 }),
+        #     Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, targets=PeripheralTarget.DMA, max_ports=4, context=self),
+        # ]
+
+        self.peripherals : List[Peripheral] = self.initialize_peripherals()
 
         # todo: total io available should be populated from device xml
         self.total_io_available = 40
@@ -219,6 +221,36 @@ class Peripheral_SubModule(SubModule):
         self.total_acpu_block_power = 0.0
         self.total_bcpu_block_power = 0.0
         self.total_dma_block_power = 0.0
+
+    def initialize_peripherals(self) -> List['Peripheral']:
+        # add peripherals based onthe configuration in device.xml
+        peripherals: List['Peripheral'] = []
+        peripherals += self.create_peripherals(1, 'SPI/QSPI', PeripheralType.SPI)
+        peripherals += self.create_peripherals(self.resources.get_num_I2Cs(), 'I2C', PeripheralType.I2C)
+        peripherals += self.create_peripherals(self.resources.get_num_UARTs(), 'UART0 (BCPU)', PeripheralType.UART)
+        peripherals += self.create_peripherals(self.resources.get_num_JTAGs(), 'JTAG', PeripheralType.JTAG)
+        peripherals += self.create_peripherals(self.resources.get_num_USBs(), 'USB 2.0', PeripheralType.USB2)
+        peripherals += self.create_peripherals(self.resources.get_num_GIGEs(), 'GigE', PeripheralType.GIGE)
+        peripherals += self.create_peripherals(self.resources.get_num_PWMs(), 'PWM', PeripheralType.PWM)
+        peripherals += self.create_peripherals(self.resources.get_num_DDRs(), 'DDR', PeripheralType.DDR)
+        peripherals += self.create_peripherals(1, 'OCM', PeripheralType.OCM)
+        peripherals += self.create_peripherals(self.resources.get_num_DMAs(), 'DMA', PeripheralType.DMA)
+        peripherals += self.create_peripherals(1, 'N22 RISC-V', PeripheralType.BCPU)
+        peripherals += self.create_peripherals(1, 'Fabric', PeripheralType.FPGA_COMPLEX)
+        # todo: add GPIO
+
+        # add application processor for Gemini
+        if self.resources.get_series() == 'Gemini':
+            peripherals += self.create_peripherals(1, 'A45 RISC-V', PeripheralType.ACPU)
+
+        return peripherals
+
+    def create_peripherals(self, instances: int, name: str, peripheral_type: PeripheralType) -> List['Peripheral']:
+        mylist: List['Peripheral'] = []
+        if instances > 0:
+            for i in range(instances):
+                mylist.append(Peripheral(name=f'{name}{i}' if instances > 1 else name, type=peripheral_type, index=i, context=self))
+        return mylist
 
     def get_device_resources(self) -> RsDeviceResources:
         return self.resources
@@ -258,6 +290,9 @@ class Peripheral_SubModule(SubModule):
 
     def get_peripherals(self) -> List['Peripheral']:
         return self.peripherals
+
+    def clear(self) -> None:
+        self.peripherals = self.initialize_peripherals() # re-initialize the list of peripherals
 
     def get_peripheral_types(self) -> List[PeripheralType]:
         types = [
@@ -369,6 +404,18 @@ class IPeripheral(ABC):
     def get_device_resources(self) -> RsDeviceResources:
         pass
 
+    @abstractmethod
+    def set_enable(self, enable: bool) -> None:
+        pass
+
+    @abstractmethod
+    def set_usage(self, usage: Peripherals_Usage) -> None:
+        pass
+
+    @abstractmethod
+    def set_targets(self, targets: PeripheralTarget) -> None:
+        pass
+
 @dataclass
 class ComputeObject:
 
@@ -388,6 +435,9 @@ class ComputeObject:
 
     def get_bandwidth(self) -> float:
         return 0.0
+
+    def get_ports(self) -> List[Port]:
+        return []
 
     def set_properties(self, props: Dict[str, Any]) -> None:
         pass
@@ -436,18 +486,13 @@ class Peripheral(IPeripheral):
     targets: PeripheralTarget = field(default=PeripheralTarget.NONE)
     index: int = field(default=0)
     context: SubModule = field(default=None)
-    max_ports: int = field(default=0)
-    init_props: Dict[str, Any] = field(default=None)
 
     def __post_init__(self) -> None:
         self.object = ComputeObject.get_compute_object(self.type, self)
-        self.ports: List[Port] = [Port() for _ in range(self.max_ports)] if self.max_ports > 0 else None
-        if self.init_props:
-            self.object.set_properties(self.init_props)
 
     def flatten(self, excludes: List[str] = ['object', 'context', 'max_endpoints', 'max_channels', 'init_props']) -> Dict[str, Any]:
         newobj = {}
-        for key, value in { **self.__dict__, **self.get_properties(), \
+        for key, value in { **self.__dict__, **self.get_properties(), 'ports': self.get_ports(), \
                            'output': { **self.get_output(), 'messages': self.get_messages() } }.items():
             if key not in excludes:
                 newobj[key] = value
@@ -485,16 +530,26 @@ class Peripheral(IPeripheral):
         return self.object.get_bandwidth()
 
     def get_ports(self) -> List[Port]:
-        return self.ports
+        return self.object.get_ports()
 
     def get_port(self, idx: int) -> Port:
-        if self.ports:
-            if 0 <= idx < len(self.ports):
-                return self.ports[idx]
+        ports = self.object.get_ports()
+        if ports:
+            if 0 <= idx < len(ports):
+                return ports[idx]
         raise PeripheralPortNotFoundException
 
     def get_submodule(self) -> SubModule:
         return self.context
+
+    def set_enable(self, enable: bool) -> None:
+        self.enable = enable
+
+    def set_usage(self, usage: Peripherals_Usage) -> None:
+        self.usage = usage
+
+    def set_targets(self, targets: PeripheralTarget) -> None:
+        self.targets = targets
 
     def compute(self) -> bool:
         return self.object.compute()
@@ -522,6 +577,8 @@ class Pwm0(ComputeObject):
         pass
 
     def __post_init__(self) -> None:
+        self.get_context().set_usage(Peripherals_Usage.App)
+        self.get_context().set_enable(True)
         self.properties = Gpio0.properties_(io_used=0, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
         self.output = Gpio0.output_()
         self.messages: List[RsMessage] = []
@@ -553,18 +610,17 @@ class Pwm0(ComputeObject):
 @dataclass
 class Dma0(ComputeObject):
     def __post_init__(self) -> None:
-        self.initialized = False
+        self.get_context().set_enable(True)
+        self.channels = [Port(name=f'Channel {i}') for i in range(1, 5)]
+
+    def get_ports(self) -> List[Port]:
+        return self.channels
 
     def compute(self) -> bool:
         VCC_CORE = self.get_context().get_device_resources().get_VCC_CORE()
         total_dma_block_power = 0.0
 
-        if self.initialized == False:
-            for i, port in enumerate(self.get_context().get_ports(), start=1):
-                port.name = f'Channel {i}'
-            self.initialized = True
-
-        for channel in self.get_context().get_ports():
+        for channel in self.channels:
             channel.output.reset()
             if channel.enable == False:
                 continue
@@ -646,7 +702,9 @@ class Dma0(ComputeObject):
 @dataclass
 class FPGA_Fabric(ComputeObject):
     def __post_init__(self) -> None:
-        pass
+        self.get_context().set_targets(PeripheralTarget.DMA)
+        self.get_context().set_enable(True)
+        self.endpoints = [Port() for _ in range(4)]
 
     def get_bandwidth(self) -> float:
         # get max clock frequency configured according excel formula
@@ -657,12 +715,15 @@ class FPGA_Fabric(ComputeObject):
                 clock = elmt
         return clock.frequency / 1000000.0 * 32 if clock else 0.0
 
+    def get_ports(self) -> List[Port]:
+        return self.endpoints
+
     def compute(self) -> bool:
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         total_noc_power = 0.0
 
-        for endpoint in self.get_context().get_ports():
+        for endpoint in self.endpoints:
             endpoint.output.reset()
             if endpoint.name == '':
                 continue
@@ -741,8 +802,9 @@ class A45_RISC_V_ACPU(ComputeObject):
             self.block_power = 0.0
 
     def __post_init__(self) -> None:
-        self.properties = A45_RISC_V_ACPU.properties_(frequency=0, load=A45_Load.MEDIUM)
+        self.properties = A45_RISC_V_ACPU.properties_(frequency=533000000, load=A45_Load.MEDIUM)
         self.output = A45_RISC_V_ACPU.output_(block_power=0.0)
+        self.endpoints = [Port() for _ in range(4)]
         self.messages: List[RsMessage] = []
 
     def get_properties(self) -> Dict[str, Any]:
@@ -750,6 +812,9 @@ class A45_RISC_V_ACPU(ComputeObject):
 
     def get_output(self) -> Dict[str, Any]:
         return self.output.__dict__
+
+    def get_ports(self) -> List[Port]:
+        return self.endpoints
 
     def get_messages(self) -> List[RsMessage]:
         return self.messages
@@ -778,7 +843,7 @@ class A45_RISC_V_ACPU(ComputeObject):
         else:
             LOAD_FACTOR = 0.0
 
-        for endpoint in self.get_context().get_ports():
+        for endpoint in self.endpoints:
             endpoint.output.reset()
             if endpoint.name == '':
                 continue
@@ -851,8 +916,10 @@ class N22_RISC_V_BCPU(ComputeObject):
             self.boot_power = 0.0
 
     def __post_init__(self) -> None:
-        self.properties = N22_RISC_V_BCPU.properties_(encryption_used=True, clock=N22_RISC_V_Clock.PLL_233MHz)
+        self.get_context().set_enable(True)
+        self.properties = N22_RISC_V_BCPU.properties_(encryption_used=True, clock=N22_RISC_V_Clock.BOOT_Clock_40MHz)
         self.output = N22_RISC_V_BCPU.output_(boot_mode='', active_power=0.0, boot_power=0.0)
+        self.endpoints = [Port() for _ in range(4)]
         self.messages: List[RsMessage] = []
 
     def get_properties(self) -> Dict[str, Any]:
@@ -860,6 +927,9 @@ class N22_RISC_V_BCPU(ComputeObject):
 
     def get_output(self) -> Dict[str, Any]:
         return self.output.__dict__
+
+    def get_ports(self) -> List[Port]:
+        return self.endpoints
 
     def get_messages(self) -> List[RsMessage]:
         return self.messages
@@ -871,7 +941,6 @@ class N22_RISC_V_BCPU(ComputeObject):
         self.messages.clear()
         self.output.reset()
 
-        peripherals = self.get_context().get_submodule().get_peripherals()
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
         BCPU_CLK_FACTOR = resources.get_BCPU_CLK_FACTOR()
@@ -889,7 +958,7 @@ class N22_RISC_V_BCPU(ComputeObject):
         else:
             self.output.boot_mode = '<UNK>'
 
-        for endpoint in self.get_context().get_ports():
+        for endpoint in self.endpoints:
             endpoint.output.reset()
             if endpoint.name == '':
                 continue
@@ -980,7 +1049,15 @@ class Memory0(ComputeObject):
             self.percentage = 0.0
 
     def __post_init__(self) -> None:
-        self.properties = Memory0.properties_(memory_type=Memory_Type.DDR4, data_rate=1333000000, width=32)
+        if self.get_context().get_type() == PeripheralType.DDR:
+            memory_type = Memory_Type.DDR4
+            data_rate = 1333000000
+        else:
+            memory_type = Memory_Type.SRAM
+            data_rate = 533000000
+        self.get_context().set_targets(PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA)
+        self.get_context().set_usage(Peripherals_Usage.App)
+        self.properties = Memory0.properties_(memory_type=memory_type, data_rate=data_rate, width=32)
         self.output = Memory0.output_(write_bandwidth=0.0, read_bandwidth=0.0, block_power=0.0, percentage=0.0)
         self.messages: List[RsMessage] = []
 
@@ -1087,6 +1164,9 @@ class Gpio0(ComputeObject):
         pass
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.BCPU | PeripheralTarget.ACPU | PeripheralTarget.FABRIC)
+        self.get_context().set_usage(Peripherals_Usage.App)
+        self.get_context().set_enable(True)
         self.properties = Gpio0.properties_(io_used=0, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
         self.output = Gpio0.output_()
         self.messages: List[RsMessage] = []
@@ -1196,6 +1276,8 @@ class Usb2_0(ComputeObject):
         frequency: int
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.ACPU | PeripheralTarget.FABRIC)
+        self.get_context().set_usage(Peripherals_Usage.App)
         self.properties = Usb2_0.properties_(bit_rate=Usb_Speed.Full_Speed_480Mbps)
         self.output = Usb2_0.output_()
         self.messages: List[RsMessage] = []
@@ -1298,6 +1380,8 @@ class GigE_0(ComputeObject):
         frequency: int
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.ACPU | PeripheralTarget.FABRIC)
+        self.get_context().set_usage(Peripherals_Usage.App)
         self.properties = GigE_0.properties_(bit_rate=Gige_Speed.Gige_100Mbps)
         self.output = GigE_0.output_()
         self.messages: List[RsMessage] = []
@@ -1401,6 +1485,8 @@ class I2c0(ComputeObject):
         frequency: int
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.ACPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA)
+        self.get_context().set_usage(Peripherals_Usage.App)
         self.properties = I2c0.properties_(clock_frequency=I2c_Speed.Standard_100Kbps)
         self.output = I2c0.output_()
         self.messages: List[RsMessage] = []
@@ -1509,6 +1595,8 @@ class Jtag0(ComputeObject):
         frequency: int
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.BCPU)
+        self.get_context().set_usage(Peripherals_Usage.Debug)
         self.properties = Jtag0.properties_(clock_frequency=Jtag_Clock_Frequency.JTAG_10Mbps)
         self.output = Jtag0.output_()
         self.messages: List[RsMessage] = []
@@ -1627,6 +1715,8 @@ class Qspi0(ComputeObject):
         ios: int
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA)
+        self.get_context().set_usage(Peripherals_Usage.Boot)
         self.properties = Qspi0.properties_(clock_frequency=Qspi_Performance_Mbps.SPI_1Mbps)
         self.output = Qspi0.output_()
         self.messages: List[RsMessage] = []
@@ -1746,6 +1836,8 @@ class Uart0(ComputeObject):
         frequency: int
 
     def __post_init__(self) -> None:
+        self.get_context().set_targets(PeripheralTarget.BCPU)
+        self.get_context().set_usage(Peripherals_Usage.Debug)
         self.properties = Uart0.properties_(baudrate=Baud_Rate.Baud_Rate_115200)
         self.output = Uart0.output_()
         self.messages: List[RsMessage] = []

@@ -15,7 +15,7 @@ class RsDeviceManager:
         return cls.__instance
 
     def __init__(self) -> None:
-        self.devices = []
+        self.devices: List[RsDevice] = []
 
     @staticmethod
     def get_instance() -> 'RsDeviceManager':
@@ -36,3 +36,8 @@ class RsDeviceManager:
         if devices:
             return devices[0]
         raise DeviceNotFoundException
+
+    def clear_all_device_inputs(self) -> None:
+        for device in self.devices:
+            device.clear()
+            device.compute_output_power()

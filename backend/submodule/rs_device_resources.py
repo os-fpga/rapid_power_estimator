@@ -3,50 +3,66 @@ from utilities.common_utils import RsEnum
 from dataclasses import dataclass, field
 from typing import List
 
-class DeviceNotFoundException(Exception):
-    pass
+class RsCustomException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
-class ClockNotFoundException(Exception):
-    pass
+class DeviceNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Device with given id doesn't exists")
 
-class ClockDescriptionPortValidationException(Exception):
-    pass
+class ClockNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Clock with given index doesn't exists")
 
-class ClockMaxCountReachedException(Exception):
-    pass
+class ClockDescriptionPortValidationException(RsCustomException):
+    def __init__(self):
+        super().__init__("Clock description or port already exists in the list of clocks")
 
-class DspNotFoundException(Exception):
-    pass
+class ClockMaxCountReachedException(RsCustomException):
+    def __init__(self):
+        super().__init__("Maximum number of clocks reached")
 
-class FabricLeNotFoundException(Exception):
-    pass
+class DspNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Dsp with given index doesn't exists")
 
-class FabricLeDescriptionAlreadyExistsException(Exception):
-    pass
+class FabricLeNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Fabric logic element with given index doesn't exists")
 
-class BramNotFoundException(Exception):
-    pass
+class FabricLeDescriptionAlreadyExistsException(RsCustomException):
+    def __init__(self):
+        super().__init__("Fabric logic element with same description already exists")
 
-class IONotFoundException(Exception):
-    pass
+class BramNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Block RAM with given index doesn't exists")
 
-class IOStandardCoeffNotFoundException(Exception):
-    pass
+class IONotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("IO with given index doesn't exists")
 
-class PeripheralNotFoundException(Exception):
-    pass
+class IOStandardCoeffNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("IO standard coefficient not found")
 
-class InvalidPeripheralTypeException(Exception):
-    pass
+class PeripheralNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Peripheral with given index doesn't exists")
 
-class PeripheralPortNotFoundException(Exception):
-    pass
+class InvalidPeripheralTypeException(RsCustomException):
+    def __init__(self):
+        super().__init__("Invalid peripheral type")
 
-class ProjectNotLoadedException(Exception):
-    pass
+class PeripheralPortNotFoundException(RsCustomException):
+    def __init__(self):
+        super().__init__("Peripheral port with given index doesn't exists")
 
-class ProjectNotLoadedException(Exception):
-    pass
+class ProjectNotLoadedException(RsCustomException):
+    def __init__(self):
+        super().__init__("Project not loaded")
 
 class ModuleType(Enum):
     CLOCKING = 0
@@ -263,7 +279,9 @@ class RsDeviceResources:
         return self.peripheral_noc_power_factor
 
     def get_attr(self, name) -> int:
-        return int(self.device.resources[name].num)
+        if name in self.device.resources:
+            return int(self.device.resources[name].num)
+        return 0
 
     def get_num_Clocks(self):
         # NOTE:
@@ -356,6 +374,31 @@ class RsDeviceResources:
     def get_num_USB_IOs(self) -> int:
         # todo: how to get number of Gige peripheral?
         return 5
+
+    def get_num_USBs(self) -> int:
+        return self.get_attr('usb')
+
+    def get_num_GIGEs(self) -> int:
+        return self.get_attr('gbe')
+
+    def get_num_DDRs(self) -> int:
+        return self.get_attr('ddr')
+
+    def get_num_I2Cs(self) -> int:
+        return self.get_attr('i2c')
+
+    def get_num_UARTs(self) -> int:
+        return self.get_attr('uart')
+
+    def get_num_JTAGs(self) -> int:
+        return self.get_attr('jtag')
+
+    def get_num_PWMs(self) -> int:
+        return self.get_attr('pwm')
+
+    def get_num_DMAs(self) -> int:
+        # todo: how to get number of DMA peripheral and channel?
+        return 1
 
     def get_CLK_CAP(self) -> float:
         # todo: read from power data. Coeffient to calculate clock block power

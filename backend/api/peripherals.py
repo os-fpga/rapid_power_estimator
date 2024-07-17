@@ -4,6 +4,7 @@
 #
 import sys
 from enum import Enum
+from typing import Type
 from flask import Blueprint, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, ValidationError, post_dump
@@ -93,35 +94,40 @@ class PeripheralSchema(Schema):
     targets = fields.Enum(PeripheralTarget, by_value=True)
 
     @classmethod
-    def create_schema(cls, peripheral_type):
+    def get_schema(cls, peripheral_type) -> Type:
         if peripheral_type == PeripheralType.SPI:
-            return SpiSchema()
+            return SpiSchema
         elif peripheral_type == PeripheralType.JTAG:
-            return JtagSchema()
+            return JtagSchema
         elif peripheral_type == PeripheralType.I2C:
-            return I2cSchema()
+            return I2cSchema
         elif peripheral_type == PeripheralType.UART:
-            return UartSchema()
+            return UartSchema
         elif peripheral_type == PeripheralType.USB2:
-            return Usb2Schema()
+            return Usb2Schema
         elif peripheral_type == PeripheralType.GIGE:
-            return GigeSchema()
+            return GigeSchema
         elif peripheral_type == PeripheralType.GPIO:
-            return GpioSchema()
+            return GpioSchema
         elif peripheral_type == PeripheralType.PWM:
-            return PwmSchema()
+            return PwmSchema
         elif peripheral_type == PeripheralType.DDR or peripheral_type == PeripheralType.OCM:
-            return MemorySchema()
+            return MemorySchema
         elif peripheral_type == PeripheralType.DMA:
-            return DmaSchema()
+            return DmaSchema
         elif peripheral_type == PeripheralType.BCPU:
-            return BcpuSchema()
+            return BcpuSchema
         elif peripheral_type == PeripheralType.ACPU:
-            return AcpuSchema()
+            return AcpuSchema
         elif peripheral_type == PeripheralType.FPGA_COMPLEX:
-            return FpgaComplexSchema()
+            return FpgaComplexSchema
         else:
-            return PeripheralSchema()
+            return PeripheralSchema
+
+    @classmethod
+    def create_schema(cls, peripheral_type):
+        schema_ctor = cls.get_schema(peripheral_type)
+        return schema_ctor()
 
 class SpiSchema(PeripheralSchema):
     enable = fields.Bool()
@@ -188,8 +194,12 @@ class MemorySchema(PeripheralSchema):
     width = fields.Int()
     output = fields.Nested(MemoryOutputSchema, data_key="consumption")
 
+class DummyOutputSchema(Schema):
+    pass
+
 class DmaSchema(PeripheralSchema):
     ports = ChannelUrlField(data_key="channels")
+    output = fields.Nested(DummyOutputSchema, data_key="consumption")
 
 class EndpointOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
@@ -234,6 +244,7 @@ class AcpuSchema(PeripheralSchema):
 
 class FpgaComplexSchema(PeripheralSchema):
     ports = EndpointUrlField()
+    output = fields.Nested(DummyOutputSchema, data_key="consumption")
 
 class ChannelOutputSchema(Schema):
     calculated_bandwidth = fields.Number()

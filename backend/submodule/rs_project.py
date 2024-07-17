@@ -3,8 +3,7 @@
 #  Authorized use only
 #
 from datetime import datetime
-from marshmallow import Schema, fields
-import numpy as np
+from marshmallow import Schema, fields, post_dump
 import json
 from typing import Any, Dict, List
 from api.clock import ClockSchema
@@ -12,6 +11,7 @@ from api.dsp import DspSchema
 from api.fabric_le import FabricLogicElementSchema
 from api.bram import BramSchema
 from api.io import IoSchema
+from api.peripherals import PeripheralSchema
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, ProjectNotLoadedException
 from submodule.rs_message import RsMessage, RsMessageManager
@@ -30,12 +30,19 @@ class RsProjectAttributesSchema(Schema):
     version = fields.Str()
     last_edited = fields.DateTime()
 
+class RsPeripheralSchema(Schema):
+    @post_dump(pass_original=True)
+    def adjust_output(self, data, original_data, **kwargs):
+        schema = PeripheralSchema.get_schema(original_data.get_type())(exclude=['output', 'targets'])
+        return schema.dump(original_data.flatten())
+
 class RsDeviceConfig(Schema):
     clocking = fields.Nested(ClockSchema, many=True, exclude=['output'])
     dsp = fields.Nested(DspSchema, many=True, exclude=['output'])
     fabric_le = fields.Nested(FabricLogicElementSchema, many=True, exclude=['output'])
     bram = fields.Nested(BramSchema, many=True, exclude=['output'])
     io = fields.Nested(IoSchema, many=True, exclude=['output'])
+    peripherals = fields.Nested(RsPeripheralSchema, many=True)
 
 class RsProjectDeviceSchema(Schema):
     name = fields.Str()
@@ -98,6 +105,9 @@ class RsProjectManager:
             except Exception as e:
                 messages.append(RsMessageManager.get_message(307, { 'message': e.args[0] }))
 
+    def load_peripherals(self, module, items: List, messages: List[RsMessage]) -> None:
+        pass
+
     def load_devices(self, devices: List, messages: List[RsMessage]) -> None:
         for data in devices:
             try:
@@ -107,6 +117,7 @@ class RsProjectManager:
                 self.load_module(device.get_module(ModuleType.FABRIC_LE), data['configuration']['fabric_le'], messages)
                 self.load_module(device.get_module(ModuleType.BRAM), data['configuration']['bram'], messages)
                 self.load_module(device.get_module(ModuleType.IO), data['configuration']['io'], messages)
+                self.load_peripherals(device.get_module(ModuleType.SOC_PERIPHERALS), data['configuration']['peripherals'], messages)
                 device.compute_output_power()
             except DeviceNotFoundException as e:
                 messages.append(RsMessageManager.get_message(306, { 'name': data['name'] }))
@@ -136,7 +147,7 @@ class RsProjectManager:
                         'fabric_le': device.get_module(ModuleType.FABRIC_LE).get_all(),
                         'bram': device.get_module(ModuleType.BRAM).get_all(),
                         'io': device.get_module(ModuleType.IO).get_all(),
-                        'peripherals': []
+                        'peripherals': device.get_module(ModuleType.SOC_PERIPHERALS).get_peripherals()
                     }
                 }
                 devices.append(data)

@@ -3,7 +3,7 @@
 #  Authorized use only
 #
 from datetime import datetime
-from marshmallow import Schema, fields, post_dump
+from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
 import json
 from typing import Any, Dict, List
 from api.clock import ClockSchema
@@ -12,8 +12,9 @@ from api.fabric_le import FabricLogicElementSchema
 from api.bram import BramSchema
 from api.io import IoSchema
 from api.peripherals import PeripheralSchema
+from submodule.peripherals import Peripheral, Peripheral_SubModule
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, ProjectNotLoadedException
+from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, PeripheralType, ProjectNotLoadedException
 from submodule.rs_message import RsMessage, RsMessageManager
 from utilities.common_utils import RsEnum, update_attributes
 from dataclasses import dataclass, field
@@ -31,10 +32,23 @@ class RsProjectAttributesSchema(Schema):
     last_edited = fields.DateTime()
 
 class RsPeripheralSchema(Schema):
+    type = fields.Enum(PeripheralType, by_value=True)
+
+    class Meta:
+        unknown = INCLUDE
+
+    def create_schema(self, type: PeripheralType) -> Schema:
+        return PeripheralSchema.get_schema(type)(exclude=['output', 'targets'])
+
+    @post_load
+    def post_load(self, data, **kwargs):
+        data.update(self.create_schema(data['type']).load(data))
+        return data
+
     @post_dump(pass_original=True)
-    def adjust_output(self, data, original_data, **kwargs):
-        schema = PeripheralSchema.get_schema(original_data.get_type())(exclude=['output', 'targets'])
-        return schema.dump(original_data.flatten())
+    def post_dump(self, data, original_data: Peripheral, **kwargs):
+        data.update(self.create_schema(original_data.get_type()).dump(original_data.flatten()))
+        return data
 
 class RsDeviceConfig(Schema):
     clocking = fields.Nested(ClockSchema, many=True, exclude=['output'])
@@ -105,8 +119,13 @@ class RsProjectManager:
             except Exception as e:
                 messages.append(RsMessageManager.get_message(307, { 'message': e.args[0] }))
 
-    def load_peripherals(self, module, items: List, messages: List[RsMessage]) -> None:
-        pass
+    def load_peripherals(self, module: Peripheral_SubModule, items: List, messages: List[RsMessage]) -> None:
+        for item in items:
+            try:
+                periph = module.get_peripheral(item['type'], item['index'])
+                periph.set_properties(item)
+            except Exception as e:
+                messages.append(RsMessageManager.get_message(308, { 'message': e.args[0] }))
 
     def load_devices(self, devices: List, messages: List[RsMessage]) -> None:
         for data in devices:

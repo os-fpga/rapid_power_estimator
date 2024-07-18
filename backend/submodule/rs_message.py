@@ -39,6 +39,7 @@ class RsMessageManager:
         RsMessage(305, RsMessageType.ERRO, "Peripheral '{name}' not found"),
         RsMessage(306, RsMessageType.ERRO, "Device '{name}' not found"),
         RsMessage(307, RsMessageType.ERRO, "Load error: {message}"),
+        RsMessage(308, RsMessageType.ERRO, "Load peripheral error: {message}"),
     ]
 
     @staticmethod

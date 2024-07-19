@@ -93,6 +93,10 @@ class PeripheralSchema(Schema):
     index = fields.Int()
     targets = fields.Enum(PeripheralTarget, by_value=True)
 
+    def __init__(self, *args, expand = False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.expand = expand
+
     @classmethod
     def get_schema(cls, peripheral_type) -> Type:
         if peripheral_type == PeripheralType.SPI:
@@ -201,6 +205,12 @@ class DmaSchema(PeripheralSchema):
     ports = ChannelUrlField(data_key="channels")
     output = fields.Nested(DummyOutputSchema, data_key="consumption")
 
+    @post_dump(pass_original=True)
+    def post_dump(self, data, original_data, **kwargs):
+        if self.expand:
+            data['channels'] = ChannelSchema(many=True, exclude=['output']).dump(original_data['ports'])
+        return data
+
 class EndpointOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
     noc_power = fields.Number()
@@ -224,6 +234,12 @@ class BcpuSchema(PeripheralSchema):
     ports = EndpointUrlField()
     output = fields.Nested(BcpuOutputSchema, data_key="consumption")
 
+    @post_dump(pass_original=True)
+    def post_dump(self, data, original_data, **kwargs):
+        if self.expand:
+            data['ports'] = EndpointSchema(many=True, exclude=['output']).dump(original_data['ports'])
+        return data
+
 class FpgaComplexEndpointOutputSchema(EndpointOutputSchema):
     clock_frequency = fields.Int()
     percentage = fields.Number()
@@ -242,9 +258,21 @@ class AcpuSchema(PeripheralSchema):
     ports = EndpointUrlField()
     output = fields.Nested(AcpuOutputSchema, data_key="consumption")
 
+    @post_dump(pass_original=True)
+    def post_dump(self, data, original_data, **kwargs):
+        if self.expand:
+            data['ports'] = EndpointSchema(many=True, exclude=['output']).dump(original_data['ports'])
+        return data
+
 class FpgaComplexSchema(PeripheralSchema):
     ports = EndpointUrlField()
     output = fields.Nested(DummyOutputSchema, data_key="consumption")
+
+    @post_dump(pass_original=True)
+    def post_dump(self, data, original_data, **kwargs):
+        if self.expand:
+            data['ports'] = FpgaComplexEndpointSchema(many=True, exclude=['output']).dump(original_data['ports'])
+        return data
 
 class ChannelOutputSchema(Schema):
     calculated_bandwidth = fields.Number()

@@ -38,7 +38,7 @@ class RsPeripheralSchema(Schema):
         unknown = INCLUDE
 
     def create_schema(self, type: PeripheralType) -> Schema:
-        return PeripheralSchema.get_schema(type)(exclude=['output', 'targets'])
+        return PeripheralSchema.get_schema(type)(exclude=['output', 'targets'], expand=True)
 
     @post_load
     def post_load(self, data, **kwargs):

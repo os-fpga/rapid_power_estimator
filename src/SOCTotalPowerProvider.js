@@ -14,7 +14,7 @@ export const useSocTotalPower = () => {
 };
 
 export function SocTotalPowerProvider({ children }) {
-  const [totalConsumption, setTotalConsumption] = useState({
+  const defaultValue = {
     total_power_temperature: [],
     processing_complex: {
       dynamic: {
@@ -42,18 +42,22 @@ export function SocTotalPowerProvider({ children }) {
       total_power: 0,
       total_percentage: 0,
     },
-  });
+  };
+  const [totalConsumption, setTotalConsumption] = useState(defaultValue);
 
   const updateTotalPower = (device) => {
     if (device !== null) {
       server.GET(server.api.consumption('', device), (data) => {
         setTotalConsumption(data);
       });
+    } else {
+      setTotalConsumption(defaultValue);
     }
   };
 
   const values = useMemo(() => ({
     totalConsumption, updateTotalPower,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [totalConsumption]);
 
   return (

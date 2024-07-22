@@ -3,8 +3,7 @@
 #  Authorized use only
 #
 from datetime import datetime
-from marshmallow import Schema, fields
-import numpy as np
+from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
 import json
 from typing import Any, Dict, List
 from api.clock import ClockSchema
@@ -12,8 +11,10 @@ from api.dsp import DspSchema
 from api.fabric_le import FabricLogicElementSchema
 from api.bram import BramSchema
 from api.io import IoSchema
+from api.peripherals import PeripheralSchema
+from submodule.peripherals import Peripheral, Peripheral_SubModule
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, ProjectNotLoadedException
+from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, PeripheralType, ProjectNotLoadedException
 from submodule.rs_message import RsMessage, RsMessageManager
 from utilities.common_utils import RsEnum, update_attributes
 from dataclasses import dataclass, field
@@ -30,12 +31,32 @@ class RsProjectAttributesSchema(Schema):
     version = fields.Str()
     last_edited = fields.DateTime()
 
+class RsPeripheralSchema(Schema):
+    type = fields.Enum(PeripheralType, by_value=True)
+
+    class Meta:
+        unknown = INCLUDE
+
+    def create_schema(self, type: PeripheralType) -> Schema:
+        return PeripheralSchema.get_schema(type)(exclude=['output', 'targets'], expand=True)
+
+    @post_load
+    def post_load(self, data, **kwargs):
+        data.update(self.create_schema(data['type']).load(data))
+        return data
+
+    @post_dump(pass_original=True)
+    def post_dump(self, data, original_data: Peripheral, **kwargs):
+        data.update(self.create_schema(original_data.get_type()).dump(original_data.flatten()))
+        return data
+
 class RsDeviceConfig(Schema):
     clocking = fields.Nested(ClockSchema, many=True, exclude=['output'])
     dsp = fields.Nested(DspSchema, many=True, exclude=['output'])
     fabric_le = fields.Nested(FabricLogicElementSchema, many=True, exclude=['output'])
     bram = fields.Nested(BramSchema, many=True, exclude=['output'])
     io = fields.Nested(IoSchema, many=True, exclude=['output'])
+    peripherals = fields.Nested(RsPeripheralSchema, many=True)
 
 class RsProjectDeviceSchema(Schema):
     name = fields.Str()
@@ -98,6 +119,17 @@ class RsProjectManager:
             except Exception as e:
                 messages.append(RsMessageManager.get_message(307, { 'message': e.args[0] }))
 
+    def load_peripherals(self, module: Peripheral_SubModule, items: List, messages: List[RsMessage]) -> None:
+        for item in items:
+            try:
+                periph = module.get_peripheral(item['type'], item['index'])
+                periph.set_properties(item)
+                if 'ports' in item:
+                    for i, data in enumerate(item['ports']):
+                        periph.get_port(i).set_properties(data)
+            except Exception as e:
+                messages.append(RsMessageManager.get_message(308, { 'message': e.args[0] }))
+
     def load_devices(self, devices: List, messages: List[RsMessage]) -> None:
         for data in devices:
             try:
@@ -107,6 +139,7 @@ class RsProjectManager:
                 self.load_module(device.get_module(ModuleType.FABRIC_LE), data['configuration']['fabric_le'], messages)
                 self.load_module(device.get_module(ModuleType.BRAM), data['configuration']['bram'], messages)
                 self.load_module(device.get_module(ModuleType.IO), data['configuration']['io'], messages)
+                self.load_peripherals(device.get_module(ModuleType.SOC_PERIPHERALS), data['configuration']['peripherals'], messages)
                 device.compute_output_power()
             except DeviceNotFoundException as e:
                 messages.append(RsMessageManager.get_message(306, { 'name': data['name'] }))
@@ -136,7 +169,7 @@ class RsProjectManager:
                         'fabric_le': device.get_module(ModuleType.FABRIC_LE).get_all(),
                         'bram': device.get_module(ModuleType.BRAM).get_all(),
                         'io': device.get_module(ModuleType.IO).get_all(),
-                        'peripherals': []
+                        'peripherals': device.get_module(ModuleType.SOC_PERIPHERALS).get_peripherals()
                     }
                 }
                 devices.append(data)

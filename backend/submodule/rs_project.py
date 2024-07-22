@@ -124,6 +124,9 @@ class RsProjectManager:
             try:
                 periph = module.get_peripheral(item['type'], item['index'])
                 periph.set_properties(item)
+                if 'ports' in item:
+                    for i, data in enumerate(item['ports']):
+                        periph.get_port(i).set_properties(data)
             except Exception as e:
                 messages.append(RsMessageManager.get_message(308, { 'message': e.args[0] }))
 

@@ -2,8 +2,6 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-import sys
-from enum import Enum
 from typing import Type
 from flask import Blueprint, request
 from flask_restful import Api, Resource
@@ -46,21 +44,6 @@ def get_type(periph: str) -> PeripheralType:
         return periph_type
     raise InvalidPeripheralTypeException
 
-# todo: obsolete
-class UrlField(fields.Field):
-    def _serialize(self, value, attr, obj, **kwargs):
-        return [{'type': item.type.value, 'name': item.name, 'href': f'{item.type.value}/{index}'} for index, item in enumerate(value)]
-
-class EndpointUrlField(fields.Field):
-    def _serialize(self, value, attr, obj, **kwargs):
-        if value:
-            return [{'name': item.name, 'href': f'ep/{index}'} for index, item in enumerate(value)]
-
-class ChannelUrlField(fields.Field):
-    def _serialize(self, value, attr, obj, **kwargs):
-        if value:
-            return [{'name': item.name, 'href': f'channel/{index}'} for index, item in enumerate(value)]
-
 class PeripheralUrlSchema(Schema):
     type = fields.Enum(PeripheralType, by_value=True)
     name = fields.Str()
@@ -96,6 +79,15 @@ class PeripheralSchema(Schema):
     def __init__(self, *args, expand = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.expand = expand
+
+    @post_dump
+    def post_dump(self, data, **kwargs):
+        if self.expand == False:
+            if 'ports' in data:
+                data['ports'] = [{'name': item['name'], 'href': f'ep/{index}'} for index, item in enumerate(data['ports'])]
+            elif 'channels' in data:
+                data['channels'] = [{'name': item['name'], 'href': f'channel/{index}'} for index, item in enumerate(data['channels'])]
+        return data
 
     @classmethod
     def get_schema(cls, peripheral_type) -> Type:
@@ -201,15 +193,26 @@ class MemorySchema(PeripheralSchema):
 class DummyOutputSchema(Schema):
     pass
 
-class DmaSchema(PeripheralSchema):
-    ports = ChannelUrlField(data_key="channels")
-    output = fields.Nested(DummyOutputSchema, data_key="consumption")
+class ChannelOutputSchema(Schema):
+    calculated_bandwidth = fields.Number()
+    noc_power = fields.Number()
+    block_power = fields.Number()
+    percentage = fields.Number()
+    messages = fields.Nested(MessageSchema, many=True)
 
-    @post_dump(pass_original=True)
-    def post_dump(self, data, original_data, **kwargs):
-        if self.expand:
-            data['channels'] = ChannelSchema(many=True, exclude=['output']).dump(original_data['ports'])
-        return data
+class ChannelSchema(Schema):
+    enable = fields.Bool()
+    name = fields.Str()
+    source = fields.Str()
+    destination = fields.Str()
+    activity = fields.Enum(Port_Activity, by_value=True)
+    read_write_rate = fields.Number()
+    toggle_rate = fields.Number()
+    output = fields.Nested(ChannelOutputSchema, data_key="consumption")
+
+class DmaSchema(PeripheralSchema):
+    ports = fields.Nested(ChannelSchema, many=True, data_key="channels", exclude=['output'])
+    output = fields.Nested(DummyOutputSchema, data_key="consumption")
 
 class EndpointOutputSchema(Schema):
     calculated_bandwidth = fields.Number()
@@ -231,14 +234,8 @@ class BcpuOutputSchema(Schema):
 class BcpuSchema(PeripheralSchema):
     encryption_used = fields.Bool()
     clock = fields.Enum(N22_RISC_V_Clock, by_value=True)
-    ports = EndpointUrlField()
+    ports = fields.Nested(EndpointSchema, many=True, exclude=['output'])
     output = fields.Nested(BcpuOutputSchema, data_key="consumption")
-
-    @post_dump(pass_original=True)
-    def post_dump(self, data, original_data, **kwargs):
-        if self.expand:
-            data['ports'] = EndpointSchema(many=True, exclude=['output']).dump(original_data['ports'])
-        return data
 
 class FpgaComplexEndpointOutputSchema(EndpointOutputSchema):
     clock_frequency = fields.Int()
@@ -255,41 +252,12 @@ class AcpuSchema(PeripheralSchema):
     enable = fields.Bool()
     frequency = fields.Int()
     load = fields.Enum(A45_Load, by_value=True)
-    ports = EndpointUrlField()
+    ports = fields.Nested(EndpointSchema, many=True, exclude=['output'])
     output = fields.Nested(AcpuOutputSchema, data_key="consumption")
 
-    @post_dump(pass_original=True)
-    def post_dump(self, data, original_data, **kwargs):
-        if self.expand:
-            data['ports'] = EndpointSchema(many=True, exclude=['output']).dump(original_data['ports'])
-        return data
-
 class FpgaComplexSchema(PeripheralSchema):
-    ports = EndpointUrlField()
+    ports = fields.Nested(FpgaComplexEndpointSchema, many=True, exclude=['output'])
     output = fields.Nested(DummyOutputSchema, data_key="consumption")
-
-    @post_dump(pass_original=True)
-    def post_dump(self, data, original_data, **kwargs):
-        if self.expand:
-            data['ports'] = FpgaComplexEndpointSchema(many=True, exclude=['output']).dump(original_data['ports'])
-        return data
-
-class ChannelOutputSchema(Schema):
-    calculated_bandwidth = fields.Number()
-    noc_power = fields.Number()
-    block_power = fields.Number()
-    percentage = fields.Number()
-    messages = fields.Nested(MessageSchema, many=True)
-
-class ChannelSchema(Schema):
-    enable = fields.Bool()
-    name = fields.Str()
-    source = fields.Str()
-    destination = fields.Str()
-    activity = fields.Enum(Port_Activity, by_value=True)
-    read_write_rate = fields.Number()
-    toggle_rate = fields.Number()
-    output = fields.Nested(ChannelOutputSchema, data_key="consumption")
 
 class PeripheralsApi(Resource):
     def get(self, device_id : str):

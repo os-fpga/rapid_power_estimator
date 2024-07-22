@@ -118,6 +118,10 @@ function App() {
       if (data.device.length !== 0 && data.device !== device) {
         setSelectedDevice(data.device);
         deviceChanged(data.device);
+      } else {
+        updateGlobalState(device);
+        updateTotalPower(device);
+        fetchAttributes();
       }
       sendProjectData({ modified: data.modified, filepath: data.filepath });
     });

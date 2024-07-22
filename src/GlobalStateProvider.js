@@ -128,6 +128,19 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
           updatePeripherals(device, item.href, item.type);
         });
       });
+    } else {
+      setClockingState([]);
+      setFleState([]);
+      setBramState([]);
+      setDspState([]);
+      setIoState([]);
+      setSocState({});
+      setAttributes([]);
+      setPeripherals([]);
+      setDmaNames([]);
+      setConnectivityNames([]);
+      setAcpuNames([]);
+      setBcpuNames([]);
     }
   }
 

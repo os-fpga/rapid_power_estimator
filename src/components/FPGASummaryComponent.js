@@ -8,7 +8,7 @@ function FPGASummaryComponent({ device }) {
   const {
     clockingState, fleState, bramState, dspState, ioState,
   } = useGlobalState();
-  const [data, setData] = React.useState([
+  const defaultData = [
     {
       text: 'Clocking',
       power: 0,
@@ -51,13 +51,14 @@ function FPGASummaryComponent({ device }) {
       percent: 0,
       messages: [],
     },
-  ]);
+  ];
+  const [data, setData] = React.useState(defaultData);
   const { totalConsumption } = useSocTotalPower();
 
   const fpgaComplex = totalConsumption.fpga_complex;
 
   React.useEffect(() => {
-    const newData = data;
+    const newData = defaultData;
     const { dynamic } = totalConsumption.fpga_complex;
     const clocking = dynamic.components.find((elem) => elem.type === 'clocking');
     if (clocking) {

@@ -567,6 +567,8 @@ class PeripheralApi(Resource):
             schema = get_peripheral_schema(peripheral.get_type())
             peripheral.set_properties(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(peripheral), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -682,6 +684,8 @@ class PeripheralEndpointApi(Resource):
             schema = get_endpoint_schema(periph)
             ep.set_properties(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(ep), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -799,6 +803,8 @@ class PeripheralChannelApi(Resource):
             schema = ChannelSchema()
             channel.set_properties(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(channel), 200
         except ValidationError as e:
             raise SchemaValidationError

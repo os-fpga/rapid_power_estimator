@@ -213,6 +213,8 @@ class BramsApi(Resource):
             schema = BramSchema()
             bram = bram_module.add(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(bram), 201
         except ValidationError as e:
             raise SchemaValidationError
@@ -308,6 +310,8 @@ class BramApi(Resource):
             schema = BramSchema()
             bram = bram_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(bram), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -349,6 +353,8 @@ class BramApi(Resource):
             schema = BramSchema()
             bram_module.remove(rownum)
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return '', 204
         except BramNotFoundException as e:
             raise BramNotExistsError

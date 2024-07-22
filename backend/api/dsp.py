@@ -187,6 +187,8 @@ class DspsApi(Resource):
             schema = DspSchema()
             dsp = dsp_module.add(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(dsp), 201
         except ValidationError as e:
             raise SchemaValidationError
@@ -282,6 +284,8 @@ class DspApi(Resource):
             schema = DspSchema()
             dsp = dsp_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(dsp), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -323,6 +327,8 @@ class DspApi(Resource):
             schema = DspSchema()
             dsp_module.remove(rownum)
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return '', 204
         except DspNotFoundException as e:
             raise DspNotExistsError

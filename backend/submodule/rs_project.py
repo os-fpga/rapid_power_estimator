@@ -163,3 +163,6 @@ class RsProjectManager:
         self.projects[0].filepath = filepath
         self.projects[0].modified = False
         return True
+
+    def set_modified(self, modified: bool) -> None:
+        self.projects[0].modified = modified

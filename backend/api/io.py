@@ -287,6 +287,8 @@ class IosApi(Resource):
             schema = IoSchema()
             io = io_module.add(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(io), 201
         except ValidationError as e:
             raise SchemaValidationError
@@ -382,6 +384,8 @@ class IoApi(Resource):
             schema = IoSchema()
             io = io_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(io), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -423,6 +427,8 @@ class IoApi(Resource):
             schema = IoSchema()
             io_module.remove(rownum)
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return '', 204
         except IONotFoundException as e:
             raise IONotExistsError

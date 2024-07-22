@@ -181,6 +181,8 @@ class ClocksApi(Resource):
             schema = ClockSchema()
             clock = clock_module.add(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(clock), 201
         except ValidationError as e:
             raise SchemaValidationError
@@ -280,6 +282,8 @@ class ClockApi(Resource):
             schema = ClockSchema()
             clock = clock_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(clock), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -321,6 +325,8 @@ class ClockApi(Resource):
             schema = ClockSchema()
             clock_module.remove(rownum)
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return '', 204
         except ClockNotFoundException as e:
             raise ClockNotExistsError

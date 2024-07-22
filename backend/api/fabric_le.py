@@ -187,6 +187,8 @@ class Fabric_LesApi(Resource):
             schema = FabricLogicElementSchema()
             logic_element = fle_module.add(schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(logic_element), 201
         except ValidationError as e:
             raise SchemaValidationError
@@ -284,6 +286,8 @@ class Fabric_LeApi(Resource):
             schema = FabricLogicElementSchema()
             logic_element = fle_module.update(rownum, schema.load(request.json))
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return schema.dump(logic_element), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -325,6 +329,8 @@ class Fabric_LeApi(Resource):
             schema = FabricLogicElementSchema()
             fle_module.remove(rownum)
             device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
             return '', 204
         except FabricLeNotFoundException as e:
             raise FabricLeNotExistsError

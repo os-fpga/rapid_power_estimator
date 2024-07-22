@@ -17,7 +17,7 @@ import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ACPUTable.css';
 
-function ConnectivityTable({ device, peripherals }) {
+function ConnectivityTable({ device, peripherals, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -77,6 +77,11 @@ function ConnectivityTable({ device, peripherals }) {
     setDev(device);
     if (device !== null) fetchData();
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   const header = ['', 'Action', 'Clock', 'Frequency', 'Endpoint', 'Activity', 'R/W',
     'Toggle Rate', 'Bandwidth', 'Noc Power', '%',

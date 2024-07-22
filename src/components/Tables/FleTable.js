@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function FleTable({ device }) {
+function FleTable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -57,6 +57,11 @@ function FleTable({ device }) {
     setDev(device);
     if (device !== null) fetchFleData(device);
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchFleData(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     fetchFleData(device);

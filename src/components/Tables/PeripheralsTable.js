@@ -10,7 +10,7 @@ import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
-function PeripheralsTable({ device, peripheralsUrl }) {
+function PeripheralsTable({ device, peripheralsUrl, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -139,6 +139,10 @@ function PeripheralsTable({ device, peripheralsUrl }) {
     setDev(device);
     if (device !== null) fetchData(device);
   }
+  React.useEffect(() => {
+    if (update && device !== null) fetchData(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     updateTotalPower(device);

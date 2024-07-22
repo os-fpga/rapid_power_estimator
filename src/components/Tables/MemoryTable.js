@@ -15,7 +15,7 @@ import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
-function MemoryTable({ device, peripherals }) {
+function MemoryTable({ device, peripherals, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -63,6 +63,10 @@ function MemoryTable({ device, peripherals }) {
       fetchData(href);
     }
   }
+  React.useEffect(() => {
+    if (update && device !== null) fetchData(href);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     fetchData(href);

@@ -73,6 +73,7 @@ function App() {
   const [peripherals, setPeripherals] = React.useState([]);
   const [memoryEnable, setMemoryEnable] = React.useState(true);
   const [selectedDevice, setSelectedDevice] = React.useState('selectDev');
+  const [update, setUpdate] = React.useState(false);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -164,6 +165,7 @@ function App() {
         fetchAttributes();
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
+        setUpdate(data.action === 'new');
         if (data.action === 'new') server.POST(server.projectClose(), {}, fetchProjectData);
         if (data.action === 'open') {
           const openData = { filepath: data.filepath };
@@ -312,47 +314,47 @@ function App() {
       <div className="table-container main-border">
         {
         openedTable === Table.Clocking
-        && <ClockingTable device={device} />
+        && <ClockingTable device={device} update={update} />
         }
         {
         openedTable === Table.FLE
-        && <FleTable device={device} />
+        && <FleTable device={device} update={update} />
         }
         {
         openedTable === Table.IO
-        && <IOTable device={device} />
+        && <IOTable device={device} update={update} />
         }
         {
         openedTable === Table.BRAM
-        && <BramTable device={device} />
+        && <BramTable device={device} update={update} />
         }
         {
         openedTable === Table.DSP
-        && <DspTable device={device} />
+        && <DspTable device={device} update={update} />
         }
         {
         openedTable === Table.ACPU
-        && <ACPUTable device={device} />
+        && <ACPUTable device={device} update={update} />
         }
         {
         openedTable === Table.BCPU
-        && <BCPUTable device={device} />
+        && <BCPUTable device={device} update={update} />
         }
         {
         openedTable === Table.Connectivity
-        && <ConnectivityTable device={device} peripherals={peripherals} />
+        && <ConnectivityTable device={device} peripherals={peripherals} update={update} />
         }
         {
         openedTable === Table.Memory
-        && <MemoryTable device={device} peripherals={peripherals} />
+        && <MemoryTable device={device} peripherals={peripherals} update={update} />
         }
         {
         openedTable === Table.DMA
-        && <DMATable device={device} />
+        && <DMATable device={device} update={update} />
         }
         {
         openedTable === Table.Peripherals
-        && <PeripheralsTable device={device} peripheralsUrl={peripherals} />
+        && <PeripheralsTable device={device} peripheralsUrl={peripherals} update={update} />
         }
         {
         openedTable === Table.Summary

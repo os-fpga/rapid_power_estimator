@@ -14,7 +14,7 @@ import { ComponentLabel, Checkbox, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
-function BCPUTable({ device }) {
+function BCPUTable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -86,6 +86,11 @@ function BCPUTable({ device }) {
     setDev(device);
     if (device !== null) fetchData();
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     publish('cpuChanged', 'bcpu');

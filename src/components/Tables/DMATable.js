@@ -17,7 +17,7 @@ import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
-function DMATable({ device }) {
+function DMATable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -65,18 +65,25 @@ function DMATable({ device }) {
     }
   }
 
+  function fetchAll(deviceId) {
+    server.GET(server.api.fetch(server.Elem.peripherals, deviceId), (data) => {
+      const dma = data.find((elem) => elem.type === 'dma');
+      if (dma !== undefined) {
+        setDmaHref(dma.href);
+        fetchData(dma.href);
+      }
+    });
+  }
+
   if (dev !== device) {
     setDev(device);
-    if (device !== null) {
-      server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
-        const dma = data.find((elem) => elem.type === 'dma');
-        if (dma !== undefined) {
-          setDmaHref(dma.href);
-          fetchData(dma.href);
-        }
-      });
-    }
+    if (device !== null) fetchAll(device);
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchAll(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     publish('dmaChanged');

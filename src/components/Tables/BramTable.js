@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function BramTable({ device }) {
+function BramTable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -81,6 +81,11 @@ function BramTable({ device }) {
     setDev(device);
     if (device !== null) fetchBramData(device);
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchBramData(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function sendData(row) {
     const data = {};

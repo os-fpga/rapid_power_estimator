@@ -14,7 +14,7 @@ import { ComponentLabel, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
-function ACPUTable({ device }) {
+function ACPUTable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -80,6 +80,11 @@ function ACPUTable({ device }) {
     setDev(device);
     if (device !== null) fetchData();
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     publish('cpuChanged', 'acpu');

@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function IOTable({ device }) {
+function IOTable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -134,6 +134,11 @@ function IOTable({ device }) {
     setDev(device);
     if (device !== null) fetchIoData(device);
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchIoData(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     fetchIoData(device);

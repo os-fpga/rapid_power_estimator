@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function DspTable({ device }) {
+function DspTable({ device, update }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -54,6 +54,11 @@ function DspTable({ device }) {
     setDev(device);
     if (device !== null) fetchDspData(device);
   }
+
+  React.useEffect(() => {
+    if (update && device !== null) fetchDspData(device);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
 
   function modifyDataHandler() {
     fetchDspData(device);

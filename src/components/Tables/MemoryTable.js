@@ -15,7 +15,9 @@ import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
-function MemoryTable({ device, peripherals, update }) {
+function MemoryTable({
+  device, peripherals, update, notify,
+}) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -73,6 +75,7 @@ function MemoryTable({ device, peripherals, update }) {
     publish('memoryChanged');
     updateTotalPower(device);
     updateGlobalState(device);
+    notify();
   }
 
   function modifyRow(index, row) {

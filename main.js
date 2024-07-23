@@ -47,7 +47,7 @@ const projectMeta = {
   notes: '',
   lang: 0,
   name: '',
-  changed: false,
+  modified: false,
 };
 
 let mainWindow = null;
@@ -59,6 +59,7 @@ function updateTitle(titleInfo) {
   else title += `${path.basename(titleInfo.filepath)}`;
   title += ' - Rapid Power Estimator';
   mainWindow.setTitle(title);
+  projectMeta.modified = titleInfo.modified;
 }
 
 function sendProjectDataToRenderer(action = '') {
@@ -70,7 +71,6 @@ function saveProjectClicked() {
     const file = saveProjectRequest(mainWindow);
     if (file.length > 0) {
       projectMeta.file = file;
-      projectMeta.changed = false;
       updateTitle({ modified: false, filepath: projectMeta.file });
       sendProjectDataToRenderer({ action: 'saveAs', filepath: file });
     }
@@ -80,14 +80,22 @@ function saveProjectClicked() {
 }
 
 function acceptReset(accept) {
-  const result = dialog.showMessageBoxSync(mainWindow, {
-    type: 'question',
-    buttons: ['Cancel', 'Yes', 'No'],
-    defaultId: 0,
-    title: 'Reset',
-    message: 'All data will be reset. Do you want to continue?',
-  });
-  if (result === 1) { // Yes
+  if (projectMeta.modified) {
+    const buttons = ['Cancel', 'No', 'Yes'];
+    const result = dialog.showMessageBoxSync(mainWindow, {
+      type: 'question',
+      buttons,
+      defaultId: 0,
+      title: 'Save changes before closing',
+      message: 'Do you want to save your changes?',
+    });
+    if (buttons[result] === 'Yes') {
+      saveProjectClicked();
+      accept();
+    } else if (buttons[result] === 'No') {
+      accept();
+    }
+  } else {
     accept();
   }
 }
@@ -96,7 +104,6 @@ function saveAsClicked() {
   const file = saveProjectRequest(mainWindow);
   if (file.length > 0) {
     projectMeta.file = file;
-    projectMeta.changed = false;
     updateTitle({ modified: false, filepath: projectMeta.file });
     sendProjectDataToRenderer({ action: 'saveAs', filepath: file });
   }

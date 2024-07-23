@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function DspTable({ device, update }) {
+function DspTable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -64,6 +64,7 @@ function DspTable({ device, update }) {
     fetchDspData(device);
     updateGlobalState(device);
     updateTotalPower(device);
+    notify();
   }
 
   function modifyRow(index, row) {

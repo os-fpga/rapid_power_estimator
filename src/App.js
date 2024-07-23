@@ -128,6 +128,12 @@ function App() {
     });
   }
 
+  function fetchModify() {
+    server.GET(server.project(), (data) => {
+      sendProjectData({ modified: data.modified, filepath: data.filepath });
+    });
+  }
+
   const handleOk = () => {
     // this will restart app
     if (preferencesChanged) {
@@ -314,47 +320,68 @@ function App() {
       <div className="table-container main-border">
         {
         openedTable === Table.Clocking
-        && <ClockingTable device={device} update={update} />
+        && <ClockingTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.FLE
-        && <FleTable device={device} update={update} />
+        && <FleTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.IO
-        && <IOTable device={device} update={update} />
+        && <IOTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.BRAM
-        && <BramTable device={device} update={update} />
+        && <BramTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.DSP
-        && <DspTable device={device} update={update} />
+        && <DspTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.ACPU
-        && <ACPUTable device={device} update={update} />
+        && <ACPUTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.BCPU
-        && <BCPUTable device={device} update={update} />
+        && <BCPUTable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.Connectivity
-        && <ConnectivityTable device={device} peripherals={peripherals} update={update} />
+        && (
+        <ConnectivityTable
+          device={device}
+          peripherals={peripherals}
+          update={update}
+          notify={() => fetchModify()}
+        />
+        )
         }
         {
         openedTable === Table.Memory
-        && <MemoryTable device={device} peripherals={peripherals} update={update} />
+        && (
+        <MemoryTable
+          device={device}
+          peripherals={peripherals}
+          update={update}
+          notify={() => fetchModify()}
+        />
+        )
         }
         {
         openedTable === Table.DMA
-        && <DMATable device={device} update={update} />
+        && <DMATable device={device} update={update} notify={() => fetchModify()} />
         }
         {
         openedTable === Table.Peripherals
-        && <PeripheralsTable device={device} peripheralsUrl={peripherals} update={update} />
+        && (
+        <PeripheralsTable
+          device={device}
+          peripheralsUrl={peripherals}
+          update={update}
+          notify={() => fetchModify()}
+        />
+        )
         }
         {
         openedTable === Table.Summary

@@ -14,7 +14,7 @@ import { ComponentLabel, Checkbox, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
-function BCPUTable({ device, update }) {
+function BCPUTable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -96,6 +96,7 @@ function BCPUTable({ device, update }) {
     publish('cpuChanged', 'bcpu');
     updateTotalPower(device);
     updateGlobalState(device);
+    notify();
   }
 
   const handleChange = (name, val) => {

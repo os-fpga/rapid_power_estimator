@@ -17,7 +17,9 @@ import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ACPUTable.css';
 
-function ConnectivityTable({ device, peripherals, update }) {
+function ConnectivityTable({
+  device, peripherals, update, notify,
+}) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -97,6 +99,7 @@ function ConnectivityTable({ device, peripherals, update }) {
     publish('interconnectChanged');
     updateTotalPower(device);
     updateGlobalState(device);
+    notify();
   }
 
   const deleteRow = (index) => {

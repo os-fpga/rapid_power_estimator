@@ -14,7 +14,7 @@ import { ComponentLabel, Dropdown } from '../ComponentsLib';
 
 import '../style/ACPUTable.css';
 
-function ACPUTable({ device, update }) {
+function ACPUTable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -90,6 +90,7 @@ function ACPUTable({ device, update }) {
     publish('cpuChanged', 'acpu');
     updateTotalPower(device);
     updateGlobalState(device);
+    notify();
   }
 
   const handleChange = (name, val) => {

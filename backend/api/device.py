@@ -311,7 +311,7 @@ class DeviceApi(Resource):
             device_mgr = RsDeviceManager.get_instance()
             device = device_mgr.get_device(device_id)
             schema = DeviceSchema()
-            device.update_spec(schema.load(request.json))
+            device.update_spec(schema.load(request.json)['specification'])
             from submodule.rs_project import RsProjectManager
             RsProjectManager.get_instance().set_modified(True)
             return schema.dump(device), 200

@@ -329,7 +329,7 @@ class RsDevice:
         return self.output
 
     def update_spec(self, data):
-        return update_attributes(self.specification, data['specification'])
+        return update_attributes(self.specification, data)
 
     def get_io_banks_used(self, bank_type : IO_BankType, voltage : float = None) -> int:
         num_banks = 0

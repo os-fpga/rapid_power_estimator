@@ -12,6 +12,7 @@ from api.fabric_le import FabricLogicElementSchema
 from api.bram import BramSchema
 from api.io import IoSchema
 from api.peripherals import PeripheralSchema
+from api.device import SpecificationSchema
 from submodule.peripherals import Peripheral, Peripheral_SubModule
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import DeviceNotFoundException, ModuleType, PeripheralType, ProjectNotLoadedException
@@ -60,6 +61,7 @@ class RsDeviceConfig(Schema):
 
 class RsProjectDeviceSchema(Schema):
     name = fields.Str()
+    specification = fields.Nested(SpecificationSchema)
     configuration = fields.Nested(RsDeviceConfig)
 
 class RsProjectSchema(Schema):
@@ -134,6 +136,7 @@ class RsProjectManager:
         for data in devices:
             try:
                 device = RsDeviceManager.get_instance().get_device(data['name'])
+                device.update_spec(data.get('specification', {}))
                 self.load_module(device.get_module(ModuleType.CLOCKING), data['configuration']['clocking'], messages)
                 self.load_module(device.get_module(ModuleType.DSP), data['configuration']['dsp'], messages)
                 self.load_module(device.get_module(ModuleType.FABRIC_LE), data['configuration']['fabric_le'], messages)
@@ -163,6 +166,7 @@ class RsProjectManager:
             for device in RsDeviceManager.get_instance().get_device_all():
                 data = {
                     'name': device.id,
+                    'specification': device.specification,
                     'configuration': {
                         'clocking': device.get_module(ModuleType.CLOCKING).get_all(),
                         'dsp': device.get_module(ModuleType.DSP).get_all(),

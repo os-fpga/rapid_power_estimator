@@ -31,7 +31,7 @@ class RsMessageManager:
         RsMessage(203, RsMessageType.WARN, "Peripheral '{name}' is not connected"),
         RsMessage(204, RsMessageType.WARN, "DMA {name} source not specified"),
         RsMessage(205, RsMessageType.WARN, "DMA {name} destination not specified"),
-        RsMessage(205, RsMessageType.WARN, "DMA {name} cannot have the same source and destination"),
+        RsMessage(206, RsMessageType.WARN, "DMA {name} cannot have the same source and destination"),
         RsMessage(301, RsMessageType.ERRO, "Invalid clock '{clock}'"),
         RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
         RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),

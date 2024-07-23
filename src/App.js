@@ -171,7 +171,7 @@ function App() {
         fetchAttributes();
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
-        setUpdate(data.action === 'new');
+        setUpdate(data.action === 'new' || data.action === 'open');
         if (data.action === 'new') server.POST(server.projectClose(), {}, fetchProjectData);
         if (data.action === 'open') {
           const openData = { filepath: data.filepath };

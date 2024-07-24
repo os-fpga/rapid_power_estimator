@@ -3,6 +3,7 @@
 #  Authorized use only
 #
 import sys
+import threading
 from flask import Blueprint, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, fields, ValidationError
@@ -20,6 +21,9 @@ from .errors import CreateProjectPermissionError, ProjectFileNotFoundError, Proj
 # /project/open     | POST                      | ProjectOpenApi        #
 # /project/close    | POST                      | ProjectCloseApi       #
 #-----------------------------------------------------------------------#
+
+# Used to serialize api requests to prevent race conditions
+lock = threading.Lock()
 
 class ProjectAttributesSchema(Schema):
     autosave = fields.Bool()
@@ -125,8 +129,9 @@ class ProjectApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.save()
+            with lock:
+                proj_mgr = RsProjectManager.get_instance()
+                proj_mgr.save()
             return ProjectSchema().dump(proj_mgr.get()), 201
         except ValidationError as e:
             raise SchemaValidationError
@@ -170,8 +175,9 @@ class ProjectApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.update(ProjectAttributesSchema().load(request.json))
+            with lock:
+                proj_mgr = RsProjectManager.get_instance()
+                proj_mgr.update(ProjectAttributesSchema().load(request.json))
             return ProjectSchema().dump(proj_mgr.get()), 200
         except ValidationError as e:
             raise SchemaValidationError
@@ -204,8 +210,9 @@ class ProjectCreateApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.create(ProjectFilepathSchema().load(request.json)['filepath'])
+            with lock:
+                proj_mgr = RsProjectManager.get_instance()
+                proj_mgr.create(ProjectFilepathSchema().load(request.json)['filepath'])
             return "", 204
         except ValidationError as e:
             raise SchemaValidationError
@@ -240,8 +247,9 @@ class ProjectOpenApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.open(ProjectFilepathSchema().load(request.json)['filepath'])
+            with lock:
+                proj_mgr = RsProjectManager.get_instance()
+                proj_mgr.open(ProjectFilepathSchema().load(request.json)['filepath'])
             return "", 204
         except FileNotFoundError as e:
             raise ProjectFileNotFoundError
@@ -267,8 +275,9 @@ class ProjectCloseApi(Resource):
                     $ref: '#/definitions/HTTPErrorMessage'
         """
         try:
-            proj_mgr = RsProjectManager.get_instance()
-            proj_mgr.close()
+            with lock:
+                proj_mgr = RsProjectManager.get_instance()
+                proj_mgr.close()
             return "", 204
         except ValidationError as e:
             raise SchemaValidationError

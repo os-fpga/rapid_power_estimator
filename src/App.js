@@ -125,7 +125,6 @@ function App() {
       } else {
         updateGlobalState(device);
         updateTotalPower(device);
-        fetchAttributes();
       }
       sendProjectData({ modified: data.modified, filepath: data.filepath });
     });

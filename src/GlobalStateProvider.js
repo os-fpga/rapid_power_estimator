@@ -135,12 +135,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       setDspState([]);
       setIoState([]);
       setSocState({});
-      setAttributes([]);
       setPeripherals([]);
-      setDmaNames([]);
-      setConnectivityNames([]);
-      setAcpuNames([]);
-      setBcpuNames([]);
     }
   }
 

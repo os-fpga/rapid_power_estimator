@@ -46,6 +46,7 @@ const Language = [
 
 function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
+  const notApplicableTime = 'N/A';
   const [devices, setDevices] = React.useState([]);
   const [device, setDevice] = React.useState(null);
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
@@ -57,7 +58,7 @@ function App() {
     lang: 0,
     notes: '',
     device: '',
-    lastEdited: moment().format(timeFormat),
+    lastEdited: notApplicableTime,
   });
   const [config, setConfig] = React.useState({
     useDefaultFile: true,
@@ -110,7 +111,9 @@ function App() {
         name: data.name,
         device: data.device,
         notes: data.notes,
-        lastEdited: moment(data.last_edited).format(timeFormat),
+        lastEdited: data.last_edited
+          ? moment(data.last_edited).format(timeFormat)
+          : notApplicableTime,
       };
       const findLang = Language.find((i) => i.text === lang);
       if (findLang !== undefined) newData.lang = findLang.id;

@@ -17,7 +17,7 @@ import { ComponentLabel } from '../ComponentsLib';
 
 import '../style/ComponentTable.css';
 
-function DMATable({ device, update }) {
+function DMATable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -89,6 +89,7 @@ function DMATable({ device, update }) {
     publish('dmaChanged');
     updateTotalPower(device);
     updateGlobalState(device);
+    notify();
   }
 
   function modifyRow(index, row) {

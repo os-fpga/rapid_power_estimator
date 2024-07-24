@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function BramTable({ device, update }) {
+function BramTable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -116,6 +116,7 @@ function BramTable({ device, update }) {
     fetchBramData(device);
     updateGlobalState(device);
     updateTotalPower(device);
+    notify();
   }
 
   function modifyRow(index, row) {

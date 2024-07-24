@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function FleTable({ device, update }) {
+function FleTable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -67,6 +67,7 @@ function FleTable({ device, update }) {
     fetchFleData(device);
     updateGlobalState(device);
     updateTotalPower(device);
+    notify();
   }
 
   function modifyRow(index, row) {

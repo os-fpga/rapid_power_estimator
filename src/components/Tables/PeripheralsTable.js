@@ -10,7 +10,9 @@ import { useGlobalState } from '../../GlobalStateProvider';
 
 import '../style/ComponentTable.css';
 
-function PeripheralsTable({ device, peripheralsUrl, update }) {
+function PeripheralsTable({
+  device, peripheralsUrl, update, notify,
+}) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -147,6 +149,7 @@ function PeripheralsTable({ device, peripheralsUrl, update }) {
   function modifyDataHandler() {
     updateTotalPower(device);
     updateGlobalState(device);
+    notify();
   }
 
   function modifyRow(index, row) {

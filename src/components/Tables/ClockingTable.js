@@ -14,7 +14,7 @@ import { useSocTotalPower } from '../../SOCTotalPowerProvider';
 
 import '../style/ComponentTable.css';
 
-function ClockingTable({ device, update }) {
+function ClockingTable({ device, update, notify }) {
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -78,6 +78,7 @@ function ClockingTable({ device, update }) {
     fetchClockData(device);
     updateGlobalState(device);
     updateTotalPower(device);
+    notify();
   }
 
   function modifyRow(index, row) {

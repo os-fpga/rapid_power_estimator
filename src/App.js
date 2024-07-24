@@ -74,16 +74,28 @@ function App() {
   const [memoryEnable, setMemoryEnable] = React.useState(true);
   const [selectedDevice, setSelectedDevice] = React.useState('');
   const [update, setUpdate] = React.useState(false);
+  const [errorMessageState, setErrorMessageState] = React.useState(false);
+
+  function sendProjectData(projectDataValue) {
+    window.ipcAPI.send('projectData', projectDataValue);
+  }
+
+  React.useEffect(() => {
+    if (errorMessageState) {
+      server.GET(server.project(), (data) => {
+        sendProjectData({
+          messages: data.messages,
+        });
+        setErrorMessageState(false);
+      });
+    }
+  }, [errorMessageState]);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
     setPreferencesChanged(false);
     setIsModalOpen(true);
   };
-
-  function sendProjectData(projectDataValue) {
-    window.ipcAPI.send('projectData', projectDataValue);
-  }
 
   const deviceChanged = (newDevice) => {
     setPeripherals([]);
@@ -124,6 +136,8 @@ function App() {
       });
     });
   }
+
+  function verifyError() { setErrorMessageState(true); }
 
   function switchDevice() {
     server.GET(server.project(), (data) => {
@@ -181,7 +195,7 @@ function App() {
           server.POST(
             server.projectOpen(),
             openData,
-            () => { fetchProjectData(); switchDevice(); },
+            () => { fetchProjectData(); switchDevice(); verifyError(); },
           );
         }
         if (data.action === 'save') {

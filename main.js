@@ -53,13 +53,15 @@ const projectMeta = {
 let mainWindow = null;
 
 function updateTitle(titleInfo) {
-  let title = '';
-  if (titleInfo.modified) title += '*';
-  if (titleInfo.filepath.length === 0) title += `${untitled}`;
-  else title += `${path.basename(titleInfo.filepath)}`;
-  title += ' - Rapid Power Estimator';
-  mainWindow.setTitle(title);
-  projectMeta.modified = titleInfo.modified;
+  if (titleInfo.modified !== undefined && titleInfo.filepath !== undefined) {
+    let title = '';
+    if (titleInfo.modified) title += '*';
+    if (titleInfo.filepath.length === 0) title += `${untitled}`;
+    else title += `${path.basename(titleInfo.filepath)}`;
+    title += ' - Rapid Power Estimator';
+    mainWindow.setTitle(title);
+    projectMeta.modified = titleInfo.modified;
+  }
 }
 
 function sendProjectDataToRenderer(action = '') {
@@ -125,6 +127,24 @@ function openProjectClicked() {
       sendProjectDataToRenderer({ action: 'open', filepath: projectFile });
     }
   });
+}
+
+function showMessage(type, title, message) {
+  dialog.showMessageBoxSync(mainWindow, {
+    type,
+    buttons: ['Ok'],
+    defaultId: 0,
+    title,
+    message,
+  });
+}
+
+function operateErrorState(messages) {
+  const errors = messages.filter((message) => message.type === 'error');
+  if (errors.length !== 0) {
+    showMessage('error', `Failed to open file ${path.basename(projectMeta.file)}`, errors.map((mess) => mess.text).join('\n'));
+    newProjectClicked();
+  }
 }
 
 const isDev = process.argv.find((val) => val === '--development');
@@ -278,7 +298,9 @@ const createWindow = () => {
     mainWindow.webContents.send('loadConfig', store.store);
   });
   ipcMain.on('projectData', (event, arg) => {
-    if (arg.saveRequest) saveProjectClicked();
+    if (arg.messages && arg.messages.length !== 0) {
+      operateErrorState(arg.messages);
+    } else if (arg.saveRequest) saveProjectClicked();
     else updateTitle(arg);
   });
   ipcMain.on('autoSave', (event, arg) => {

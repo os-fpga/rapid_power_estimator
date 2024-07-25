@@ -36,15 +36,17 @@ function MemoryComponent({ device, peripherals }) {
   const href = [...ddr, ...ocm];
 
   const update = React.useCallback(() => {
-    href.forEach((mem) => {
-      const index = href.indexOf(mem);
-      server.GET(server.peripheralPath(device, mem.href), (memJson) => {
-        setMemData((prev) => prev.map((it, idx) => {
-          if (index === idx) return memJson;
-          return it;
-        }));
+    if (device !== '') {
+      href.forEach((mem) => {
+        const index = href.indexOf(mem);
+        server.GET(server.peripheralPath(device, mem.href), (memJson) => {
+          setMemData((prev) => prev.map((it, idx) => {
+            if (index === idx) return memJson;
+            return it;
+          }));
+        });
       });
-    });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [device, peripherals]);
 
@@ -57,7 +59,7 @@ function MemoryComponent({ device, peripherals }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) update();
+    if (device !== '') update();
   }
 
   const Title = 'Memory';
@@ -108,7 +110,7 @@ MemoryComponent.propTypes = {
 };
 
 MemoryComponent.defaultProps = {
-  device: null,
+  device: '',
 };
 
 export default MemoryComponent;

@@ -15,18 +15,19 @@ import { ComponentLabel, Dropdown } from '../ComponentsLib';
 import '../style/ACPUTable.css';
 
 function ACPUTable({ device, update, notify }) {
-  const [dev, setDev] = React.useState(null);
-  const [editIndex, setEditIndex] = React.useState(null);
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const [powerData, setPowerData] = React.useState([['Block Power', 0, 0]]);
-  const [acpuData, setAcpuData] = React.useState({
+  const acpuDataDefault = {
     name: '',
     frequency: 0,
     load: 0,
-  });
+  };
+  const powerDataDefault = [['Block Power', 0, 0]];
+  const [dev, setDev] = React.useState(null);
+  const [editIndex, setEditIndex] = React.useState(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [powerData, setPowerData] = React.useState(powerDataDefault);
+  const [acpuData, setAcpuData] = React.useState(acpuDataDefault);
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
-  const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
   const { GetOptions, updateGlobalState, acpuNames } = useGlobalState();
   const loadActivity = GetOptions('A45_Load');
@@ -38,9 +39,6 @@ function ACPUTable({ device, update, notify }) {
       while (newData.length < (ep + 1)) newData.push({});
       newData[ep] = { ep, data };
       setEndpoints([...newData]);
-
-      const found = newData.find((it) => it.data !== undefined && it.data.name === '');
-      setAddButtonDisable(found === undefined);
     });
   }
 
@@ -78,11 +76,16 @@ function ACPUTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchData();
+    if (device !== '') fetchData();
+    else {
+      setAcpuData(acpuDataDefault);
+      setPowerData(powerDataDefault);
+      setHref('');
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchData();
+    if (update && device !== '') fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -96,7 +99,7 @@ function ACPUTable({ device, update, notify }) {
   const handleChange = (name, val) => {
     const newData = { ...acpuData, [name]: val };
     setAcpuData(newData);
-    if (device !== null && href !== '') {
+    if (device !== '' && href !== '') {
       server.PATCH(server.peripheralPath(device, href), newData, () => fetchAcpuData(href));
     }
     modifyDataHandler();
@@ -119,7 +122,7 @@ function ACPUTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       const data = newData;
       data.name = GetText(newData.name, acpuNames);
       server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, () => fetchAcpuData(href));
@@ -159,7 +162,7 @@ function ACPUTable({ device, update, notify }) {
             <Dropdown value={acpuData.load} onChangeHandler={(value) => handleChange('load', value)} items={loadActivity} />
           </div>
         </div>
-        <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>
+        <TableBase header={header} disabled={device === ''} onClick={() => setModalOpen(true)}>
           {
             endpoints.map((row, index) => (
               (row.data !== undefined && row.data.name !== '')

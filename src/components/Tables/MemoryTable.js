@@ -18,14 +18,15 @@ import '../style/ComponentTable.css';
 function MemoryTable({
   device, peripherals, update, notify,
 }) {
+  const memoryDataDefault = [
+    { id: 0, data: {} },
+    { id: 1, data: {} },
+  ];
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerTotal, setPowerTotal] = React.useState(0);
-  const [memoryData, setMemoryData] = React.useState([
-    { id: 0, data: {} },
-    { id: 1, data: {} },
-  ]);
+  const [memoryData, setMemoryData] = React.useState(memoryDataDefault);
   const { updateTotalPower } = useSocTotalPower();
   const { GetOptions, updateGlobalState } = useGlobalState();
   const memoryUsage = GetOptions('Peripherals_Usage');
@@ -50,7 +51,7 @@ function MemoryTable({
   }
 
   function fetchData(lhref) {
-    if (device !== null) {
+    if (device !== '') {
       setPowerTotal(0);
       lhref.forEach((mem) => {
         const index = lhref.indexOf(mem);
@@ -61,12 +62,14 @@ function MemoryTable({
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) {
+    if (device !== '') {
       fetchData(href);
+    } else {
+      setMemoryData(memoryDataDefault);
     }
   }
   React.useEffect(() => {
-    if (update && device !== null) fetchData(href);
+    if (update && device !== '') fetchData(href);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 

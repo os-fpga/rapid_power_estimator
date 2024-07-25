@@ -90,7 +90,7 @@ function PeripheralsComponent({ device }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) {
+    if (device !== '') {
       setGPIO({ ...gpio, power: 0 });
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
         data.forEach((entry) => {

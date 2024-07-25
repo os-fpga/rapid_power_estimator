@@ -85,7 +85,7 @@ SOCComponent.propTypes = {
 };
 
 SOCComponent.defaultProps = {
-  device: null,
+  device: '',
 };
 
 export default SOCComponent;

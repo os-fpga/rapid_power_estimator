@@ -26,7 +26,7 @@ function PeripheralsTable({
   const usbFreq = GetOptions('Usb_Speed');
   const gigeFreq = GetOptions('Gige_Speed');
   const gpioFreq = GetOptions('GpioStandard');
-  const [peripherals, setPeripherals] = React.useState([
+  const peripheralsDefault = [
     {
       id: 'spi',
       usage,
@@ -99,7 +99,8 @@ function PeripheralsTable({
       url: '',
       data: [],
     },
-  ]);
+  ];
+  const [peripherals, setPeripherals] = React.useState(peripheralsDefault);
 
   const mainTableHeader = [
     '', '', '', 'Action', 'Usage', 'Performance', 'IO used', 'Bandwidth', 'Block Power', '%',
@@ -127,7 +128,7 @@ function PeripheralsTable({
   }
 
   const fetchData = (deviceId) => {
-    if (deviceId !== null) {
+    if (deviceId !== '') {
       peripheralsUrl.forEach((elem) => {
         const { type } = elem;
         if (type === 'dma' || type === 'ocm' || type === 'acpu' || type === 'bcpu' || type === 'ddr') return;
@@ -139,10 +140,13 @@ function PeripheralsTable({
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchData(device);
+    if (device !== '') fetchData(device);
+    else {
+      setPeripherals(peripheralsDefault);
+    }
   }
   React.useEffect(() => {
-    if (update && device !== null) fetchData(device);
+    if (update && device !== '') fetchData(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 

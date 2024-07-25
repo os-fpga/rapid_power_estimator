@@ -87,6 +87,7 @@ function App() {
   }
 
   const deviceChanged = (newDevice) => {
+    setPeripherals([]);
     setDevice(newDevice);
     updateGlobalState(newDevice);
     updateTotalPower(newDevice);

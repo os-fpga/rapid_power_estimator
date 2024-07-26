@@ -18,18 +18,19 @@ import { ComponentLabel } from '../ComponentsLib';
 import '../style/ComponentTable.css';
 
 function DMATable({ device, update, notify }) {
+  const dmaDataDefault = [
+    { id: 0, data: {} },
+    { id: 1, data: {} },
+    { id: 2, data: {} },
+    { id: 3, data: {} },
+  ];
   const [dev, setDev] = React.useState(null);
   const [editIndex, setEditIndex] = React.useState(null);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [channelHref, setChannelHref] = React.useState([]);
   const [dmaHref, setDmaHref] = React.useState([]);
-  const [dmaData, setDmaData] = React.useState([
-    { id: 0, data: {} },
-    { id: 1, data: {} },
-    { id: 2, data: {} },
-    { id: 3, data: {} },
-  ]);
+  const [dmaData, setDmaData] = React.useState(dmaDataDefault);
   const { updateTotalPower } = useSocTotalPower();
   const { GetOptions, dmaNames, updateGlobalState } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
@@ -54,7 +55,7 @@ function DMATable({ device, update, notify }) {
   }
 
   function fetchData(lhref) {
-    if (device !== null) {
+    if (device !== '') {
       setPowerTotal(0);
       server.GET(server.peripheralPath(device, lhref), (data) => {
         setChannelHref(data.channels);
@@ -77,11 +78,15 @@ function DMATable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchAll(device);
+    if (device !== '') fetchAll(device);
+    else {
+      setDmaData(dmaDataDefault);
+      setDmaHref([]);
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchAll(device);
+    if (update && device !== '') fetchAll(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -104,7 +109,7 @@ function DMATable({ device, update, notify }) {
   }
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       const found = dmaData.find((item) => item.data.enable === false);
       if (found) {
         server.PATCH(

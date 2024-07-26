@@ -117,7 +117,7 @@ function IOTable({ device, update, notify }) {
   };
 
   const fetchIoData = (deviceId) => {
-    if (deviceId !== null) {
+    if (deviceId !== '') {
       server.GET(server.api.fetch(server.Elem.io, deviceId), (data) => {
         setIoData(data);
         server.GET(server.api.consumption(server.Elem.io, deviceId), (power) => {
@@ -132,11 +132,15 @@ function IOTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchIoData(device);
+    if (device !== '') fetchIoData(device);
+    else {
+      setIoData([]);
+      setPowerTable(null);
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchIoData(device);
+    if (update && device !== '') fetchIoData(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -162,7 +166,7 @@ function IOTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       server.POST(server.api.fetch(server.Elem.io, device), newData, modifyDataHandler);
     }
   }
@@ -204,7 +208,7 @@ function IOTable({ device, update, notify }) {
         </div>
         <TableBase
           header={mainTableHeader}
-          disabled={device === null}
+          disabled={device === ''}
           onClick={() => setModalOpen(true)}
         >
           {

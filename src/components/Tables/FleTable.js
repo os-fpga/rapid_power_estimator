@@ -27,7 +27,7 @@ function FleTable({ device, update, notify }) {
   const glitchFactor = GetOptions('Glitch_Factor');
 
   function fetchFleData(deviceId) {
-    if (deviceId !== null) {
+    if (deviceId !== '') {
       server.GET(server.api.fetch(server.Elem.fle, deviceId), (data) => {
         setFleData(data);
         server.GET(server.api.consumption(server.Elem.fle, deviceId), (consumption) => {
@@ -55,11 +55,15 @@ function FleTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchFleData(device);
+    if (device !== '') fetchFleData(device);
+    else {
+      setPowerTable([]);
+      setFleData([]);
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchFleData(device);
+    if (update && device !== '') fetchFleData(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -86,7 +90,7 @@ function FleTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       server.POST(
         server.api.fetch(server.Elem.fle, device),
         newData,
@@ -136,7 +140,7 @@ function FleTable({ device, update, notify }) {
         </div>
         <TableBase
           header={mainTableHeader}
-          disabled={device === null}
+          disabled={device === ''}
           onClick={() => setModalOpen(true)}
         >
           {

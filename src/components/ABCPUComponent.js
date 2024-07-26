@@ -9,7 +9,7 @@ import { getPeripherals } from '../utils/common';
 function ABCPUComponent({
   device, title, index, power, percent, peripherals, messages,
 }) {
-  const [dev, setDev] = React.useState(0);
+  const [dev, setDev] = React.useState('');
   const [name, setName] = React.useState('');
   const [ep0, setEp0] = React.useState(0);
   const [ep1, setEp1] = React.useState(0);
@@ -24,7 +24,7 @@ function ABCPUComponent({
   }
 
   function update() {
-    if (device !== null) {
+    if (device !== '') {
       setEnable(cpu.length !== 0);
       if (cpu.length !== 0) {
         const { href } = cpu[0];
@@ -58,7 +58,14 @@ function ABCPUComponent({
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) update();
+    if (device !== '') update();
+    else {
+      setName('');
+      setEp0(0);
+      setEp1(0);
+      setEp2(0);
+      setEp3(0);
+    }
   }
 
   function getBaseName(item) {

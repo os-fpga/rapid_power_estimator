@@ -34,7 +34,7 @@ function ClockingTable({ device, update, notify }) {
   ];
 
   const fetchClockData = (deviceId) => {
-    if (deviceId !== null) {
+    if (deviceId !== '') {
       server.GET(server.api.fetch(server.Elem.clocking, deviceId), (data) => {
         setClockingData(data);
         setClocks(data.map((item) => item.port));
@@ -66,11 +66,15 @@ function ClockingTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchClockData(device);
+    if (device !== '') fetchClockData(device);
+    else {
+      setClockingData([]);
+      setPowerTable([]);
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchClockData(device);
+    if (update && device !== '') fetchClockData(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -97,7 +101,7 @@ function ClockingTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       server.POST(
         server.api.fetch(server.Elem.clocking, device),
         newData,
@@ -142,7 +146,7 @@ function ClockingTable({ device, update, notify }) {
         </div>
         <TableBase
           header={mainTableHeader}
-          disabled={device === null}
+          disabled={device === ''}
           onClick={() => setModalOpen(true)}
         >
           {

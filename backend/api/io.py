@@ -4,8 +4,8 @@
 #
 from flask import Blueprint, request
 from flask_restful import Api, Resource
-from marshmallow import Schema, fields, ValidationError
-from submodule.io import IO_Direction, IO_Drive_Strength, IO_Slew_Rate, IO_differential_termination, \
+from marshmallow import Schema, fields, post_dump, ValidationError
+from submodule.io import IO_Direction, IO_Drive_Strength, IO_Feature, IO_FeatureType, IO_OdtType, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_Standard, IO_Synchronization, IO_Pull_up_down
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType, IO_BankType, DeviceNotFoundException, IONotFoundException
@@ -22,10 +22,31 @@ from .errors import errors
 # devices/<device_id>/io/consumption      | get                     | IoConsumptionApi      #
 #-------------------------------------------------------------------------------------------#
 
-class IoOnDieTerminationSchema(Schema):
-    bank_number = fields.Int()
-    odt = fields.Bool()
-    power = fields.Number()
+class IoFeatureOdtHpBankOutputSchema(Schema):
+    block_power = fields.Float()
+    messages = fields.Nested(MessageSchema, many=True)
+
+class IoFeatureOdtHpBankSchema(Schema):
+    bank = fields.Int()
+    odt_type = fields.Enum(IO_OdtType, by_value=True)
+    output = fields.Nested(IoFeatureOdtHpBankOutputSchema, data_key="consumption")
+
+class IoFeatureOdtSchema(Schema):
+    banks = fields.Nested(IoFeatureOdtHpBankSchema, many=True)
+    index = fields.Int()
+
+class IoFeatureSchema(Schema):
+    type = fields.Enum(IO_FeatureType, by_value=True)
+
+    @staticmethod
+    def get_schema(type: IO_FeatureType) -> Schema:
+        if type == IO_FeatureType.ODT:
+            return IoFeatureOdtSchema()
+
+    @post_dump(pass_original=True)
+    def post_dump(self, data, original_data: IO_Feature, **kwargs):
+        data.update(self.get_schema(original_data.type).dump(original_data))
+        return data
 
 class IoUsageAllocationSchema(Schema):
     voltage = fields.Number()
@@ -46,7 +67,7 @@ class IoResourcesConsumptionSchema(Schema):
     total_interconnect_power = fields.Number()
     total_on_die_termination_power = fields.Number()
     io_usage = fields.Nested(IoUsageSchema, many=True)
-    io_on_die_termination = fields.Nested(IoOnDieTerminationSchema, many=True)
+    io_features = fields.Nested(IoFeatureSchema, many=True)
     messages = fields.Nested(MessageSchema, many=True)
 
 class IoOutputSchema(Schema):
@@ -465,14 +486,15 @@ class IoConsumptionApi(Resource):
             device = device_mgr.get_device(device_id)
             io_module = device.get_module(ModuleType.IO)
             consumption = io_module.get_power_consumption()
+            features = io_module.get_features()
             messages = io_module.get_all_messages()
             res = io_module.get_resources()
             data = {
                 'total_block_power': consumption[0],
                 'total_interconnect_power': consumption[1],
-                'total_on_die_termination_power': consumption[1],
+                'total_on_die_termination_power': consumption[2],
                 'io_usage': res[0],
-                'io_on_die_termination': res[1],
+                'io_features': features,
                 'messages': messages
             }
             schema = IoResourcesConsumptionSchema()

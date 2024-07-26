@@ -15,22 +15,23 @@ import { ComponentLabel, Checkbox, Dropdown } from '../ComponentsLib';
 import '../style/ACPUTable.css';
 
 function BCPUTable({ device, update, notify }) {
-  const [dev, setDev] = React.useState(null);
-  const [editIndex, setEditIndex] = React.useState(null);
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const [powerData, setPowerData] = React.useState([
-    ['Active Power', 0, 0],
-    ['Boot Power', 0, 0],
-  ]);
-  const [bcpuData, setBcpuData] = React.useState({
+  const bcpuDataDefault = {
     name: '',
     encryption_used: false,
     clock: 0,
-  });
+  };
+  const powerDataDefault = [
+    ['Active Power', 0, 0],
+    ['Boot Power', 0, 0],
+  ];
+  const [dev, setDev] = React.useState(null);
+  const [editIndex, setEditIndex] = React.useState(null);
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [powerData, setPowerData] = React.useState(powerDataDefault);
+  const [bcpuData, setBcpuData] = React.useState(bcpuDataDefault);
   const [bootMode, setBootMode] = React.useState('');
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
-  const [addButtonDisable, setAddButtonDisable] = React.useState(true);
   const { updateTotalPower } = useSocTotalPower();
   const { GetOptions, updateGlobalState, bcpuNames } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
@@ -43,9 +44,6 @@ function BCPUTable({ device, update, notify }) {
       while (newData.length < (ep + 1)) newData.push({});
       newData[ep] = { ep, data };
       setEndpoints([...newData]);
-
-      const found = newData.find((it) => it.data !== undefined && it.data.name === '');
-      setAddButtonDisable(found === undefined);
     });
   }
 
@@ -84,11 +82,17 @@ function BCPUTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchData();
+    if (device !== '') fetchData();
+    else {
+      setBcpuData(bcpuDataDefault);
+      setPowerData(powerDataDefault);
+      setBootMode('');
+      setHref('');
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchData();
+    if (update && device !== '') fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -102,7 +106,7 @@ function BCPUTable({ device, update, notify }) {
   const handleChange = (name, val) => {
     const newData = { ...bcpuData, [name]: val };
     setBcpuData(newData);
-    if (device !== null && href !== '') {
+    if (device !== '' && href !== '') {
       server.PATCH(server.peripheralPath(device, href), newData, () => fetchAcpuData(href));
     }
     modifyDataHandler();
@@ -125,7 +129,7 @@ function BCPUTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       const data = newData;
       data.name = GetText(newData.name, bcpuNames);
       server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, () => fetchAcpuData(href));
@@ -173,7 +177,7 @@ function BCPUTable({ device, update, notify }) {
             <Dropdown value={bcpuData.clock} onChangeHandler={(value) => handleChange('clock', value)} items={clock} />
           </div>
         </div>
-        <TableBase header={header} disabled={addButtonDisable} onClick={() => setModalOpen(true)}>
+        <TableBase header={header} disabled={device === ''} onClick={() => setModalOpen(true)}>
           {
             endpoints.map((row, index) => (
               (row.data !== undefined && row.data.name !== '')

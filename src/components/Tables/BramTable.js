@@ -29,7 +29,7 @@ function BramTable({ device, update, notify }) {
   const bramType = GetOptions('BRAM_Type');
 
   const fetchBramData = (deviceId) => {
-    if (deviceId !== null) {
+    if (deviceId !== '') {
       server.GET(server.api.fetch(server.Elem.bram, deviceId), (data) => {
         setBramData(data);
         const newBramWindowData = [];
@@ -79,11 +79,15 @@ function BramTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchBramData(device);
+    if (device !== '') fetchBramData(device);
+    else {
+      setPowerTable([]);
+      setBramData([]);
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchBramData(device);
+    if (update && device !== '') fetchBramData(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -135,7 +139,7 @@ function BramTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       server.POST(
         server.api.fetch(server.Elem.bram, device),
         sendData(newData),
@@ -185,7 +189,7 @@ function BramTable({ device, update, notify }) {
         </div>
         <TableBase
           header={mainTableHeader}
-          disabled={device === null}
+          disabled={device === ''}
           onClick={() => setModalOpen(true)}
         >
           {

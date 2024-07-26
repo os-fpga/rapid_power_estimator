@@ -13,7 +13,7 @@ function DeviceList({ devices, selectedDevice, handleDeviceChange }) {
 
   function DeviceOnChange(event) {
     const deviceId = event.target.value;
-    getDeviceInfo(deviceId);
+    if (deviceId !== '') getDeviceInfo(deviceId);
     handleDeviceChange(deviceId);
   }
 
@@ -34,7 +34,7 @@ function DeviceList({ devices, selectedDevice, handleDeviceChange }) {
             onChange={DeviceOnChange}
             value={selectedDevice}
           >
-            <option key="" value="selectDev" disabled>
+            <option key="" value="">
               Select a device...
             </option>
             {devices.map((data) => (

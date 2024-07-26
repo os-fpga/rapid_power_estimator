@@ -29,7 +29,7 @@ function DspTable({ device, update, notify }) {
   const pipelining = GetOptions('Pipelining');
 
   const fetchDspData = (deviceId) => {
-    if (deviceId !== null) {
+    if (deviceId !== '') {
       server.GET(server.api.fetch(server.Elem.dsp, deviceId), (data) => {
         setDspData(data);
         server.GET(server.api.consumption(server.Elem.dsp, deviceId), (consumption) => {
@@ -52,11 +52,15 @@ function DspTable({ device, update, notify }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchDspData(device);
+    if (device !== '') fetchDspData(device);
+    else {
+      setPowerTable([]);
+      setDspData([]);
+    }
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchDspData(device);
+    if (update && device !== '') fetchDspData(device);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -83,7 +87,7 @@ function DspTable({ device, update, notify }) {
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       server.POST(
         server.api.fetch(server.Elem.dsp, device),
         newData,
@@ -134,7 +138,7 @@ function DspTable({ device, update, notify }) {
         </div>
         <TableBase
           header={mainTableHeader}
-          disabled={device === null}
+          disabled={device === ''}
           onClick={() => setModalOpen(true)}
         >
           {

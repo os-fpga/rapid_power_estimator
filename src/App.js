@@ -48,7 +48,7 @@ function App() {
   const timeFormat = 'MMM DD, YYYY h:mm:ss a';
   const notApplicableTime = 'N/A';
   const [devices, setDevices] = React.useState([]);
-  const [device, setDevice] = React.useState(null);
+  const [device, setDevice] = React.useState('');
   const [openedTable, setOpenedTable] = React.useState(Table.Clocking);
   const [mode, setMode] = React.useState(false);
   const [autoSave, setAutoSave] = React.useState(false);
@@ -57,7 +57,6 @@ function App() {
     name: '',
     lang: 0,
     notes: '',
-    device: '',
     lastEdited: notApplicableTime,
   });
   const [config, setConfig] = React.useState({
@@ -73,7 +72,7 @@ function App() {
   const { updateTotalPower } = useSocTotalPower();
   const [peripherals, setPeripherals] = React.useState([]);
   const [memoryEnable, setMemoryEnable] = React.useState(true);
-  const [selectedDevice, setSelectedDevice] = React.useState('selectDev');
+  const [selectedDevice, setSelectedDevice] = React.useState('');
   const [update, setUpdate] = React.useState(false);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -91,13 +90,13 @@ function App() {
     setDevice(newDevice);
     updateGlobalState(newDevice);
     updateTotalPower(newDevice);
-    server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
-      const ddr = getPeripherals(data, 'ddr');
-      const ocm = getPeripherals(data, 'ocm');
-      setMemoryEnable(ddr.length > 0 || ocm.length > 0);
-      setPeripherals(data);
-    });
-    if (newDevice !== null) {
+    if (newDevice !== '') {
+      server.GET(server.api.fetch(server.Elem.peripherals, newDevice), (data) => {
+        const ddr = getPeripherals(data, 'ddr');
+        const ocm = getPeripherals(data, 'ocm');
+        setMemoryEnable(ddr.length > 0 || ocm.length > 0);
+        setPeripherals(data);
+      });
       server.GET(server.api.fetch(server.Elem.clocking, newDevice), (data) => {
         setClocks(data.map((item) => item.port));
       });
@@ -110,7 +109,6 @@ function App() {
       const newData = {
         ...projectData,
         name: data.name,
-        device: data.device,
         notes: data.notes,
         lastEdited: data.last_edited
           ? moment(data.last_edited).format(timeFormat)
@@ -120,14 +118,17 @@ function App() {
       if (findLang !== undefined) newData.lang = findLang.id;
       else newData.lang = Language[0].id;
       setProjectData(newData);
-      if (data.device.length !== 0 && data.device !== device) {
-        setSelectedDevice(data.device);
-        deviceChanged(data.device);
-      } else {
-        updateGlobalState(device);
-        updateTotalPower(device);
-      }
-      sendProjectData({ modified: data.modified, filepath: data.filepath });
+      sendProjectData({
+        modified: data.modified,
+        filepath: data.filepath,
+      });
+    });
+  }
+
+  function switchDevice() {
+    server.GET(server.project(), (data) => {
+      setSelectedDevice(data.device);
+      deviceChanged(data.device);
     });
   }
 
@@ -174,11 +175,14 @@ function App() {
         fetchAttributes();
       });
       window.ipcAPI.ipcRendererOn('projectData', (event, data) => {
-        setUpdate(data.action === 'new' || data.action === 'open');
-        if (data.action === 'new') server.POST(server.projectClose(), {}, fetchProjectData);
+        if (data.action === 'new') server.POST(server.projectClose(), {}, () => { fetchProjectData(); switchDevice(); });
         if (data.action === 'open') {
           const openData = { filepath: data.filepath };
-          server.POST(server.projectOpen(), openData, fetchProjectData);
+          server.POST(
+            server.projectOpen(),
+            openData,
+            () => { fetchProjectData(); switchDevice(); },
+          );
         }
         if (data.action === 'save') {
           server.POST(server.project(), {}, fetchProjectData);
@@ -187,6 +191,7 @@ function App() {
           const saveData = { filepath: data.filepath };
           server.POST(server.projectSave(), saveData, fetchProjectData);
         }
+        setUpdate(data.action === 'new' || data.action === 'open');
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

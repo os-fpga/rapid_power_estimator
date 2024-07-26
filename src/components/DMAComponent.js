@@ -34,7 +34,7 @@ function DMAComponent({ device, peripherals }) {
   }
 
   function update() {
-    if (device === null) return;
+    if (device === '') return;
     setEnable(dmaType.length !== 0);
     if (dmaType.length !== 0) {
       server.GET(server.peripheralPath(device, dmaType[0].href), (data) => {
@@ -58,7 +58,7 @@ function DMAComponent({ device, peripherals }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) update();
+    if (device !== '') update();
   }
 
   const Title = 'DMA';

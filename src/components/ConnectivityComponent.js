@@ -28,7 +28,7 @@ function ConnectivityComponent({ device, peripherals }) {
     function fetchEndPoint(href, setEp) {
       server.GET(server.peripheralPath(device, href), (data) => setEp(data.consumption.noc_power));
     }
-    if (device === null) return;
+    if (device === '') return;
     setEnable(fpgaComplex.length !== 0);
     if (fpgaComplex.length !== 0) {
       const { href } = fpgaComplex[0];
@@ -51,7 +51,7 @@ function ConnectivityComponent({ device, peripherals }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) update();
+    if (device !== '') update();
   }
 
   const Title = 'Connectivity';

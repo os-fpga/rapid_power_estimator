@@ -2,12 +2,14 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+from abc import ABC, abstractmethod
+from enum import Enum
 import math
 from dataclasses import dataclass, field
-from typing import List
+from typing import Any, Dict, List
 from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard_Coeff, IOStandardCoeffNotFoundException, \
-    IONotFoundException, IO_BankType, IO_Standard
+    IONotFoundException, IO_BankType, IO_Standard, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
 
 class IO_Direction(RsEnum):
@@ -55,6 +57,15 @@ class IO_Pull_up_down(RsEnum):
     NONE = 0, "None"
     PULL_UP = 1, "Pullup"
     PULL_DOWN = 2, "Pulldown"
+
+class IO_FeatureType(Enum):
+    NONE = 'none'
+    ODT = 'odt'
+
+class IO_OdtType(RsEnum):
+    OFF = 0, "Off"
+    ON = 1, "On"
+    CASCADE = 2, "Cascade"
 
 @dataclass
 class IO_output:
@@ -281,14 +292,89 @@ class IO_Usage:
     usage : List[IO_Usage_Allocation] = field(default_factory=list)
 
 @dataclass
-class IO_On_Die_Termination:
-    bank_number : int = field(default=0)
-    odt : bool = field(default=False)
-    power : float = field(default=0.0)
+class IO_Feature(ABC):
+    type: IO_FeatureType = field(default=IO_FeatureType.NONE)
+    index: int = field(default=0)
+    context: 'IO_SubModule' = field(default=None)
+
+    @abstractmethod
+    def compute(self) -> bool:
+        pass
+
+    @abstractmethod
+    def get_power(self) -> float:
+        pass
+
+    @abstractmethod
+    def set_properties(self, props: Dict[str, Any]) -> None:
+        pass
+
+@dataclass
+class IO_Hp_Bank_Output:
+    block_power: float = field(default=0.0)
+    messages: List[RsMessage] = field(default_factory=list)
+
+@dataclass
+class IO_Hp_Bank:
+    bank: int = field(default=0)
+    odt_type: bool = field(default=IO_OdtType.OFF)
+    output: IO_Hp_Bank_Output = field(default_factory=IO_Hp_Bank_Output)
+
+@dataclass
+class IO_Feature_ODT(IO_Feature):
+    banks: List[IO_Hp_Bank] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        for i in range(self.context.resources.get_num_HP_Banks()):
+            self.banks.append(IO_Hp_Bank(bank=i+1))
+        self.type = IO_FeatureType.ODT
+
+    def get_power(self) -> float:
+        return sum([bank.output.block_power for bank in self.banks])
+
+    def set_properties(self, props: Dict[str, Any]) -> None:
+        # todo: update banks' property
+        pass
+
+    def is_odt_io(self, io_std: IO_Standard) -> bool:
+        if io_std in [IO_Standard.HSTL_1_2V_Class_I_with_ODT, IO_Standard.HSTL_1_2V_Class_II_with_ODT, IO_Standard.HSTL_1_5V_Class_I_with_ODT, \
+                      IO_Standard.HSTL_1_5V_Class_II_with_ODT]:
+            return True
+        return False
+
+    def is_all_banks(self, odt_type: IO_OdtType) -> bool:
+        for bank in self.banks:
+            if bank.odt_type != odt_type:
+                return False
+        return True
+
+    def get_odt_io_row_count(self) -> int:
+        return sum([1 for io in self.context.itemlist if self.is_odt_io(io.io_standard) == True])
+
+    def compute(self) -> bool:
+        odt_row_count = self.get_odt_io_row_count()
+        odt_banks_all_off = self.is_all_banks(IO_OdtType.OFF)
+        previous_odt_type = IO_OdtType.OFF
+        for bank in self.banks:
+            bank.output.messages.clear()
+            if odt_row_count == 0 and bank.odt_type != IO_OdtType.OFF:
+                bank.output.messages.append(RsMessageManager.get_message(207))
+            elif odt_row_count > 0 and odt_banks_all_off:
+                bank.output.messages.append(RsMessageManager.get_message(309))
+            if bank.odt_type == IO_OdtType.CASCADE and previous_odt_type == IO_OdtType.OFF:
+                bank.output.messages.append(RsMessageManager.get_message(310))
+            if bank.odt_type == IO_OdtType.ON:
+                bank.output.block_power = 0.004
+            elif bank.odt_type == IO_OdtType.CASCADE:
+                bank.output.block_power = 0.001
+            else:
+                bank.output.block_power = 0.0
+            previous_odt_type = bank.odt_type
+        return True
 
 class IO_SubModule:
 
-    def __init__(self, resources, itemlist: List[IO] = None):
+    def __init__(self, resources: RsDeviceResources, itemlist: List[IO] = None):
         self.resources = resources
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
@@ -315,15 +401,17 @@ class IO_SubModule:
                 ]
             )
         ]
-        self.io_on_die_termination = [
-            IO_On_Die_Termination(bank_number=1),
-            IO_On_Die_Termination(bank_number=2),
-            IO_On_Die_Termination(bank_number=3)
-        ]
+        self.io_features: List[IO_Feature] = self.create_features()
         self.itemlist: List[IO] = itemlist or []
 
+    def create_features(self) -> List[IO_Feature]:
+        return [IO_Feature_ODT(context=self)]
+
+    def get_features(self) -> List[IO_Feature]:
+        return self.io_features
+
     def get_resources(self):
-        return self.io_usage, self.io_on_die_termination
+        return self.io_usage, 0
 
     def get_total_output_power(self) -> float:
         return sum(self.get_power_consumption())
@@ -383,12 +471,19 @@ class IO_SubModule:
         # Compute the total power consumption of all clocks
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
+        self.total_on_die_termination_power = 0.0
 
         # Compute the power consumption for each individual items
         for item in self.itemlist:
             item.compute_dynamic_power(self.resources.get_clock(item.clock), self.find_coeff(IO_STD_COEFF_LIST, item.io_standard))
             self.total_interconnect_power += item.output.interconnect_power
             self.total_block_power += item.output.block_power
+
+        # Compute io features power consumption e.g. ODT
+        for feature in self.io_features:
+            feature.compute()
+            if feature.type == IO_FeatureType.ODT:
+                self.total_on_die_termination_power += feature.get_power()
 
         # update individual clock percentage
         total_power = self.total_block_power + self.total_interconnect_power

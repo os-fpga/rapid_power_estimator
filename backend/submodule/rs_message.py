@@ -32,6 +32,7 @@ class RsMessageManager:
         RsMessage(204, RsMessageType.WARN, "DMA {name} source not specified"),
         RsMessage(205, RsMessageType.WARN, "DMA {name} destination not specified"),
         RsMessage(206, RsMessageType.WARN, "DMA {name} cannot have the same source and destination"),
+        RsMessage(207, RsMessageType.WARN, "ODT set but no standards requiring ODT selected"),
         RsMessage(301, RsMessageType.ERRO, "Invalid clock '{clock}'"),
         RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A"),
         RsMessage(303, RsMessageType.ERRO, "Invalid clock on Port B"),
@@ -40,6 +41,8 @@ class RsMessageManager:
         RsMessage(306, RsMessageType.ERRO, "Device '{name}' not found"),
         RsMessage(307, RsMessageType.ERRO, "Load error: {message}"),
         RsMessage(308, RsMessageType.ERRO, "Load peripheral error: {message}"),
+        RsMessage(309, RsMessageType.ERRO, "One or more banks need to enable ODT since ODT was a selected standard"),
+        RsMessage(310, RsMessageType.ERRO, "Cascade requires prior bank termination"),
     ]
 
     @staticmethod

@@ -102,7 +102,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   }
 
   function updateGlobalState(device) {
-    if (device !== null) {
+    if (device !== '') {
       server.GET(server.api.fetch(server.Elem.clocking, device), (data) => {
         setClockingState(data.map((item) => item.consumption.messages));
       });

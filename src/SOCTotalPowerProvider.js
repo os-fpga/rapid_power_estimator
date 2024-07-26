@@ -46,7 +46,7 @@ export function SocTotalPowerProvider({ children }) {
   const [totalConsumption, setTotalConsumption] = useState(defaultValue);
 
   const updateTotalPower = (device) => {
-    if (device !== null) {
+    if (device !== '') {
       server.GET(server.api.consumption('', device), (data) => {
         setTotalConsumption(data);
       });

@@ -26,7 +26,6 @@ function ConnectivityTable({
   const [powerTotal, setPowerTotal] = React.useState(0);
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
-  const [addButtonDisable, setAddButtonDisable] = React.useState(false);
   const { updateTotalPower } = useSocTotalPower();
   const { defaultClock } = useClockSelection();
   const { GetOptions, updateGlobalState, connectivityNames } = useGlobalState();
@@ -43,9 +42,6 @@ function ConnectivityTable({
       while (newData.length < (ep + 1)) newData.push({});
       newData[ep] = { ep, data };
       setEndpoints([...newData]);
-
-      const found = newData.find((it) => it.data !== undefined && it.data.name === '');
-      setAddButtonDisable(found === undefined);
     });
   }
 
@@ -58,30 +54,34 @@ function ConnectivityTable({
     }
   }
 
+  function reset() {
+    setEndpoints([]);
+    setHref('');
+  }
+
   function fetchData() {
     if (fpgaComplex.length > 0) {
       const link = fpgaComplex[0].href;
       setHref(link);
       fetchConnectivityData(link);
     } else {
-      setEndpoints([]);
-      setHref('');
-      setAddButtonDisable(true);
+      reset();
     }
   }
 
   React.useEffect(() => {
-    fetchData();
+    if (device !== '') fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [peripherals]);
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) fetchData();
+    if (device !== '') fetchData();
+    else reset();
   }
 
   React.useEffect(() => {
-    if (update && device !== null) fetchData();
+    if (update && device !== '') fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update]);
 
@@ -111,7 +111,7 @@ function ConnectivityTable({
   };
 
   function addRow(newData) {
-    if (device !== null) {
+    if (device !== '') {
       const data = newData;
       data.name = GetText(newData.name, connectivityNames);
       server.PATCH(server.peripheralPath(device, `${href}/ep/${findEvailableIndex(endpoints)}`), data, () => fetchConnectivityData(href));
@@ -140,7 +140,7 @@ function ConnectivityTable({
           />
           <TableBase
             header={header}
-            disabled={addButtonDisable}
+            disabled={device === ''}
             onClick={() => setModalOpen(true)}
           >
             {

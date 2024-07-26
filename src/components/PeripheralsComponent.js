@@ -179,7 +179,7 @@ function PeripheralsComponent({ device }) {
 
   if (dev !== device) {
     setDev(device);
-    if (device !== null) {
+    if (device !== '') {
       setGPIO({ ...gpio, power: 0 });
       setTableData(dataDefault);
       server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {

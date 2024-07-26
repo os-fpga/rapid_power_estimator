@@ -15,14 +15,14 @@ describe('DeviceList', () => {
       <GlobalStateProvider fetch={fetch}>
         <SocTotalPowerProvider>
           <SelectionProvider>
-            <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} selectedDevice={'selectDev'} handleDeviceChange={() => {}}/>
+            <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} selectedDevice={''} handleDeviceChange={() => {}}/>
           </SelectionProvider>
         </SocTotalPowerProvider>
       </GlobalStateProvider>,
     );
     expect(getByLabelText('Device:')).toBeInTheDocument();
     expect(screen.getByText('test-dev test')).toBeInTheDocument();
-    expect(screen.getByRole('combobox')).toHaveValue('selectDev');
+    expect(screen.getByRole('combobox')).toHaveValue('');
   });
   it('select device', async () => {
     const user = userEvent.setup();

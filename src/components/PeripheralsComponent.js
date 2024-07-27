@@ -75,104 +75,122 @@ function PeripheralsComponent({ device }) {
   function fetchPeripherals(deviceId, key, url, name) {
     server.GET(server.peripheralPath(deviceId, url), (data) => {
       if (key === 'i2c') {
-        const newData = [...tableData];
-        newData[3] = {
-          name,
-          power: data.consumption.block_power,
-          messages: socState.i2c,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[3] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.i2c,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
       if (key === 'spi') {
-        const newData = [...tableData];
-        newData[6] = {
-          name,
-          power: data.consumption.block_power,
-          messages: socState.spi,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[6] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.spi,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
       if (key === 'pwm') {
-        const newData = [...tableData];
-        newData[5] = {
-          name,
-          power: data.consumption.block_power,
-          messages: socState.pwm,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[5] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.pwm,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
       if (key === 'usb2') {
-        const newData = [...tableData];
-        newData[2] = {
-          name,
-          power: data.consumption.block_power,
-          messages: socState.usb2,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[2] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.usb2,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
       if (key === 'jtag') {
-        const newData = [...tableData];
-        newData[7] = {
-          name,
-          power: data.consumption.block_power,
-          messages: socState.jtag,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[7] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.jtag,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
       if (key === 'gige') {
-        const newData = [...tableData];
-        newData[8] = {
-          name,
-          power: data.consumption.block_power,
-          messages: socState.gige,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[8] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.gige,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
       if (key === 'uart') {
         if (data.index === 0) {
-          const newData = [...tableData];
-          newData[0] = {
-            name,
-            power: data.consumption.block_power,
-            messages: socState.uart0,
-            percents: 100,
-            valid: true,
-          };
-          setTableData(newData);
+          setTableData((prev) => {
+            const newData = [...prev];
+            newData[0] = {
+              name,
+              power: data.consumption.block_power,
+              messages: socState.uart0,
+              percents: 100,
+              valid: true,
+            };
+            return newData;
+          });
         } else {
-          const newData = [...tableData];
-          newData[1] = {
-            name,
-            power: data.consumption.block_power,
-            messages: socState.uart1,
-            percents: 100,
-            valid: true,
-          };
-          setTableData(newData);
+          setTableData((prev) => {
+            const newData = [...prev];
+            newData[1] = {
+              name,
+              power: data.consumption.block_power,
+              messages: socState.uart1,
+              percents: 100,
+              valid: true,
+            };
+            return newData;
+          });
         }
       }
       if (key === 'gpio') {
-        const newData = [...tableData];
-        newData[4] = {
-          name,
-          power: data.consumption.block_power + newData[4].power,
-          messages: socState.gpio,
-          percents: 100,
-          valid: true,
-        };
-        setTableData(newData);
+        setTableData((prev) => {
+          const newData = [...prev];
+          newData[4] = {
+            name,
+            power: data.consumption.block_power,
+            messages: socState.gpio,
+            percents: 100,
+            valid: true,
+          };
+          return newData;
+        });
       }
     });
   }

@@ -52,6 +52,14 @@ function ConnectivityComponent({ device, peripherals }) {
   if (dev !== device) {
     setDev(device);
     if (device !== '') update();
+    else {
+      setEnable(true);
+      setName('');
+      setEp0(0);
+      setEp1(0);
+      setEp2(0);
+      setEp3(0);
+    }
   }
 
   const Title = 'Connectivity';

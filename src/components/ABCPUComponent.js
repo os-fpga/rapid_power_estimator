@@ -60,6 +60,7 @@ function ABCPUComponent({
     setDev(device);
     if (device !== '') update();
     else {
+      setEnable(true);
       setName('');
       setEp0(0);
       setEp1(0);

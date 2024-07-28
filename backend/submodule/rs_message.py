@@ -43,6 +43,7 @@ class RsMessageManager:
         RsMessage(308, RsMessageType.ERRO, "Load peripheral error: {message}"),
         RsMessage(309, RsMessageType.ERRO, "One or more banks need to enable ODT since ODT was a selected standard"),
         RsMessage(310, RsMessageType.ERRO, "Cascade requires prior bank termination"),
+        RsMessage(311, RsMessageType.ERRO, "Load io error: {message}"),
     ]
 
     @staticmethod

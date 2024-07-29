@@ -3,6 +3,7 @@ import moment from 'moment';
 import { FiSave } from 'react-icons/fi';
 import { PiNotepad } from 'react-icons/pi';
 import Switch from 'react-switch';
+import { BiSolidError } from 'react-icons/bi';
 import DeviceList from './components/DeviceList';
 import FpgaComponent from './components/FpgaComponent';
 import ClockingTable from './components/Tables/ClockingTable';
@@ -74,6 +75,8 @@ function App() {
   const [memoryEnable, setMemoryEnable] = React.useState(true);
   const [selectedDevice, setSelectedDevice] = React.useState('');
   const [update, setUpdate] = React.useState(false);
+  const messageDefault = { type: '', text: '' };
+  const [message, setMessage] = React.useState(messageDefault);
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const showModal = () => {
@@ -118,6 +121,11 @@ function App() {
       if (findLang !== undefined) newData.lang = findLang.id;
       else newData.lang = Language[0].id;
       setProjectData(newData);
+      if (data.messages.length > 0) {
+        setMessage(data.messages[0]);
+      } else {
+        setMessage(messageDefault);
+      }
       sendProjectData({
         modified: data.modified,
         filepath: data.filepath,
@@ -244,8 +252,18 @@ function App() {
     server.PATCH(server.project(), data, fetchProjectData);
   };
 
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   return (
     <div className="rpe-head">
+      {message.text !== '' && (
+      <div className={`rpe-${message.type}-banner-container`}>
+        <BiSolidError />
+        <div>{`${capitalizeFirstLetter(message.type)}: ${message.text}`}</div>
+      </div>
+      )}
       <div className="top-row-container">
         <div className="main-table-container main-border">
           <div className="top-l1 main-bottom-border" onClick={() => setOpenedTable(Table.Summary)}>

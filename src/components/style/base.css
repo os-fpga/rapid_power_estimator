@@ -1,11 +1,11 @@
 .warning {
-    background-color: #EFDB94;
+    background-color: var(--warning-color)
 }
 
 .error {
-    background-color: #F288A8;
+    background-color: var(--error-color);
 }
 
 .normal {
-    background-color: #9fdda9;
+    background-color: var(--normal-color)
 }

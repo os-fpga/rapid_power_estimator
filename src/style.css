@@ -1,6 +1,9 @@
 :root {
     --border-color: #9c9a9a;
     --central-size: 54%;
+    --error-color: #F288A8;
+    --warning-color: #EFDB94;
+    --normal-color: #9fdda9;
 }
 
 .rpe-head {
@@ -8,6 +11,30 @@
     flex-direction: column;
     font-size: 14px;
     height: 97vh;
+}
+
+.rpe-error-banner-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+    padding-bottom: 10px;
+    color: var(--error-color);
+}
+
+.rpe-warn-banner-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+    padding-bottom: 10px;
+    color: var(--warning-color);
+}
+
+.rpe-info-banner-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+    padding-bottom: 10px;
+    color: #007bff;
 }
 
 .top-row-container {

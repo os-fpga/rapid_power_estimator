@@ -8,7 +8,7 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard_Coeff, IOStandardCoeffNotFoundException, \
+from .rs_device_resources import IO_Standard_Coeff, IOFeatureNotFoundException, IOFeatureOdtBankNotFoundException, IOStandardCoeffNotFoundException, \
     IONotFoundException, IO_BankType, IO_Standard, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
 
@@ -306,7 +306,7 @@ class IO_Feature(ABC):
         pass
 
     @abstractmethod
-    def set_properties(self, props: Dict[str, Any]) -> None:
+    def update(self, data: Dict[str, Any]) -> None:
         pass
 
 @dataclass
@@ -332,9 +332,17 @@ class IO_Feature_ODT(IO_Feature):
     def get_power(self) -> float:
         return sum([bank.output.block_power for bank in self.banks])
 
-    def set_properties(self, props: Dict[str, Any]) -> None:
-        # todo: update banks' property
-        pass
+    def get_bank(self, num: int) -> IO_Hp_Bank:
+        for bank in self.banks:
+            if bank.bank == num:
+                return bank
+        raise IOFeatureOdtBankNotFoundException(self.type.value, self.index, num)
+
+    def update(self, props: Dict[str, Any]) -> None:
+        # update banks' property
+        for data in props['banks']:
+            bank = self.get_bank(data['bank'])
+            update_attributes(bank, data, exclude=['bank', 'output'])
 
     def is_odt_io(self, io_std: IO_Standard) -> bool:
         if io_std in [IO_Standard.HSTL_1_2V_Class_I_with_ODT, IO_Standard.HSTL_1_2V_Class_II_with_ODT, IO_Standard.HSTL_1_5V_Class_I_with_ODT, \
@@ -409,6 +417,12 @@ class IO_SubModule:
 
     def get_features(self) -> List[IO_Feature]:
         return self.io_features
+
+    def get_feature(self, type: IO_FeatureType, index: int) -> IO_Feature:
+        for feature in self.io_features:
+            if feature.type == type and feature.index == index:
+                return feature
+        raise IOFeatureNotFoundException(type.value, index)
 
     def get_resources(self):
         return self.io_usage, 0

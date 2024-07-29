@@ -10,7 +10,7 @@ from api.clock import ClockSchema
 from api.dsp import DspSchema
 from api.fabric_le import FabricLogicElementSchema
 from api.bram import BramSchema
-from api.io import IoSchema
+from api.io import IoFeatureSchema, IoSchema
 from api.peripherals import PeripheralSchema
 from api.device import SpecificationSchema
 from submodule.peripherals import Peripheral, Peripheral_SubModule
@@ -51,12 +51,16 @@ class RsPeripheralSchema(Schema):
         data.update(self.create_schema(original_data.get_type()).dump(original_data.flatten()))
         return data
 
+class IoConfigSchema(Schema):
+    items = fields.Nested(IoSchema, many=True, exclude=['output'])
+    features = fields.Nested(IoFeatureSchema, many=True)
+
 class RsDeviceConfig(Schema):
     clocking = fields.Nested(ClockSchema, many=True, exclude=['output'])
     dsp = fields.Nested(DspSchema, many=True, exclude=['output'])
     fabric_le = fields.Nested(FabricLogicElementSchema, many=True, exclude=['output'])
     bram = fields.Nested(BramSchema, many=True, exclude=['output'])
-    io = fields.Nested(IoSchema, many=True, exclude=['output'])
+    io = fields.Nested(IoConfigSchema)
     peripherals = fields.Nested(RsPeripheralSchema, many=True)
 
 class RsProjectDeviceSchema(Schema):
@@ -114,12 +118,28 @@ class RsProjectManager:
         devmgr = RsDeviceManager.get_instance()
         devmgr.clear_all_device_inputs()
 
-    def load_module(self, module, items: List, messages: List[RsMessage]) -> None:
+    def load_items(self, module, items, messages: List[RsMessage]) -> None:
         for data in items:
             try:
                 module.add(data)
             except Exception as e:
                 messages.append(RsMessageManager.get_message(307, { 'message': e.args[0] }))
+
+    def load_features(self, module, features, messages: List[RsMessage]) -> None:
+        for data in features:
+            try:
+                feature = module.get_feature(data['type'], data['index'])
+                feature.update(data)
+            except Exception as e:
+                messages.append(RsMessageManager.get_message(311, { 'message': e.args[0] }))
+
+    def load_module(self, module, data: List, messages: List[RsMessage]) -> None:
+        if 'items' in data:
+            self.load_items(module, data['items'], messages)
+            if 'features' in data:
+                self.load_features(module, data['features'], messages)
+        else:
+            self.load_items(module, data, messages)
 
     def load_peripherals(self, module: Peripheral_SubModule, items: List, messages: List[RsMessage]) -> None:
         for item in items:
@@ -172,12 +192,15 @@ class RsProjectManager:
                         'dsp': device.get_module(ModuleType.DSP).get_all(),
                         'fabric_le': device.get_module(ModuleType.FABRIC_LE).get_all(),
                         'bram': device.get_module(ModuleType.BRAM).get_all(),
-                        'io': device.get_module(ModuleType.IO).get_all(),
+                        'io': {
+                            'features': device.get_module(ModuleType.IO).get_features(),
+                            'items': device.get_module(ModuleType.IO).get_all(),
+                        },
                         'peripherals': device.get_module(ModuleType.SOC_PERIPHERALS).get_peripherals()
                     }
                 }
                 devices.append(data)
-            json.dump(RsProjectSchema().dump({ 'project': project, 'devices': devices }), fd, indent=2)
+            json.dump(RsProjectSchema(context={ 'output': False }).dump({ 'project': project, 'devices': devices }), fd, indent=2)
 
     def save(self) -> bool:
         if self.projects[0].state == RsProjectState.LOADED:

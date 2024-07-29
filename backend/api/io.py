@@ -2,9 +2,10 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+from typing import Type
 from flask import Blueprint, request
 from flask_restful import Api, Resource
-from marshmallow import Schema, fields, post_dump, ValidationError
+from marshmallow import Schema, fields, post_dump, post_load, ValidationError, INCLUDE
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Feature, IO_FeatureType, IO_OdtType, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_Standard, IO_Synchronization, IO_Pull_up_down
 from submodule.rs_device_manager import RsDeviceManager
@@ -31,21 +32,38 @@ class IoFeatureOdtHpBankSchema(Schema):
     odt_type = fields.Enum(IO_OdtType, by_value=True)
     output = fields.Nested(IoFeatureOdtHpBankOutputSchema, data_key="consumption")
 
+    @post_dump
+    def post_dump(self, data, **kwargs):
+        if self.context.get("output", True) == False:
+            del data['consumption']
+        return data
+
 class IoFeatureOdtSchema(Schema):
     banks = fields.Nested(IoFeatureOdtHpBankSchema, many=True)
     index = fields.Int()
 
+    class Meta:
+        unknown = INCLUDE
+
 class IoFeatureSchema(Schema):
     type = fields.Enum(IO_FeatureType, by_value=True)
 
+    class Meta:
+        unknown = INCLUDE
+
     @staticmethod
-    def get_schema(type: IO_FeatureType) -> Schema:
+    def get_schema(type: IO_FeatureType) -> Type[Schema]:
         if type == IO_FeatureType.ODT:
-            return IoFeatureOdtSchema()
+            return IoFeatureOdtSchema
+
+    @post_load
+    def post_load(self, data, **kwargs):
+        data.update(self.get_schema(data['type'])(context=self.context).load(data))
+        return data
 
     @post_dump(pass_original=True)
     def post_dump(self, data, original_data: IO_Feature, **kwargs):
-        data.update(self.get_schema(original_data.type).dump(original_data))
+        data.update(self.get_schema(original_data.type)(context=self.context).dump(original_data))
         return data
 
 class IoUsageAllocationSchema(Schema):

@@ -128,7 +128,7 @@ class RsProjectManager:
     def load_features(self, module, features, messages: List[RsMessage]) -> None:
         for data in features:
             try:
-                feature = module.get_feature(data['type'], data['index'])
+                feature = module.get_feature(data['index'])
                 feature.update(data)
             except Exception as e:
                 messages.append(RsMessageManager.get_message(311, { 'message': e.args[0] }))

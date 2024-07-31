@@ -45,12 +45,16 @@ class IONotFoundException(RsCustomException):
         super().__init__("IO with given index doesn't exists")
 
 class IOFeatureNotFoundException(RsCustomException):
-    def __init__(self, type: str, index: str):
-        super().__init__(f"IO feature '{type}' index '{index}' doesn't exists")
+    def __init__(self, index: str):
+        super().__init__(f"IO feature '{index}' doesn't exists")
 
 class IOFeatureOdtBankNotFoundException(RsCustomException):
     def __init__(self, type: str, index: str, bank: int):
         super().__init__(f"IO feature '{type}' index '{index}' bank '{bank}' doesn't exists")
+
+class IOFeatureTypeMismatchException(RsCustomException):
+    def __init__(self, index: str):
+        super().__init__(f"IO feature '{index}' type mismatched")
 
 class IOStandardCoeffNotFoundException(RsCustomException):
     def __init__(self):

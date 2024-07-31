@@ -35,6 +35,15 @@ class BramNotExistsError(Exception):
 class IONotExistsError(Exception):
     pass
 
+class IOFeatureNotExistsError(Exception):
+    pass
+
+class IOFeatureTypeMismatchError(Exception):
+    pass
+
+class IOFeatureOdtBankNotExistsError(Exception):
+    pass
+
 class PeripheralNotExistsError(Exception):
     pass
 
@@ -99,6 +108,18 @@ errors = {
     },
     "IONotExistsError": {
         "message": "IO with given index doesn't exists",
+        "status": 400
+    },
+    "IOFeatureNotExistsError": {
+        "message": "IO feature with given index doesn't exists",
+        "status": 400
+    },
+    "IOFeatureOdtBankNotExistsError": {
+        "message": "IO ODT feature with given bank no doesn't exists",
+        "status": 400
+    },
+    "IOFeatureTypeMismatchError": {
+        "message": "IO feature type mismatch",
         "status": 400
     },
     "PeripheralNotExistsError": {

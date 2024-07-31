@@ -9,9 +9,9 @@ from marshmallow import Schema, fields, post_dump, post_load, ValidationError, I
 from submodule.io import IO_Direction, IO_Drive_Strength, IO_Feature, IO_FeatureType, IO_OdtType, IO_Slew_Rate, IO_differential_termination, \
     IO_Data_Type, IO_Standard, IO_Synchronization, IO_Pull_up_down
 from submodule.rs_device_manager import RsDeviceManager
-from submodule.rs_device_resources import ModuleType, IO_BankType, DeviceNotFoundException, IONotFoundException
+from submodule.rs_device_resources import IOFeatureNotFoundException, IOFeatureOdtBankNotFoundException, IOFeatureTypeMismatchException, ModuleType, IO_BankType, DeviceNotFoundException, IONotFoundException
 from .device import MessageSchema
-from .errors import DeviceNotExistsError, InternalServerError, IONotExistsError, \
+from .errors import DeviceNotExistsError, IOFeatureNotExistsError, IOFeatureOdtBankNotExistsError, IOFeatureTypeMismatchError, InternalServerError, IONotExistsError, \
     SchemaValidationError
 from .errors import errors
 
@@ -20,6 +20,8 @@ from .errors import errors
 #-------------------------------------------------------------------------------------------# 
 # devices/<device_id>/io                  | get, post               | IosApi                #
 # devices/<device_id>/io/<rownum>         | get, patch, delete      | IoApi                 #
+# devices/<device_id>/io/features         | get                     | IoFeaturesApi         #
+# devices/<device_id>/io/features/<index> | get, patch              | IoFeatureApi          #
 # devices/<device_id>/io/consumption      | get                     | IoConsumptionApi      #
 #-------------------------------------------------------------------------------------------#
 
@@ -206,15 +208,6 @@ class IosApi(Resource):
                                 percentage:
                                     type: number
                             - $ref: '#/definitions/ItemMessage'
-            IOOnDieTermination:
-                type: object
-                properties:
-                    bank_number:
-                        type: integer
-                    odt:
-                        type: boolean
-                    power:
-                        type: number
             IOUsageAllocation:
                 type: object
                 properties:
@@ -243,6 +236,13 @@ class IosApi(Resource):
                         type: array
                         items:
                             $ref: '#/definitions/IOUsageAllocation'
+            IOFeature:
+                type: object
+                properties:
+                    type:
+                        type: string
+                    index:
+                        type: integer
             IOConsumptionAndResourceUsage:
                 allOf:
                     - type: object
@@ -255,10 +255,10 @@ class IosApi(Resource):
                             type: number
                         io_usage:
                             $ref: '#/definitions/IOUsage'
-                        io_on_die_termination:
+                        io_features:
                             type: array
                             items:
-                                $ref: '#/definitions/IOOnDieTermination'
+                                $ref: '#/definitions/IOFeature'
                     - $ref: '#/definitions/ItemMessage'
         responses:
             200:
@@ -522,8 +522,183 @@ class IoConsumptionApi(Resource):
         except Exception as e:
             raise InternalServerError
 
+class IoFeaturesApi(Resource):
+    def get(self, device_id: str):
+        """
+        This endpoint returns a list of IO features of a device.
+        ---
+        tags:
+            - IO
+        description: Returns a list of IO features of a device.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
+        responses:
+            200:
+                description: Successfully returned a list of IO features
+                schema:
+                    type: array
+                    items:
+                        $ref: '#/definitions/IOFeature'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+        """
+        try:
+            device_mgr = RsDeviceManager.get_instance()
+            device = device_mgr.get_device(device_id)
+            data = device.get_module(ModuleType.IO).get_features()
+            schema = IoFeatureSchema(many=True)
+            return schema.dump(data)
+        except DeviceNotFoundException as e:
+            raise DeviceNotExistsError
+        except Exception as e:
+            raise InternalServerError
+
+class IoFeatureApi(Resource):
+    def get(self, device_id: str, index: int):
+        """
+        This endpoint return an IO feature of a device.
+        ---
+        tags:
+            - IO
+        description: Return an IO feature.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
+            - name: index
+              in: path 
+              type: integer
+              required: true
+        responses:
+            200:
+                description: Successfully returned an IO feature
+                schema:
+                    $ref: '#/definitions/IOConsumptionAndResourceUsage'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+        """
+        try:
+            device_mgr = RsDeviceManager.get_instance()
+            device = device_mgr.get_device(device_id)
+            data = device.get_module(ModuleType.IO).get_feature(index)
+            schema = IoFeatureSchema()
+            return schema.dump(data)
+        except DeviceNotFoundException as e:
+            raise DeviceNotExistsError
+        except IOFeatureNotFoundException as e:
+            raise IOFeatureNotExistsError
+        except Exception as e:
+            raise InternalServerError
+
+    def get(self, device_id: str, index: int):
+        """
+        This endpoint return an IO feature of a device.
+        ---
+        tags:
+            - IO
+        description: Return an IO feature.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true
+            - name: index
+              in: path 
+              type: integer
+              required: true
+        responses:
+            200:
+                description: Successfully returned an IO feature
+                schema:
+                    $ref: '#/definitions/IOFeature'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+        """
+        try:
+            device_mgr = RsDeviceManager.get_instance()
+            device = device_mgr.get_device(device_id)
+            data = device.get_module(ModuleType.IO).get_feature(index)
+            schema = IoFeatureSchema()
+            return schema.dump(data)
+        except DeviceNotFoundException as e:
+            raise DeviceNotExistsError
+        except IOFeatureNotFoundException as e:
+            raise IOFeatureNotExistsError
+        except Exception as e:
+            raise InternalServerError
+
+    def patch(self, device_id: str, index: int):
+        """
+        This endpoint updates an IO feature of a device by index
+        ---
+        tags:
+            - IO
+        description: Update an IO feature of a device by index.
+        parameters:
+            - name: device_id
+              in: path 
+              type: string
+              required: true 
+            - name: index
+              in: path 
+              type: integer
+              required: true
+            - name: io_feature
+              in: body
+              description: IO feature
+              schema:
+                $ref: '#/definitions/IOFeature'
+        responses:
+            200:
+                description: Successfully updated the IO feature
+                schema:
+                    $ref: '#/definitions/IOFeature'
+            400:
+                description: Invalid request 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+            403:
+                description: Schema validation error 
+                schema:
+                    $ref: '#/definitions/HTTPErrorMessage'
+        """
+        try:
+            device = RsDeviceManager.get_instance().get_device(device_id)
+            schema = IoFeatureSchema()
+            data = schema.load(request.json)
+            feature = device.get_module(ModuleType.IO).get_feature(index)
+            feature.update(data)
+            device.compute_output_power()
+            from submodule.rs_project import RsProjectManager
+            RsProjectManager.get_instance().set_modified(True)
+            return schema.dump(feature), 200
+        except ValidationError as e:
+            raise SchemaValidationError
+        except IOFeatureOdtBankNotFoundException as e:
+            raise IOFeatureOdtBankNotExistsError
+        except IOFeatureTypeMismatchException as e:
+            raise IOFeatureTypeMismatchError
+        except IOFeatureNotFoundException as e:
+            raise IOFeatureNotExistsError
+        except DeviceNotFoundException as e:
+            raise DeviceNotExistsError
+        except Exception as e:
+            raise InternalServerError
+
 io_api = Blueprint('io_api', __name__)
 api = Api(io_api, errors=errors)
 api.add_resource(IosApi, '/devices/<string:device_id>/io')
 api.add_resource(IoApi, '/devices/<string:device_id>/io/<int:rownum>')
+api.add_resource(IoFeaturesApi, '/devices/<string:device_id>/io/features')
+api.add_resource(IoFeatureApi, '/devices/<string:device_id>/io/features/<int:index>')
 api.add_resource(IoConsumptionApi, '/devices/<string:device_id>/io/consumption')

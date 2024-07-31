@@ -8,7 +8,7 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard_Coeff, IOFeatureNotFoundException, IOFeatureOdtBankNotFoundException, IOStandardCoeffNotFoundException, \
+from .rs_device_resources import IO_Standard_Coeff, IOFeatureNotFoundException, IOFeatureOdtBankNotFoundException, IOFeatureTypeMismatchException, IOStandardCoeffNotFoundException, \
     IONotFoundException, IO_BankType, IO_Standard, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
 
@@ -339,6 +339,10 @@ class IO_Feature_ODT(IO_Feature):
         raise IOFeatureOdtBankNotFoundException(self.type.value, self.index, num)
 
     def update(self, props: Dict[str, Any]) -> None:
+        # validate feature type
+        if self.type != props['type']:
+            raise IOFeatureTypeMismatchException(self.index)
+
         # update banks' property
         for data in props['banks']:
             bank = self.get_bank(data['bank'])
@@ -418,11 +422,11 @@ class IO_SubModule:
     def get_features(self) -> List[IO_Feature]:
         return self.io_features
 
-    def get_feature(self, type: IO_FeatureType, index: int) -> IO_Feature:
+    def get_feature(self, index: int) -> IO_Feature:
         for feature in self.io_features:
-            if feature.type == type and feature.index == index:
+            if feature.index == index:
                 return feature
-        raise IOFeatureNotFoundException(type.value, index)
+        raise IOFeatureNotFoundException(index)
 
     def get_resources(self):
         return self.io_usage, 0

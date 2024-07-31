@@ -33,6 +33,7 @@ function BCPUTable({ device, update, notify }) {
   const [endpoints, setEndpoints] = React.useState([]);
   const [href, setHref] = React.useState('');
   const { updateTotalPower } = useSocTotalPower();
+  const [disable, setDisable] = React.useState(true);
   const { GetOptions, updateGlobalState, bcpuNames } = useGlobalState();
   const loadActivity = GetOptions('Port_Activity');
   const clock = GetOptions('N22_RISC_V_Clock');
@@ -70,12 +71,24 @@ function BCPUTable({ device, update, notify }) {
     }
   }
 
+  function reset() {
+    setBcpuData(bcpuDataDefault);
+    setPowerData(powerDataDefault);
+    setBootMode('');
+    setHref('');
+    setDisable(true);
+    setEndpoints([]);
+  }
+
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
       const bcpu = getPeripherals(data, 'bcpu');
+      setDisable(bcpu.length === 0);
       if (bcpu.length > 0) {
         setHref(bcpu[0].href);
         fetchAcpuData(bcpu[0].href);
+      } else {
+        reset();
       }
     });
   }
@@ -84,10 +97,7 @@ function BCPUTable({ device, update, notify }) {
     setDev(device);
     if (device !== '') fetchData();
     else {
-      setBcpuData(bcpuDataDefault);
-      setPowerData(powerDataDefault);
-      setBootMode('');
-      setHref('');
+      reset();
     }
   }
 
@@ -158,7 +168,7 @@ function BCPUTable({ device, update, notify }) {
         <div className="acpu-group-container">
           <div className="acpu-group">
             <label>BCPU name</label>
-            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={bcpuData.name} />
+            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={bcpuData.name} disabled={disable} />
           </div>
           <div className="acpu-group">
             <Checkbox
@@ -166,6 +176,7 @@ function BCPUTable({ device, update, notify }) {
               label="Encryption"
               checkHandler={(state) => handleChange('encryption_used', state)}
               id="encryption"
+              disabled={disable}
             />
           </div>
           <div className="acpu-group">
@@ -174,10 +185,10 @@ function BCPUTable({ device, update, notify }) {
           </div>
           <div className="acpu-group">
             <label>Clock</label>
-            <Dropdown value={bcpuData.clock} onChangeHandler={(value) => handleChange('clock', value)} items={clock} />
+            <Dropdown value={bcpuData.clock} onChangeHandler={(value) => handleChange('clock', value)} items={clock} disabled={disable} />
           </div>
         </div>
-        <TableBase header={header} disabled={device === ''} onClick={() => setModalOpen(true)}>
+        <TableBase header={header} disabled={disable} onClick={() => setModalOpen(true)}>
           {
             endpoints.map((row, index) => (
               (row.data !== undefined && row.data.name !== '')

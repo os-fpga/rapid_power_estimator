@@ -30,6 +30,7 @@ function ACPUTable({ device, update, notify }) {
   const [href, setHref] = React.useState('');
   const { updateTotalPower } = useSocTotalPower();
   const { GetOptions, updateGlobalState, acpuNames } = useGlobalState();
+  const [disable, setDisable] = React.useState(true);
   const loadActivity = GetOptions('A45_Load');
 
   function fetchPort(port, link) {
@@ -63,13 +64,24 @@ function ACPUTable({ device, update, notify }) {
     }
   }
 
+  function reset() {
+    setAcpuData(acpuDataDefault);
+    setPowerData(powerDataDefault);
+    setHref('');
+    setEndpoints([]);
+    setDisable(true);
+  }
+
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
       const acpu = getPeripherals(data, 'acpu');
+      setDisable(acpu.length === 0);
       if (acpu.length > 0) {
         const link = acpu[0].href;
         setHref(link);
         fetchAcpuData(link);
+      } else {
+        reset();
       }
     });
   }
@@ -78,9 +90,7 @@ function ACPUTable({ device, update, notify }) {
     setDev(device);
     if (device !== '') fetchData();
     else {
-      setAcpuData(acpuDataDefault);
-      setPowerData(powerDataDefault);
-      setHref('');
+      reset();
     }
   }
 
@@ -151,18 +161,18 @@ function ACPUTable({ device, update, notify }) {
         <div className="acpu-group-container">
           <div className="acpu-group">
             <label>ACPU name</label>
-            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={acpuData.name} />
+            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={acpuData.name} disabled={disable} />
           </div>
           <div className="acpu-group">
             <label>Frequency</label>
-            <input type="number" min={0} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} />
+            <input type="number" min={0} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} disabled={disable} />
           </div>
           <div className="acpu-group">
             <label>Load</label>
-            <Dropdown value={acpuData.load} onChangeHandler={(value) => handleChange('load', value)} items={loadActivity} />
+            <Dropdown value={acpuData.load} onChangeHandler={(value) => handleChange('load', value)} items={loadActivity} disabled={disable} />
           </div>
         </div>
-        <TableBase header={header} disabled={device === ''} onClick={() => setModalOpen(true)}>
+        <TableBase header={header} disabled={disable} onClick={() => setModalOpen(true)}>
           {
             endpoints.map((row, index) => (
               (row.data !== undefined && row.data.name !== '')

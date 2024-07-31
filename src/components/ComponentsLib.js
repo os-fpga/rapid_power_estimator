@@ -96,10 +96,15 @@ export function PercentSelector({ value, setValue, max }) {
 }
 
 export function Dropdown({
-  id, value, onChangeHandler, items,
+  id, value, onChangeHandler, items, disabled,
 }) {
   return (
-    <select id={id} value={value} onChange={(e) => onChangeHandler(parseInt(e.target.value, 10))}>
+    <select
+      id={id}
+      value={value}
+      onChange={(e) => onChangeHandler(parseInt(e.target.value, 10))}
+      disabled={disabled}
+    >
       {
         items.map((item) => <option key={item.id} value={item.id}>{item.text}</option>)
       }

@@ -29,6 +29,7 @@ function ConnectivityTable({
   const { updateTotalPower } = useSocTotalPower();
   const { defaultClock } = useClockSelection();
   const { GetOptions, updateGlobalState, connectivityNames } = useGlobalState();
+  const [disable, setDisable] = React.useState(true);
   const loadActivity = GetOptions('Port_Activity');
   const fpgaComplex = getPeripherals(peripherals, 'fpga_complex');
 
@@ -57,9 +58,11 @@ function ConnectivityTable({
   function reset() {
     setEndpoints([]);
     setHref('');
+    setDisable(true);
   }
 
   function fetchData() {
+    setDisable(fpgaComplex.length === 0);
     if (fpgaComplex.length > 0) {
       const link = fpgaComplex[0].href;
       setHref(link);
@@ -140,7 +143,7 @@ function ConnectivityTable({
           />
           <TableBase
             header={header}
-            disabled={device === ''}
+            disabled={disable}
             onClick={() => setModalOpen(true)}
           >
             {

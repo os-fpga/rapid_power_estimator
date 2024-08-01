@@ -33,6 +33,8 @@ function DMATable({ device, update, notify }) {
   const [dmaData, setDmaData] = React.useState(dmaDataDefault);
   const { updateTotalPower } = useSocTotalPower();
   const { GetOptions, dmaNames, updateGlobalState } = useGlobalState();
+  // eslint-disable-next-line no-unused-vars
+  const [disable, setDisable] = React.useState(true);
   const loadActivity = GetOptions('Port_Activity');
 
   const mainTableHeader = [
@@ -66,12 +68,21 @@ function DMATable({ device, update, notify }) {
     }
   }
 
+  function reset() {
+    setDmaData(dmaDataDefault);
+    setDmaHref([]);
+    setDisable(true);
+  }
+
   function fetchAll(deviceId) {
     server.GET(server.api.fetch(server.Elem.peripherals, deviceId), (data) => {
       const dma = data.find((elem) => elem.type === 'dma');
+      setDisable(dma === undefined);
       if (dma !== undefined) {
         setDmaHref(dma.href);
         fetchData(dma.href);
+      } else {
+        reset();
       }
     });
   }
@@ -80,8 +91,7 @@ function DMATable({ device, update, notify }) {
     setDev(device);
     if (device !== '') fetchAll(device);
     else {
-      setDmaData(dmaDataDefault);
-      setDmaHref([]);
+      reset();
     }
   }
 

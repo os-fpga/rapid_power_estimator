@@ -18,9 +18,9 @@ function FpgaCell({ power, messages, title }) {
         {fixed(power)}
         {' W'}
       </div>
-      <div className="grayed-text">
+      {/* TODO RPE-47 <div className="grayed-text">
         XX %
-      </div>
+      </div> */}
     </State>
   );
 }

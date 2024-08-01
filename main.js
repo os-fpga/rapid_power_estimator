@@ -172,7 +172,7 @@ const template = [
         label: 'Close Project',
         click: () => { newProjectClicked(); },
       },
-      { label: 'Sample Project' },
+      // { label: 'Sample Project' }, //TODO RPE-50
       {
         label: 'Save',
         accelerator: 'CmdOrCtrl+S',

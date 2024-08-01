@@ -262,7 +262,9 @@ function App() {
     <div className="rpe-head">
       <div className="top-row-container">
         <div className="main-table-container main-border">
-          <div className="top-l1 main-bottom-border" onClick={() => setOpenedTable(Table.Summary)}>
+          {/* <div className="top-l1 main-bottom-border"
+          onClick={() => setOpenedTable(Table.Summary)}> TODO RPE-49 */}
+          <div className="main-bottom-border">
             <DeviceList
               devices={devices}
               selectedDevice={selectedDevice}

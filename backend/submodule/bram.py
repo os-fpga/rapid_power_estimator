@@ -73,7 +73,7 @@ class BRAM:
             self.port_b.toggle_rate = 0
 
     def get_bram_capacity(self):        
-        if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18k_TDP, 
+        if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, 
                          BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_18K_FIFO,
                          BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM):
             return 1024

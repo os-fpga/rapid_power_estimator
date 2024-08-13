@@ -76,7 +76,7 @@ def test_add_and_get_bram():
         "enable": True,
         "name": "New BRAM",
         "type": BRAM_Type.BRAM_36K_TDP,
-        "bram_used": 1
+        "bram_used": 2
     }
     new_bram = bram_submodule.add(new_bram_data)
     assert new_bram.name == "New BRAM"

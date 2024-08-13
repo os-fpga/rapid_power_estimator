@@ -1,4 +1,4 @@
-from rs_message import RsMessage, RsMessageManager, RsMessageType
+from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
 import pytest
 
 def test_rs_message_initialization():
@@ -37,9 +37,6 @@ def test_message_text_substitution():
     # Assuming RsMessage can have placeholders like {name} in its text
     message = RsMessageManager.get_message(106)
     assert "{name}" in message.text
-
-
-            
 
 def test_message_type():
     # Test that the message type is correctly set

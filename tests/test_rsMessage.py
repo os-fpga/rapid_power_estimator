@@ -38,6 +38,9 @@ def test_message_text_substitution():
     message = RsMessageManager.get_message(106)
     assert "{name}" in message.text
 
+
+            
+
 def test_message_type():
     # Test that the message type is correctly set
     message = RsMessage(123, RsMessageType.WARN, "Test warning")

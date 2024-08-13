@@ -12,7 +12,7 @@ def test_bram_initialization():
     assert bram.type == BRAM_Type.BRAM_36K_FIFO
     assert bram.bram_used == 0
     assert isinstance(bram.port_a, PortProperties)
-    assert isinstance(bgit ram.port_b, PortProperties)
+    assert isinstance(bram ram.port_b, PortProperties)
     assert isinstance(bram.output, PortOutputProperties)
     assert bram.output.block_power == 0.0
     assert bram.output.interconnect_power == 0.0

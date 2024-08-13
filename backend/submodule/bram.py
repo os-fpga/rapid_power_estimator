@@ -11,8 +11,8 @@ from .rs_message import RsMessage, RsMessageManager
 class BRAM_Type(RsEnum):
     BRAM_18K_SDP = 0, "18k SDP"
     BRAM_36K_SDP = 1, "36k SDP"
-    BRAM_18k_TDP = 2, "18k TDP"
-    BRAM_36k_TDP = 3, "36k TDP"
+    BRAM_18K_TDP = 2, "18k TDP"
+    BRAM_36K_TDP = 3, "36k TDP"
     BRAM_18K_SP = 4, "18k SP"
     BRAM_36K_SP = 5, "36k SP"
     BRAM_18K_FIFO = 6, "18k FIFO"
@@ -72,7 +72,7 @@ class BRAM:
             self.port_b.width = 0
             self.port_b.toggle_rate = 0
 
-    def get_bram_capacity(self):
+    def get_bram_capacity(self):        
         if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18k_TDP, 
                          BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_18K_FIFO,
                          BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM):

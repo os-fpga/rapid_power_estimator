@@ -20,8 +20,8 @@ def test_bram_initialization():
     assert bram.output.messages == []
 
 @pytest.mark.parametrize("type, expected_capacity", [
-    (BRAM_Type.BRAM_18K_SDP, 1024),
-    (BRAM_Type.BRAM_36K_TDP, 2048),
+    (BRAM_Type.BRAM_18K_TDP, 1024),
+    (BRAM_Type.BRAM_36K_SDP, 2048),
     (BRAM_Type.BRAM_18K_ROM, 1024),
     (BRAM_Type.BRAM_36K_FIFO, 2048),
 ])

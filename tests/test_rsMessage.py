@@ -1,19 +1,20 @@
 from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
+from unittest.mock import Mock
 import pytest
 
 def test_rs_message_initialization():
     # Test the initialization of RsMessage
-    message = RsMessage(123, RsMessageType.INFO, "Test message")
+    message = RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A")
     assert message.code == 123
-    assert message.type == RsMessageType.INFO
-    assert message.text == "Test message"
+    assert message.type == RsMessageType.ERRO
+    assert message.text == "Invalid clock on Port A"
 
-@pytest.mark.parametrize(
+@pytest.mark.parametrize(   
     "message_code, message_type, expected_text",
     [
         (999, RsMessageType.ERRO, "Unknown error"),
         (101, RsMessageType.INFO, "This clock is disabled"),
-        (201, RsMessageType.WARN, "Clock is specified but no loads identified in other modules"),
+        (201, RsMessageType.WARN, "Clock is specified but no loads identified in other tabs"),
         (404, None, None)  # Test for non-existent message
     ]
 )
@@ -40,8 +41,8 @@ def test_message_text_substitution():
 
 def test_message_type():
     # Test that the message type is correctly set
-    message = RsMessage(123, RsMessageType.WARN, "Test warning")
-    assert message.type == RsMessageType.WARN
+    message = RsMessage(302, RsMessageType.ERRO, "Invalid clock on Port A")
+    assert message.type == RsMessageType.ERRO
 
 @pytest.mark.parametrize(
     "invalid_code",

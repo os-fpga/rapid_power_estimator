@@ -55,3 +55,13 @@ class RsMessageManager:
                 copied_message.text = copied_message.text.format(**params)
             return copied_message
         return RsMessageManager.messages[0]
+
+  #  @staticmethod
+  #  def get_message(code):
+  #      if not isinstance(code, int) or code < 0:
+  #          raise TypeError("The message code must be a non-negative integer.")
+  #
+  #      for message in RsMessageManager.messages:
+  #          if message.code == code:
+  #              return message
+  #      return None           

@@ -75,7 +75,7 @@ class BRAM:
     def get_bram_capacity(self):        
         if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, 
                          BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_18K_FIFO,
-                         BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM):
+                         BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM, BRAM_Type.BRAM_36K_SP):
             return 1024
         else:
             return 2048

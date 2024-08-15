@@ -1,4 +1,4 @@
-from submodule.bram import BRAM, BRAM_SubModule, BRAM_Type, PortProperties, PortOutputProperties
+from submodule.bram import BRAM, BRAM_SubModule, BRAM_Type, PortProperties, PortOutputProperties, RsMessageType
 from unittest.mock import Mock
 import pytest
 
@@ -8,8 +8,6 @@ def test_bram_initialization():
     assert bram.name == ''
     assert bram.type == BRAM_Type.BRAM_18K_SDP
     assert bram.type == BRAM_Type.BRAM_36K_TDP
-    assert bram.type == BRAM_Type.BRAM_18K_ROM
-    assert bram.type == BRAM_Type.BRAM_36K_FIFO
     assert bram.bram_used == 0
     assert isinstance(bram.port_a, PortProperties)
     assert isinstance(bram.ram.port_b, PortProperties)

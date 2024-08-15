@@ -1,4 +1,4 @@
-from submodule.bram import BRAM, BRAM_SubModule, BRAM_Type, PortProperties, PortOutputProperties, RsMessageType
+from submodule.bram import BRAM, BRAM_SubModule, BRAM_Type, PortProperties, PortOutputProperties
 from unittest.mock import Mock
 import pytest
 

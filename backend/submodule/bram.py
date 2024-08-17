@@ -5,8 +5,8 @@
 from dataclasses import dataclass, field
 from typing import List
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import BramNotFoundException
-from .rs_message import RsMessage, RsMessageManager
+from submodule.rs_device_resources import BramNotFoundException
+from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
 
 class BRAM_Type(RsEnum):
     BRAM_18K_SDP = 0, "18k SDP"
@@ -72,13 +72,22 @@ class BRAM:
             self.port_b.width = 0
             self.port_b.toggle_rate = 0
 
-    def get_bram_capacity(self):        
-        if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, 
-                         BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_18K_FIFO,
-                         BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM, BRAM_Type.BRAM_36K_SP):
-            return 1024
-        else:
-            return 2048
+  #  def get_bram_capacity(self):        
+   #     if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, 
+   #                      BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_18K_FIFO,
+   #                      BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM, BRAM_Type.BRAM_36K_SP):
+   #         return 1024
+   #     else:
+   #         return 2048
+
+    def get_bram_capacity(self):
+     if self.type in [BRAM_Type.BRAM_18K_TDP, BRAM_Type.BRAM_18K_ROM, BRAM_Type.BRAM_18K_SDP]:
+        return 1024
+     elif self.type in [BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_36K_FIFO]:
+        return 2048
+     else:
+        raise ValueError("Unknown BRAM Type")
+
 
     def compute_port_a_properties(self):
         self.output.port_a.ram_depth = self.get_bram_capacity()
@@ -99,6 +108,11 @@ class BRAM:
             self.output.percentage = 0
 
     def compute_dynamic_power(self, clock_a, clock_b, WRITE_CAP, READ_CAP, INT_CAP, FIFO_CAP):
+     if not self.enable:
+        self.output.block_power = 0
+        self.output.interconnect_power = 0
+        self.output.messages.append(RsMessageType.INFO)
+     else:
         self.output.port_a.output_signal_rate = 0.0
         self.output.port_a.clock_frequency = 0
         self.output.port_b.output_signal_rate = 0.0

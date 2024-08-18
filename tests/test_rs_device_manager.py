@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+
 import pytest
 from unittest.mock import MagicMock, patch
 from submodule.rs_device_manager import RsDeviceManager, DeviceNotFoundException

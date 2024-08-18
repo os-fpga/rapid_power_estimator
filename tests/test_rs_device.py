@@ -1,11 +1,13 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+
 import pytest
 from unittest.mock import patch, mock_open, Mock
 from datetime import datetime
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_device_resources import ModuleType
 from submodule.rs_project import RsProject, RsProjectState, RsProjectSchema, DeviceNotFoundException, RsProjectManager
-
-
 
 def test_singleton_behavior():
     instance1 = RsProjectManager.get_instance()

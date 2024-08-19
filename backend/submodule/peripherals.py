@@ -9,8 +9,8 @@ import sys
 from typing import Any, List, Dict, Tuple
 from submodule.clock import Clock
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralType
-from .rs_message import RsMessage, RsMessageManager
+from submodule.rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralType
+from submodule.rs_message import RsMessage, RsMessageManager
 
 class Peripherals_Usage(RsEnum):
     Boot  = 0, "Boot"

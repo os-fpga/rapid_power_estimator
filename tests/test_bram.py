@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+
 import pytest
 from submodule.rs_device_resources import BramNotFoundException
 from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
@@ -81,11 +85,11 @@ def test_bram_submodule_add_remove(bram_submodule):
 
 def test_bram_submodule_compute_output_power(bram_submodule):
     bram_submodule.compute_output_power()
-    assert bram_submodule.total_block_power >= 0  # Fixing the condition to check for non-negative power
+    assert bram_submodule.total_block_power >= 0  # fixing the condition to check for non-negative power
     assert bram_submodule.total_interconnect_power >= 0
 
 def test_bram_submodule_get_all_messages(bram_submodule):
-    bram_submodule.compute_output_power()  # Ensure power computation runs, which may generate messages
+    bram_submodule.compute_output_power()  # Ensuring power computation runs
     messages = bram_submodule.get_all_messages()
     assert len(messages) >= 0  # Check for non-negative count, could be zero if no errors occurred
     if len(messages) > 0:

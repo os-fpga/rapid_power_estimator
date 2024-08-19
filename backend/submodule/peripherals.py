@@ -1930,3 +1930,5 @@ class Uart0(ComputeObject):
         print(f'[DEBUG] UART: {self.output.block_power = }', file=sys.stderr)
 
         return True
+    
+    

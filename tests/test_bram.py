@@ -11,8 +11,6 @@ def test_bram_initialization():
     bram = BRAM()
     assert not bram.enable
     assert bram.name == ''
-  #  assert bram.type == BRAM_Type.BRAM_18K_SDP
-  #  assert bram.type == BRAM_Type.BRAM_36K_TDP
     assert bram.bram_used == 0
     assert isinstance(bram.port_a, PortProperties)
     assert isinstance(bram.port_b, PortProperties)

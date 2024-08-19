@@ -72,22 +72,13 @@ class BRAM:
             self.port_b.width = 0
             self.port_b.toggle_rate = 0
 
-  #  def get_bram_capacity(self):        
-   #     if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, 
-   #                      BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_18K_FIFO,
-   #                      BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_18K_ROM, BRAM_Type.BRAM_36K_SP):
-   #         return 1024
-   #     else:
-   #         return 2048
-
     def get_bram_capacity(self):
-     if self.type in [BRAM_Type.BRAM_18K_TDP, BRAM_Type.BRAM_18K_ROM, BRAM_Type.BRAM_18K_SDP]:
-        return 1024
-     elif self.type in [BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_36K_FIFO]:
-        return 2048
-     else:
-        raise ValueError("Unknown BRAM Type")
-
+        if self.type in [BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_18K_FIFO, BRAM_Type.BRAM_18K_ROM]:
+         return 1024
+        elif self.type in [BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_36K_TDP, BRAM_Type.BRAM_36K_SP, BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_36K_ROM]:
+         return 2048
+        else:
+         raise ValueError("Unknown BRAM Type")
 
     def compute_port_a_properties(self):
         self.output.port_a.ram_depth = self.get_bram_capacity()
@@ -111,7 +102,10 @@ class BRAM:
      if not self.enable:
         self.output.block_power = 0
         self.output.interconnect_power = 0
-        self.output.messages.append(RsMessageType.INFO)
+        
+        # Creating an RsMessage object with the INFO type and append it to messages
+        info_message = RsMessage(RsMessageType.INFO, "Power calculation skipped because the block is disabled.")
+        self.output.messages.append(info_message)
      else:
         self.output.port_a.output_signal_rate = 0.0
         self.output.port_a.clock_frequency = 0

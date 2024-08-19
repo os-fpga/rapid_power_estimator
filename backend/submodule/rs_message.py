@@ -44,7 +44,6 @@ class RsMessageManager:
         RsMessage(309, RsMessageType.ERRO, "One or more banks need to enable ODT since ODT was a selected standard"),
         RsMessage(310, RsMessageType.ERRO, "Cascade requires prior bank termination"),
         RsMessage(311, RsMessageType.ERRO, "Load io error: {message}"),
-        
         # 404 Error Message
         RsMessage(404, RsMessageType.ERRO, "Message not found: 404"),
     ]
@@ -57,12 +56,5 @@ class RsMessageManager:
             if params is not None:
                 copied_message.text = copied_message.text.format(**params)
             return copied_message
-  #  @staticmethod
-  #  def get_message(code):
-  #      if not isinstance(code, int) or code < 0:
-  #          raise TypeError("The message code must be a non-negative integer.")
-  #
-  #      for message in RsMessageManager.messages:
-  #          if message.code == code:
-  #              return message
-  #      return None           
+
+

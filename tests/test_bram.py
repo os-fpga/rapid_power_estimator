@@ -1,7 +1,7 @@
 #
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
-
+#
 import pytest
 from unittest.mock import patch
 from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
@@ -73,7 +73,7 @@ def test_bram_submodule_initialization(bram_submodule):
     assert bram_submodule.get_total_output_power() == 0.0
 
 def test_bram_submodule_add_remove(bram_submodule):
-    new_bram = BRAM(enable=True, name="TestBRAM2", type=BRAM_Type.BRAM_36K_TDP, bram_used=2)
+    new_bram = BRAM(enable=True, name="TestBRAM2", type=BRAM_Type.BRAM_36k_TDP, bram_used=2)
     bram_submodule.add(vars(new_bram))  # Add BRAM object as dictionary
     assert len(bram_submodule.get_all()) == 2
 

@@ -12,7 +12,7 @@ class BRAM_Type(RsEnum):
     BRAM_18K_SDP = 0, "18k SDP"
     BRAM_36K_SDP = 1, "36k SDP"
     BRAM_18k_TDP = 2, "18k TDP"
-    BRAM_36K_TDP = 3, "36k TDP"
+    BRAM_36k_TDP = 3, "36k TDP"
     BRAM_18K_SP = 4, "18k SP"
     BRAM_36K_SP = 5, "36k SP"
     BRAM_18K_FIFO = 6, "18k FIFO"
@@ -249,3 +249,4 @@ class BRAM_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
+            

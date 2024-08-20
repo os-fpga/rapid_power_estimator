@@ -2,10 +2,6 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
-#
-#  Copyright (C) 2024 RapidSilicon
-#  Authorized use only
-#
 from enum import Enum
 from typing import Dict, Any
 import copy

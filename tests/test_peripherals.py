@@ -1,4 +1,7 @@
-
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
 import pytest
 from unittest.mock import Mock, create_autospec
 from submodule.peripherals import (

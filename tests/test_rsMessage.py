@@ -62,5 +62,3 @@ def test_message_type():
 def test_get_invalid_message(invalid_code):
     # Test retrieving messages with invalid codes
         RsMessageManager.get_message(invalid_code)
-
-

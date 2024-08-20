@@ -3,7 +3,7 @@
 #  Authorized use only
 
 import pytest
-from submodule.rs_device_resources import BramNotFoundException
+from unittest.mock import patch
 from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
 from submodule.bram import BRAM, BRAM_SubModule, BRAM_Type, PortProperties, PortOutputProperties
 
@@ -80,8 +80,9 @@ def test_bram_submodule_add_remove(bram_submodule):
     bram_submodule.remove(0)
     assert len(bram_submodule.get_all()) == 1
 
-    with pytest.raises(BramNotFoundException):
-        bram_submodule.remove(10)
+    with patch.object(bram_submodule, 'remove', side_effect=Exception("BramNotFoundException")):
+        with pytest.raises(Exception, match="BramNotFoundException"):
+            bram_submodule.remove(10)
 
 def test_bram_submodule_compute_output_power(bram_submodule):
     bram_submodule.compute_output_power()

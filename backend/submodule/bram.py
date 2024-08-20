@@ -5,13 +5,13 @@
 from dataclasses import dataclass, field
 from typing import List
 from utilities.common_utils import RsEnum, update_attributes
-from submodule.rs_device_resources import BramNotFoundException
-from submodule.rs_message import RsMessage, RsMessageManager, RsMessageType
+from .rs_device_resources import BramNotFoundException
+from .rs_message import RsMessage, RsMessageManager
 
 class BRAM_Type(RsEnum):
     BRAM_18K_SDP = 0, "18k SDP"
     BRAM_36K_SDP = 1, "36k SDP"
-    BRAM_18K_TDP = 2, "18k TDP"
+    BRAM_18k_TDP = 2, "18k TDP"
     BRAM_36K_TDP = 3, "36k TDP"
     BRAM_18K_SP = 4, "18k SP"
     BRAM_36K_SP = 5, "36k SP"
@@ -73,12 +73,11 @@ class BRAM:
             self.port_b.toggle_rate = 0
 
     def get_bram_capacity(self):
-        if self.type in [BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18K_TDP, BRAM_Type.BRAM_18K_SP, BRAM_Type.BRAM_18K_FIFO, BRAM_Type.BRAM_18K_ROM]:
-         return 1024
-        elif self.type in [BRAM_Type.BRAM_36K_SDP, BRAM_Type.BRAM_36K_TDP, BRAM_Type.BRAM_36K_SP, BRAM_Type.BRAM_36K_FIFO, BRAM_Type.BRAM_36K_ROM]:
-         return 2048
+        if self.type in (BRAM_Type.BRAM_18K_SDP, BRAM_Type.BRAM_18k_TDP, BRAM_Type.BRAM_18K_SP, \
+            BRAM_Type.BRAM_18K_FIFO, BRAM_Type.BRAM_18K_ROM):
+            return 1024
         else:
-         raise ValueError("Unknown BRAM Type")
+            return 2048
 
     def compute_port_a_properties(self):
         self.output.port_a.ram_depth = self.get_bram_capacity()
@@ -99,14 +98,6 @@ class BRAM:
             self.output.percentage = 0
 
     def compute_dynamic_power(self, clock_a, clock_b, WRITE_CAP, READ_CAP, INT_CAP, FIFO_CAP):
-     if not self.enable:
-        self.output.block_power = 0
-        self.output.interconnect_power = 0
-        
-        # Creating an RsMessage object with the INFO type and append it to messages
-        info_message = RsMessage(RsMessageType.INFO, "Power calculation skipped because the block is disabled.")
-        self.output.messages.append(info_message)
-     else:
         self.output.port_a.output_signal_rate = 0.0
         self.output.port_a.clock_frequency = 0
         self.output.port_b.output_signal_rate = 0.0
@@ -258,3 +249,4 @@ class BRAM_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
+            

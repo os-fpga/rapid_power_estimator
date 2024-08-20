@@ -5,8 +5,7 @@
 from dataclasses import dataclass, field
 from typing import List
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import BramNotFoundException
-from .rs_message import RsMessage, RsMessageManager
+from submodule.rs_message import RsMessage, RsMessageManager
 
 class BRAM_Type(RsEnum):
     BRAM_18K_SDP = 0, "18k SDP"
@@ -249,4 +248,3 @@ class BRAM_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
-            

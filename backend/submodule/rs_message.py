@@ -55,4 +55,3 @@ class RsMessageManager:
                 copied_message.text = copied_message.text.format(**params)
             return copied_message
         return RsMessageManager.messages[0]
-    

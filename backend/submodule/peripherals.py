@@ -1928,4 +1928,5 @@ class Uart0(ComputeObject):
         print(f'[DEBUG] UART: {io_vcc_aux_power = }', file=sys.stderr)
         print(f'[DEBUG] UART: {self.output.calculated_bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] UART: {self.output.block_power = }', file=sys.stderr)
+
         return True

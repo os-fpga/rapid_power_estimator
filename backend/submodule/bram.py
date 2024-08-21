@@ -249,4 +249,3 @@ class BRAM_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
-            

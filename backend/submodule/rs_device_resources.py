@@ -1,4 +1,7 @@
 from enum import Enum
+import os
+from device.device_resource import Device
+from .rs_power_config import RsPowerConfig, ElementType, ScenarioType
 from utilities.common_utils import RsEnum
 from dataclasses import dataclass, field
 from typing import List
@@ -174,11 +177,19 @@ class Power_Factor:
 class RsDeviceResources:
 
     def __init__(self, device):
-        self.device = device
+        self.device: Device = device
+        self.powercfg = RsPowerConfig(self.get_power_config_filepath())
         self.io_standard_coeff_list : List[IO_Standard_Coeff]
         self.peripheral_noc_power_factor : List[Power_Factor]
         self.modules = [None, None, None, None, None, None, None]
         self.load()
+
+    def get_power_config_filepath(self) -> str:
+        power_cfg_filepath = self.device.internals['power_data'].file
+        if not os.path.isabs(power_cfg_filepath):
+            return os.path.join(os.path.dirname(self.device.filepath), power_cfg_filepath)
+        else:
+            return power_cfg_filepath
 
     def load(self) -> None:
         self.io_standard_coeff_list = [
@@ -413,52 +424,52 @@ class RsDeviceResources:
         return 1
 
     def get_CLK_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate clock block power
-        return 0.00001
+        # Coeffient to calculate clock block power
+        return self.powercfg.get_coeff(ElementType.CLOCKING, 'CLK_CAP')
 
     def get_CLK_INT_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate clock interconnect power
-        return 0.00000003
+        # Coeffient to calculate clock interconnect power
+        return self.powercfg.get_coeff(ElementType.CLOCKING, 'CLK_INT_CAP')
 
     def get_PLL_INT(self) -> float:
-        # todo: read from power data. Coeffient to calculate PLL power (VCC Core)
-        return 0.0009
+        # Coeffient to calculate PLL power (VCC Core)
+        return self.powercfg.get_coeff(ElementType.CLOCKING, 'PLL_INT')
 
     def get_PLL_AUX(self) -> float:
-        # todo: read from power data. Coeffient to calculate PLL power (Aux Int)
-        return 0.01
+        # Coeffient to calculate PLL power (Aux Int)
+        return self.powercfg.get_coeff(ElementType.CLOCKING, 'PLL_AUX')
 
     def get_LUT_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate FLE block power
-        return 0.0000003
+        # Coeffient to calculate FLE block power
+        return self.powercfg.get_coeff(ElementType.FABRIC_LE, 'LUT_CAP')
 
     def get_FF_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate FLE block power
-        return 0.00000035
+        # Coeffient to calculate FLE block power
+        return self.powercfg.get_coeff(ElementType.FABRIC_LE, 'FF_CAP')
 
     def get_FF_CLK_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate FLE block power
-        return 2.91375291375291E-09
+        # Coeffient to calculate FLE block power
+        return self.powercfg.get_coeff(ElementType.FABRIC_LE, 'FF_CLK_CAP')
 
     def get_LUT_INT_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate FLE interconnect power
-        return 0.00000002
+        # Coeffient to calculate FLE interconnect power
+        return self.powercfg.get_coeff(ElementType.FABRIC_LE, 'LUT_INT_CAP')
 
     def get_FF_INT_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate FLE interconnect power
-        return 0.00000004
+        # Coeffient to calculate FLE interconnect power
+        return self.powercfg.get_coeff(ElementType.FABRIC_LE, 'FF_INT_CAP')
 
     def get_DSP_MULT_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate DSP block power
-        return 0.0000015
+        # Coeffient to calculate DSP block power
+        return self.powercfg.get_coeff(ElementType.DSP, 'DSP_MULT_CAP')
 
     def get_DSP_MULT_CAP2(self) -> float:
-        # todo: read from power data. Coeffient to calculate DSP block power (only used for MULTIPLY_ACCUMULATE & MULTIPLY_ADD_SUB DSP Modes)
-        return 0.00000007
+        # Coeffient to calculate DSP block power (only used for MULTIPLY_ACCUMULATE & MULTIPLY_ADD_SUB DSP Modes)
+        return self.powercfg.get_coeff(ElementType.DSP, 'DSP_MULT_CAP2')
 
     def get_DSP_INT_CAP(self) -> float:
-        # todo: read from power data. Coeffient to calculate DSP interconnect power
-        return 0.0000001
+        # Coeffient to calculate DSP interconnect power
+        return self.powercfg.get_coeff(ElementType.DSP, 'DSP_INT_CAP')
 
     def get_VCC_CORE(self) -> float:
         # todo: should read from regulator module
@@ -513,20 +524,16 @@ class RsDeviceResources:
         return 0.0
 
     def get_BRAM_INT_CAP(self) -> float:
-        # todo: should read from power data
-        return 0.00000035
+        return self.powercfg.get_coeff(ElementType.BRAM, 'BRAM_INT_CAP')
     
     def get_BRAM_WRITE_CAP(self) -> float:
-        # todo: should read from power data
-        return 0.000002
+        return self.powercfg.get_coeff(ElementType.BRAM, 'BRAM_WRITE_CAP')
 
     def get_BRAM_READ_CAP(self) -> float:
-        # todo: should read from power data
-        return 0.0000025
+        return self.powercfg.get_coeff(ElementType.BRAM, 'BRAM_READ_CAP')
 
     def get_BRAM_FIFO_CAP(self) -> float:
-        # todo: should read from power data
-        return 0.0000007
+        return self.powercfg.get_coeff(ElementType.BRAM, 'BRAM_FIFO_CAP')
 
     def get_IO_standard_coeff(self) -> List[IO_Standard_Coeff]:
         return self.io_standard_coeff_list
@@ -640,23 +647,19 @@ class RsDeviceResources:
     def get_ACLK_FACTOR(self) -> float:
         return 0.0000688892039916618
 
+    def get_polynomial_coeff(self, type: ElementType, worse: bool):
+        polynomials = self.powercfg.get_polynomial_coeff(type, ScenarioType.WORSE if worse else ScenarioType.TYPICAL)
+        coeffs = [c.coeffs[:c.length] for c in polynomials]
+        return 1/polynomials[0].factor, coeffs
+
     def get_divfactor_coeff_CLB(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000000002, -0.0000000000001, 0.00000000001, 0.0000000008, 0.00000006, 0.000002]]
-        else:
-            return 0.8, [[0.0000000000003, -0.00000000001, 0.0000000001, 0.00000006, 0.0000007]]
+        return self.get_polynomial_coeff(ElementType.CLB, worsecase)
 
     def get_divfactor_coeff_BRAM(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000004, 0.00001]]
-        else:
-            return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+        return self.get_polynomial_coeff(ElementType.BRAM, worsecase)
 
     def get_divfactor_coeff_DSP(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000002, -0.00000000004, 0.00000000008, 0.0000005, 0.00001]]
-        else:
-            return 0.8, [[0.000000000002, -0.00000000008, 0.0000000007, 0.0000003, 0.000004]]
+        return self.get_polynomial_coeff(ElementType.DSP, worsecase)
 
     def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
         if bank_type == 0: # HP
@@ -683,35 +686,19 @@ class RsDeviceResources:
                 return 0.8, [[0.00001]]
 
     def get_divfactor_coeff_AUX(self, worsecase : bool):
-        if worsecase:
-            # return 1.8, [[0.000000003, 0.0000002, 0.00004, 0.0224], [0.0000000004, 0.0000001, 0.000005, 0.0033]] # from doc
-            return 1.8, [[0.00000001, -0.0000003, 0.00004,  0.0332], [0.000000002, 0.0000004, 0.00002, 0.0133]] # from excel
-        else:
-            return 1.8, [[0.000000003, 0.0000002, 0.00004, 0.0224], [0.0000000004, 0.0000001, 0.000005, 0.0033]]
+        return self.get_polynomial_coeff(ElementType.AUX, worsecase)
 
     def get_divfactor_coeff_NOC(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.00000000005, -0.000000001, 0.000000002, 0.00001, 0.0003]]
-        else:
-            return 0.8, [[0.00000000003, -0.000000001, 0.00000001, 0.000005, 0.00006]]
+        return self.get_polynomial_coeff(ElementType.NOC, worsecase)
 
     def get_divfactor_coeff_Mem_SS(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.0000000001, -0.000000003, 0.000000005, 0.00003, 0.0009]]
-        else:
-            return 0.8, [[0.0000000001, -0.000000006, 0.00000005, 0.00002, 0.0003]]
+        return self.get_polynomial_coeff(ElementType.MEM_SS, worsecase)
 
     def get_divfactor_coeff_A45(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.00000000000008, -0.000000000004, 0.0000000004, 0.00000003, 0.000002, 0.00008]]
-        else:
-            return 0.8, [[0.000000000006, -0.000000000006, -0.000000005, 0.0000007, 0.00002]]
+        return self.get_polynomial_coeff(ElementType.ACPU, worsecase)
 
     def get_divfactor_coeff_Config(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.0000000001, -0.000000002, 0.000000004, 0.00002, 0.0007]]
-        else:
-            return 0.8, [[0.0000000000005, -0.00000000002, 0.000000003, 0.0000002, 0.00001, 0.0013]]
+        return self.get_polynomial_coeff(ElementType.CONFIG, worsecase)
 
     def get_divfactor_coeff_Aux_bank_type(self, bank_type : int , worsecase : bool):
         if bank_type == 0: # HP
@@ -761,70 +748,37 @@ class RsDeviceResources:
                     return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
 
     def get_divfactor_coeff_VCC_BOOT_IO(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-        else:
-            return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+        return self.get_polynomial_coeff(ElementType.VCC_BOOT_IO, worsecase)
 
     def get_divfactor_coeff_VCC_DDR_IO(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-        else:
-            return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+        return self.get_polynomial_coeff(ElementType.VCC_DDR_IO, worsecase)
 
     def get_divfactor_coeff_VCC_SOC_IO(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-        else:
-            return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+        return self.get_polynomial_coeff(ElementType.VCC_SOC_IO, worsecase)
 
     def get_divfactor_coeff_VCC_GIGE_IO(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-        else:
-            return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+        return self.get_polynomial_coeff(ElementType.VCC_GIGE_IO, worsecase)
 
     def get_divfactor_coeff_VCC_USB_IO(self, worsecase : bool):
-        if worsecase:
-            return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-        else:
-            return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+        return self.get_polynomial_coeff(ElementType.VCC_USB_IO, worsecase)
 
     def get_divfactor_coeff_VCC_BOOT_AUX(self, worsecase : bool):
-        if worsecase:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
-        else:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
+        return self.get_polynomial_coeff(ElementType.VCC_BOOT_AUX, worsecase)
 
     def get_divfactor_coeff_VCC_SOC_AUX(self, worsecase : bool):
-        if worsecase:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
-        else:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
+        return self.get_polynomial_coeff(ElementType.VCC_SOC_AUX, worsecase)
 
     def get_divfactor_coeff_VCC_GIGE_AUX(self, worsecase: bool):
-        if worsecase:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
-        else:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
+        return self.get_polynomial_coeff(ElementType.VCC_GIGE_AUX, worsecase)
 
     def get_divfactor_coeff_VCC_USB_AUX(self, worsecase: bool):
-        if worsecase:
-            return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
-        else:
-            return 1.8, [[0.000000001, 0.0000002, 0.00021, 0.0003]]
+        return self.get_polynomial_coeff(ElementType.VCC_USB_AUX, worsecase)
 
     def get_divfactor_coeff_VCC_PUF(self, worsecase : bool):
-        if worsecase:
-            return 1.8, [[0.001]]
-        else:
-            return 1.8, [[0.0005]]
+        return self.get_polynomial_coeff(ElementType.VCC_PUF, worsecase)
 
     def get_divfactor_coeff_VCC_RC_OSC(self, worsecase : bool):
-        if worsecase:
-            return 1.8, [[0.0005]]
-        else:
-            return 1.8, [[0.0001]]
+        return self.get_polynomial_coeff(ElementType.VCC_RC_OSC, worsecase)
 
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module

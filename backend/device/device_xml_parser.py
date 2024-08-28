@@ -18,6 +18,7 @@ def parse_device_xml(file_path: str) -> DeviceList:
  
         device = Device(
             **device_elem.attrib,
+            filepath=file_path,
             resources=resources,
             internals=internals
         )

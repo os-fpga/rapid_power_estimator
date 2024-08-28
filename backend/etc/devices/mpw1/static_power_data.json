@@ -1,0 +1,487 @@
+[
+    {
+        "type": "clb",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 6,
+                        "coeffs": [0.000000000000002, -0.0000000000001, 0.00000000001, 0.0000000008, 0.00000006, 0.000002],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.0000000000003, -0.00000000001, 0.0000000001, 0.00000006, 0.0000007],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "bram",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000004, 0.00001],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "dsp",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000002, -0.00000000004, 0.00000000008, 0.0000005, 0.00001],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000002, -0.00000000008, 0.0000000007, 0.0000003, 0.000004],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "aux",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.00000001, -0.0000003, 0.00004,  0.0332],
+                        "factor": 0.555555555555556
+                    },
+                    {
+                        "length": 4,
+                        "coeffs": [0.000000002, 0.0000004, 0.00002, 0.0133],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.000000003, 0.0000002, 0.00004, 0.0224],
+                        "factor": 0.555555555555556
+                    },
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000004, 0.0000001, 0.000005, 0.0033],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "noc",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.00000000005, -0.000000001, 0.000000002, 0.00001, 0.0003],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.00000000003, -0.000000001, 0.00000001, 0.000005, 0.00006],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "mem_ss",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.0000000001, -0.000000003, 0.000000005, 0.00003, 0.0009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.0000000001, -0.000000006, 0.00000005, 0.00002, 0.0003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "acpu",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 6,
+                        "coeffs": [0.00000000000008, -0.000000000004, 0.0000000004, 0.00000003, 0.000002, 0.00008],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000006, -0.000000000006, -0.000000005, 0.0000007, 0.00002],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "config",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.0000000001, -0.000000002, 0.000000004, 0.00002, 0.0007],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 6,
+                        "coeffs": [0.0000000000005, -0.00000000002, 0.000000003, 0.0000002, 0.00001, 0.0013],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_boot_io",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_ddr_io",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_soc_io",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_gige_io",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_usb_io",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_boot_aux",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_soc_aux",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_gige_aux",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_usb_aux",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.000000001, 0.0000002, 0.00021, 0.0003],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_puf",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.001],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.0005],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "vcc_rc_osc",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.0005],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.0001],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    }
+]

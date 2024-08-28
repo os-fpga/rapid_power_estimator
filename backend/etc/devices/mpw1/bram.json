@@ -1,0 +1,9 @@
+{
+    "type": "bram",
+    "coeffs": [
+        { "name": "BRAM_INT_CAP"  , "value": 0.00000035 },
+        { "name": "BRAM_WRITE_CAP", "value": 0.000002   },
+        { "name": "BRAM_READ_CAP" , "value": 0.0000025  },
+        { "name": "BRAM_FIFO_CAP" , "value": 0.0000007  }
+    ]
+}

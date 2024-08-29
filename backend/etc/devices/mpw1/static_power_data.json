@@ -483,5 +483,305 @@
                 ]
             }
         ]
+    },
+    {
+        "type": "gearbox_io_hp",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.00000000003, -0.0000000006, 0.000000001, 0.000006, 0.0002],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.00000000002, -0.000000001, 0.00000001, 0.000004, 0.00005],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "gearbox_io_hr",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.00000000003, -0.0000000007, 0.000000001, 0.000007, 0.0002],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.00000000003, -0.0000000008, 0.000000001, 0.000008, 0.0002],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hp",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.0001],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.00005],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hr",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.00005],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 1,
+                        "coeffs": [0.00001],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "aux_hp",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.000000001, 0.0000002, 0.00021, 0.0003],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "aux_hr",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 4,
+                        "coeffs": [0.000000001, 0.0000002, 0.00021, 0.0003],
+                        "factor": 0.555555555555556
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hp_1_2v",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hp_1_5v",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hp_1_8v",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hr_1_8v",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.00001],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hr_2_5v",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "io_hr_3_3v",
+        "scenarios": [
+            {
+                "type": "worse",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009],
+                        "factor": 1.25
+                    }
+                ]
+            },
+            {
+                "type": "typical",
+                "polynomials": [
+                    {
+                        "length": 5,
+                        "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003],
+                        "factor": 1.25
+                    }
+                ]
+            }
+        ]
     }
 ]

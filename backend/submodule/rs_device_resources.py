@@ -662,28 +662,10 @@ class RsDeviceResources:
         return self.get_polynomial_coeff(ElementType.DSP, worsecase)
 
     def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
-        if bank_type == 0: # HP
-            if worsecase:
-                return 0.8, [[0.00000000003, -0.0000000006, 0.000000001, 0.000006, 0.0002]]
-            else:
-                return 0.8, [[0.00000000002, -0.000000001, 0.00000001, 0.000004, 0.00005]]
-        elif bank_type == 1: # HR
-            if worsecase:
-                return 0.8, [[0.00000000003, -0.0000000007, 0.000000001, 0.000007, 0.0002]]
-            else:
-                return 0.8, [[0.00000000003, -0.0000000008, 0.000000001, 0.000008, 0.0002]]
+        return self.get_polynomial_coeff(ElementType.GEARBOX_IO_HP if bank_type == 0 else ElementType.GEARBOX_IO_HR, worsecase)
 
     def get_divfactor_coeff_IO_bank_type(self, bank_type : int, worsecase : bool):
-        if bank_type == 0: # HP
-            if worsecase:
-                return 0.8, [[0.0001]]
-            else:
-                return 0.8, [[0.00005]]
-        elif bank_type == 1: # HR
-            if worsecase:
-                return 0.8, [[0.00005]]
-            else:
-                return 0.8, [[0.00001]]
+        return self.get_polynomial_coeff(ElementType.IO_HP if bank_type == 0 else ElementType.IO_HR, worsecase)
 
     def get_divfactor_coeff_AUX(self, worsecase : bool):
         return self.get_polynomial_coeff(ElementType.AUX, worsecase)
@@ -700,52 +682,24 @@ class RsDeviceResources:
     def get_divfactor_coeff_Config(self, worsecase : bool):
         return self.get_polynomial_coeff(ElementType.CONFIG, worsecase)
 
-    def get_divfactor_coeff_Aux_bank_type(self, bank_type : int , worsecase : bool):
-        if bank_type == 0: # HP
-            if worsecase:
-                return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
-            else:
-                return 1.8, [[0.000000001, 0.0000002, 0.00021, 0.0003]]
-        elif bank_type == 1: # HR
-            if worsecase:
-                return 1.8, [[0.0000000008, 0.0000002, 0.00001, 0.007]]
-            else:
-                return 1.8, [[0.000000001, 0.0000002, 0.00021, 0.0003]]
+    def get_divfactor_coeff_Aux_bank_type(self, bank_type: int, worsecase: bool):
+        return self.get_polynomial_coeff(ElementType.AUX_HP if bank_type == 0 else ElementType.AUX_HR, worsecase)
 
     def get_divfactor_coeff_IO_bank_type_voltage(self, bank_type : int, voltage : float, worsecase : bool = True):
-        # todo: should read from power data
         if bank_type == 1: # HR
             if voltage == 1.8:
-                if worsecase:
-                    return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.00001]]
-                else:
-                    return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+                return self.get_polynomial_coeff(ElementType.IO_HR_1_8V, worsecase)
             elif voltage == 2.5:
-                if worsecase:
-                    return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-                else:
-                    return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+                return self.get_polynomial_coeff(ElementType.IO_HR_2_5V, worsecase)
             elif voltage == 3.3:
-                if worsecase:
-                    return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-                else:
-                    return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+                return self.get_polynomial_coeff(ElementType.IO_HR_3_3V, worsecase)
         elif bank_type == 0: # HP
             if voltage == 1.2:
-                if worsecase:
-                    return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-                else:
-                    return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+                return self.get_polynomial_coeff(ElementType.IO_HP_1_2V, worsecase)
             elif voltage == 1.5:
-                if worsecase:
-                    return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-                else:
-                    return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+                return self.get_polynomial_coeff(ElementType.IO_HP_1_5V, worsecase)
             elif voltage == 1.8:
-                if worsecase:
-                    return 0.8, [[0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009]]
-                else:
-                    return 0.8, [[0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003]]
+                return self.get_polynomial_coeff(ElementType.IO_HP_1_8V, worsecase)
 
     def get_divfactor_coeff_VCC_BOOT_IO(self, worsecase : bool):
         return self.get_polynomial_coeff(ElementType.VCC_BOOT_IO, worsecase)

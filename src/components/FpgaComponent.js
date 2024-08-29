@@ -18,7 +18,7 @@ function FpgaComponent({ tableOpen }) {
   const clocking = dynamic.components.find((elem) => elem.type === 'clocking');
   const fle = dynamic.components.find((elem) => elem.type === 'fabric_le');
   const bram = dynamic.components.find((elem) => elem.type === 'bram');
-  const dsp = dynamic.components.find((elem) => elem.type === 'bsp');
+  const dsp = dynamic.components.find((elem) => elem.type === 'dsp');
   const io = dynamic.components.find((elem) => elem.type === 'io');
 
   return (

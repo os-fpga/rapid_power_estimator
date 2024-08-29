@@ -78,7 +78,7 @@ function FPGASummaryComponent({ device }) {
       newData[2].percent = bram.percentage;
       newData[2].messages = bramState;
     }
-    const dsp = dynamic.components.find((elem) => elem.type === 'bsp');
+    const dsp = dynamic.components.find((elem) => elem.type === 'dsp');
     if (dsp) {
       newData[3].power = dsp.power;
       newData[3].percent = dsp.percentage;

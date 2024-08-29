@@ -1,4 +1,4 @@
-![CI](https://github.com/os-fpga/rapid_power_estimator/actions/workflows/codecov.yml/badge.svg)
+[![CI](https://github.com/os-fpga/rapid_power_estimator/actions/workflows/codecov.yml/badge.svg)]
 [![codecov](https://codecov.io/gh/os-fpga/rapid_power_estimator/branch/main/graph/badge.svg)](https://codecov.io/gh/os-fpga/rapid_power_estimator)
 
 # Rapid Power Estimator

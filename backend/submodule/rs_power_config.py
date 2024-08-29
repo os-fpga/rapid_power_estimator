@@ -34,6 +34,18 @@ class ElementType(Enum):
     VCC_USB_AUX = 'vcc_usb_aux'
     VCC_PUF = 'vcc_puf'
     VCC_RC_OSC = 'vcc_rc_osc'
+    GEARBOX_IO_HP = 'gearbox_io_hp'
+    GEARBOX_IO_HR = 'gearbox_io_hr'
+    AUX_HP = 'aux_hp'
+    AUX_HR = 'aux_hr'
+    IO_HP = 'io_hp'
+    IO_HR = 'io_hr'
+    IO_HP_1_2V = 'io_hp_1_2v'
+    IO_HP_1_5V = 'io_hp_1_5v'
+    IO_HP_1_8V = 'io_hp_1_8v'
+    IO_HR_1_8V = 'io_hr_1_8v'
+    IO_HR_2_5V = 'io_hr_2_5v'
+    IO_HR_3_3V = 'io_hr_3_3v'
 
 class ScenarioType(Enum):
     NONE = 'none'

@@ -1,3 +1,6 @@
+![CI](https://github.com/os-fpga/rapid_power_estimator/actions/workflows/codecov.yml/badge.svg)
+[![codecov](https://codecov.io/gh/os-fpga/rapid_power_estimator/branch/main/graph/badge.svg)](https://codecov.io/gh/os-fpga/rapid_power_estimator)
+
 # Rapid Power Estimator
 
 Rapid Power Estimation Tool allows you to estimate power consumption at various stages of your design cycle. It simplifies the input of design information through intuitive wizards and delivers comprehensive power and thermal data analysis.

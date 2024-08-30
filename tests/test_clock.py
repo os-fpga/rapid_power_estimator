@@ -1,7 +1,7 @@
 #
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
-#
+
 from submodule.clock import Clock, Source, ClockOutput, Clock_SubModule, Clock_State
 from submodule.rs_device_resources import RsDeviceResources
 from submodule.rs_message import RsMessageType

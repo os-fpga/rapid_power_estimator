@@ -98,8 +98,15 @@ jobs:
 
       - name: Run pytest on ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
-        run: python3 -m pytest
+        run: python3 -m pytest --cov=. --cov-report=term-missing 
         
+      - name: Upload results to Codecov
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: os-fpga/rapid_power_estimator
+
       - name: Run frontend unit test on ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |

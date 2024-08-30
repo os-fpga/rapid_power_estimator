@@ -4,6 +4,11 @@
 #
 from enum import Enum
 
+class RsCustomException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
 class RsEnum(Enum):
     def __init__(self, value, description = '(empty)'):
         self._value_ = value

@@ -8,4 +8,3 @@ numpy
 codecov
 pytest-cov
 coverage
-flask-cov

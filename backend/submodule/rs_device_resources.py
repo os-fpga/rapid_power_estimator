@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+import sys
 from device.device_resource import Device
 from .rs_power_config import RsPowerConfig, ElementType, ScenarioType
 from utilities.common_utils import RsEnum
@@ -179,7 +180,6 @@ class RsDeviceResources:
     def __init__(self, device):
         self.device: Device = device
         self.powercfg = RsPowerConfig(self.get_power_config_filepath())
-        self.io_standard_coeff_list : List[IO_Standard_Coeff]
         self.peripheral_noc_power_factor : List[Power_Factor]
         self.modules = [None, None, None, None, None, None, None]
         self.load()
@@ -192,52 +192,6 @@ class RsDeviceResources:
             return power_cfg_filepath
 
     def load(self) -> None:
-        self.io_standard_coeff_list = [
-            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_5V, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000006),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.0000002, output_ac=0.000025, input_dc=0.00001, output_dc=0.0003, int_inner=0.00000001, int_outer=0.0000008),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.0000003, output_ac=0.000025, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_2_5V, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000012, output_ac=0.000025, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000275),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_3_3V, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.0000012, output_ac=0.000025, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000275),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVTTL, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.0000012, output_ac=0.00003, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.000002),
-            IO_Standard_Coeff(io_standard=IO_Standard.BLVDS_Diff, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.0000012, output_ac=0.000001, input_dc=0.001, output_dc=0.00002, int_inner=0.00000001, int_outer=0.00000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVDS_Diff_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000001, output_ac=0.000005, input_dc=0.002, output_dc=0.0011, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVDS_Diff_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.000001, output_ac=0.000005, input_dc=0.002, output_dc=0.0011, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVPECL_2_5V_Diff, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000007, output_ac=0.000000001, input_dc=0.00105, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.LVPECL_3_3V_Diff, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.0000007, output_ac=0.000000001, input_dc=0.00105, output_dc=0.00001, int_inner=0.00000001, int_outer=0.00000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_I_with_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.0102, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_I_without_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_II_with_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.0102, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Class_II_without_ODT, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.0000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_2V_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000004, output_ac=0.0001, input_dc=0.006, output_dc=0.005, int_inner=0.00000002, int_outer=0.0000008),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_I_with_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.01425, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_I_without_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_II_with_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.01425, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Class_II_without_ODT, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSTL_1_5V_Diff, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.0001, input_dc=0.006, output_dc=0.005, int_inner=0.00000002, int_outer=0.0000001),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSUL_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000002, output_ac=0.000005, input_dc=0.003, output_dc=0.00025, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.HSUL_1_2V_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000001, output_ac=0.000009, input_dc=0.003, output_dc=0.0005, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.MIPI_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000001, output_ac=0.000007, input_dc=0.003, output_dc=0.006, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.PCI66, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.0000013, output_ac=0.000075, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.PCIX133, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000013, output_ac=0.00008, input_dc=0.00001, output_dc=0.00001, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.POD_1_2V, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000005, output_ac=0.000007, input_dc=0.003, output_dc=0.006, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.POD_1_2V_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.0000007, output_ac=0.00000007, input_dc=0.003, output_dc=0.006, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.RSDS_Diff, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.0000007, output_ac=0.00000007, input_dc=0.002, output_dc=0.03, int_inner=0.00000001, int_outer=0.000004),
-            IO_Standard_Coeff(io_standard=IO_Standard.SLVS_Diff, bank_type=IO_BankType.HP, voltage=1.2, input_ac=0.000001, output_ac=0.000005, input_dc=0.0023, output_dc=0.006, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_5V_Class_I, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.00004, input_dc=0.002, output_dc=0.002, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_5V_Class_II, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.00004, input_dc=0.002, output_dc=0.002, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_5V_Diff, bank_type=IO_BankType.HP, voltage=1.5, input_ac=0.000004, output_ac=0.00004, input_dc=0.002, output_dc=0.002, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_I_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_II_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Diff_HP, bank_type=IO_BankType.HP, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_I_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_1_8V_Class_II_HR, bank_type=IO_BankType.HR, voltage=1.8, input_ac=0.000002, output_ac=0.00005, input_dc=0.003, output_dc=0.0025, int_inner=0.00000001, int_outer=0.00000005),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_2_5V_Class_I, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.000003, output_ac=0.00006, input_dc=0.003, output_dc=0.003, int_inner=0.000000015, int_outer=0.000000075),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_2_5V_Class_II, bank_type=IO_BankType.HR, voltage=2.5, input_ac=0.000003, output_ac=0.00006, input_dc=0.003, output_dc=0.003, int_inner=0.000000015, int_outer=0.000000075),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_3_3V_Class_I, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.000004, output_ac=0.00006, input_dc=0.003, output_dc=0.0035, int_inner=0.00000002, int_outer=0.0000001),
-            IO_Standard_Coeff(io_standard=IO_Standard.SSTL_3_3V_Class_II, bank_type=IO_BankType.HR, voltage=3.3, input_ac=0.000004, output_ac=0.00006, input_dc=0.003, output_dc=0.0035, int_inner=0.00000002, int_outer=0.0000001),
-        ]
-
         self.peripheral_noc_power_factor = [
             Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=4.6207E-06),
             Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=5.03289E-06),
@@ -535,8 +489,15 @@ class RsDeviceResources:
     def get_BRAM_FIFO_CAP(self) -> float:
         return self.powercfg.get_coeff(ElementType.BRAM, 'BRAM_FIFO_CAP')
 
-    def get_IO_standard_coeff(self) -> List[IO_Standard_Coeff]:
-        return self.io_standard_coeff_list
+    def get_IO_standard_coeff(self, io_std: IO_Standard) -> IO_Standard_Coeff:
+        coeff = IO_Standard_Coeff(io_standard=io_std)
+        for prop in ['bank_type', 'voltage', 'input_ac', 'output_ac', 'input_dc', 'output_dc', 'int_inner', 'int_outer']:
+            value = self.powercfg.get_coeff(ElementType.IO, io_std.name + '.' + prop.upper())
+            if prop == 'bank_type':
+                setattr(coeff, prop, IO_BankType(value))
+            else:
+                setattr(coeff, prop, value)
+        return coeff
 
     def get_BCPU_CLK_FACTOR(self) -> float:
         # todo: should read from power data

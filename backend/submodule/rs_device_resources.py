@@ -1,16 +1,10 @@
 from enum import Enum
 import os
-import sys
 from device.device_resource import Device
 from .rs_power_config import RsPowerConfig, ElementType, ScenarioType
-from utilities.common_utils import RsEnum
+from utilities.common_utils import RsEnum, RsCustomException
 from dataclasses import dataclass, field
 from typing import List
-
-class RsCustomException(Exception):
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
 
 class DeviceNotFoundException(RsCustomException):
     def __init__(self):

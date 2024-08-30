@@ -1,15 +1,40 @@
 from dataclasses import dataclass, field
 from enum import Enum
-import json
-import sys
+from marshmallow import Schema, fields, post_load, validate
+from marshmallow.exceptions import ValidationError
+from utilities.common_utils import RsCustomException
 from typing import Any, List
+import json
 import jsonref
 import os
 
-from marshmallow import Schema, fields, post_load, validate
-from marshmallow.exceptions import ValidationError
+class PowerConfigFileNotFoundException(RsCustomException):
+    def __init__(self, filepath: str):
+        super().__init__(f"Power config file '{filepath}' not found")
 
-# todo: define exceptions (in common module)
+class PowerConfigStaticComponentNotFoundException(RsCustomException):
+    def __init__(self, component: str):
+        super().__init__(f"Static component '{component}' not found")
+
+class PowerConfigComponentNotFoundException(RsCustomException):
+    def __init__(self, component: str):
+        super().__init__(f"Component '{component}' not found")
+
+class PowerConfigCoeffNotFoundException(RsCustomException):
+    def __init__(self, component: str, name: str):
+        super().__init__(f"Coeff '{name}' of component '{component}' not found")
+
+class PowerConfigPolynomialNotFoundException(RsCustomException):
+    def __init__(self, component: str, scenario: str):
+        super().__init__(f"Polynomial '{component}' for '{scenario}' case not found")
+
+class PowerConfigParsingException(RsCustomException):
+    def __init__(self, error_message: str):
+        super().__init__(f"Parsing Error: {error_message}")
+
+class PowerConfigSchemaValidationException(RsCustomException):
+    def __init__(self, ex: ValidationError):
+        super().__init__(f"Parsing Error: {ex.messages}")
 
 class ElementType(Enum):
     BRAM = 'bram'
@@ -152,18 +177,14 @@ class RsPowerConfig:
             # store data
             self.data = data
 
-            # debug
-            # print(f'{self.data = }', file=sys.stderr)
-
-        # todo: translate system exception to app exception
         except FileNotFoundError as ex:
-            raise ex
+            raise PowerConfigFileNotFoundException(self.filepath)
         except json.JSONDecodeError as ex:
-            raise ex
+            raise PowerConfigParsingException(ex.msg)
         except jsonref.JsonRefError as ex:
-            raise ex
+            raise PowerConfigParsingException(ex.message)
         except ValidationError as ex:
-            raise ex
+            raise PowerConfigSchemaValidationException(ex)
         except Exception as ex:
             raise ex
 
@@ -171,22 +192,22 @@ class RsPowerConfig:
         comps = [c for c in self.data.static if c.type == type]
         if comps:
             return comps[0]
-        raise ValueError(f"static component '{type.value}' not found") # todo: change to specific exception
+        raise PowerConfigStaticComponentNotFoundException(type.value)
 
     def get_component(self, type: ElementType) -> RsDynamicPowerComponent:
         comps = [c for c in self.data.components if c.type == type]
         if comps:
             return comps[0]
-        raise ValueError(f"component '{type.value}' not found") # todo: change to specific exception
+        raise PowerConfigComponentNotFoundException(type.value)
 
     def get_coeff(self, type: ElementType, name: str) -> float:
         coeffs = [c for c in self.get_component(type).coeffs if c.name == name]
         if coeffs:
             return coeffs[0].value
-        raise ValueError(f'coeff {name} of {type.value} not found') # todo: change to specific exception
+        raise PowerConfigCoeffNotFoundException(type.value, name)
 
     def get_polynomial_coeff(self, type: ElementType, scenario: ScenarioType) -> List[RsStaticPowerPolynomial]:
         coeffs = [c for c in self.get_static_component(type).scenarios if c.type == scenario]
         if coeffs:
             return coeffs[0].polynomials
-        raise ValueError(f'polynomial coeffs for {scenario.value} of {type.value} not found') # todo: change to specific exception
+        raise PowerConfigPolynomialNotFoundException(type.value, scenario.value)

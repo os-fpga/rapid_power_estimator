@@ -6,4 +6,3 @@ flasgger
 flask-restful
 numpy
 codecov
-cov

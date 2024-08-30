@@ -6,6 +6,7 @@
         { "$ref": "clocking.json" },
         { "$ref": "dsp.json" },
         { "$ref": "fabric_le.json" },
-        { "$ref": "bram.json" }
+        { "$ref": "bram.json" },
+        { "$ref": "io.json" }
     ]
 }

@@ -12,11 +12,11 @@ from marshmallow.exceptions import ValidationError
 # todo: define exceptions (in common module)
 
 class ElementType(Enum):
-    NONE = 'none'
     BRAM = 'bram'
     CLOCKING = 'clocking'
     DSP = 'dsp'
     FABRIC_LE = 'fabric_le'
+    IO = 'io'
     NOC = 'noc'
     CLB = 'clb'
     AUX = 'aux'
@@ -48,7 +48,6 @@ class ElementType(Enum):
     IO_HR_3_3V = 'io_hr_3_3v'
 
 class ScenarioType(Enum):
-    NONE = 'none'
     TYPICAL = 'typical'
     WORSE = 'worse'
 
@@ -60,12 +59,12 @@ class RsStaticPowerPolynomial:
 
 @dataclass
 class RsStaticPowerScenario:
-    type: ScenarioType = field(default=ScenarioType.NONE)
+    type: ScenarioType
     polynomials: List[RsStaticPowerPolynomial] = field(default_factory=list)
 
 @dataclass
 class RsStaticPowerElement:
-    type: ElementType = field(default=ElementType.NONE)
+    type: ElementType
     scenarios: List[RsStaticPowerScenario] = field(default_factory=list)
 
 @dataclass
@@ -75,7 +74,7 @@ class RsDynamicPowerCoeff:
 
 @dataclass
 class RsDynamicPowerComponent:
-    type: ElementType = field(default=ElementType.NONE)
+    type: ElementType
     coeffs: List[RsDynamicPowerCoeff] = field(default_factory=list)
 
 @dataclass

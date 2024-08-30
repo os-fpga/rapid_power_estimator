@@ -117,12 +117,15 @@ def find_peripheral(context: 'IPeripheral', name: str) -> 'IPeripheral':
     return None
 
 def get_io_output_coeff(context: 'IPeripheral', voltage: float) -> List[float]:
-    IO_STANDARD_COEFF = context.get_device_resources().get_IO_standard_coeff()
-    for coeff in IO_STANDARD_COEFF:
-        if coeff.io_standard in (IO_Standard.LVCMOS_1_8V_HR, IO_Standard.LVCMOS_2_5V, IO_Standard.LVCMOS_3_3V):
-            if coeff.voltage == voltage:
-                return coeff.output_ac, coeff.output_dc
-    return 0.0, 0.0
+    if voltage == 1.8:
+        coeff = context.get_device_resources().get_IO_standard_coeff(IO_Standard.LVCMOS_1_8V_HR)
+    elif voltage == 2.5:
+        coeff = context.get_device_resources().get_IO_standard_coeff(IO_Standard.LVCMOS_2_5V)
+    elif voltage == 3.3:
+        coeff = context.get_device_resources().get_IO_standard_coeff(IO_Standard.LVCMOS_3_3V)
+    else:
+        return 0.0, 0.0
+    return coeff.output_ac, coeff.output_dc
 
 def get_power_factor(context: 'IPeripheral', master_type: PeripheralType, slave_type: PeripheralType) -> float:
     POWER_FACTOR = context.get_device_resources().get_peripheral_noc_power_factor()
@@ -1078,10 +1081,9 @@ class Memory0(ComputeObject):
         return bandwidth
 
     def get_ddr_io_power_coeff(self, io_std: IO_Standard) -> IO_Standard_Coeff:
-        IO_STANDARD_COEFF = self.get_context().get_device_resources().get_IO_standard_coeff()
-        for coeff in IO_STANDARD_COEFF:
-            if coeff.io_standard == io_std:
-                return coeff
+        coeff = self.get_context().get_device_resources().get_IO_standard_coeff(io_std)
+        if coeff:
+            return coeff
 
     def compute_ddr_io_power(self, read_bandwidth: float, write_bandwidth: float, read_write_rate: float) -> float:
         if self.properties.memory_type == Memory_Type.DDR4:

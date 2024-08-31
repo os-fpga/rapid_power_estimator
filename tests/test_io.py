@@ -28,9 +28,9 @@ def mock_resources():
     mock_res.get_num_HR_Banks.return_value = 2
     mock_res.get_num_HP_IOs.return_value = 100
     mock_res.get_num_HR_IOs.return_value = 60
-    mock_res.get_IO_standard_coeff.return_value = [
-        IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HR, voltage=1.8, bank_type=IO_BankType.HR, input_ac=0.1, input_dc=0.2, output_ac=0.3, output_dc=0.4, int_inner=0.1, int_outer=0.2)
-    ]
+    mock_res.get_IO_standard_coeff.return_value = \
+        IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HR, voltage=1.8, \
+                          bank_type=IO_BankType.HR, input_ac=0.1, input_dc=0.2, output_ac=0.3, output_dc=0.4, int_inner=0.1, int_outer=0.2)
     mock_res.get_clock.return_value = None
     mock_res.device = mock_device
     return mock_res
@@ -67,7 +67,7 @@ def test_io_feature_odt_compute(mock_resources):
 
 def test_find_coeff(mock_resources):
     io_submodule = IO_SubModule(resources=mock_resources)
-    coeff = io_submodule.find_coeff(mock_resources.get_IO_standard_coeff(), IO_Standard.LVCMOS_1_8V_HR)
+    coeff = io_submodule.find_coeff(IO_Standard.LVCMOS_1_8V_HR)
     assert coeff.voltage == 1.8
 
 def test_get_num_ios_by_banktype_voltage(mock_resources):
@@ -134,7 +134,7 @@ def test_compute_output_power(mock_resources):
     )
 
     # Setup RsDeviceResources to return the mock coefficient
-    mock_resources.get_IO_standard_coeff = MagicMock(return_value=[mock_io_standard_coeff])
+    mock_resources.get_IO_standard_coeff = MagicMock(return_value=mock_io_standard_coeff)
     mock_resources.get_clock = MagicMock(return_value=MagicMock(frequency=100e6))  # 100 MHz clock
 
     # Create an IO object with attributes that should trigger interconnect power calculation

@@ -187,6 +187,7 @@ class RsPowerConfig:
             raise PowerConfigSchemaValidationException(ex)
         except Exception as ex:
             raise ex
+        return True
 
     def get_static_component(self, type: ElementType) -> RsStaticPowerElement:
         comps = [c for c in self.data.static if c.type == type]

@@ -8,3 +8,4 @@ numpy
 codecov
 pytest-cov
 coverage
+pytest_mock

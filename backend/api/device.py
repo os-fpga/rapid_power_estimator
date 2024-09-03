@@ -74,8 +74,8 @@ class DeviceStaticSchema(Schema):
 class DeviceComplexSchema(Schema):
     dynamic = fields.Nested(DeviceDynamicSchema)
     static = fields.Nested(DeviceStaticSchema)
-    total_power = fields.Number(default=0.0)
-    total_percentage = fields.Number(default=0.0)
+    total_power = fields.Number()
+    total_percentage = fields.Number()
 
 class DeviceConsumptionSchema(Schema):
     total_power_temperature = fields.Nested(DeviceTotalPowerTemperatureSchema, many=True)

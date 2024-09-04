@@ -243,9 +243,19 @@ jobs:
       - name: Install dependencies
         run: | 
               pip install -r requirements.txt
+              npm install
     
       - name: Run pytest with Codecov
         run: python3 -m pytest --cov=. --cov-report=term-missing 
+        
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: os-fpga/rapid_power_estimator
+
+      - name: Run npm test with Codecov
+        run: npm test
         
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4

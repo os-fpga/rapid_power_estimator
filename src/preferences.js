@@ -54,7 +54,7 @@ function Preferences({
             setOkButtonDisabled(!config.useDefaultFile && (e.target.value === ''));
           }}
           disabled={config.useDefaultFile}
-          placeholder="Enter absolute path to devices.xml"
+          placeholder="Enter absolute path to device.xml"
           value={config.device_xml}
         />
       </div>

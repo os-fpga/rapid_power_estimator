@@ -5,6 +5,7 @@ pyinstaller
 flasgger
 flask-restful
 numpy
+jsonref
 codecov
 pytest-cov
 coverage

@@ -1,0 +1,6 @@
+{
+    "static": [],
+    "components": [
+        { "$ref": "abc.json" }
+    ]
+}

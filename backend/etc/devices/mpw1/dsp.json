@@ -1,0 +1,8 @@
+{
+    "type": "dsp",
+    "coeffs": [
+        { "name": "DSP_MULT_CAP" , "value": 0.0000015  },
+        { "name": "DSP_MULT_CAP2", "value": 0.00000007 },
+        { "name": "DSP_INT_CAP"  , "value": 0.0000001  }
+    ]
+}

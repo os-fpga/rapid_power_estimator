@@ -3,7 +3,8 @@
 #  Authorized use only
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+from submodule.rs_power_config import RsStaticPowerPolynomial
 from submodule.rs_device_resources import (
     RsDeviceResources,
     IO_Standard_Coeff,
@@ -22,14 +23,17 @@ def mock_device():
     device.name = 'TestDevice'
     device.package = 'TestPackage'
     device.speedgrade = 'Speed1'
+    device.filepath = 'device.xml'
     return device
 
 @pytest.fixture
 def device_resources(mock_device):
-    return RsDeviceResources(mock_device)
+    with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:
+        MockRsPowerConfig.return_value.load.return_value = True
+        MockRsPowerConfig.return_value.get_polynomial_coeff.return_value = [RsStaticPowerPolynomial(length=5, factor=1.25, coeffs=[0.1, 0.2, 0.3, 0.4, 0.5])]
+        yield RsDeviceResources(mock_device)
 
 def test_load_device_resources(device_resources):
-    assert len(device_resources.io_standard_coeff_list) > 0
     assert len(device_resources.peripheral_noc_power_factor) > 0
 
 def test_get_device_name(device_resources):

@@ -465,12 +465,11 @@ class IO_SubModule:
     def clear(self) -> None:
         self.itemlist.clear()
 
-    def find_coeff(self, io_std_coeff_list : List[IO_Standard_Coeff], io_std : IO_Standard) -> IO_Standard_Coeff:
-        result : List[IO_Standard_Coeff] = [x for x in io_std_coeff_list if x.io_standard == io_std]
-        if result:
-            return result[0]
-        else:
-            raise IOStandardCoeffNotFoundException
+    def find_coeff(self, io_std: IO_Standard) -> IO_Standard_Coeff:
+        coeff = self.resources.get_IO_standard_coeff(io_std)
+        if coeff:
+            return coeff
+        raise IOStandardCoeffNotFoundException
 
     def get_num_ios_by_banktype_voltage(self, bank_type : IO_BankType, voltage : float) -> int:
         return sum([io.bus_width for io in self.itemlist if io.output.bank_type == bank_type \
@@ -483,9 +482,6 @@ class IO_SubModule:
                 io.output.messages.append(RsMessageManager.get_message(202, { 'bank_type': bank_type.name, 'voltage': voltage }))
 
     def compute_output_power(self):
-        # Get IO power calculation coefficients
-        IO_STD_COEFF_LIST = self.resources.get_IO_standard_coeff()
-
         # Compute the total power consumption of all clocks
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
@@ -493,7 +489,7 @@ class IO_SubModule:
 
         # Compute the power consumption for each individual items
         for item in self.itemlist:
-            item.compute_dynamic_power(self.resources.get_clock(item.clock), self.find_coeff(IO_STD_COEFF_LIST, item.io_standard))
+            item.compute_dynamic_power(self.resources.get_clock(item.clock), self.find_coeff(item.io_standard))
             self.total_interconnect_power += item.output.interconnect_power
             self.total_block_power += item.output.block_power
 

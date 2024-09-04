@@ -27,6 +27,7 @@ class Device:
     pin_count: str
     speedgrade: str
     core_voltage: str
+    filepath: str
     resources: Dict[str, ResourceAttributes]
     internals: Dict[str, InternalAttributes]
 

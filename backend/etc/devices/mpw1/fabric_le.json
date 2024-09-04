@@ -1,0 +1,10 @@
+{
+    "type": "fabric_le",
+    "coeffs": [
+        { "name": "LUT_CAP"    , "value": 0.0000003            },
+        { "name": "FF_CAP"     , "value": 0.00000035           },
+        { "name": "FF_CLK_CAP" , "value": 2.91375291375291E-09 },
+        { "name": "LUT_INT_CAP", "value": 0.00000002           },
+        { "name": "FF_INT_CAP" , "value": 0.00000004           }
+    ]
+}

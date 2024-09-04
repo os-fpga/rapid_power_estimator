@@ -1,0 +1,8 @@
+{
+    "type": "dsp",
+    "coeffs": [
+        {
+            "name": "TEST1", "value": 0.1234
+        }    
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "static": {
+        "$ref": "static_power_data.json"
+    },
+    "components": [
+        { "$ref": "clocking.json" },
+        { "$ref": "dsp.json" },
+        { "$ref": "fabric_le.json" },
+        { "$ref": "bram.json" },
+        { "$ref": "io.json" }
+    ]
+}

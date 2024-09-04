@@ -4,6 +4,7 @@
 #
 import pytest
 from unittest.mock import Mock, create_autospec
+from submodule.rs_device_resources import IO_Standard_Coeff, IO_Standard, IO_BankType
 from submodule.peripherals import (
     Peripherals_Usage,
     Qspi_Performance_Mbps,
@@ -116,9 +117,10 @@ def test_find_peripheral():
 
 def test_get_io_output_coeff():
     mock_context = Mock()
-    mock_context.get_device_resources.return_value.get_IO_standard_coeff.return_value = []
+    mock_context.get_device_resources.return_value.get_IO_standard_coeff.return_value = IO_Standard_Coeff(io_standard=IO_Standard.LVCMOS_1_8V_HR, voltage=1.8, \
+                          bank_type=IO_BankType.HR, input_ac=0.1, input_dc=0.2, output_ac=0.3, output_dc=0.4, int_inner=0.1, int_outer=0.2)
     coeff = get_io_output_coeff(mock_context, 1.8)
-    assert coeff == (0.0, 0.0)
+    assert coeff == (0.3, 0.4)
 
 def test_get_power_factor():
     mock_context = Mock()

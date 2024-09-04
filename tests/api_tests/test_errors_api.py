@@ -115,3 +115,4 @@ def test_errors_dictionary():
     assert errors["CreateProjectPermissionError"]["message"] == "Failed to create project file. Permission error"
     assert errors["ProjectNotLoadedError"]["message"] == "Project not loaded"
     assert errors["ProjectFileNotFoundError"]["message"] == "Project file not found"
+    

@@ -5,13 +5,12 @@ module.exports = {
   },
   testEnvironment: 'jsdom',
   
-  // Ensure this section is correctly configured for coverage
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx}",  // Include JS/JSX files in src directory
-    "!src/**/*.test.{js,jsx}", // Exclude test files from coverage
-    "!src/**/index.{js,jsx}",  // Optionally exclude index files
+    "src/**/*.{js,jsx}",  
+    "!src/**/*.test.{js,jsx}", 
+    "!src/**/index.{js,jsx}", 
   ],
-  coverageReporters: ['text', 'lcov'],
-  coverageDirectory: "coverage",  // Ensure it is stored properly
+  coverageReporters: ['text', 'lcov'],  
+  coverageDirectory: "coverage",  
 };

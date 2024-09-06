@@ -7,11 +7,9 @@ module.exports = {
 
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx}",  
-    "tests/**/*.{js,jsx}",  // including the tests folder so it covers front end tests coverage
-    "!src/**/*.test.{js,jsx}", 
-    "!src/**/index.{js,jsx}",  
+    "src/**/*.{js,jsx}",  // Include all JS/JSX files in src (including tests folder which have front-end tests)
+    "!src/**/index.{js,jsx}",  // Exclude index files
   ],
-  coverageReporters: ['text', 'lcov'],  
-  coverageDirectory: "coverage",  
+  coverageReporters: ['text', 'lcov'],
+  coverageDirectory: "coverage",
 };

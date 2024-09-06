@@ -1,4 +1,4 @@
-name: Build, Test, and Publish RPE
+name: Build and Publish RPE
 
 on:
   push:
@@ -33,13 +33,13 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.11
+          node-version: 20.11 #if update this then also update in Dockerfile for centos
 
       - name: Setup Python
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-python@v5.0.0
         with:
-          python-version: 3.8
+          python-version: 3.8 #if update this then also update in Dockerfile for centos
 
       - name: Login to the Container registry
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -47,7 +47,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}          
 
       - name: Pull the CentOS image
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -59,19 +59,19 @@ jobs:
               node --version
               python3 -V
 
-      - name: Shell configuration on CentOS 7
+      - name: Shell configuration on centos 7
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
           shell: bash
           image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
-          run: |
+          run:
               source /opt/rh/devtoolset-11/enable
               cmake --version
               node --version
               python3 -V
-
-      - name: Install packages on ${{ matrix.os }}
+        
+      - name: Install packages ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
             npm install
@@ -82,7 +82,7 @@ jobs:
         run: |
             npx eslint src/
 
-      - name: Install packages, run pytest & frontend test on CentOS 7
+      - name: Install packages centos 7 & Run pytest & frontend test
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -111,7 +111,7 @@ jobs:
       fail-fast: false
       matrix:
         os: 
-          - ubuntu-22.04
+          - ubuntu-22.04 # This is CentOS 7 under the hood
           - macos-12
           - windows-latest
     runs-on: ${{ matrix.os }}
@@ -128,13 +128,13 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.11
+          node-version: 20.11 #if update this then also update in Dockerfile for centos
 
       - name: Setup Python
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-python@v5.0.0
         with:
-          python-version: 3.8
+          python-version: 3.8 #if update this then also update in Dockerfile for centos
 
       - name: Login to the Container registry
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -142,7 +142,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}          
 
       - name: Pull the CentOS image
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -154,7 +154,7 @@ jobs:
               node --version
               python3 -V
 
-      - name: Shell configuration on CentOS 7
+      - name: Shell configuration on centos 7
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -165,21 +165,21 @@ jobs:
                 cmake --version
                 node --version
                 python3 -V
-
-      - name: Install packages on ${{ matrix.os }}
+        
+      - name: Install packages ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
             npm install
             python3 -m pip install -r requirements.txt
 
-      - name: Create package on macOS and Windows
+      - name: Create Package on ${{ matrix.os }}
         if: ${{ matrix.os == 'macos-12' || matrix.os == 'windows-latest' }}
         run: |
              npm run dist
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create package on Linux
+      - name: Create Package on Linux
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -191,32 +191,39 @@ jobs:
                 npm install
                 python3 -m pip install -r requirements.txt
                 npm run dist
+                ls dist
                 tar -czvf rapid_power_estimator_linux.tar.gz -C dist/linux-unpacked .
                 mv rapid_power_estimator_linux.tar.gz dist
         env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload package to GitHub
+      - name: Run on refs/tags only
+        run: |
+            echo ${{ github.ref }} 
+
+      - name: Upload Package
         if: ${{ github.ref == 'refs/heads/main' &&  matrix.os != 'windows-latest'  }}
         uses: actions/upload-artifact@v3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
-            path: dist/rapid_power_estimator*.tar.gz
+            path: dist/rapid_power_estimator*.tar.gz 
 
-      - name: Upload package to GitHub
+      - name: Upload Package
         if: ${{ github.ref == 'refs/heads/main' &&  matrix.os == 'windows-latest' }}
         uses: actions/upload-artifact@v3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.exe
 
-      - name: Upload release
+
+      - name: Upload Release
         if: ${{ matrix.os != 'windows-latest' && contains(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v1
         with:
             files: dist/rapid_power_estimator*.tar.gz
 
-      - name: Upload release for Windows
+
+      - name: Upload Release
         if: ${{ matrix.os == 'windows-latest' && contains(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v1
         with:
@@ -238,24 +245,20 @@ jobs:
               pip install -r requirements.txt
               npm install
     
-      - name: Run Jest with coverage
-        run: |
-          npm test -- --coverage
-
-      - name: Run pytest with coverage
+      - name: Run pytest with Codecov
         run: python3 -m pytest --cov=. --cov-report=term-missing 
-
-      - name: Upload Jest results to Codecov
+        
+      - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: './coverage/**/lcov.info'  # Path to Jest's coverage report
-          flags: frontend
-          name: frontend-coverage
+          slug: os-fpga/rapid_power_estimator
 
-      - name: Upload pytest results to Codecov
+      - name: Run npm test with Codecov
+        run: npm test
+        
+      - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: backend
-          name: backend-coverage
+          slug: os-fpga/rapid_power_estimator

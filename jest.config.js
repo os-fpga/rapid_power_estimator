@@ -7,10 +7,11 @@ module.exports = {
 
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx}",  // Including all JS/JSX files in src
-    "src/tests/**/*.{js,jsx}",  //  including files in the tests folder
-    "!src/**/index.{js,jsx}",  
+    "src/**/*.{js,jsx}",  // Include all JS/JSX files in src, including tests
   ],
   coverageReporters: ['text', 'lcov'],
   coverageDirectory: "coverage",
+
+  // Jest runs all .test.js files in the src directory, including in the tests folder
+  testMatch: ['<rootDir>/src/**/*.test.js'],
 };

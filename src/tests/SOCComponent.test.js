@@ -61,7 +61,6 @@ describe('SOCComponent', () => {
   test('renders SOCComponent with correct child components', () => {
     render(<SOCComponent device="test-device" setOpenedTable={mockSetOpenedTable} peripherals={mockPeripherals} />);
 
-    // Use getAllByText since there are two ABCPUComponents (ACPU and BCPU)
     const acpuComponents = screen.getAllByText('Mocked ABCPUComponent');
     expect(acpuComponents.length).toBe(2);
 

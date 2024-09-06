@@ -4,12 +4,13 @@ module.exports = {
     '\\.(css|less)$': 'identity-obj-proxy',
   },
   testEnvironment: 'jsdom',
-  
+
   collectCoverage: true,
   collectCoverageFrom: [
     "src/**/*.{js,jsx}",  
+    "tests/**/*.{js,jsx}",  // including the tests folder so it covers front end tests coverage
     "!src/**/*.test.{js,jsx}", 
-    "!src/**/index.{js,jsx}", 
+    "!src/**/index.{js,jsx}",  
   ],
   coverageReporters: ['text', 'lcov'],  
   coverageDirectory: "coverage",  

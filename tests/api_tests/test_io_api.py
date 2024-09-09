@@ -5,8 +5,6 @@ from api.io import io_api
 from unittest.mock import patch, MagicMock
 from submodule.io import IO_Direction, IO_Standard  # Importing the Enum classes
 
-
-# Create a test app and configure it
 @pytest.fixture
 def client():
     app = Flask(__name__)

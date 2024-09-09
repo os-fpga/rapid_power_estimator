@@ -167,3 +167,4 @@ def test_io_consumption_success(mock_device_manager, client):
     assert response.json['total_block_power'] == 1.0
     assert response.json['total_interconnect_power'] == 2.0
     assert response.json['total_on_die_termination_power'] == 0.5
+    

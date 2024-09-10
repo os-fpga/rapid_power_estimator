@@ -1,4 +1,7 @@
-
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
 import pytest
 from flask import Flask
 from api.io import io_api

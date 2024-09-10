@@ -1,0 +1,8 @@
+{
+    "type": "uart",
+    "coeffs": [
+        { "name": "UART_CLK_FACTOR"      , "value": 0.00130836512711466 },
+        { "name": "UART_SWITCHING_FACTOR", "value": 0.0924457233313814  },
+        { "name": "UART_IO_FACTOR"       , "value": 0.00639794692       }
+    ]
+}

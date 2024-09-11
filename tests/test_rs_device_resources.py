@@ -93,7 +93,7 @@ def test_get_clock_not_found(device_resources):
     ("get_UART_SWITCHING_FACTOR", ElementType.UART, "UART_SWITCHING_FACTOR", 0.4567),
     ("get_UART_IO_FACTOR", ElementType.UART, "UART_IO_FACTOR", 123.456)
 ])
-def test_get_UART_CLK_FACTOR(mock_device, method_name, element_type, coef_name, coef_value):
+def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:
         MockRsPowerConfig.return_value.get_coeff.return_value = coef_value
         device_resources = RsDeviceResources(mock_device)

@@ -72,6 +72,7 @@ class ElementType(Enum):
     IO_HR_2_5V = 'io_hr_2_5v'
     IO_HR_3_3V = 'io_hr_3_3v'
     UART = 'uart'
+    SPI = 'spi'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

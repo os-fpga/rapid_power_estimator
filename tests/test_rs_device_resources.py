@@ -91,7 +91,10 @@ def test_get_clock_not_found(device_resources):
 @pytest.mark.parametrize("method_name, element_type, coef_name, coef_value", [
     ("get_UART_CLK_FACTOR", ElementType.UART, "UART_CLK_FACTOR", 0.1234),
     ("get_UART_SWITCHING_FACTOR", ElementType.UART, "UART_SWITCHING_FACTOR", 0.4567),
-    ("get_UART_IO_FACTOR", ElementType.UART, "UART_IO_FACTOR", 123.456)
+    ("get_UART_IO_FACTOR", ElementType.UART, "UART_IO_FACTOR", 123.456),
+    ("get_QSPI_CLK_FACTOR", ElementType.SPI, "QSPI_CLK_FACTOR", 0.1234),
+    ("get_QSPI_SWITCHING_FACTOR", ElementType.SPI, "QSPI_SWITCHING_FACTOR", 0.4567),
+    ("get_QSPI_IO_FACTOR", ElementType.SPI, "QSPI_IO_FACTOR", 123.456)
 ])
 def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:

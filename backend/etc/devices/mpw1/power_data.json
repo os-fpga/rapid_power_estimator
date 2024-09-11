@@ -8,6 +8,7 @@
         { "$ref": "fabric_le.json" },
         { "$ref": "bram.json" },
         { "$ref": "io.json" },
-        { "$ref": "uart.json" }
+        { "$ref": "uart.json" },
+        { "$ref": "qspi.json" }
     ]
 }

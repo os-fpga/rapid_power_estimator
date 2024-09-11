@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
+from submodule.rs_power_config import ElementType
 from submodule.rs_power_config import RsStaticPowerPolynomial
 from submodule.rs_device_resources import (
     RsDeviceResources,
@@ -86,3 +87,17 @@ def test_get_divfactor_coeff_CLB(device_resources):
 def test_get_clock_not_found(device_resources):
     device_resources.register_module(ModuleType.CLOCKING, MagicMock(get_all=MagicMock(return_value=[])))
     assert device_resources.get_clock('non_existent_clock') is None
+
+@pytest.mark.parametrize("method_name, element_type, coef_name, coef_value", [
+    ("get_UART_CLK_FACTOR", ElementType.UART, "UART_CLK_FACTOR", 0.1234),
+    ("get_UART_SWITCHING_FACTOR", ElementType.UART, "UART_SWITCHING_FACTOR", 0.4567),
+    ("get_UART_IO_FACTOR", ElementType.UART, "UART_IO_FACTOR", 123.456)
+])
+def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
+    with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:
+        MockRsPowerConfig.return_value.get_coeff.return_value = coef_value
+        device_resources = RsDeviceResources(mock_device)
+        method = getattr(device_resources, method_name)
+        result = method()
+        MockRsPowerConfig.return_value.get_coeff.assert_called_with(element_type, coef_name)
+        assert coef_value == result

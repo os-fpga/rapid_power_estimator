@@ -576,13 +576,13 @@ class RsDeviceResources:
         return 0.0000001688475
 
     def get_UART_CLK_FACTOR(self) -> float:
-        return 0.00130836512711466
+        return self.powercfg.get_coeff(ElementType.UART, 'UART_CLK_FACTOR')
 
     def get_UART_SWITCHING_FACTOR(self) -> float:
-        return 0.0924457233313814
+        return self.powercfg.get_coeff(ElementType.UART, 'UART_SWITCHING_FACTOR')
 
     def get_UART_IO_FACTOR(self) -> float:
-        return 0.00639794692
+        return self.powercfg.get_coeff(ElementType.UART, 'UART_IO_FACTOR')
 
     def get_DDR_CLK_FACTOR(self) -> float:
         return 0.0000281154101977619

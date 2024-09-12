@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
 import pytest
 from marshmallow import ValidationError
 from submodule.peripherals import PeripheralType, PeripheralTarget, Peripheral, Jtag_Clock_Frequency, I2c_Speed

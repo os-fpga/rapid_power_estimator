@@ -506,16 +506,16 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.BCPU, 'BCPU_HIGH_LOAD_FACTOR')
 
     def get_ACPU_CLK_FACTOR(self) -> float:
-        return 0.0000321306659727
+        return self.powercfg.get_coeff(ElementType.ACPU, 'ACPU_CLK_FACTOR')
 
     def get_ACPU_LOW_LOAD_FACTOR(self) -> float:
-        return 6.22030740524698E-06
+        return self.powercfg.get_coeff(ElementType.ACPU, 'ACPU_LOW_LOAD_FACTOR')
 
     def get_ACPU_MEDIUM_LOAD_FACTOR(self) -> float:
-        return 7.03786731129023E-06
+        return self.powercfg.get_coeff(ElementType.ACPU, 'ACPU_MEDIUM_LOAD_FACTOR')
 
     def get_ACPU_HIGH_LOAD_FACTOR(self) -> float:
-        return 0.0000105978995482262
+        return self.powercfg.get_coeff(ElementType.ACPU, 'ACPU_HIGH_LOAD_FACTOR')
 
     def get_I2C_CLK_FACTOR(self) -> float:
         return 0.0000180345864661654

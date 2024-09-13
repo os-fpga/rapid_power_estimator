@@ -9,6 +9,7 @@
         { "$ref": "bram.json" },
         { "$ref": "io.json" },
         { "$ref": "uart.json" },
-        { "$ref": "qspi.json" }
+        { "$ref": "qspi.json" },
+        { "$ref": "acpu.json" }
     ]
 }

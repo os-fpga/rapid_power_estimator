@@ -1,0 +1,9 @@
+{
+    "type": "bcpu",
+    "coeffs": [
+        { "name": "BCPU_CLK_FACTOR"        , "value": 0.0000321306659727    },
+        { "name": "BCPU_LOW_LOAD_FACTOR"   , "value": 6.22030740524698E-06  },
+        { "name": "BCPU_MEDIUM_LOAD_FACTOR", "value": 7.03786731129023E-06  },
+        { "name": "BCPU_HIGH_LOAD_FACTOR"  , "value": 0.0000105978995482262 }
+    ]
+}

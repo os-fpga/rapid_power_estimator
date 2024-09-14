@@ -494,20 +494,16 @@ class RsDeviceResources:
         return coeff
 
     def get_BCPU_CLK_FACTOR(self) -> float:
-        # todo: should read from power data
-        return 0.0000321306659727
+        return self.powercfg.get_coeff(ElementType.BCPU, 'BCPU_CLK_FACTOR')
 
     def get_BCPU_LOW_LOAD_FACTOR(self) -> float:
-        # todo: should read from power data
-        return 6.22030740524698E-06
+        return self.powercfg.get_coeff(ElementType.BCPU, 'BCPU_LOW_LOAD_FACTOR')
 
     def get_BCPU_MEDIUM_LOAD_FACTOR(self) -> float:
-        # todo: should read from power data
-        return 7.03786731129023E-06
+        return self.powercfg.get_coeff(ElementType.BCPU, 'BCPU_MEDIUM_LOAD_FACTOR')
 
     def get_BCPU_HIGH_LOAD_FACTOR(self) -> float:
-        # todo: should read from power data
-        return 0.0000105978995482262
+        return self.powercfg.get_coeff(ElementType.BCPU, 'BCPU_HIGH_LOAD_FACTOR')
 
     def get_ACPU_CLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.ACPU, 'ACPU_CLK_FACTOR')

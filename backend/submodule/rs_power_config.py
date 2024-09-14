@@ -73,6 +73,7 @@ class ElementType(Enum):
     IO_HR_3_3V = 'io_hr_3_3v'
     UART = 'uart'
     SPI = 'spi'
+    BCPU = 'bcpu'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

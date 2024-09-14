@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
 import pytest
 import os
 import sys

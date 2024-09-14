@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
 import pytest
 from dataclasses import is_dataclass
 from device.device_resource import ResourceAttributes, InternalAttributes, Device, DeviceList

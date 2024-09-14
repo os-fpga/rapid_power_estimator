@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2024 RapidSilicon
+#  Authorized use only
+#
 import pytest
 from enum import Enum
 from utilities.common_utils import RsCustomException, RsEnum, update_attributes, get_enum_by_value

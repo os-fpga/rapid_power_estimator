@@ -527,13 +527,13 @@ class RsDeviceResources:
         return 0.000056634
 
     def get_JTAG_CLK_FACTOR(self) -> float:
-        return 0.000407953336466165
+        return self.powercfg.get_coeff(ElementType.JTAG, 'JTAG_CLK_FACTOR')
 
     def get_JTAG_SWITCHING_FACTOR(self) -> float:
-        return 0.000264495634397032
+        return self.powercfg.get_coeff(ElementType.JTAG, 'JTAG_SWITCHING_FACTOR')
 
     def get_JTAG_IO_FACTOR(self) -> float:
-        return 0.00004367522
+        return self.powercfg.get_coeff(ElementType.JTAG, 'JTAG_IO_FACTOR')
 
     def get_QSPI_CLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.SPI, 'QSPI_CLK_FACTOR')

@@ -102,7 +102,10 @@ def test_get_clock_not_found(device_resources):
     ("get_BCPU_CLK_FACTOR", ElementType.BCPU, "BCPU_CLK_FACTOR", 1111.2222),
     ("get_BCPU_LOW_LOAD_FACTOR", ElementType.BCPU, "BCPU_LOW_LOAD_FACTOR", 0.456),
     ("get_BCPU_MEDIUM_LOAD_FACTOR", ElementType.BCPU, "BCPU_MEDIUM_LOAD_FACTOR", 0.123),
-    ("get_BCPU_HIGH_LOAD_FACTOR", ElementType.BCPU, "BCPU_HIGH_LOAD_FACTOR", 123.456)
+    ("get_BCPU_HIGH_LOAD_FACTOR", ElementType.BCPU, "BCPU_HIGH_LOAD_FACTOR", 123.456),
+    ("get_JTAG_CLK_FACTOR", ElementType.JTAG, "JTAG_CLK_FACTOR", 0.4321),
+    ("get_JTAG_SWITCHING_FACTOR", ElementType.JTAG, "JTAG_SWITCHING_FACTOR", 0.8765),
+    ("get_JTAG_IO_FACTOR", ElementType.JTAG, "JTAG_IO_FACTOR", 85.9087),
 ])
 def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:

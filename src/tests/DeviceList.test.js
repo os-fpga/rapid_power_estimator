@@ -7,34 +7,74 @@ import '@testing-library/jest-dom';
 import DeviceList from '../components/DeviceList';
 import { SelectionProvider } from '../SelectionProvider';
 import { SocTotalPowerProvider } from '../SOCTotalPowerProvider';
+import * as server from '../utils/serverAPI';
 import { GlobalStateProvider } from '../GlobalStateProvider';
-const fetch = (str, callback) => {}
+
+jest.mock('../utils/serverAPI', () => ({
+  GET: jest.fn(),
+  deviceInfo: jest.fn(),
+}));
+
+const mockDevices = [
+  { id: '1', series: 'Series A' },
+  { id: '2', series: 'Series B' },
+];
+
 describe('DeviceList', () => {
-  it('default value', () => {
-    const { getByLabelText } = render(
-      <GlobalStateProvider fetch={fetch}>
-        <SocTotalPowerProvider>
-          <SelectionProvider>
-            <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} selectedDevice={''} handleDeviceChange={() => {}}/>
-          </SelectionProvider>
-        </SocTotalPowerProvider>
-      </GlobalStateProvider>,
-    );
-    expect(getByLabelText('Device:')).toBeInTheDocument();
-    expect(screen.getByText('test-dev test')).toBeInTheDocument();
-    expect(screen.getByRole('combobox')).toHaveValue('');
+  const handleDeviceChange = jest.fn();
+
+  beforeEach(() => {
+    server.GET.mockImplementation((_, callback) => {
+      callback({ logic_density: 'High', package: 'FPGA', speedgrade: '1', temperature_grade: 'A' });
+    });
   });
-  it('select device', async () => {
-    const user = userEvent.setup();
+
+  test('renders the device selection and device info', () => {
     render(
-      <SocTotalPowerProvider>
-        <SelectionProvider>
-          <DeviceList devices={[{ id: 'test-dev', series: 'test' }]} setDevice={(dev) => { }} />
-        </SelectionProvider>
-      </SocTotalPowerProvider>,
+      <SelectionProvider>
+        <DeviceList devices={mockDevices} selectedDevice="" handleDeviceChange={handleDeviceChange} />
+      </SelectionProvider>
     );
-    // todo, need rework compoment since fetch
-    // await user.selectOptions(screen.getByRole('combobox'), 'test-dev');
-    // expect(screen.getByRole('option', { name: 'test-dev test' }).selected).toBe(true);
+
+    expect(screen.getByLabelText(/Device:/i)).toBeInTheDocument();
+    expect(screen.getByText('Select a device...')).toBeInTheDocument();
+  });
+
+  test('loads device info when a device is selected', () => {
+    render(
+      <SelectionProvider>
+        <DeviceList devices={mockDevices} selectedDevice="" handleDeviceChange={handleDeviceChange} />
+      </SelectionProvider>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Device:/i), { target: { value: '1' } });
+
+    expect(handleDeviceChange).toHaveBeenCalledWith('1');
+    expect(server.GET).toHaveBeenCalled();
+    expect(screen.getByText('High')).toBeInTheDocument();
+    expect(screen.getByText('FPGA')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('A')).toBeInTheDocument();
+  });
+
+  test('shows n/a when device info is not available', () => {
+    server.GET.mockImplementation((_, callback) => {
+      callback({});
+    });
+
+    render(
+      <SelectionProvider>
+        <DeviceList devices={mockDevices} selectedDevice="" handleDeviceChange={handleDeviceChange} />
+      </SelectionProvider>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Device:/i), { target: { value: '1' } });
+
+    const naLabels = screen.getAllByText('(n/a)');
+    expect(naLabels.length).toBe(4); 
+    expect(naLabels[0]).toBeInTheDocument(); // Logic Density
+    expect(naLabels[1]).toBeInTheDocument(); // Package
+    expect(naLabels[2]).toBeInTheDocument(); // Speedgrade
+    expect(naLabels[3]).toBeInTheDocument(); // Temp Grade
   });
 });

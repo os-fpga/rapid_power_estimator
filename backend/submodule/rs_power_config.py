@@ -74,6 +74,7 @@ class ElementType(Enum):
     UART = 'uart'
     SPI = 'spi'
     BCPU = 'bcpu'
+    JTAG = 'jtag'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

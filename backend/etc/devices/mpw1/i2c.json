@@ -1,0 +1,8 @@
+{
+    "type": "i2c",
+    "coeffs": [
+        { "name": "I2C_CLK_FACTOR"      , "value": 0.0000180345864661654 },
+        { "name": "I2C_SWITCHING_FACTOR", "value": 0.0000846668045655417 },
+        { "name": "I2C_IO_FACTOR"       , "value": 0.000056634           }
+    ]
+}

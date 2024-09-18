@@ -518,13 +518,13 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.ACPU, 'ACPU_HIGH_LOAD_FACTOR')
 
     def get_I2C_CLK_FACTOR(self) -> float:
-        return 0.0000180345864661654
+        return self.powercfg.get_coeff(ElementType.I2C, 'I2C_CLK_FACTOR')
 
     def get_I2C_SWITCHING_FACTOR(self) -> float:
-        return 0.0000846668045655417
+        return self.powercfg.get_coeff(ElementType.I2C, 'I2C_SWITCHING_FACTOR')
 
     def get_I2C_IO_FACTOR(self) -> float:
-        return 0.000056634
+        return self.powercfg.get_coeff(ElementType.I2C, 'I2C_IO_FACTOR')
 
     def get_JTAG_CLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.JTAG, 'JTAG_CLK_FACTOR')

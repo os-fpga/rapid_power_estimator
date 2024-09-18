@@ -106,6 +106,9 @@ def test_get_clock_not_found(device_resources):
     ("get_JTAG_CLK_FACTOR", ElementType.JTAG, "JTAG_CLK_FACTOR", 0.4321),
     ("get_JTAG_SWITCHING_FACTOR", ElementType.JTAG, "JTAG_SWITCHING_FACTOR", 0.8765),
     ("get_JTAG_IO_FACTOR", ElementType.JTAG, "JTAG_IO_FACTOR", 85.9087),
+    ("get_I2C_CLK_FACTOR", ElementType.I2C, "I2C_CLK_FACTOR", 0.4321),
+    ("get_I2C_SWITCHING_FACTOR", ElementType.I2C, "I2C_SWITCHING_FACTOR", 0.8765),
+    ("get_I2C_IO_FACTOR", ElementType.I2C, "I2C_IO_FACTOR", 85.9087),
 ])
 def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:

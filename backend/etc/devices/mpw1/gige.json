@@ -1,0 +1,8 @@
+{
+    "type": "gige",
+    "coeffs": [
+        { "name": "GIGE_CLK_FACTOR"      , "value": 0.000124771586466165 },
+        { "name": "GIGE_SWITCHING_FACTOR", "value": 0.00504040314066422  },
+        { "name": "GIGE_IO_FACTOR"       , "value": 0.000071487696       }
+    ]
+}

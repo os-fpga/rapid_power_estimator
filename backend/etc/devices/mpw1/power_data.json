@@ -13,6 +13,7 @@
         { "$ref": "acpu.json" },
         { "$ref": "bcpu.json" },
         { "$ref": "jtag.json" },
-        { "$ref": "i2c.json" }
+        { "$ref": "i2c.json" },
+        { "$ref": "gige.json" }
     ]
 }

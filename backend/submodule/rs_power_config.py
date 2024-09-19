@@ -76,6 +76,7 @@ class ElementType(Enum):
     BCPU = 'bcpu'
     JTAG = 'jtag'
     I2C = 'i2c'
+    GIGE = 'gige'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

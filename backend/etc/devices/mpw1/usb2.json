@@ -1,0 +1,8 @@
+{
+    "type": "usb2",
+    "coeffs": [
+        { "name": "USB2_CLK_FACTOR"      , "value": 0.0000261772947994987 },
+        { "name": "USB2_SWITCHING_FACTOR", "value": 0.0000440759304744493 },
+        { "name": "USB2_IO_FACTOR"       , "value": 0.00166056666666667   }
+    ]
+}

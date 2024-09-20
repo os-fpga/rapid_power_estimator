@@ -545,13 +545,13 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.SPI, 'QSPI_IO_FACTOR')
 
     def get_USB2_CLK_FACTOR(self) -> float:
-        return 0.0000261772947994987
+        return self.powercfg.get_coeff(ElementType.USB2, 'USB2_CLK_FACTOR')
 
     def get_USB2_SWITCHING_FACTOR(self) -> float:
-        return 0.0000440759304744493
+        return self.powercfg.get_coeff(ElementType.USB2, 'USB2_SWITCHING_FACTOR')
 
     def get_USB2_IO_FACTOR(self) -> float:
-        return 0.00166056666666667
+        return self.powercfg.get_coeff(ElementType.USB2, 'USB2_IO_FACTOR')
 
     def get_GIGE_CLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.GIGE, 'GIGE_CLK_FACTOR')

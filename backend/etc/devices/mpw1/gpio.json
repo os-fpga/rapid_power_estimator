@@ -1,0 +1,8 @@
+{
+    "type": "gpio",
+    "coeffs": [
+        { "name": "GPIO_CLK_FACTOR"      , "value": 0.0000773683364661654 },
+        { "name": "GPIO_SWITCHING_FACTOR", "value": 5.89015486234265E-06  },
+        { "name": "GPIO_IO_FACTOR"       , "value": 0.0000001688475       }
+    ]
+}

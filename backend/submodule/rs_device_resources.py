@@ -563,13 +563,13 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.GIGE, 'GIGE_IO_FACTOR')
 
     def get_GPIO_CLK_FACTOR(self) -> float:
-        return 0.0000773683364661654
+        return self.powercfg.get_coeff(ElementType.GPIO, 'GPIO_CLK_FACTOR')
 
     def get_GPIO_SWITCHING_FACTOR(self) -> float:
-        return 5.89015486234265E-06
+        return self.powercfg.get_coeff(ElementType.GPIO, 'GPIO_SWITCHING_FACTOR')
 
     def get_GPIO_IO_FACTOR(self) -> float:
-        return 0.0000001688475
+        return self.powercfg.get_coeff(ElementType.GPIO, 'GPIO_IO_FACTOR')
 
     def get_UART_CLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.UART, 'UART_CLK_FACTOR')

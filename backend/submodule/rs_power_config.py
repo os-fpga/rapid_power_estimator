@@ -77,6 +77,7 @@ class ElementType(Enum):
     JTAG = 'jtag'
     I2C = 'i2c'
     GIGE = 'gige'
+    GPIO = 'gpio'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

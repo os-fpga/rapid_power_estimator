@@ -554,13 +554,13 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.USB2, 'USB2_IO_FACTOR')
 
     def get_GIGE_CLK_FACTOR(self) -> float:
-        return 0.000124771586466165
+        return self.powercfg.get_coeff(ElementType.GIGE, 'GIGE_CLK_FACTOR')
 
     def get_GIGE_SWITCHING_FACTOR(self) -> float:
-        return 0.00504040314066422
+        return self.powercfg.get_coeff(ElementType.GIGE, 'GIGE_SWITCHING_FACTOR')
 
     def get_GIGE_IO_FACTOR(self) -> float:
-        return 0.000071487696
+        return self.powercfg.get_coeff(ElementType.GIGE, 'GIGE_IO_FACTOR')
 
     def get_GPIO_CLK_FACTOR(self) -> float:
         return 0.0000773683364661654

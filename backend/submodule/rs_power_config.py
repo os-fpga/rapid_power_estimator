@@ -78,6 +78,7 @@ class ElementType(Enum):
     I2C = 'i2c'
     USB2 = 'usb2'
     GIGE = 'gige'
+    GPIO = 'gpio'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

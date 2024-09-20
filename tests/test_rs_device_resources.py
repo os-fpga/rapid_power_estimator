@@ -115,6 +115,9 @@ def test_get_clock_not_found(device_resources):
     ("get_GIGE_CLK_FACTOR", ElementType.GIGE, "GIGE_CLK_FACTOR", 0.421),
     ("get_GIGE_SWITCHING_FACTOR", ElementType.GIGE, "GIGE_SWITCHING_FACTOR", 0.865),
     ("get_GIGE_IO_FACTOR", ElementType.GIGE, "GIGE_IO_FACTOR", 8.987),
+    ("get_GPIO_CLK_FACTOR", ElementType.GPIO, "GPIO_CLK_FACTOR", 0.21),
+    ("get_GPIO_SWITCHING_FACTOR", ElementType.GPIO, "GPIO_SWITCHING_FACTOR", 0.85),
+    ("get_GPIO_IO_FACTOR", ElementType.GPIO, "GPIO_IO_FACTOR", 8.97),
 ])
 def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:

@@ -15,6 +15,7 @@
         { "$ref": "jtag.json" },
         { "$ref": "i2c.json" },
         { "$ref": "usb2.json" },
-        { "$ref": "gige.json" }
+        { "$ref": "gige.json" },
+        { "$ref": "gpio.json" }
     ]
 }

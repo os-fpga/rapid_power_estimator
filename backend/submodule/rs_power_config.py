@@ -79,6 +79,7 @@ class ElementType(Enum):
     USB2 = 'usb2'
     GIGE = 'gige'
     GPIO = 'gpio'
+    DDR = 'ddr'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

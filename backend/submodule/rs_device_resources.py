@@ -581,13 +581,16 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.UART, 'UART_IO_FACTOR')
 
     def get_DDR_CLK_FACTOR(self) -> float:
-        return 0.0000281154101977619
+        return self.powercfg.get_coeff(ElementType.DDR, 'DDR_CLK_FACTOR')
 
     def get_DDR_WRITE_FACTOR(self) -> float:
-        return 0.0000421054185139638
+        return self.powercfg.get_coeff(ElementType.DDR, 'DDR_WRITE_FACTOR')
 
     def get_DDR_READ_FACTOR(self) -> float:
-        return 0.0000397024214264236
+        return self.powercfg.get_coeff(ElementType.DDR, 'DDR_READ_FACTOR')
+
+    def get_DDR_ACLK_FACTOR(self) -> float:
+        return self.powercfg.get_coeff(ElementType.DDR, 'DDR_ACLK_FACTOR')
 
     def get_SRAM_WRITE_FACTOR(self) -> float:
         return 0.000142810846268152
@@ -595,7 +598,7 @@ class RsDeviceResources:
     def get_SRAM_READ_FACTOR(self) -> float:
         return 0.000140428615087023
 
-    def get_ACLK_FACTOR(self) -> float:
+    def get_SRAM_ACLK_FACTOR(self) -> float:
         return 0.0000688892039916618
 
     def get_polynomial_coeff(self, type: ElementType, worse: bool):

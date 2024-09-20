@@ -582,8 +582,8 @@ class Pwm0(ComputeObject):
     def __post_init__(self) -> None:
         self.get_context().set_usage(Peripherals_Usage.App)
         self.get_context().set_enable(True)
-        self.properties = Gpio0.properties_(io_used=0, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
-        self.output = Gpio0.output_()
+        self.properties = Pwm0.properties_(io_used=0, io_standard=GpioStandard.SSTL_1_8V_Class_I_HR)
+        self.output = Pwm0.output_()
         self.messages: List[RsMessage] = []
 
     def get_properties(self) -> Dict[str, Any]:

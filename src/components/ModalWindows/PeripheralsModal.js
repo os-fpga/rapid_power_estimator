@@ -6,6 +6,7 @@ function PeripheralsModal({
   closeModal, onSubmit, defaultValue, index,
 }) {
   useEffect(() => {
+    // fixing eslint
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault(); 

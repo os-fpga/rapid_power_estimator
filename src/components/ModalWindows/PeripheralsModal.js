@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FieldType, getPerformance } from '../../utils/common';
 import ModalWindow from './ModalWindow';
 
 function PeripheralsModal({
   closeModal, onSubmit, defaultValue, index,
 }) {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault(); 
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <ModalWindow
       closeModal={closeModal}

@@ -5,7 +5,6 @@ import ModalWindow from './ModalWindow';
 function PeripheralsModal({
   closeModal, onSubmit, defaultValue, index,
 }) {
-
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
@@ -54,3 +53,4 @@ function PeripheralsModal({
 }
 
 export default PeripheralsModal;
+

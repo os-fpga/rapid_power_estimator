@@ -1112,12 +1112,6 @@ class Memory0(ComputeObject):
 
         resources = self.get_context().get_device_resources()
         VCC_CORE = resources.get_VCC_CORE()
-        ACLK_FACTOR = resources.get_ACLK_FACTOR()
-        DDR_CLK_FACTOR = resources.get_DDR_CLK_FACTOR()
-        DDR_WRITE_FACTOR = resources.get_DDR_WRITE_FACTOR()
-        DDR_READ_FACTOR = resources.get_DDR_READ_FACTOR()
-        SRAM_WRITE_FACTOR = resources.get_SRAM_WRITE_FACTOR()
-        SRAM_READ_FACTOR = resources.get_SRAM_READ_FACTOR()
 
         # highest calculated bandwidth
         bandwidth = endpoint.output.calculated_bandwidth
@@ -1128,11 +1122,18 @@ class Memory0(ComputeObject):
 
         # compute block power
         if self.get_context().get_type() == PeripheralType.DDR:
-            block_power = VCC_CORE ** 2 * (((self.properties.data_rate / 1000000.0) * DDR_CLK_FACTOR) + (533 * ACLK_FACTOR / 2) + \
+            DDR_ACLK_FACTOR = resources.get_DDR_ACLK_FACTOR()
+            DDR_CLK_FACTOR = resources.get_DDR_CLK_FACTOR()
+            DDR_WRITE_FACTOR = resources.get_DDR_WRITE_FACTOR()
+            DDR_READ_FACTOR = resources.get_DDR_READ_FACTOR()
+            block_power = VCC_CORE ** 2 * (((self.properties.data_rate / 1000000.0) * DDR_CLK_FACTOR) + (533 * DDR_ACLK_FACTOR / 2) + \
                                            (write_bandwidth * DDR_WRITE_FACTOR) + (read_bandwidth * DDR_READ_FACTOR)) + \
                                             self.compute_ddr_io_power(read_bandwidth, write_bandwidth, endpoint.read_write_rate)
         else:
-            block_power = VCC_CORE ** 2 * ((533 * ACLK_FACTOR / 2) + (write_bandwidth * SRAM_WRITE_FACTOR) + \
+            SRAM_ACLK_FACTOR = resources.get_SRAM_ACLK_FACTOR()
+            SRAM_WRITE_FACTOR = resources.get_SRAM_WRITE_FACTOR()
+            SRAM_READ_FACTOR = resources.get_SRAM_READ_FACTOR()
+            block_power = VCC_CORE ** 2 * ((533 * SRAM_ACLK_FACTOR / 2) + (write_bandwidth * SRAM_WRITE_FACTOR) + \
                                            (read_bandwidth * SRAM_READ_FACTOR))
 
         # update output
@@ -1145,9 +1146,15 @@ class Memory0(ComputeObject):
         print(f'[DEBUG] MEM0: {self.properties.data_rate / 1000000.0 = }', file=sys.stderr)
         print(f'[DEBUG] MEM0: {endpoint.read_write_rate = }', file=sys.stderr)
         print(f'[DEBUG] MEM0: {VCC_CORE = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {ACLK_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {SRAM_WRITE_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {SRAM_READ_FACTOR = }', file=sys.stderr)
+        if self.get_context().get_type() == PeripheralType.DDR:
+            print(f'[DEBUG] MEM0: {DDR_ACLK_FACTOR = }', file=sys.stderr)
+            print(f'[DEBUG] MEM0: {DDR_CLK_FACTOR = }', file=sys.stderr)
+            print(f'[DEBUG] MEM0: {DDR_WRITE_FACTOR = }', file=sys.stderr)
+            print(f'[DEBUG] MEM0: {DDR_READ_FACTOR = }', file=sys.stderr)
+        else:
+            print(f'[DEBUG] MEM0: {SRAM_ACLK_FACTOR = }', file=sys.stderr)
+            print(f'[DEBUG] MEM0: {SRAM_WRITE_FACTOR = }', file=sys.stderr)
+            print(f'[DEBUG] MEM0: {SRAM_READ_FACTOR = }', file=sys.stderr)
         print(f'[DEBUG] MEM0: {self.output.write_bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] MEM0: {self.output.read_bandwidth = }', file=sys.stderr)
         print(f'[DEBUG] MEM0: {self.output.block_power = }', file=sys.stderr)

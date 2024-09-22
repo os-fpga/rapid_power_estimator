@@ -122,6 +122,9 @@ def test_get_clock_not_found(device_resources):
     ("get_DDR_WRITE_FACTOR", ElementType.DDR, "DDR_WRITE_FACTOR", 0.21),
     ("get_DDR_READ_FACTOR", ElementType.DDR, "DDR_READ_FACTOR", 0.85),
     ("get_DDR_ACLK_FACTOR", ElementType.DDR, "DDR_ACLK_FACTOR", 8.97),
+    ("get_SRAM_WRITE_FACTOR", ElementType.SRAM, "SRAM_WRITE_FACTOR", 0.121),
+    ("get_SRAM_READ_FACTOR", ElementType.SRAM, "SRAM_READ_FACTOR", 0.285),
+    ("get_SRAM_ACLK_FACTOR", ElementType.SRAM, "SRAM_ACLK_FACTOR", 8.397),
 ])
 def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:

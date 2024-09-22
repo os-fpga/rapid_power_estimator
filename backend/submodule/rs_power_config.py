@@ -80,6 +80,7 @@ class ElementType(Enum):
     GIGE = 'gige'
     GPIO = 'gpio'
     DDR = 'ddr'
+    SRAM = 'sram'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

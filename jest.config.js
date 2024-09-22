@@ -8,8 +8,9 @@ module.exports = {
   collectCoverage: true,
   collectCoverageFrom: [
     "src/**/*.{js,jsx}",  
-    "!src/**/*.test.{js,jsx}", 
+    "!src/**/*.test.{js,jsx}", // Exclude test files from src
     "!src/**/index.{js,jsx}", 
+    "tests/**/*.{js,jsx}"  // Include all test files from the tests folder
   ],
   coverageReporters: ['text', 'lcov'],  
   coverageDirectory: "coverage",  

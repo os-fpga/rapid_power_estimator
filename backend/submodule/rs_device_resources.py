@@ -593,13 +593,13 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.DDR, 'DDR_ACLK_FACTOR')
 
     def get_SRAM_WRITE_FACTOR(self) -> float:
-        return 0.000142810846268152
+        return self.powercfg.get_coeff(ElementType.SRAM, 'SRAM_WRITE_FACTOR')
 
     def get_SRAM_READ_FACTOR(self) -> float:
-        return 0.000140428615087023
+        return self.powercfg.get_coeff(ElementType.SRAM, 'SRAM_READ_FACTOR')
 
     def get_SRAM_ACLK_FACTOR(self) -> float:
-        return 0.0000688892039916618
+        return self.powercfg.get_coeff(ElementType.SRAM, 'SRAM_ACLK_FACTOR')
 
     def get_polynomial_coeff(self, type: ElementType, worse: bool):
         polynomials = self.powercfg.get_polynomial_coeff(type, ScenarioType.WORSE if worse else ScenarioType.TYPICAL)

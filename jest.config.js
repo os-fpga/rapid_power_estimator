@@ -7,7 +7,8 @@ module.exports = {
 
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx}",  // Include everything inside src, including the tests folder
+    "src/**/*.{js,jsx}",   
+    "src/tests/**/*.{js,jsx}"  
   ],
   coverageReporters: ['text', 'lcov'],
   coverageDirectory: "coverage",

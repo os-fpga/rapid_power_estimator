@@ -125,6 +125,7 @@ def test_get_clock_not_found(device_resources):
     ("get_SRAM_WRITE_FACTOR", ElementType.SRAM, "SRAM_WRITE_FACTOR", 0.121),
     ("get_SRAM_READ_FACTOR", ElementType.SRAM, "SRAM_READ_FACTOR", 0.285),
     ("get_SRAM_ACLK_FACTOR", ElementType.SRAM, "SRAM_ACLK_FACTOR", 8.397),
+    ("get_PWM_IO_FACTOR", ElementType.PWM, "PWM_IO_FACTOR", 123.456),
     ("get_VCC_CORE", ElementType.REGULATOR, "VCC_CORE", 1.397),
     ("get_VCC_AUX", ElementType.REGULATOR, "VCC_AUX", 2.397),
     ("get_VCC_BOOT_IO", ElementType.REGULATOR, "VCC_BOOT_IO", 3.397),

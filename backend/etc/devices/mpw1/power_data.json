@@ -19,6 +19,7 @@
         { "$ref": "gpio.json" },
         { "$ref": "ddr.json" },
         { "$ref": "sram.json" },
+        { "$ref": "pwm.json" },
         { "$ref": "regulator.json" }
     ]
 }

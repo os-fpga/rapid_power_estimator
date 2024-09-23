@@ -558,6 +558,9 @@ class RsDeviceResources:
     def get_GPIO_IO_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.GPIO, 'GPIO_IO_FACTOR')
 
+    def get_PWM_IO_FACTOR(self) -> float:
+        return self.powercfg.get_coeff(ElementType.PWM, 'PWM_IO_FACTOR')
+
     def get_UART_CLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.UART, 'UART_CLK_FACTOR')
 

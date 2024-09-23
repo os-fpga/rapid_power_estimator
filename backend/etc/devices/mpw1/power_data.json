@@ -18,6 +18,7 @@
         { "$ref": "gige.json" },
         { "$ref": "gpio.json" },
         { "$ref": "ddr.json" },
-        { "$ref": "sram.json" }
+        { "$ref": "sram.json" },
+        { "$ref": "regulator.json" }
     ]
 }

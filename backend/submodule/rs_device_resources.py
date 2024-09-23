@@ -420,56 +420,43 @@ class RsDeviceResources:
         return self.powercfg.get_coeff(ElementType.DSP, 'DSP_INT_CAP')
 
     def get_VCC_CORE(self) -> float:
-        # todo: should read from regulator module
-        return 0.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_CORE')
 
     def get_VCC_AUX(self) -> float:
-        # todo: should read from regulator module
-        return 1.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_AUX')
 
     def get_VCC_BOOT_IO(self) -> float:
-        # todo: should read from regulator module
-        return 1.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_BOOT_IO')
 
     def get_VCC_DDR_IO(self) -> float:
-        # todo: should read from regulator module
-        return 0.0
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_DDR_IO')
 
     def get_VCC_SOC_IO(self) -> float:
-        # todo: should read from regulator module
-        return 1.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_SOC_IO')
 
     def get_VCC_GBE_IO(self) -> float:
-        # todo: should read from regulator module
-        return 0.0
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_GBE_IO')
 
     def get_VCC_USB_IO(self) -> float:
-        # todo: should read from regulator module
-        return 0.0
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_USB_IO')
 
     def get_VCC_BOOT_AUX(self) -> float:
-        # todo: should read from regulator module
-        return 1.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_BOOT_AUX')
 
     def get_VCC_SOC_AUX(self) -> float:
-        # todo: should read from regulator module
-        return 1.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_SOC_AUX')
 
     def get_VCC_GBE_AUX(self) -> float:
-        # todo: should read from regulator module
-        return 0.0
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_GBE_AUX')
 
     def get_VCC_USB_AUX(self) -> float:
-        # todo: should read from regulator module
-        return 0.0
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_USB_AUX')
 
     def get_VCC_PUF(self) -> float:
-        # todo: should read from regulator module
-        return 1.8
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_PUF')
 
     def get_VCC_RC_OSC(self) -> float:
-        # todo: should read from regulator module
-        return 0.0
+        return self.powercfg.get_coeff(ElementType.REGULATOR, 'VCC_RC_OSC')
 
     def get_BRAM_INT_CAP(self) -> float:
         return self.powercfg.get_coeff(ElementType.BRAM, 'BRAM_INT_CAP')

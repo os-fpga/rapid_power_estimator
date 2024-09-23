@@ -81,6 +81,7 @@ class ElementType(Enum):
     GPIO = 'gpio'
     DDR = 'ddr'
     SRAM = 'sram'
+    REGULATOR = 'regulator'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

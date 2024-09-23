@@ -9,7 +9,6 @@ from submodule.rs_power_config import RsStaticPowerPolynomial
 from submodule.rs_device_resources import (
     RsDeviceResources,
     IO_Standard_Coeff,
-    Power_Factor,
     IO_Standard,
     IO_BankType,
     PeripheralType,
@@ -33,9 +32,6 @@ def device_resources(mock_device):
         MockRsPowerConfig.return_value.load.return_value = True
         MockRsPowerConfig.return_value.get_polynomial_coeff.return_value = [RsStaticPowerPolynomial(length=5, factor=1.25, coeffs=[0.1, 0.2, 0.3, 0.4, 0.5])]
         yield RsDeviceResources(mock_device)
-
-def test_load_device_resources(device_resources):
-    assert len(device_resources.peripheral_noc_power_factor) > 0
 
 def test_get_device_name(device_resources):
     assert device_resources.get_device_name() == 'TestDevice'

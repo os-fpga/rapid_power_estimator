@@ -126,6 +126,19 @@ def test_get_clock_not_found(device_resources):
     ("get_SRAM_READ_FACTOR", ElementType.SRAM, "SRAM_READ_FACTOR", 0.285),
     ("get_SRAM_ACLK_FACTOR", ElementType.SRAM, "SRAM_ACLK_FACTOR", 8.397),
     ("get_PWM_IO_FACTOR", ElementType.PWM, "PWM_IO_FACTOR", 123.456),
+    ("get_VCC_CORE", ElementType.REGULATOR, "VCC_CORE", 1.397),
+    ("get_VCC_AUX", ElementType.REGULATOR, "VCC_AUX", 2.397),
+    ("get_VCC_BOOT_IO", ElementType.REGULATOR, "VCC_BOOT_IO", 3.397),
+    ("get_VCC_DDR_IO", ElementType.REGULATOR, "VCC_DDR_IO", 4.397),
+    ("get_VCC_SOC_IO", ElementType.REGULATOR, "VCC_SOC_IO", 5.397),
+    ("get_VCC_GBE_IO", ElementType.REGULATOR, "VCC_GBE_IO", 6.397),
+    ("get_VCC_USB_IO", ElementType.REGULATOR, "VCC_USB_IO", 7.397),
+    ("get_VCC_BOOT_AUX", ElementType.REGULATOR, "VCC_BOOT_AUX", 8.397),
+    ("get_VCC_SOC_AUX", ElementType.REGULATOR, "VCC_SOC_AUX", 9.397),
+    ("get_VCC_GBE_AUX", ElementType.REGULATOR, "VCC_GBE_AUX", 10.397),
+    ("get_VCC_USB_AUX", ElementType.REGULATOR, "VCC_USB_AUX", 11.397),
+    ("get_VCC_PUF", ElementType.REGULATOR, "VCC_PUF", 12.397),
+    ("get_VCC_RC_OSC", ElementType.REGULATOR, "VCC_RC_OSC", 13.397),
 ])
 def test_power_coeff_method(mock_device, method_name, element_type, coef_name, coef_value):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:

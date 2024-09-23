@@ -20,6 +20,7 @@
         { "$ref": "ddr.json" },
         { "$ref": "sram.json" },
         { "$ref": "pwm.json" },
+        { "$ref": "noc.json" },
         { "$ref": "regulator.json" }
     ]
 }

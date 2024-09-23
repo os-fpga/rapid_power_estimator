@@ -162,21 +162,12 @@ class IO_Standard_Coeff:
     int_inner   : float       = field(default=0.0)
     int_outer   : float       = field(default=0.0)
 
-@dataclass
-class Power_Factor:
-    master : PeripheralType = field(default=PeripheralType.NONE)
-    slave  : PeripheralType = field(default=PeripheralType.NONE)
-    note   : str = field(default='')
-    factor : float = field(default=0.0)
-
 class RsDeviceResources:
 
     def __init__(self, device):
         self.device: Device = device
         self.powercfg = RsPowerConfig(self.get_power_config_filepath())
-        self.peripheral_noc_power_factor : List[Power_Factor]
         self.modules = [None, None, None, None, None, None, None]
-        self.load()
 
     def get_power_config_filepath(self) -> str:
         power_cfg_filepath = self.device.internals['power_data'].file
@@ -185,69 +176,8 @@ class RsDeviceResources:
         else:
             return power_cfg_filepath
 
-    def load(self) -> None:
-        self.peripheral_noc_power_factor = [
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=4.6207E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=5.03289E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DDR, note='DDR', factor=2.76698E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.OCM, note='OCM', factor=4.81266E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.FPGA_COMPLEX, note='Fabric', factor=4.61688E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.DMA, note='DMA', factor=4.61538E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.USB2, note='USB 2.0', factor=4.61194E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.GIGE, note='GigE', factor=4.60939E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.64542E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.65952E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.I2C, note='I2C', factor=4.52828E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.UART, note='UART1 (ACPU)', factor=4.5345E-06),
-            Power_Factor(master=PeripheralType.ACPU, slave=PeripheralType.GPIO, note='GPIO (ACPU)', factor=4.53407E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DDR, note='DDR', factor=4.6133E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DDR, note='DDR', factor=5.24858E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DDR, note='DDR', factor=2.68637E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.OCM, note='OCM', factor=4.86676E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.5947E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.FPGA_COMPLEX, note='Fabric', factor=4.65149E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.DMA, note='DMA', factor=4.63211E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.USB2, note='USB 2.0', factor=4.60778E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.GIGE, note='GigE', factor=4.63853E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.63756E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.64902E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.I2C, note='I2C', factor=4.55653E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.UART, note='UART0 (BCPU)', factor=4.52801E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.UART, note='UART', factor=4.52801E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.GPIO, note='GPIO (BCPU)', factor=4.55519E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.55632E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.5486E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.57513E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.54766E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.CONFIG, note='config', factor=4.62188E-06),
-            Power_Factor(master=PeripheralType.BCPU, slave=PeripheralType.JTAG, note='JTAG', factor=3.50E-08),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=4.95086E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=2.72392E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=4.50652E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=4.93121E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DDR, note='DDR', factor=2.67781E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.OCM, note='OCM', factor=4.74494E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.DMA, note='DMA', factor=4.50289E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.USB2, note='USB 2.0', factor=4.50167E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.GIGE, note='GigE', factor=4.50934E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.51407E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.51605E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.I2C, note='I2C', factor=4.41253E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.UART, note='UART1 (ACPU)', factor=4.40617E-06),
-            Power_Factor(master=PeripheralType.FPGA_COMPLEX, slave=PeripheralType.GPIO, note='GPIO (Fabric)', factor=4.40782E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.FPGA_COMPLEX, note='Fabric', factor=4.50286E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.SPI, note='SPI/QSPI', factor=4.53998E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.I2C, note='I2C', factor=4.42115E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.UART, note='UART1 (ACPU)', factor=4.41946E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.DDR, note='DDR', factor=5.13089E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.DDR, note='DDR', factor=2.63756E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.OCM, note='OCM', factor=4.64649E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.OCM, note='OCM', factor=4.74549E-06),
-            Power_Factor(master=PeripheralType.DMA, slave=PeripheralType.OCM, note='OCM', factor=4.69132E-06),
-        ]
-
-    def get_peripheral_noc_power_factor(self) -> List[Power_Factor]:
-        return self.peripheral_noc_power_factor
+    def get_peripheral_noc_power_factor(self, master: PeripheralType, slave: PeripheralType) -> float:
+        return self.powercfg.get_coeff(ElementType.NOC, f'{master.value}.{slave.value}')
 
     def get_attr(self, name) -> int:
         if name in self.device.resources:

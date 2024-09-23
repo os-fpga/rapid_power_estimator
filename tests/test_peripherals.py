@@ -124,9 +124,9 @@ def test_get_io_output_coeff():
 
 def test_get_power_factor():
     mock_context = Mock()
-    mock_context.get_device_resources.return_value.get_peripheral_noc_power_factor.return_value = []
+    mock_context.get_device_resources.return_value.get_peripheral_noc_power_factor.return_value = 0.123
     factor = get_power_factor(mock_context, PeripheralTarget.ACPU, PeripheralTarget.BCPU)
-    assert factor == 0.0
+    assert factor == 0.123
 
 # Test ComputeObject-derived class methods with proper context mocks
 def test_dma0_compute():

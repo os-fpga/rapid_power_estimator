@@ -9,7 +9,7 @@ import sys
 from typing import Any, List, Dict, Tuple
 from submodule.clock import Clock
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, Power_Factor, PeripheralNotFoundException, PeripheralType
+from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
 from .rs_message import RsMessage, RsMessageManager
 
 class Peripherals_Usage(RsEnum):
@@ -128,11 +128,7 @@ def get_io_output_coeff(context: 'IPeripheral', voltage: float) -> List[float]:
     return coeff.output_ac, coeff.output_dc
 
 def get_power_factor(context: 'IPeripheral', master_type: PeripheralType, slave_type: PeripheralType) -> float:
-    POWER_FACTOR = context.get_device_resources().get_peripheral_noc_power_factor()
-    factors = [elem.factor for elem in POWER_FACTOR if elem.master == master_type and elem.slave == slave_type]
-    if factors:
-        return sum(factors) / len(factors)
-    return 0.0
+    return context.get_device_resources().get_peripheral_noc_power_factor(master_type, slave_type)
 
 def sanity_check(output: List[RsMessage], context: 'IPeripheral') -> bool:
     output.clear()

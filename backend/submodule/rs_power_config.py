@@ -214,9 +214,9 @@ class RsPowerConfig:
         raise PowerConfigComponentNotFoundException(type.value)
 
     def get_coeff(self, type: ElementType, name: str) -> float:
-        coeffs = [c for c in self.get_component(type).coeffs if c.name == name]
-        if coeffs:
-            return coeffs[0].value
+        values = [c.value for c in self.get_component(type).coeffs if c.name == name]
+        if values:
+            return sum(values) / len(values)
         raise PowerConfigCoeffNotFoundException(type.value, name)
 
     def get_polynomial_coeff(self, type: ElementType, scenario: ScenarioType) -> List[RsStaticPowerPolynomial]:

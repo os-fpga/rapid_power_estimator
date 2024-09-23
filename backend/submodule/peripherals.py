@@ -606,7 +606,7 @@ class Pwm0(ComputeObject):
             return False
 
         self.output.calculated_bandwidth = 0.0001 # hardcoded in excel
-        self.output.block_power = self.properties.io_used * 0.001 # hardcoded in excel
+        self.output.block_power = self.properties.io_used * self.get_context().get_device_resources().get_PWM_IO_FACTOR()
 
         return True
 

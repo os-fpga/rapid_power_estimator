@@ -59,7 +59,6 @@ describe('Preferences', () => {
     expect(screen.getByText('Application will be reloaded')).toBeInTheDocument();
   });
 
-  // New simple test case
   test('renders the OK button', () => {
     render(
       <Preferences

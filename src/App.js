@@ -319,13 +319,15 @@ function App() {
                 activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                 height={20}
                 width={40}
+                disabled={true}  // Disabling the switch
+
               />
             </div>
             <div className="row">
               <div className="switch">Auto Mode</div>
               <Switch
-                checked={mode}
-                onChange={setMode}
+                checked={false} //making sure the switch is off
+                onChange={autoSaveChanged} //will implement if needed for future functionality
                 onColor="#f11f5e"
                 uncheckedIcon={false}
                 checkedIcon={false}
@@ -333,6 +335,8 @@ function App() {
                 activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                 height={20}
                 width={40}
+                disabled={true}  // Disable the switch
+
               />
             </div>
             <div className="notes" onClick={() => setModalOpen(true)}><PiNotepad size="28px" /></div>

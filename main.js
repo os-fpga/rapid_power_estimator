@@ -304,7 +304,7 @@ const createWindow = () => {
     else updateTitle(arg);
   });
   ipcMain.on('autoSave', (event, arg) => {
-    store.set('autoSave', arg.autoSave);
+    console.log('Auto Save feature is disabled.');
   });
 };
 

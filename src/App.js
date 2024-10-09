@@ -310,7 +310,7 @@ function App() {
             <div className="row">
               <div className="switch">Auto save</div>
               <Switch
-                checked={autoSave}
+                checked={false}
                 onChange={autoSaveChanged}
                 onColor="#f11f5e"
                 uncheckedIcon={false}
@@ -319,6 +319,7 @@ function App() {
                 activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                 height={20}
                 width={40}
+                disabled={true} 
               />
             </div>
             <div className="row">
@@ -333,6 +334,7 @@ function App() {
                 activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
                 height={20}
                 width={40}
+                disabled={true}
               />
             </div>
             <div className="notes" onClick={() => setModalOpen(true)}><PiNotepad size="28px" /></div>

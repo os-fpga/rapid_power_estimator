@@ -29,7 +29,7 @@ describe('App component', () => {
     );
 
     expect(screen.getByPlaceholderText('Top level name')).toBeInTheDocument();
-    expect(screen.getByText('Auto save')).toBeInTheDocument();
+    expect(screen.getByText('Auto Save')).toBeInTheDocument();
     expect(screen.getByText('Auto Mode')).toBeInTheDocument();
   });
 });

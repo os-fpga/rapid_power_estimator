@@ -308,7 +308,7 @@ function App() {
         <div className="power-tables">
           <div className="switches-container">
             <div className="row">
-              <div className="switch">Auto save</div>
+              <div className="switch">Auto Save</div>
               <Switch
                 checked={false}
                 onChange={autoSaveChanged}

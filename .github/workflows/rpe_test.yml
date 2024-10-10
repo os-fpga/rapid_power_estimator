@@ -249,6 +249,7 @@ jobs:
     
       - name: Run pytest with Codecov
         run: |
+          sudo apt install -y python3-venv
           python3 -m pytest --cov=src --cov=backend --cov=tests --cov-report=term-missing 
         
       - name: Upload results to Codecov

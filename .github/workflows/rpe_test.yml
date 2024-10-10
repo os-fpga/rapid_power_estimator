@@ -33,12 +33,13 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.11 # if update this then also update in Dockerfile for centos
+          node-version: 20.11 #if update this then also update in Dockerfile for centos
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        uses: actions/setup-python@v5.0.0
         with:
-          python-version: 3.8 # if update this then also update in Dockerfile for centos
+          python-version: 3.8 #if update this then also update in Dockerfile for centos
 
       - name: Login to the Container registry
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -58,13 +59,13 @@ jobs:
               node --version
               python3 -V
 
-      - name: Shell configuration on CentOS 7
+      - name: Shell configuration on centos 7
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
           shell: bash
           image: ghcr.io/${{ github.repository_owner }}/rapid_power_estimator:centos7latest
-          run: |
+          run:
               source /opt/rh/devtoolset-11/enable
               cmake --version
               node --version
@@ -81,7 +82,7 @@ jobs:
         run: |
             npx eslint src/
 
-      - name: Install packages CentOS 7 & Run pytest & frontend test
+      - name: Install packages centos 7 & Run pytest & frontend test
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -127,12 +128,13 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.11 # if update this then also update in Dockerfile for centos
+          node-version: 20.11 #if update this then also update in Dockerfile for centos
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        uses: actions/setup-python@v5.0.0
         with:
-          python-version: 3.8 # if update this then also update in Dockerfile for centos
+          python-version: 3.8 #if update this then also update in Dockerfile for centos
 
       - name: Login to the Container registry
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -152,7 +154,7 @@ jobs:
               node --version
               python3 -V
 
-      - name: Shell configuration on CentOS 7
+      - name: Shell configuration on centos 7
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         uses: addnab/docker-run-action@v3
         with:
@@ -213,11 +215,13 @@ jobs:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.exe
 
+
       - name: Upload Release
         if: ${{ matrix.os != 'windows-latest' && contains(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v1
         with:
             files: dist/rapid_power_estimator*.tar.gz
+
 
       - name: Upload Release
         if: ${{ matrix.os == 'windows-latest' && contains(github.ref, 'refs/tags/') }}
@@ -236,21 +240,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
 
-      - name: Set up virtual environment
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-
-      - name: Install dependencies in virtual environment
-        run: |
-          source venv/bin/activate
-          pip install -r requirements.txt
-          npm install
+      - name: Install dependencies
+        run: | 
+              sudo apt install -y python3-venv
+              pip install -r requirements.txt
+              npm install
     
       - name: Run pytest with Codecov
-        run: |
-          sudo apt install -y python3-venv
-          python3 -m pytest --cov=src --cov=backend --cov=tests --cov-report=term-missing 
+        run: python3 -m pytest --cov=. --cov-report=term-missing 
         
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
@@ -259,7 +256,7 @@ jobs:
           slug: os-fpga/rapid_power_estimator
 
       - name: Run npm test with Codecov
-        run: npm test -- --coverage
+        run: npm test
         
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4

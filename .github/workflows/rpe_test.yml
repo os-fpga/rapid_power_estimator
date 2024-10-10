@@ -250,7 +250,7 @@ jobs:
       - name: Run pytest with Codecov
         run: |
           source venv/bin/activate
-          python3 -m pytest --cov=. --cov-report=term-missing 
+          python3 -m pytest --cov=src --cov=backend --cov=tests --cov-report=term-missing 
         
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
@@ -259,7 +259,7 @@ jobs:
           slug: os-fpga/rapid_power_estimator
 
       - name: Run npm test with Codecov
-        run: npm test
+        run: npm test -- --coverage
         
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4

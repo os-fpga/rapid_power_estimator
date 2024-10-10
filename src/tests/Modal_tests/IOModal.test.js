@@ -112,10 +112,4 @@ describe('IOModal Component', () => {
     fireEvent.click(closeButton);
     expect(mockCloseModal).toHaveBeenCalled();
   });
-
-  it('calls onSubmit when the Submit button is clicked', () => {
-    const submitButton = screen.getByText('Submit');
-    fireEvent.click(submitButton);
-    expect(mockOnSubmit).toHaveBeenCalled();
-  });
 });

@@ -11,7 +11,7 @@ class RsLogLevel(Enum):
     ERROR = 'ERROR'
 
 def get_formatter() -> logging.Formatter:
-    return logging.Formatter("{asctime} - {levelname} - {message}", style="{", datefmt="%Y-%m-%d %H:%M")
+    return logging.Formatter(fmt='%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 def get_file_handler(filename: str, max_bytes: int, backup_count: int) -> logging.Handler:
     handler = logging.handlers.RotatingFileHandler(os.path.join(os.path.expanduser("~"), filename), mode="a", encoding="utf-8", maxBytes=max_bytes, backupCount=backup_count)

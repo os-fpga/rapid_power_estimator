@@ -250,7 +250,7 @@ jobs:
       - name: Run pytest with Codecov
         run: |
           source venv/bin/activate
-          python3 -m pytest --cov=. --cov-report=term-missing 
+          python3 -m pytest --cov=. --cov-report=term-missing --cov-report=xml
         
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
@@ -266,3 +266,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: os-fpga/rapid_power_estimator
+          files: ./coverage.xml,./coverage/lcov.info

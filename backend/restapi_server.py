@@ -71,6 +71,16 @@ def main():
     app.register_blueprint(attrs_api)
     app.register_blueprint(project_api)
 
+    # hook up request signal to log request by UI
+    @app.before_request
+    def before_request():
+        log(f"{request.method} {request.url}")
+
+    @app.after_request
+    def after_request(response):
+        log(f"{request.method} {request.url} {response.status_code} - DONE")
+        return response
+
     # log app server started
     log("App server is running...")
 

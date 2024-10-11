@@ -8,6 +8,7 @@ import sys
 from flask import Flask, request, jsonify
 from flasgger import Swagger
 from submodule.rs_device_manager import RsDeviceManager
+from submodule.rs_logger import log_setup, log, RsLogLevel
 from api.device import device_api
 from api.clock import clock_api
 from api.dsp import dsp_api
@@ -27,11 +28,18 @@ def main():
     parser.add_argument('device_file', type=str, help='Path to the input device xml file')
     parser.add_argument('--port', type=int, default=5000, help='Specify TCP Port to use for REST server')
     parser.add_argument('--debug', default=False, action='store_true', help='Enable/Disable debug mode')
+    parser.add_argument('--logfile', type=str, default="rpe.log", help='Specify log file name')
+    parser.add_argument('--maxbytes', type=int, default=2048, help='Specify maximun log file size in bytes before rollover')
+    parser.add_argument('--backupcount', type=int, default=20, help='Specify no. of backup log files')
     args = parser.parse_args()
+
+    # setup app logger
+    log_setup(filename=args.logfile, max_bytes=args.maxbytes, backup_count=args.backupcount)
+    log("Initialized app logger.")
 
     # Check if the device_file exists
     if os.path.exists(args.device_file) == False:
-        print(f"ERROR: The file '{args.device_file}' does not exist.")
+        log(f"Device file '{args.device_file}' does not exist.", RsLogLevel.ERROR)
         sys.exit(1)
 
     # Parse Device XML file into Device List
@@ -63,6 +71,9 @@ def main():
     app.register_blueprint(peripherals_api)
     app.register_blueprint(attrs_api)
     app.register_blueprint(project_api)
+
+    # log app server started
+    log("App server is running...")
 
     # Start Rest API server
     app.run(debug=args.debug, port=args.port)

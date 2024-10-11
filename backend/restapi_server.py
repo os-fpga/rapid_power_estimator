@@ -29,13 +29,12 @@ def main():
     parser.add_argument('--port', type=int, default=5000, help='Specify TCP Port to use for REST server')
     parser.add_argument('--debug', default=False, action='store_true', help='Enable/Disable debug mode')
     parser.add_argument('--logfile', type=str, default="rpe.log", help='Specify log file name')
-    parser.add_argument('--maxbytes', type=int, default=2048, help='Specify maximun log file size in bytes before rollover')
+    parser.add_argument('--maxbytes', type=int, default=2048, help='Specify maximun log file size in kilobytes before rollover')
     parser.add_argument('--backupcount', type=int, default=20, help='Specify no. of backup log files')
     args = parser.parse_args()
 
     # setup app logger
-    log_setup(filename=args.logfile, max_bytes=args.maxbytes, backup_count=args.backupcount)
-    log("Initialized app logger.")
+    log_setup(filename=args.logfile, max_bytes=args.maxbytes*1024, backup_count=args.backupcount)
 
     # Check if the device_file exists
     if os.path.exists(args.device_file) == False:

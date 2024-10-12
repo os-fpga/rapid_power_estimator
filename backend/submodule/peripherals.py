@@ -5,12 +5,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import IntFlag
-import sys
 from typing import Any, List, Dict, Tuple
-from submodule.clock import Clock
 from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
 from .rs_message import RsMessage, RsMessageManager
+from .rs_logger import log, RsLogLevel
 
 class Peripherals_Usage(RsEnum):
     Boot  = 0, "Boot"
@@ -674,20 +673,20 @@ class Dma0(ComputeObject):
             total_dma_block_power += block_power
 
             # debug info
-            print(f'[DEBUG] DMA: {self.get_context().get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {source.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {destination.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {source_power_factor = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {destination_power_factor = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {source_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {destination_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {VCC_CORE = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {channel.activity = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {channel.toggle_rate = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {channel.output.calculated_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {channel.output.noc_power = }', file=sys.stderr)
-            print(f'[DEBUG] DMA:   {channel.output.block_power = }', file=sys.stderr)
+            log(f'[DMA] {self.get_context().get_name() = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {source.get_name() = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {destination.get_name() = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {source_power_factor = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {destination_power_factor = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {source_bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {destination_bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {VCC_CORE = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {channel.activity = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {channel.toggle_rate = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {channel.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {channel.output.noc_power = }', RsLogLevel.DEBUG)
+            log(f'[DMA]   {channel.output.block_power = }', RsLogLevel.DEBUG)
 
         # calculate block power distribution in percentage among channels
         if total_dma_block_power > 0:
@@ -770,14 +769,14 @@ class FPGA_Fabric(ComputeObject):
             total_noc_power += noc_power
 
             # debug info
-            print(f'[DEBUG] FPGA: {self.get_context().get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {peripheral.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {power_factor = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {endpoint.activity = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {endpoint.toggle_rate = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {VCC_CORE = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] FPGA:   {endpoint.output.noc_power = }', file=sys.stderr)
+            log(f'[FPGA] {self.get_context().get_name() = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {peripheral.get_name() = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {power_factor = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {endpoint.activity = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {VCC_CORE = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {endpoint.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[FPGA]   {endpoint.output.noc_power = }', RsLogLevel.DEBUG)
 
         # calculate noc power distribution in percentage among endpoints
         if total_noc_power > 0:
@@ -880,14 +879,14 @@ class A45_RISC_V_ACPU(ComputeObject):
             endpoint.output.noc_power = noc_power
 
             # debug info
-            print(f'[DEBUG] ACPU: {self.get_context().get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {peripheral.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {power_factor = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {endpoint.activity = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {endpoint.toggle_rate = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {VCC_CORE = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] ACPU:   {endpoint.output.noc_power = }', file=sys.stderr)
+            log(f'[ACPU] {self.get_context().get_name() = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {peripheral.get_name() = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {power_factor = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {endpoint.activity = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {VCC_CORE = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {endpoint.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[ACPU]   {endpoint.output.noc_power = }', RsLogLevel.DEBUG)
 
         # compute block power
         block_power = (LOAD_FACTOR + ACPU_CLK_FACTOR) * (self.properties.frequency / 1000000.0) * VCC_CORE ** 2
@@ -998,14 +997,14 @@ class N22_RISC_V_BCPU(ComputeObject):
             endpoint.output.noc_power = noc_power
 
             # debug info
-            print(f'[DEBUG] BCPU: {self.get_context().get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {peripheral.get_name() = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {power_factor = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {endpoint.activity = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {endpoint.toggle_rate = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {VCC_CORE = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {endpoint.output.calculated_bandwidth = }', file=sys.stderr)
-            print(f'[DEBUG] BCPU:   {endpoint.output.noc_power = }', file=sys.stderr)
+            log(f'[BCPU] {self.get_context().get_name() = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {peripheral.get_name() = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {power_factor = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {endpoint.activity = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {VCC_CORE = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {endpoint.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+            log(f'[BCPU]   {endpoint.output.noc_power = }', RsLogLevel.DEBUG)
 
         # compute active power
         if self.properties.clock == N22_RISC_V_Clock.PLL_233MHz:
@@ -1138,22 +1137,22 @@ class Memory0(ComputeObject):
         self.output.block_power = block_power
 
         # debug info
-        print(f'[DEBUG] MEM0: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {self.properties.data_rate / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {endpoint.read_write_rate = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {VCC_CORE = }', file=sys.stderr)
+        log(f'[MEM0]: {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[MEM0]: {self.properties.data_rate / 1000000.0 = }', RsLogLevel.DEBUG)
+        log(f'[MEM0]: {endpoint.read_write_rate = }', RsLogLevel.DEBUG)
+        log(f'[MEM0]: {VCC_CORE = }', RsLogLevel.DEBUG)
         if self.get_context().get_type() == PeripheralType.DDR:
-            print(f'[DEBUG] MEM0: {DDR_ACLK_FACTOR = }', file=sys.stderr)
-            print(f'[DEBUG] MEM0: {DDR_CLK_FACTOR = }', file=sys.stderr)
-            print(f'[DEBUG] MEM0: {DDR_WRITE_FACTOR = }', file=sys.stderr)
-            print(f'[DEBUG] MEM0: {DDR_READ_FACTOR = }', file=sys.stderr)
+            log(f'[MEM0]: {DDR_ACLK_FACTOR = }', RsLogLevel.DEBUG)
+            log(f'[MEM0]: {DDR_CLK_FACTOR = }', RsLogLevel.DEBUG)
+            log(f'[MEM0]: {DDR_WRITE_FACTOR = }', RsLogLevel.DEBUG)
+            log(f'[MEM0]: {DDR_READ_FACTOR = }', RsLogLevel.DEBUG)
         else:
-            print(f'[DEBUG] MEM0: {SRAM_ACLK_FACTOR = }', file=sys.stderr)
-            print(f'[DEBUG] MEM0: {SRAM_WRITE_FACTOR = }', file=sys.stderr)
-            print(f'[DEBUG] MEM0: {SRAM_READ_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {self.output.write_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {self.output.read_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] MEM0: {self.output.block_power = }', file=sys.stderr)
+            log(f'[MEM0]: {SRAM_ACLK_FACTOR = }', RsLogLevel.DEBUG)
+            log(f'[MEM0]: {SRAM_WRITE_FACTOR = }', RsLogLevel.DEBUG)
+            log(f'[MEM0]: {SRAM_READ_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[MEM0]: {self.output.write_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[MEM0]: {self.output.read_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[MEM0]: {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1251,16 +1250,16 @@ class Gpio0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
-        print(f'[DEBUG] GPIO: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {clock_frequency = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {endpoint.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {io_vcco_power = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {io_vcc_aux_power = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GPIO: {self.output.block_power = }', file=sys.stderr)
+        log(f'[GPIO] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {clock_frequency = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {endpoint.toggle_rate * bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {io_vcco_power = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {io_vcc_aux_power = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[GPIO] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1357,14 +1356,14 @@ class Usb2_0(ComputeObject):
         self.output.block_power = core_power + io_core_power
 
         # debug info
-        print(f'[DEBUG] USB2: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {endpoint.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] USB2: {self.output.block_power = }', file=sys.stderr)
+        log(f'[USB2] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {self.get_freq() / 1000000.0 = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {endpoint.toggle_rate * bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[USB2] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1462,14 +1461,14 @@ class GigE_0(ComputeObject):
         self.output.block_power = core_power + io_core_power
 
         # debug info
-        print(f'[DEBUG] GIGE: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {endpoint.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] GIGE: {self.output.block_power = }', file=sys.stderr)
+        log(f'[GIGE] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {self.get_freq() / 1000000.0 = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {endpoint.toggle_rate * bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[GIGE] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1571,16 +1570,16 @@ class I2c0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
-        print(f'[DEBUG] I2C: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {endpoint.toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {endpoint.toggle_rate * bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {io_vcco_power = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {io_vcc_aux_power = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] I2C: {self.output.block_power = }', file=sys.stderr)
+        log(f'[I2C] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {self.get_freq() / 1000000.0 = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {endpoint.toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {endpoint.toggle_rate * bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {io_vcco_power = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {io_vcc_aux_power = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[I2C] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1682,23 +1681,23 @@ class Jtag0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
-        print(f'[DEBUG] JTAG: {self.get_context().get_usage() = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {bandwidth * toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {VCC_BOOT_IO = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {OUTPUT_AC = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {OUTPUT_DC = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {JTAG_CLK_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {JTAG_SWITCHING_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {JTAG_IO_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {io_vcco_power = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {io_vcc_aux_power = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] JTAG: {self.output.block_power = }', file=sys.stderr)
+        log(f'[JTAG] {self.get_context().get_usage() = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {bandwidth * toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {self.get_freq() / 1000000.0 = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {VCC_BOOT_IO = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {OUTPUT_AC = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {OUTPUT_DC = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {JTAG_CLK_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {JTAG_SWITCHING_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {JTAG_IO_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {io_vcco_power = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {io_vcc_aux_power = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[JTAG] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1807,21 +1806,21 @@ class Qspi0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
-        print(f'[DEBUG] QSPI: {self.get_context().get_usage() = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {toggle_rate = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {VCC_BOOT_IO = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {OUTPUT_AC = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {OUTPUT_DC = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {QSPI_CLK_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {QSPI_SWITCHING_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {QSPI_IO_FACTOR = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {io_vcco_power = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {io_vcc_aux_power = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] QSPI: {self.output.block_power = }', file=sys.stderr)
+        log(f'[QSPI] {self.get_context().get_usage() = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {toggle_rate = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {VCC_BOOT_IO = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {OUTPUT_AC = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {OUTPUT_DC = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {QSPI_CLK_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {QSPI_SWITCHING_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {QSPI_IO_FACTOR = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {io_vcco_power = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {io_vcc_aux_power = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[QSPI] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
 
@@ -1925,13 +1924,13 @@ class Uart0(ComputeObject):
         self.output.block_power = core_power + io_core_power + io_vcco_power + io_vcc_aux_power
 
         # debug info
-        print(f'[DEBUG] UART: {bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {self.get_freq() / 1000000.0 = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {core_power = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {io_core_power = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {io_vcco_power = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {io_vcc_aux_power = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {self.output.calculated_bandwidth = }', file=sys.stderr)
-        print(f'[DEBUG] UART: {self.output.block_power = }', file=sys.stderr)
+        log(f'[UART] {bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[UART] {self.get_freq() / 1000000.0 = }', RsLogLevel.DEBUG)
+        log(f'[UART] {core_power = }', RsLogLevel.DEBUG)
+        log(f'[UART] {io_core_power = }', RsLogLevel.DEBUG)
+        log(f'[UART] {io_vcco_power = }', RsLogLevel.DEBUG)
+        log(f'[UART] {io_vcc_aux_power = }', RsLogLevel.DEBUG)
+        log(f'[UART] {self.output.calculated_bandwidth = }', RsLogLevel.DEBUG)
+        log(f'[UART] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True

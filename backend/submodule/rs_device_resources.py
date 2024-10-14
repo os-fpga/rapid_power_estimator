@@ -2,9 +2,9 @@ from enum import Enum
 import os
 from device.device_resource import Device
 from .rs_power_config import RsPowerConfig, ElementType, ScenarioType
+from .rs_logger import log, RsLogLevel
 from utilities.common_utils import RsEnum, RsCustomException
 from dataclasses import dataclass, field
-from typing import List
 
 class DeviceNotFoundException(RsCustomException):
     def __init__(self):
@@ -166,15 +166,22 @@ class RsDeviceResources:
 
     def __init__(self, device):
         self.device: Device = device
-        self.powercfg = RsPowerConfig(self.get_power_config_filepath())
         self.modules = [None, None, None, None, None, None, None]
+        self.powercfg = RsPowerConfig()
+        filepath = self.get_power_config_filepath()
+        if filepath:
+            self.powercfg.load(filepath)
+        else:
+            log(f"Device '{device.name}' power data element not found", RsLogLevel.WARNING)
 
     def get_power_config_filepath(self) -> str:
-        power_cfg_filepath = self.device.internals['power_data'].file
-        if not os.path.isabs(power_cfg_filepath):
-            return os.path.join(os.path.dirname(self.device.filepath), power_cfg_filepath)
-        else:
-            return power_cfg_filepath
+        if 'power_data' in self.device.internals:
+            power_cfg_filepath = self.device.internals['power_data'].file
+            if not os.path.isabs(power_cfg_filepath):
+                return os.path.join(os.path.dirname(self.device.filepath), power_cfg_filepath)
+            else:
+                return power_cfg_filepath
+        return None
 
     def get_peripheral_noc_power_factor(self, master: PeripheralType, slave: PeripheralType) -> float:
         return self.powercfg.get_coeff(ElementType.NOC, f'{master.value}.{slave.value}')

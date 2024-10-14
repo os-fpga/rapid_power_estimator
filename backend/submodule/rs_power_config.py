@@ -36,6 +36,10 @@ class PowerConfigSchemaValidationException(RsCustomException):
     def __init__(self, ex: ValidationError):
         super().__init__(f"Parsing Error: {ex.messages}")
 
+class PowerConfigNotAvailable(RsCustomException):
+    def __init__(self):
+        super().__init__(f"Power config data not available")
+
 class ElementType(Enum):
     BRAM = 'bram'
     CLOCKING = 'clocking'
@@ -169,25 +173,25 @@ class RsPowerConfigDataSchema(Schema):
         return RsPowerConfigData(**data)
 
 class RsPowerConfig:
-    def __init__(self, filepath: str) -> None:
-        self.filepath = filepath
+    def __init__(self) -> None:
+        self.filepath = None
         self.data: RsPowerConfigData = None
-        self.load()
+        self.loaded = False
 
-    def load(self) -> bool:
+    def load(self, filepath: str) -> bool:
         try:
             # read the main power config json file
-            with open(self.filepath, 'r') as fd:
+            with open(filepath, 'r') as fd:
                 rawdata = json.load(fd)
 
             # resolve all $ref nodes
-            resolved_data = jsonref.replace_refs(rawdata, base_uri='file:///' + os.path.abspath(os.path.dirname(self.filepath)).replace('\\', '/') + '/')
+            resolved_data = jsonref.replace_refs(rawdata, base_uri='file:///' + os.path.abspath(os.path.dirname(filepath)).replace('\\', '/') + '/')
 
             # verify json structure
             data = RsPowerConfigDataSchema().load(resolved_data)
 
             # store data
-            self.data = data
+            self.filepath, self.data, self.loaded = filepath, data, True
 
         except FileNotFoundError as ex:
             raise PowerConfigFileNotFoundException(self.filepath)
@@ -201,13 +205,24 @@ class RsPowerConfig:
             raise ex
         return True
 
+    def is_loaded(self) -> bool:
+        return self.loaded
+
     def get_static_component(self, type: ElementType) -> RsStaticPowerElement:
+        # raise power data not available exception
+        if not self.loaded:
+            raise PowerConfigNotAvailable()
+
         comps = [c for c in self.data.static if c.type == type]
         if comps:
             return comps[0]
         raise PowerConfigStaticComponentNotFoundException(type.value)
 
     def get_component(self, type: ElementType) -> RsDynamicPowerComponent:
+        # raise power data not available exception
+        if not self.loaded:
+            raise PowerConfigNotAvailable()
+
         comps = [c for c in self.data.components if c.type == type]
         if comps:
             return comps[0]

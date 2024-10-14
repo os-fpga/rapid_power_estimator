@@ -33,13 +33,12 @@ function ACPUTable({ device, update, notify }) {
   const [disable, setDisable] = React.useState(true);
   const loadActivity = GetOptions('A45_Load');
 
-  // toggle handler to enable/disable ACPU fields and freeze parameters
+  // Toggle handler to enable/disable ACPU fields and freeze parameters
   const handleToggle = () => {
     if (!device || !href) {
       setDisable(true);
-    } 
-    else if (device && href) {
-      setDisable(!disable); 
+    } else {
+      setDisable(!disable);
     }
   };
 
@@ -56,9 +55,10 @@ function ACPUTable({ device, update, notify }) {
   function fetchAcpuData(link) {
     if (link !== '') {
       server.GET(server.peripheralPath(device, link), (data) => {
-        if (data.name !== acpuData.name
-          || data.frequency !== acpuData.frequency
-          || data.load !== acpuData.load) {
+        if (
+          data.name !== acpuData.name
+          || (data.frequency !== acpuData.frequency && data.load !== acpuData.load)
+        ) {
           setAcpuData({
             name: data.name,
             frequency: data.frequency,
@@ -198,7 +198,7 @@ function ACPUTable({ device, update, notify }) {
               step={1}
               onChange={(e) => handleChange('frequency', e.target.value)}
               value={acpuData.frequency}
-              disabled={disable} 
+              disabled={disable}
             />
           </div>
           <div className="acpu-group">
@@ -207,7 +207,7 @@ function ACPUTable({ device, update, notify }) {
               value={acpuData.load}
               onChangeHandler={(value) => handleChange('load', value)}
               items={loadActivity}
-              disabled={disable} 
+              disabled={disable}
             />
           </div>
         </div>
@@ -219,11 +219,13 @@ function ACPUTable({ device, update, notify }) {
             <tr key={row.ep}>
               <StatusColumn messages={row.data.consumption.messages} />
               <Actions
-                onEditClick={() => { if (!disable) { setEditIndex(index); setModalOpen(true); } }} 
-                onDeleteClick={() => { if (!disable) { deleteRow(index); } }} 
+                onEditClick={() => { if (!disable) { setEditIndex(index); setModalOpen(true); } }}
+                onDeleteClick={() => { if (!disable) { deleteRow(index); } }}
               />
               <td>{row.data.name}</td>
-              <SelectionCell val={row.data.activity} values={loadActivity} disabled={disable} /> {/* Freeze selection */}
+              <SelectionCell val={row.data.activity} values={loadActivity} disabled={disable} />
+              {' '}
+              {/* Freeze selection */}
               <PercentsCell val={row.data.read_write_rate} disabled={disable} />
               <PercentsCell val={row.data.toggle_rate} precition={1} disabled={disable} />
               <BandwidthCell val={row.data.consumption.calculated_bandwidth} disabled={disable} />

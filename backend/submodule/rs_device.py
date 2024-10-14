@@ -236,6 +236,10 @@ class RsDevice:
         # soc peripherals module
         self.resources.register_module(ModuleType.SOC_PERIPHERALS, Peripheral_SubModule(self.resources))
 
+        # skip compute output power and exit function if no power data available
+        if not self.resources.powercfg.is_loaded():
+            return
+
         # perform initial calculation
         self.compute_output_power()
 

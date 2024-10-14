@@ -37,8 +37,8 @@ function ACPUTable({ device, update, notify }) {
   const handleToggle = () => {
     if (!device || !href) {
       setDisable(true);
-    } else {
-      setDisable(!disable);
+    } else if (device && href) {
+      setDisable(!disable); // Toggle the fields' disable state
     }
   };
 
@@ -55,10 +55,9 @@ function ACPUTable({ device, update, notify }) {
   function fetchAcpuData(link) {
     if (link !== '') {
       server.GET(server.peripheralPath(device, link), (data) => {
-        if (
-          data.name !== acpuData.name
-          || (data.frequency !== acpuData.frequency && data.load !== acpuData.load)
-        ) {
+        if (data.name !== acpuData.name
+          || data.frequency !== acpuData.frequency
+          || data.load !== acpuData.load) {
           setAcpuData({
             name: data.name,
             frequency: data.frequency,
@@ -166,7 +165,7 @@ function ACPUTable({ device, update, notify }) {
             type="checkbox"
             onChange={handleToggle}
             checked={!disable}
-            disabled={!device || !href}
+            disabled={!device || !href} // Disable toggle based on device and ACPU selection
           />
           <span className="slider" />
         </label>
@@ -187,7 +186,7 @@ function ACPUTable({ device, update, notify }) {
               type="text"
               onChange={(e) => handleChange('name', e.target.value)}
               value={acpuData.name}
-              disabled={disable} // freeze when toggle is off
+              disabled={disable} // Freeze when toggle is off
             />
           </div>
           <div className="acpu-group">
@@ -198,7 +197,7 @@ function ACPUTable({ device, update, notify }) {
               step={1}
               onChange={(e) => handleChange('frequency', e.target.value)}
               value={acpuData.frequency}
-              disabled={disable}
+              disabled={disable} // Freeze when toggle is off
             />
           </div>
           <div className="acpu-group">
@@ -207,7 +206,7 @@ function ACPUTable({ device, update, notify }) {
               value={acpuData.load}
               onChangeHandler={(value) => handleChange('load', value)}
               items={loadActivity}
-              disabled={disable}
+              disabled={disable} // Freeze when toggle is off
             />
           </div>
         </div>
@@ -243,14 +242,14 @@ function ACPUTable({ device, update, notify }) {
               setEditIndex(null);
             }}
             onSubmit={handleSubmit}
-            defaultValue={editIndex !== null && {
+            defaultValue={(editIndex !== null && {
               name: acpuNames.indexOf(acpuNames.find(
                 (elem) => elem.text === endpoints[editIndex].data.name,
               )),
               activity: endpoints[editIndex].data.activity,
               read_write_rate: endpoints[editIndex].data.read_write_rate,
               toggle_rate: endpoints[editIndex].data.toggle_rate,
-            } || {
+            }) || {
               name: 0,
               activity: 0,
               read_write_rate: 0.5,

@@ -1,4 +1,5 @@
-const { dialog } = require('electron');
+const { dialog, BrowserWindow } = require('electron');
+const fs = require('fs');
 const path = require('path');
 
 function openProjectRequest(parent) {
@@ -14,16 +15,34 @@ function openProjectRequest(parent) {
 }
 
 function saveProjectRequest(parent) {
-  let filename = dialog.showSaveDialogSync(parent, {
-    properties: ['showOverwriteConfirmation'],
-    title: 'Save project file...',
-    filters: [{ name: 'Project file (*.rpe)', extensions: ['rpe'] }],
-    defaultPath: 'project.rpe',
+  const folderPath = dialog.showSaveDialogSync(parent, {
+    title: 'Save project folder...',
+    defaultPath: 'project',
+    buttonLabel: 'Save Project Folder',
+    properties: ['createDirectory'],
   });
-  if (filename !== undefined) {
-    if (path.extname(filename) !== '.rpe') filename += '.rpe';
+
+  if (folderPath) {
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
+
+    const folderName = path.basename(folderPath);
+    const projectFileName = `${folderName}.rpe`;
+    const projectFilePath = path.join(folderPath, projectFileName);
+    fs.writeFileSync(projectFilePath, '');
+
+    const currentWindow = BrowserWindow.getFocusedWindow();
+    if (currentWindow) {
+      currentWindow.setTitle(`${projectFileName} - Rapid Power Estimator`);
+    } else {
+      console.error('No focused window found to set title.');
+    }
+
+    return projectFilePath;
   }
-  return filename === undefined ? '' : filename;
+
+  return '';
 }
 
 module.exports = {

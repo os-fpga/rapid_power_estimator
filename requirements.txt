@@ -10,3 +10,10 @@ codecov
 pytest-cov
 coverage
 pytest-mock
+sphinx
+sphinx-rtd-theme
+sphinxcontrib-napoleon
+sphinxcontrib-svg2pdfconverter
+sphinxcontrib-youtube
+sphinxcontrib-bibtex
+m2r2

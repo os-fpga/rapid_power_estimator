@@ -4,7 +4,6 @@ import '@testing-library/jest-dom';
 import ClockingTable from '../../components/Tables/ClockingTable';
 import * as server from '../../utils/serverAPI';
 
-// Mock the required modules
 jest.mock('../../utils/serverAPI', () => ({
   GET: jest.fn(),
   PATCH: jest.fn(),
@@ -20,7 +19,6 @@ jest.mock('../../utils/serverAPI', () => ({
   },
 }));
 
-// Mock common utilities
 jest.mock('../../utils/common', () => ({
   fixed: jest.fn((number, precision = 2) => number.toFixed(precision)),
   GetText: jest.fn((id, options) => options.find((option) => option.id === id)?.name || ''),

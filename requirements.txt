@@ -1,4 +1,4 @@
-Flask                  # Lightweight web framework for building web applications in Python
+flask                  # Lightweight web framework for building web applications in Python
 marshmallow            # Object serialization/deserialization library for converting Python objects to/from JSON
 pytest                 # Testing framework for writing and running test cases in Python
 pyinstaller            # Tool for packaging Python applications into standalone executables

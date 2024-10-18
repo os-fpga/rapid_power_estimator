@@ -1,4 +1,5 @@
 [![Build and Publish RPE](https://github.com/os-fpga/rapid_power_estimator/actions/workflows/rpe_test.yml/badge.svg)](https://github.com/os-fpga/rapid_power_estimator/actions/workflows/rpe_test.yml)
+[![Documentation Status](https://readthedocs.org/projects/rapidpowerestimator/badge/?version=latest)](https://rapidpowerestimator.readthedocs.io/en/latest/?badge=latest)
 [![code coverage](https://codecov.io/gh/os-fpga/rapid_power_estimator/graph/badge.svg?token=O98SZ9DI28)](https://codecov.io/gh/os-fpga/rapid_power_estimator)
 
 # Rapid Power Estimator

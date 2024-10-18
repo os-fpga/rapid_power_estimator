@@ -100,6 +100,8 @@ class PeripheralType(Enum):
     DDR  = 'ddr'
     OCM  = 'ocm'
     CONFIG = 'config'
+    PUFFCC = 'puffcc'
+    RC_OSC = 'rc_osc'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"

@@ -1170,6 +1170,37 @@ class Memory0(ComputeObject):
 
         return True
 
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        if self.get_context().get_type() != PeripheralType.DDR:
+            return []
+
+        resources = self.get_context().get_device_resources()
+        VCC_DDR_IO = resources.get_VCC_DDR_IO()
+        DDR_IOS = resources.get_num_DDR_IOs()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.DDR, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                if rail_type == 'VCC_DDR_IO':
+                    power = power * VCC_DDR_IO * DDR_IOS / 2
+                total_power += power
+                # debug info
+                log(f'[MEM0] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {self.get_context().get_type() = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {VCC_DDR_IO = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {DDR_IOS = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {power = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
 @dataclass
 class Gpio0(ComputeObject):
     @dataclass

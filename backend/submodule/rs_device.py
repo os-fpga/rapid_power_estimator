@@ -306,12 +306,6 @@ class RsDevice:
         power = self.calculate(temperature, coeff)
         return power
 
-    def compute_Mem_SS(self, temperature : float, worsecase : bool) -> float:
-        # todo: not all device has Mem
-        divfactor, coeff = self.resources.get_divfactor_coeff_Mem_SS(worsecase)
-        power = self.calculate(temperature, coeff)
-        return power
-
     def compute_A45(self, temperature : float, worsecase : bool) -> float:
         # todo: not all device has ACPU
         divfactor, coeff = self.resources.get_divfactor_coeff_A45(worsecase)
@@ -358,13 +352,6 @@ class RsDevice:
         total_power = power * math.ceil(num_boot_ios / 2)
         return total_power
 
-    def compute_VCC_DDR_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_DDR_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_DDR_IO() / divfactor)
-        num_ddr_ios = self.resources.get_num_DDR_IOs()
-        total_power = power * (num_ddr_ios / 2)
-        return total_power
-
     def compute_VCC_SOC_IO(self, temperature : float, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_VCC_SOC_IO(worsecase)
         power = self.calculate(temperature, coeff, self.resources.get_VCC_SOC_IO() / divfactor)
@@ -394,7 +381,7 @@ class RsDevice:
         result = StaticPowerResult(
             temperature  = temperature,
             NOC          = self.compute_NOC(temperature, worsecase),
-            Mem_SS       = self.compute_Mem_SS(temperature, worsecase),
+            # Mem_SS       = self.compute_Mem_SS(temperature, worsecase),
             A45          = self.compute_A45(temperature, worsecase),
             # Config       = self.compute_Config(temperature, worsecase),
             # CLB          = self.compute_CLB(temperature, worsecase),
@@ -414,7 +401,7 @@ class RsDevice:
             HP_IO_1_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.5, worsecase),
             HP_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.8, worsecase),
             VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
-            VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
+            # VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
             VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),
             # VCC_GIGE_IO  = self.compute_VCC_GIGE_IO(temperature, worsecase),
             # VCC_USB_IO   = self.compute_VCC_USB_IO(temperature, worsecase),

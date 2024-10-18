@@ -2,11 +2,14 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+import numpy as np
 from dataclasses import dataclass, field
 from typing import List
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import DspNotFoundException
+from .rs_device_resources import DspNotFoundException, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
+from .rs_power_config import ElementType, PowerValue, ScenarioType
+from .rs_logger import RsLogLevel, log
 
 class Pipelining(RsEnum):
     INPUT_AND_OUTPUT = 0, "Input and Output"
@@ -103,7 +106,7 @@ class DSP:
 
 class DSP_SubModule:
 
-    def __init__(self, resources, itemlist: List[DSP] = None):
+    def __init__(self, resources: RsDeviceResources, itemlist: List[DSP] = None):
         self.resources = resources
         self.total_dsp_blocks_available = resources.get_num_DSP_BLOCKs()
         self.total_interconnect_power = 0.0
@@ -173,3 +176,26 @@ class DSP_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) ->  List[PowerValue]:
+        DSP_BlOCKS = self.resources.get_num_DSP_BLOCKs()
+        mylist = []
+
+        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.DSP, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                power = power * DSP_BlOCKS
+                total_power += power
+                # debug info
+                log(f'[DSP] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {DSP_BlOCKS = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {power = }', RsLogLevel.DEBUG)
+                log(f'[DSP]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist

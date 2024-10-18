@@ -4,5 +4,15 @@
         { "name": "DSP_MULT_CAP" , "value": 0.0000015  },
         { "name": "DSP_MULT_CAP2", "value": 0.00000007 },
         { "name": "DSP_INT_CAP"  , "value": 0.0000001  }
+    ],
+    "static_power": [
+        {
+            "rail_type": "Vcc_core (DSP)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.000000000002, -0.00000000004, 0.00000000008, 0.0000005, 0.00001], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.000000000002, -0.00000000008, 0.0000000007, 0.0000003, 0.000004], "factor": 1.0 }
+            ]
+        }
     ]
 }

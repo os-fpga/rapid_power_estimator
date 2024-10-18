@@ -4,9 +4,12 @@
 #
 from dataclasses import dataclass, field
 from typing import List
+import numpy as np
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import BramNotFoundException
+from .rs_power_config import ElementType, PowerValue, ScenarioType
+from .rs_device_resources import BramNotFoundException, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
+from .rs_logger import RsLogLevel, log
 
 class BRAM_Type(RsEnum):
     BRAM_18K_SDP = 0, "18k SDP"
@@ -175,7 +178,7 @@ class BRAM:
 
 class BRAM_SubModule:
 
-    def __init__(self, resources, itemlist: List[BRAM] = None):
+    def __init__(self, resources: RsDeviceResources, itemlist: List[BRAM] = None):
         self.resources = resources
         self.total_18k_bram_available = resources.get_num_18K_BRAM()
         self.total_36k_bram_available = resources.get_num_36K_BRAM()
@@ -249,3 +252,26 @@ class BRAM_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> float:
+        NUM_36K_BRAM = self.resources.get_num_36K_BRAM()
+        mylist = []
+
+        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.BRAM, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                power = power * NUM_36K_BRAM
+                total_power += power
+                # debug info
+                log(f'[BRAM] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {NUM_36K_BRAM = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {power = }', RsLogLevel.DEBUG)
+                log(f'[BRAM]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist

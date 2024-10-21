@@ -215,8 +215,7 @@ class Peripheral_SubModule(SubModule):
         peripherals += self.create_peripherals(self.resources.get_num_DMAs(), 'DMA', PeripheralType.DMA)
         peripherals += self.create_peripherals(1, 'N22 RISC-V', PeripheralType.BCPU)
         peripherals += self.create_peripherals(1, 'Fabric', PeripheralType.FPGA_COMPLEX)
-
-        # todo: add GPIO
+        peripherals += self.create_peripherals(1, 'GPIO', PeripheralType.GPIO)
         peripherals += self.create_peripherals(1, 'PUFFcc', PeripheralType.PUFFCC)
         peripherals += self.create_peripherals(1, 'RC Oscillator', PeripheralType.RC_OSC)
         peripherals += self.create_peripherals(1, 'NOC', PeripheralType.NOC)
@@ -1331,6 +1330,45 @@ class Gpio0(ComputeObject):
         log(f'[GPIO] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        voltages = {
+            "VCC_BOOT_IO" : resources.get_VCC_BOOT_IO(),
+            "VCC_SOC_IO"  : resources.get_VCC_SOC_IO(),
+            "VCC_BOOT_AUX": resources.get_VCC_BOOT_AUX(),
+            "VCC_SOC_AUX" : resources.get_VCC_SOC_AUX(),
+        }
+        BOOT_IOS = resources.get_num_BOOT_IOs()
+        SOC_IOS = resources.get_num_SOC_IOs()
+        ios = {
+            "VCC_BOOT_IO" : math.ceil(BOOT_IOS / 2),
+            "VCC_SOC_IO"  : (SOC_IOS / 2),
+            "VCC_BOOT_AUX": (BOOT_IOS / 40),
+            "VCC_SOC_AUX" : (SOC_IOS / 40)
+        }
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GPIO, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * voltages.get(rail_type, 0.0) * ios.get(rail_type, 0.0)
+                total_power += power
+                # debug info
+                log(f'[GPIO] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {BOOT_IOS = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {SOC_IOS = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {voltages = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {ios = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {power = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
 
 @dataclass
 class Usb2_0(ComputeObject):

@@ -333,38 +333,6 @@ class RsDevice:
         total_power = power * num_io_banks_used * 20 * voltage / divfactor
         return total_power
 
-    def compute_VCC_BOOT_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_BOOT_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_BOOT_IO() / divfactor)
-        num_boot_ios = self.resources.get_num_BOOT_IOs()
-        total_power = power * math.ceil(num_boot_ios / 2)
-        return total_power
-
-    def compute_VCC_SOC_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_SOC_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_SOC_IO() / divfactor)
-        num_soc_ios = self.resources.get_num_SOC_IOs()
-        total_power = power * (num_soc_ios / 2)
-        return total_power
-
-    def compute_VCC_BOOT_AUX(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_BOOT_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_BOOT_AUX() / divfactor)
-        num_boot_ios = self.resources.get_num_BOOT_IOs()
-        total_power = power * (num_boot_ios / 40)
-        if worsecase == False:
-            total_power *= 0.8
-        return total_power
-
-    def compute_VCC_SOC_AUX(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_SOC_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_SOC_AUX() / divfactor)
-        num_soc_ios = self.resources.get_num_SOC_IOs()
-        total_power = power * (num_soc_ios / 40)
-        if worsecase == False:
-            total_power *= 0.8
-        return total_power
-
     def compute_OBSOLETE(self, temperature : float, worsecase : bool = True) -> StaticPowerResult:
         result = StaticPowerResult(
             temperature  = temperature,
@@ -388,13 +356,13 @@ class RsDevice:
             HP_IO_1_2V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.2, worsecase),
             HP_IO_1_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.5, worsecase),
             HP_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.8, worsecase),
-            VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
+            # VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
             # VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
-            VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),
+            # VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),
             # VCC_GIGE_IO  = self.compute_VCC_GIGE_IO(temperature, worsecase),
             # VCC_USB_IO   = self.compute_VCC_USB_IO(temperature, worsecase),
-            VCC_BOOT_AUX = self.compute_VCC_BOOT_AUX(temperature, worsecase),
-            VCC_SOC_AUX  = self.compute_VCC_SOC_AUX(temperature, worsecase),
+            # VCC_BOOT_AUX = self.compute_VCC_BOOT_AUX(temperature, worsecase),
+            # VCC_SOC_AUX  = self.compute_VCC_SOC_AUX(temperature, worsecase),
             # VCC_GIGE_AUX = self.compute_VCC_GIGE_AUX(temperature, worsecase),
             # VCC_USB_AUX  = self.compute_VCC_USB_AUX(temperature, worsecase),
             # VCC_RC_OSC   = self.compute_VCC_RC_OSC(temperature, worsecase),

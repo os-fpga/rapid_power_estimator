@@ -300,12 +300,6 @@ class RsDevice:
             total += values[0]
         return total * factor
 
-    def compute_NOC(self, temperature : float, worsecase : bool) -> float:
-        # todo: not all device has NOC
-        divfactor, coeff = self.resources.get_divfactor_coeff_NOC(worsecase)
-        power = self.calculate(temperature, coeff)
-        return power
-
     def compute_A45(self, temperature : float, worsecase : bool) -> float:
         # todo: not all device has ACPU
         divfactor, coeff = self.resources.get_divfactor_coeff_A45(worsecase)
@@ -380,7 +374,7 @@ class RsDevice:
     def compute_OBSOLETE(self, temperature : float, worsecase : bool = True) -> StaticPowerResult:
         result = StaticPowerResult(
             temperature  = temperature,
-            NOC          = self.compute_NOC(temperature, worsecase),
+            # NOC          = self.compute_NOC(temperature, worsecase),
             # Mem_SS       = self.compute_Mem_SS(temperature, worsecase),
             A45          = self.compute_A45(temperature, worsecase),
             # Config       = self.compute_Config(temperature, worsecase),

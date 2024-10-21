@@ -219,6 +219,7 @@ class Peripheral_SubModule(SubModule):
         # todo: add GPIO
         peripherals += self.create_peripherals(1, 'PUFFcc', PeripheralType.PUFFCC)
         peripherals += self.create_peripherals(1, 'RC Oscillator', PeripheralType.RC_OSC)
+        peripherals += self.create_peripherals(1, 'NOC', PeripheralType.NOC)
 
         # add application processor for Gemini
         if self.resources.get_series() == 'Gemini':
@@ -462,6 +463,8 @@ class ComputeObject:
             return Puffcc0(context=context)
         elif type == PeripheralType.RC_OSC:
             return RCOsc0(context=context)
+        elif type == PeripheralType.NOC:
+            return Noc0(context=context)
         return None
 
 @dataclass
@@ -1625,6 +1628,29 @@ class RCOsc0(ComputeObject):
                 log(f'[RC_OSC]   {VCC_RC_OSC = }', RsLogLevel.DEBUG)
                 log(f'[RC_OSC]   {power = }', RsLogLevel.DEBUG)
                 log(f'[RC_OSC]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
+@dataclass
+class Noc0(ComputeObject):
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.NOC, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                total_power += power
+                # debug info
+                log(f'[NOC] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {power = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))
 
         return mylist

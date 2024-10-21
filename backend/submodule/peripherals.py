@@ -891,6 +891,27 @@ class A45_RISC_V_ACPU(ComputeObject):
         self.output.block_power = block_power
         return True
 
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.ACPU, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                total_power += power
+                # debug info
+                log(f'[ACPU] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {power = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
 @dataclass
 class N22_RISC_V_BCPU(ComputeObject):
     @dataclass

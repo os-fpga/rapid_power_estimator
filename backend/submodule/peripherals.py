@@ -1476,19 +1476,21 @@ class Usb2_0(ComputeObject):
 
     def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
         resources = self.get_context().get_device_resources()
-        VCC_USB_AUX = resources.get_VCC_USB_AUX()
-        VCC_USB_IO = resources.get_VCC_USB_IO()
-        IOS = resources.get_num_USB_IOs()
+        voltages = {
+            "VCC_USB_IO" : resources.get_VCC_USB_IO(),
+            "VCC_USB_AUX": resources.get_VCC_USB_AUX()
+        }
+        USB_IOS = resources.get_num_USB_IOs()
+        ios = {
+            "VCC_USB_IO" : math.ceil(USB_IOS / 2),
+            "VCC_USB_AUX"  : USB_IOS / 40
+        }
         mylist = []
 
         for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.USB2, scenario):
             total_power = 0.0
             for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor
-                if rail_type == 'VCC_USB_IO':
-                    power = power * VCC_USB_IO * math.ceil(IOS / 2)
-                elif rail_type == 'VCC_USB_AUX':
-                    power = power * VCC_USB_AUX * IOS / 40
+                power = np.polyval(s.coeffs, temperature) * s.factor * voltages.get(rail_type, 0.0) * ios.get(rail_type, 0.0)
                 total_power += power
                 # debug info
                 log(f'[USB2] {rail_type = }', RsLogLevel.DEBUG)
@@ -1496,9 +1498,9 @@ class Usb2_0(ComputeObject):
                 log(f'[USB2]   {scenario = }', RsLogLevel.DEBUG)
                 log(f'[USB2]   {s.coeffs = }', RsLogLevel.DEBUG)
                 log(f'[USB2]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[USB2]   {VCC_USB_AUX = }', RsLogLevel.DEBUG)
-                log(f'[USB2]   {VCC_USB_IO = }', RsLogLevel.DEBUG)
-                log(f'[USB2]   {IOS = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {USB_IOS = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {voltages = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {ios = }', RsLogLevel.DEBUG)
                 log(f'[USB2]   {power = }', RsLogLevel.DEBUG)
                 log(f'[USB2]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))
@@ -1612,19 +1614,21 @@ class GigE_0(ComputeObject):
 
     def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
         resources = self.get_context().get_device_resources()
-        VCC_GBE_AUX = resources.get_VCC_GBE_AUX()
-        VCC_GBE_IO = resources.get_VCC_GBE_IO()
-        IOS = resources.get_num_GIGE_IOs()
+        voltages = {
+            "VCC_GIGE_IO" : resources.get_VCC_GBE_IO(),
+            "VCC_GIGE_AUX": resources.get_VCC_GBE_AUX()
+        }
+        GIGE_IOS = resources.get_num_GIGE_IOs()
+        ios = {
+            "VCC_GIGE_IO" : GIGE_IOS / 2,
+            "VCC_GIGE_AUX": GIGE_IOS / 40
+        }
         mylist = []
 
         for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GIGE, scenario):
             total_power = 0.0
             for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor
-                if rail_type == 'VCC_GIGE_IO':
-                    power = power * VCC_GBE_IO * IOS / 2
-                elif rail_type == 'VCC_GIGE_AUX':
-                    power = power * VCC_GBE_AUX * IOS / 40
+                power = np.polyval(s.coeffs, temperature) * s.factor * voltages.get(rail_type, 0.0) * ios.get(rail_type, 0.0)
                 total_power += power
                 # debug info
                 log(f'[GIGE] {rail_type = }', RsLogLevel.DEBUG)
@@ -1632,9 +1636,9 @@ class GigE_0(ComputeObject):
                 log(f'[GIGE]   {scenario = }', RsLogLevel.DEBUG)
                 log(f'[GIGE]   {s.coeffs = }', RsLogLevel.DEBUG)
                 log(f'[GIGE]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[GIGE]   {VCC_GBE_AUX = }', RsLogLevel.DEBUG)
-                log(f'[GIGE]   {VCC_GBE_IO = }', RsLogLevel.DEBUG)
-                log(f'[GIGE]   {IOS = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {GIGE_IOS = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {voltages = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {ios = }', RsLogLevel.DEBUG)
                 log(f'[GIGE]   {power = }', RsLogLevel.DEBUG)
                 log(f'[GIGE]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))

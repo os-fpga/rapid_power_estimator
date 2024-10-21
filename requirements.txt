@@ -1,12 +1,19 @@
-flask
-marshmallow
-pytest
-pyinstaller
-flasgger
-flask-restful
-numpy
-jsonref
-codecov
-pytest-cov
-coverage
-pytest-mock
+flask                  # Lightweight web framework for building web applications in Python
+marshmallow            # Object serialization/deserialization library for converting Python objects to/from JSON
+pytest                 # Testing framework for writing and running test cases in Python
+pyinstaller            # Tool for packaging Python applications into standalone executables
+flasgger               # Swagger UI integration for Flask to generate API documentation
+flask-restful          # Flask extension to build RESTful APIs
+numpy                  # Library for numerical operations and array handling in Python
+jsonref                # Extension of JSON module to handle JSON references (e.g., $ref in JSON schemas)
+codecov                # Code coverage reporting tool, integrates with CI services like Travis, CircleCI
+pytest-cov             # Plugin for pytest to generate code coverage reports
+coverage               # Tool to measure code coverage of Python programs
+pytest-mock            # Pytest plugin to support mocking during tests
+sphinx                 # Documentation generator for Python projects
+sphinx-rtd-theme       # Read the Docs theme for Sphinx documentation
+sphinxcontrib-napoleon # Sphinx extension for Google style docstrings
+sphinxcontrib-svg2pdfconverter # Sphinx extension to convert SVG images to PDF in documentation
+sphinxcontrib-youtube  # Sphinx extension to embed YouTube videos in documentation
+sphinxcontrib-bibtex   # Sphinx extension to manage citations and bibliographies
+m2r2                   # Sphinx extension to convert Markdown files to reStructuredText for Sphinx documentation

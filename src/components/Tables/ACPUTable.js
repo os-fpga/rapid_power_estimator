@@ -33,6 +33,15 @@ function ACPUTable({ device, update, notify }) {
   const [disable, setDisable] = React.useState(true);
   const loadActivity = GetOptions('A45_Load');
 
+  // Toggle handler to enable/disable ACPU fields and freeze parameters
+  const handleToggle = () => {
+    if (!device || !href) {
+      setDisable(true);
+    } else if (device && href) {
+      setDisable(!disable); // Toggle the fields' disable state
+    }
+  };
+
   function fetchPort(port, link) {
     server.GET(server.peripheralPath(device, `${link}/${port.href}`), (data) => {
       const ep = parseInt(port.href.slice(-1), 10);
@@ -46,7 +55,6 @@ function ACPUTable({ device, update, notify }) {
   function fetchAcpuData(link) {
     if (link !== '') {
       server.GET(server.peripheralPath(device, link), (data) => {
-        // resolve cycling
         if (data.name !== acpuData.name
           || data.frequency !== acpuData.frequency
           || data.load !== acpuData.load) {
@@ -56,9 +64,7 @@ function ACPUTable({ device, update, notify }) {
             load: data.load,
           });
         }
-        setPowerData([
-          ['Block Power', data.consumption.block_power, 0],
-        ]);
+        setPowerData([['Block Power', data.consumption.block_power, 0]]);
         data.ports.forEach((port) => fetchPort(port, link));
       });
     }
@@ -75,7 +81,7 @@ function ACPUTable({ device, update, notify }) {
   function fetchData() {
     server.GET(server.api.fetch(server.Elem.peripherals, device), (data) => {
       const acpu = getPeripherals(data, 'acpu');
-      setDisable(acpu.length === 0);
+      setDisable(true);
       if (acpu.length > 0) {
         const link = acpu[0].href;
         setHref(link);
@@ -124,7 +130,6 @@ function ACPUTable({ device, update, notify }) {
   }
 
   const deleteRow = (index) => {
-    // no delete method for acpu. this is just clear name of the endpoint which mean disable
     const val = endpoints[index].data;
     val.name = '';
     server.PATCH(server.peripheralPath(device, `${href}/ep/${endpoints[index].ep}`), val, () => fetchAcpuData(href));
@@ -147,9 +152,25 @@ function ACPUTable({ device, update, notify }) {
 
   const powerHeader = ['Power', '%'];
   const title = 'ACPU';
+
   return (
     <div className="component-table-head">
       <ComponentLabel name={title} />
+
+      {/* Toggle Switch for ACPU */}
+      <div className="toggle-container">
+        <label htmlFor="acpu-toggle">ACPU Power</label>
+        <label className="toggle-switch">
+          <input
+            type="checkbox"
+            onChange={handleToggle}
+            checked={!disable}
+            disabled={!device || !href} // Disable toggle based on device and ACPU selection
+          />
+          <span className="slider" />
+        </label>
+      </div>
+
       <div className="cpu-container">
         <PowerTable
           title="ACPU power"
@@ -161,39 +182,58 @@ function ACPUTable({ device, update, notify }) {
         <div className="acpu-group-container">
           <div className="acpu-group">
             <label>ACPU name</label>
-            <input type="text" onChange={(e) => handleChange('name', e.target.value)} value={acpuData.name} disabled={disable} />
+            <input
+              type="text"
+              onChange={(e) => handleChange('name', e.target.value)}
+              value={acpuData.name}
+              disabled={disable} // Freeze when toggle is off
+            />
           </div>
           <div className="acpu-group">
             <label>Frequency</label>
-            <input type="number" min={0} step={1} onChange={(e) => handleChange('frequency', e.target.value)} value={acpuData.frequency} disabled={disable} />
+            <input
+              type="number"
+              min={0}
+              step={1}
+              onChange={(e) => handleChange('frequency', e.target.value)}
+              value={acpuData.frequency}
+              disabled={disable} // Freeze when toggle is off
+            />
           </div>
           <div className="acpu-group">
             <label>Load</label>
-            <Dropdown value={acpuData.load} onChangeHandler={(value) => handleChange('load', value)} items={loadActivity} disabled={disable} />
+            <Dropdown
+              value={acpuData.load}
+              onChangeHandler={(value) => handleChange('load', value)}
+              items={loadActivity}
+              disabled={disable} // Freeze when toggle is off
+            />
           </div>
         </div>
+
         <TableBase header={header} disabled={disable} onClick={() => setModalOpen(true)}>
-          {
-            endpoints.map((row, index) => (
-              (row.data !== undefined && row.data.name !== '')
-              && (
-              <tr key={row.ep}>
-                <StatusColumn messages={row.data.consumption.messages} />
-                <Actions
-                  onEditClick={() => { setEditIndex(index); setModalOpen(true); }}
-                  onDeleteClick={() => deleteRow(index)}
-                />
-                <td>{row.data.name}</td>
-                <SelectionCell val={row.data.activity} values={loadActivity} />
-                <PercentsCell val={row.data.read_write_rate} />
-                <PercentsCell val={row.data.toggle_rate} precition={1} />
-                <BandwidthCell val={row.data.consumption.calculated_bandwidth} />
-                <PowerCell val={row.data.consumption.noc_power} />
-              </tr>
-              )
-            ))
-          }
+          {endpoints.map((row, index) => (
+            row.data !== undefined && row.data.name !== ''
+            && (
+            <tr key={row.ep}>
+              <StatusColumn messages={row.data.consumption.messages} />
+              <Actions
+                onEditClick={() => { if (!disable) { setEditIndex(index); setModalOpen(true); } }}
+                onDeleteClick={() => { if (!disable) { deleteRow(index); } }}
+              />
+              <td>{row.data.name}</td>
+              <SelectionCell val={row.data.activity} values={loadActivity} disabled={disable} />
+              {' '}
+              {/* Freeze selection */}
+              <PercentsCell val={row.data.read_write_rate} disabled={disable} />
+              <PercentsCell val={row.data.toggle_rate} precition={1} disabled={disable} />
+              <BandwidthCell val={row.data.consumption.calculated_bandwidth} disabled={disable} />
+              <PowerCell val={row.data.consumption.noc_power} disabled={disable} />
+            </tr>
+            )
+          ))}
         </TableBase>
+
         {modalOpen && (
           <ABCPUModal
             title={title}

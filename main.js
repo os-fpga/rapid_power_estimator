@@ -193,14 +193,14 @@ const template = [
       { role: 'quit' },
     ],
   },
-  {
-    label: 'Config',
-    submenu: [
-      { label: 'Device' },
-      { label: 'Defaults' },
-      { label: 'Peripherals' },
-    ],
-  },
+  // {
+  //   label: 'Config',
+  //   submenu: [
+  //     { label: 'Device' },
+  //     { label: 'Defaults' },
+  //     { label: 'Peripherals' },
+  //   ],
+  // },
   ...(isDev ? [{
     label: 'Debug',
     submenu: [

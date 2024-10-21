@@ -2,11 +2,14 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+import numpy as np
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import FabricLeNotFoundException, FabricLeDescriptionAlreadyExistsException
+from .rs_device_resources import FabricLeNotFoundException, FabricLeDescriptionAlreadyExistsException, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
+from .rs_power_config import ElementType, ScenarioType, PowerValue
+from .rs_logger import RsLogLevel, log
 
 class Glitch_Factor(RsEnum):
     TYPICAL = 0, "Typical"
@@ -91,7 +94,7 @@ class Fabric_LE:
         
 class Fabric_LE_SubModule:
 
-    def __init__(self, resources, itemlist: List[Fabric_LE] = None):
+    def __init__(self, resources: RsDeviceResources, itemlist: List[Fabric_LE] = None):
         self.resources = resources
         self.total_lut6_available = resources.get_num_LUTs()
         self.total_flipflop_available = resources.get_num_FFs()
@@ -168,3 +171,26 @@ class Fabric_LE_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        NUM_CLB = self.resources.get_num_CLBs()
+        mylist = []
+
+        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.FABRIC_LE, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                power = power * NUM_CLB
+                total_power += power
+                # debug info
+                log(f'[FLE] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {NUM_CLB = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {power = }', RsLogLevel.DEBUG)
+                log(f'[FLE]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist

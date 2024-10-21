@@ -3,7 +3,7 @@ from enum import Enum
 from marshmallow import Schema, fields, post_load, validate
 from marshmallow.exceptions import ValidationError
 from utilities.common_utils import RsCustomException
-from typing import Any, List
+from typing import List, Tuple
 import json
 import jsonref
 import os
@@ -12,10 +12,6 @@ class PowerConfigFileNotFoundException(RsCustomException):
     def __init__(self, filepath: str):
         super().__init__(f"Power config file '{filepath}' not found")
 
-class PowerConfigStaticComponentNotFoundException(RsCustomException):
-    def __init__(self, component: str):
-        super().__init__(f"Static component '{component}' not found")
-
 class PowerConfigComponentNotFoundException(RsCustomException):
     def __init__(self, component: str):
         super().__init__(f"Component '{component}' not found")
@@ -23,10 +19,6 @@ class PowerConfigComponentNotFoundException(RsCustomException):
 class PowerConfigCoeffNotFoundException(RsCustomException):
     def __init__(self, component: str, name: str):
         super().__init__(f"Coeff '{name}' of component '{component}' not found")
-
-class PowerConfigPolynomialNotFoundException(RsCustomException):
-    def __init__(self, component: str, scenario: str):
-        super().__init__(f"Polynomial '{component}' for '{scenario}' case not found")
 
 class PowerConfigParsingException(RsCustomException):
     def __init__(self, error_message: str):
@@ -87,26 +79,17 @@ class ElementType(Enum):
     SRAM = 'sram'
     PWM = 'pwm'
     REGULATOR = 'regulator'
+    PUFFCC = 'puffcc'
+    RC_OSC = 'rc_osc'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'
     WORSE = 'worse'
 
 @dataclass
-class RsStaticPowerPolynomial:
-    length: int = field(default=0)
-    coeffs: List[float] = field(default_factory=list)
-    factor: float = field(default=0)
-
-@dataclass
-class RsStaticPowerScenario:
-    type: ScenarioType
-    polynomials: List[RsStaticPowerPolynomial] = field(default_factory=list)
-
-@dataclass
-class RsStaticPowerElement:
-    type: ElementType
-    scenarios: List[RsStaticPowerScenario] = field(default_factory=list)
+class PowerValue:
+    type: str
+    value: float
 
 @dataclass
 class RsDynamicPowerCoeff:
@@ -114,39 +97,26 @@ class RsDynamicPowerCoeff:
     value: float = field(default=0.0)
 
 @dataclass
-class RsDynamicPowerComponent:
+class RsStaticPowerScenario:
+    type: ScenarioType
+    coeffs: List[float]
+    factor: float
+
+@dataclass
+class RsStaticPowerConfig:
+    rail_type: str
+    domain: str
+    scenarios: List[RsStaticPowerScenario] = field(default_factory=list)
+
+@dataclass
+class RsComponent:
     type: ElementType
     coeffs: List[RsDynamicPowerCoeff] = field(default_factory=list)
+    static_power: List[RsStaticPowerConfig] = field(default_factory=list)
 
 @dataclass
 class RsPowerConfigData:
-    static: List[RsStaticPowerElement] = field(default_factory=list)
-    components: List[RsDynamicPowerComponent] = field(default_factory=list)
-
-class RsStaticPowerPolynomialSchema(Schema):
-    length = fields.Int()
-    coeffs = fields.List(fields.Float())
-    factor = fields.Float()
-
-    @post_load
-    def post_load(self, data, **kwargs):
-        return RsStaticPowerPolynomial(**data)
-
-class RsStaticPowerScenarioSchema(Schema):
-    type = fields.Enum(ScenarioType, by_value=True, required=True)
-    polynomials = fields.Nested(RsStaticPowerPolynomialSchema, many=True, validate=validate.Length(min=1), required=True)
-
-    @post_load
-    def post_load(self, data, **kwargs):
-        return RsStaticPowerScenario(**data)
-    
-class RsStaticPowerElementSchema(Schema):
-    type = fields.Enum(ElementType, by_value=True, required=True)
-    scenarios = fields.Nested(RsStaticPowerScenarioSchema, many=True, required=True)
-
-    @post_load
-    def post_load(self, data, **kwargs):
-        return RsStaticPowerElement(**data)
+    components: List[RsComponent] = field(default_factory=list)
 
 class RsDynamicPowerCoeffSchema(Schema):
     name = fields.Str(required=True)
@@ -156,17 +126,35 @@ class RsDynamicPowerCoeffSchema(Schema):
     def post_load(self, data, **kwargs):
         return RsDynamicPowerCoeff(**data)
 
-class RsDynamicPowerComponentSchema(Schema):
-    type = fields.Enum(ElementType, by_value=True, required=True)
-    coeffs = fields.Nested(RsDynamicPowerCoeffSchema, many=True, required=True)
+class RsStaticPowerScenarioSchema(Schema):
+    type = fields.Enum(ScenarioType, by_value=True, required=True)
+    coeffs = fields.List(fields.Float, required=True)
+    factor = fields.Float(required=True)
 
     @post_load
     def post_load(self, data, **kwargs):
-        return RsDynamicPowerComponent(**data)
+        return RsStaticPowerScenario(**data)
+
+class RsStaticPowerConfigSchema(Schema):
+    rail_type = fields.Str(required=True)
+    domain = fields.Str(required=True)
+    scenarios = fields.Nested(RsStaticPowerScenarioSchema, many=True, required=True)
+
+    @post_load
+    def post_load(self, data, **kwargs):
+        return RsStaticPowerConfig(**data)
+
+class RsComponentSchema(Schema):
+    type = fields.Enum(ElementType, by_value=True, required=True)
+    coeffs = fields.Nested(RsDynamicPowerCoeffSchema, many=True, required=False)
+    static_power = fields.Nested(RsStaticPowerConfigSchema, many=True, required=False)
+
+    @post_load
+    def post_load(self, data, **kwargs):
+        return RsComponent(**data)
 
 class RsPowerConfigDataSchema(Schema):
-    static = fields.Nested(RsStaticPowerElementSchema, many=True, required=True)
-    components = fields.Nested(RsDynamicPowerComponentSchema, many=True, required=True)
+    components = fields.Nested(RsComponentSchema, many=True, required=True)
 
     @post_load
     def post_load(self, data, **kwargs):
@@ -208,17 +196,7 @@ class RsPowerConfig:
     def is_loaded(self) -> bool:
         return self.loaded
 
-    def get_static_component(self, type: ElementType) -> RsStaticPowerElement:
-        # raise power data not available exception
-        if not self.loaded:
-            raise PowerConfigNotAvailable()
-
-        comps = [c for c in self.data.static if c.type == type]
-        if comps:
-            return comps[0]
-        raise PowerConfigStaticComponentNotFoundException(type.value)
-
-    def get_component(self, type: ElementType) -> RsDynamicPowerComponent:
+    def get_component(self, type: ElementType) -> RsComponent:
         # raise power data not available exception
         if not self.loaded:
             raise PowerConfigNotAvailable()
@@ -234,8 +212,13 @@ class RsPowerConfig:
             return sum(values) / len(values)
         raise PowerConfigCoeffNotFoundException(type.value, name)
 
-    def get_polynomial_coeff(self, type: ElementType, scenario: ScenarioType) -> List[RsStaticPowerPolynomial]:
-        coeffs = [c for c in self.get_static_component(type).scenarios if c.type == scenario]
-        if coeffs:
-            return coeffs[0].polynomials
-        raise PowerConfigPolynomialNotFoundException(type.value, scenario.value)
+    def get_polynomial(self, type: ElementType, scenario: ScenarioType = None, rail_type: str = None) -> List[Tuple[str, List[RsStaticPowerScenario]]]:
+        mylist = []
+        for sp in self.get_component(type).static_power:
+            if rail_type is None or sp.rail_type == rail_type:
+                scene_list = []
+                for scene in sp.scenarios:
+                    if scenario is None or scene.type == scenario:
+                        scene_list.append(scene)
+                mylist.append((sp.rail_type, scene_list))
+        return mylist

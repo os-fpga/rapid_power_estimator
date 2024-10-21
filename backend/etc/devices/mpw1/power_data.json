@@ -1,7 +1,4 @@
 {
-    "static": {
-        "$ref": "static_power_data.json"
-    },
     "components": [
         { "$ref": "clocking.json" },
         { "$ref": "dsp.json" },
@@ -21,6 +18,8 @@
         { "$ref": "sram.json" },
         { "$ref": "pwm.json" },
         { "$ref": "noc.json" },
+        { "$ref": "puffcc.json" },
+        { "$ref": "rc_osc.json" },
         { "$ref": "regulator.json" }
     ]
 }

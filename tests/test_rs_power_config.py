@@ -12,9 +12,7 @@ from submodule.rs_power_config import (
     PowerConfigFileNotFoundException, 
     PowerConfigParsingException, 
     PowerConfigSchemaValidationException, 
-    PowerConfigComponentNotFoundException,
-    PowerConfigStaticComponentNotFoundException,
-    PowerConfigPolynomialNotFoundException
+    PowerConfigComponentNotFoundException
 )
 
 def test_not_loaded():
@@ -54,25 +52,15 @@ def test_get_coeff():
     pwrcfg.load('tests/data/power_config.json')
     assert 0.1234 == pwrcfg.get_coeff(ElementType.DSP, "TEST1")
 
-def test_get_polynomial_coeff_with_not_exist_component():
-    pwrcfg = RsPowerConfig()
-    pwrcfg.load('tests/data/power_config.json')
-    with pytest.raises(PowerConfigStaticComponentNotFoundException):
-        pwrcfg.get_polynomial_coeff(ElementType.NOC, ScenarioType.TYPICAL)
-
-def test_get_polynomial_coeff_with_not_exist_scenario():
-    pwrcfg = RsPowerConfig()
-    pwrcfg.load('tests/data/power_config.json')
-    with pytest.raises(PowerConfigPolynomialNotFoundException):
-        pwrcfg.get_polynomial_coeff(ElementType.CLB, ScenarioType.WORSE)
-
 def test_get_polynomial_coeff():
     pwrcfg = RsPowerConfig()
     result = pwrcfg.load('tests/data/power_config.json')
-    polynomials = pwrcfg.get_polynomial_coeff(ElementType.CLB, ScenarioType.TYPICAL)
+    polynomials = pwrcfg.get_polynomial(ElementType.DSP, ScenarioType.TYPICAL)
     assert 1 == len(polynomials)
     assert True == result
     assert True == pwrcfg.is_loaded()
-    assert 5 == polynomials[0].length
-    assert 1.25 == polynomials[0].factor
-    assert [0.1, 0.2, 0.3, 0.4, 0.5] == polynomials[0].coeffs
+    assert 'Vcc_core (DSP)' == polynomials[0][0]
+    assert True == isinstance(polynomials[0][1], list)
+    assert 1 == len(polynomials[0][1])
+    assert 54321.1 == polynomials[0][1][0].factor
+    assert [0.1, 0.2, 0.3, 0.4, 0.5] == polynomials[0][1][0].coeffs

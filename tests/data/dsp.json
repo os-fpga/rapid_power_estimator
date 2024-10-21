@@ -4,5 +4,14 @@
         {
             "name": "TEST1", "value": 0.1234
         }    
+    ],
+    "static_power": [
+        {
+            "rail_type": "Vcc_core (DSP)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "typical", "coeffs": [0.1, 0.2, 0.3, 0.4, 0.5], "factor": 54321.1 }
+            ]
+        }
     ]
 }

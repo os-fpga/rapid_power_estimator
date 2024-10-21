@@ -2,12 +2,15 @@
 #  Copyright (C) 2024 RapidSilicon
 #  Authorized use only
 #
+import math
+import numpy as np
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import IntFlag
 from typing import Any, List, Dict, Tuple
 from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
+from .rs_power_config import ElementType, PowerValue, ScenarioType
 from .rs_message import RsMessage, RsMessageManager
 from .rs_logger import log, RsLogLevel
 
@@ -185,30 +188,7 @@ class Peripheral_SubModule(SubModule):
 
     def __init__(self, resources : RsDeviceResources):
         self.resources = resources
-
-        # for debugging usage
-        # self.peripherals : List[Peripheral] = [
-        #     Peripheral(name='SPI/QSPI', type=PeripheralType.SPI, usage=Peripherals_Usage.Boot, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
-        #     Peripheral(name='JTAG', type=PeripheralType.JTAG, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU, context=self),
-        #     Peripheral(name='I2C', type=PeripheralType.I2C, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, context=self),
-        #     Peripheral(name='UART0 (BCPU)', type=PeripheralType.UART, index=0, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.BCPU, context=self),
-        #     Peripheral(name='UART1 (ACPU)', type=PeripheralType.UART, index=1, usage=Peripherals_Usage.Debug, targets=PeripheralTarget.ACPU, context=self),
-        #     Peripheral(name='USB 2.0', type=PeripheralType.USB2, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
-        #     Peripheral(name='GigE', type=PeripheralType.GIGE, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.FABRIC, context=self),
-        #     Peripheral(name="GPIO (BCPU)", type=PeripheralType.GPIO, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.BCPU, enable=True, context=self),
-        #     Peripheral(name="GPIO (ACPU)", type=PeripheralType.GPIO, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU, enable=True, context=self),
-        #     Peripheral(name="GPIO (Fabric)", type=PeripheralType.GPIO, index=2, usage=Peripherals_Usage.App, targets=PeripheralTarget.FABRIC, enable=True, context=self),
-        #     Peripheral(name="PWM", type=PeripheralType.PWM, usage=Peripherals_Usage.App, enable=True, context=self),
-        #     Peripheral(name="DDR", type=PeripheralType.DDR, index=0, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 1333000000, "memory_type" : Memory_Type.DDR4 }),
-        #     Peripheral(name="OCM", type=PeripheralType.OCM, index=1, usage=Peripherals_Usage.App, targets=PeripheralTarget.ACPU | PeripheralTarget.BCPU | PeripheralTarget.FABRIC | PeripheralTarget.DMA, enable=False, context=self, init_props={ "data_rate" : 533000000, "memory_type" : Memory_Type.SRAM }),
-        #     Peripheral(name='DMA', type=PeripheralType.DMA, enable=True, max_ports=4, context=self),
-        #     Peripheral(name='N22 RISC-V', type=PeripheralType.BCPU, enable=True, max_ports=4, context=self),
-        #     Peripheral(name='A45 RISC-V', type=PeripheralType.ACPU, enable=True, max_ports=4, context=self, init_props={ 'frequency' : 533000000 }),
-        #     Peripheral(name='Fabric', type=PeripheralType.FPGA_COMPLEX, enable=True, targets=PeripheralTarget.DMA, max_ports=4, context=self),
-        # ]
-
         self.peripherals : List[Peripheral] = self.initialize_peripherals()
-
         # todo: total io available should be populated from device xml
         self.total_io_available = 40
         self.total_io_used = 0
@@ -221,7 +201,7 @@ class Peripheral_SubModule(SubModule):
         self.total_dma_block_power = 0.0
 
     def initialize_peripherals(self) -> List['Peripheral']:
-        # add peripherals based onthe configuration in device.xml
+        # add peripherals based on the configuration in device.xml
         peripherals: List['Peripheral'] = []
         peripherals += self.create_peripherals(1, 'SPI/QSPI', PeripheralType.SPI)
         peripherals += self.create_peripherals(self.resources.get_num_I2Cs(), 'I2C', PeripheralType.I2C)
@@ -235,7 +215,10 @@ class Peripheral_SubModule(SubModule):
         peripherals += self.create_peripherals(self.resources.get_num_DMAs(), 'DMA', PeripheralType.DMA)
         peripherals += self.create_peripherals(1, 'N22 RISC-V', PeripheralType.BCPU)
         peripherals += self.create_peripherals(1, 'Fabric', PeripheralType.FPGA_COMPLEX)
-        # todo: add GPIO
+        peripherals += self.create_peripherals(1, 'GPIO', PeripheralType.GPIO)
+        peripherals += self.create_peripherals(1, 'PUFFcc', PeripheralType.PUFFCC)
+        peripherals += self.create_peripherals(1, 'RC Oscillator', PeripheralType.RC_OSC)
+        peripherals += self.create_peripherals(1, 'NOC', PeripheralType.NOC)
 
         # add application processor for Gemini
         if self.resources.get_series() == 'Gemini':
@@ -443,6 +426,9 @@ class ComputeObject:
     def compute(self) -> bool:
         return False
 
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        return []
+
     @classmethod
     def get_compute_object(cls, type: PeripheralType, context: IPeripheral) -> 'ComputeObject':
         if type == PeripheralType.UART:
@@ -472,6 +458,12 @@ class ComputeObject:
             return FPGA_Fabric(context=context)
         elif type == PeripheralType.DMA:
             return Dma0(context=context)
+        elif type == PeripheralType.PUFFCC:
+            return Puffcc0(context=context)
+        elif type == PeripheralType.RC_OSC:
+            return RCOsc0(context=context)
+        elif type == PeripheralType.NOC:
+            return Noc0(context=context)
         return None
 
 @dataclass
@@ -551,6 +543,9 @@ class Peripheral(IPeripheral):
 
     def compute(self) -> bool:
         return self.object.compute()
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        return self.object.compute_static_power(temperature, scenario)
 
 @dataclass
 class common_output_:
@@ -895,6 +890,27 @@ class A45_RISC_V_ACPU(ComputeObject):
         self.output.block_power = block_power
         return True
 
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.ACPU, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                total_power += power
+                # debug info
+                log(f'[ACPU] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {power = }', RsLogLevel.DEBUG)
+                log(f'[ACPU]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
 @dataclass
 class N22_RISC_V_BCPU(ComputeObject):
     @dataclass
@@ -1024,6 +1040,27 @@ class N22_RISC_V_BCPU(ComputeObject):
         else:
             self.output.boot_power = boot_power
         return True
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.BCPU, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                total_power += power
+                # debug info
+                log(f'[BCPU] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[BCPU]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[BCPU]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[BCPU]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[BCPU]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[BCPU]   {power = }', RsLogLevel.DEBUG)
+                log(f'[BCPU]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
 
 @dataclass
 class Memory0(ComputeObject):
@@ -1156,6 +1193,37 @@ class Memory0(ComputeObject):
 
         return True
 
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        if self.get_context().get_type() != PeripheralType.DDR:
+            return []
+
+        resources = self.get_context().get_device_resources()
+        VCC_DDR_IO = resources.get_VCC_DDR_IO()
+        DDR_IOS = resources.get_num_DDR_IOs()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.DDR, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                if rail_type == 'VCC_DDR_IO':
+                    power = power * VCC_DDR_IO * DDR_IOS / 2
+                total_power += power
+                # debug info
+                log(f'[MEM0] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {self.get_context().get_type() = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {VCC_DDR_IO = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {DDR_IOS = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {power = }', RsLogLevel.DEBUG)
+                log(f'[MEM0]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
 @dataclass
 class Gpio0(ComputeObject):
     @dataclass
@@ -1263,6 +1331,45 @@ class Gpio0(ComputeObject):
 
         return True
 
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        voltages = {
+            "VCC_BOOT_IO" : resources.get_VCC_BOOT_IO(),
+            "VCC_SOC_IO"  : resources.get_VCC_SOC_IO(),
+            "VCC_BOOT_AUX": resources.get_VCC_BOOT_AUX(),
+            "VCC_SOC_AUX" : resources.get_VCC_SOC_AUX(),
+        }
+        BOOT_IOS = resources.get_num_BOOT_IOs()
+        SOC_IOS = resources.get_num_SOC_IOs()
+        ios = {
+            "VCC_BOOT_IO" : math.ceil(BOOT_IOS / 2),
+            "VCC_SOC_IO"  : (SOC_IOS / 2),
+            "VCC_BOOT_AUX": (BOOT_IOS / 40),
+            "VCC_SOC_AUX" : (SOC_IOS / 40)
+        }
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GPIO, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * voltages.get(rail_type, 0.0) * ios.get(rail_type, 0.0)
+                total_power += power
+                # debug info
+                log(f'[GPIO] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {BOOT_IOS = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {SOC_IOS = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {voltages = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {ios = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {power = }', RsLogLevel.DEBUG)
+                log(f'[GPIO]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
 @dataclass
 class Usb2_0(ComputeObject):
     @dataclass
@@ -1366,6 +1473,39 @@ class Usb2_0(ComputeObject):
         log(f'[USB2] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        voltages = {
+            "VCC_USB_IO" : resources.get_VCC_USB_IO(),
+            "VCC_USB_AUX": resources.get_VCC_USB_AUX()
+        }
+        USB_IOS = resources.get_num_USB_IOs()
+        ios = {
+            "VCC_USB_IO" : math.ceil(USB_IOS / 2),
+            "VCC_USB_AUX"  : USB_IOS / 40
+        }
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.USB2, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * voltages.get(rail_type, 0.0) * ios.get(rail_type, 0.0)
+                total_power += power
+                # debug info
+                log(f'[USB2] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {USB_IOS = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {voltages = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {ios = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {power = }', RsLogLevel.DEBUG)
+                log(f'[USB2]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
 
 @dataclass
 class GigE_0(ComputeObject):
@@ -1471,6 +1611,112 @@ class GigE_0(ComputeObject):
         log(f'[GIGE] {self.output.block_power = }', RsLogLevel.DEBUG)
 
         return True
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        voltages = {
+            "VCC_GIGE_IO" : resources.get_VCC_GBE_IO(),
+            "VCC_GIGE_AUX": resources.get_VCC_GBE_AUX()
+        }
+        GIGE_IOS = resources.get_num_GIGE_IOs()
+        ios = {
+            "VCC_GIGE_IO" : GIGE_IOS / 2,
+            "VCC_GIGE_AUX": GIGE_IOS / 40
+        }
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GIGE, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * voltages.get(rail_type, 0.0) * ios.get(rail_type, 0.0)
+                total_power += power
+                # debug info
+                log(f'[GIGE] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {GIGE_IOS = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {voltages = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {ios = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {power = }', RsLogLevel.DEBUG)
+                log(f'[GIGE]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
+@dataclass
+class Puffcc0(ComputeObject):
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        VCC_PUF = resources.get_VCC_PUF()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.PUFFCC, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * VCC_PUF * s.factor
+                total_power += power
+                # debug info
+                log(f'[PUFFCC] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {VCC_PUF = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {power = }', RsLogLevel.DEBUG)
+                log(f'[PUFFCC]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
+@dataclass
+class RCOsc0(ComputeObject):
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        VCC_RC_OSC = resources.get_VCC_RC_OSC()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.RC_OSC, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * VCC_RC_OSC * s.factor
+                total_power += power
+                # debug info
+                log(f'[RC_OSC] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {VCC_RC_OSC = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {power = }', RsLogLevel.DEBUG)
+                log(f'[RC_OSC]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
+@dataclass
+class Noc0(ComputeObject):
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.NOC, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                total_power += power
+                # debug info
+                log(f'[NOC] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {power = }', RsLogLevel.DEBUG)
+                log(f'[NOC]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
 
 @dataclass
 class I2c0(ComputeObject):

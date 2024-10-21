@@ -58,5 +58,15 @@
         { "name": "dma.ocm", "value": 4.64649E-06 },
         { "name": "dma.ocm", "value": 4.74549E-06 },
         { "name": "dma.ocm", "value": 4.69132E-06 }
+    ],
+    "static_power": [
+        {
+            "rail_type": "Vcc_core (NOC)",
+            "domain": "SOC",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.00000000005, -0.000000001, 0.000000002, 0.00001, 0.0003], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.00000000003, -0.000000001, 0.00000001, 0.000005, 0.00006], "factor": 1.0 }
+            ]
+        }
     ]
 }

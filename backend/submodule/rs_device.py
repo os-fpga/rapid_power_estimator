@@ -5,12 +5,13 @@
 import numpy as np
 import math
 from typing import List
+from .rs_power_config import PowerValue, ScenarioType
 from .rs_device_resources import RsDeviceResources, ModuleType, IO_BankType
-from .clock import Clock_SubModule, Clock
-from .fabric_logic_element import Fabric_LE_SubModule, Fabric_LE
-from .dsp import DSP_SubModule, DSP
-from .bram import BRAM_SubModule, BRAM, BRAM_Type, PortProperties
-from .io import IO_SubModule, IO
+from .clock import Clock_SubModule
+from .fabric_logic_element import Fabric_LE_SubModule
+from .dsp import DSP_SubModule
+from .bram import BRAM_SubModule
+from .io import IO_SubModule
 from .peripherals import Peripheral_SubModule
 from utilities.common_utils import update_attributes
 from dataclasses import dataclass, field
@@ -105,66 +106,21 @@ class Specification:
 
 @dataclass
 class StaticPowerResult():
-    NOC: float = field(default=0.0)
-    Mem_SS: float = field(default=0.0)
-    A45: float = field(default=0.0)
-    Config: float = field(default=0.0)
-    CLB: float = field(default=0.0)
-    BRAM: float = field(default=0.0)
-    DSP: float = field(default=0.0)
-    Gearbox_HP: float = field(default=0.0)
-    Gearbox_HR: float = field(default=0.0)
-    HP_IO: float = field(default=0.0)
-    HR_IO: float = field(default=0.0)
-    Aux: float = field(default=0.0)
-    HP_Aux: float = field(default=0.0)
-    HR_Aux: float = field(default=0.0)
-    HR_IO_1_8V: float = field(default=0.0)
-    HR_IO_2_5V: float = field(default=0.0)
-    HR_IO_3_3V: float = field(default=0.0)
-    HP_IO_1_2V: float = field(default=0.0)
-    HP_IO_1_5V: float = field(default=0.0)
-    HP_IO_1_8V: float = field(default=0.0)
-    VCC_BOOT_IO: float = field(default=0.0)
-    VCC_DDR_IO: float = field(default=0.0)
-    VCC_SOC_IO: float = field(default=0.0)
-    VCC_GIGE_IO: float = field(default=0.0)
-    VCC_USB_IO: float = field(default=0.0)
-    VCC_BOOT_AUX: float = field(default=0.0)
-    VCC_SOC_AUX: float = field(default=0.0)
-    VCC_GIGE_AUX: float = field(default=0.0)
-    VCC_USB_AUX: float = field(default=0.0)
-    VCC_RC_OSC: float = field(default=0.0)
-    VCC_PUF: float = field(default=0.0)
-    temperature: float = field(default=0.0)
+    powers: List[PowerValue] = field(default_factory=list)
     next_temperature: float = field(default=0.0)
+    temperature: float = field(default=0.0)
+
+    def add(self, powers: List[PowerValue]) -> None:
+        self.powers.extend(powers)
 
     def get_total_power(self) -> float:
-        total = 0.0
-        for key, value in self.__dict__.items():
-            if key == 'temperature' or key == 'next_temperature':
-                continue
-            total += value
-        return total
+        return sum([x.value for x in self.powers])
 
     def get_processing_total_power(self) -> float:
-        total = 0.0
-        total += self.NOC
-        total += self.Mem_SS
-        total += self.A45
-        total += self.Config
-        total += self.VCC_BOOT_IO
-        total += self.VCC_DDR_IO
-        total += self.VCC_SOC_IO
-        total += self.VCC_GIGE_IO
-        total += self.VCC_USB_IO
-        total += self.VCC_BOOT_AUX
-        total += self.VCC_SOC_AUX
-        total += self.VCC_GIGE_AUX
-        total += self.VCC_USB_AUX
-        total += self.VCC_RC_OSC
-        total += self.VCC_PUF
-        return total
+        return sum([x.value for x in self.powers if x.type in [
+            'Vcc_core (NOC)', 'Vcc_core (Mem_SS)', 'Vcc_core (A45)', 'Vcc_core (Config)', 'VCC_BOOT_IO', 'VCC_DDR_IO', 'VCC_SOC_IO',
+            'VCC_GIGE_IO', 'VCC_USB_IO', 'VCC_BOOT_AUX', 'VCC_SOC_AUX', 'VCC_GIGE_AUX', 'VCC_USB_AUX', 'VCC_RC_OSC', 'VCC_PUF'
+        ]])
 
     def get_fpga_total_power(self) -> float:
         return self.get_total_power() - self.get_processing_total_power()
@@ -204,34 +160,19 @@ class RsDevice:
         self.static_power_output = [StaticPowerResult(), StaticPowerResult()]
 
         # fabric logic element module
-        self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, [
-            # Fabric_LE(enable=True, clock='CLK_100', name='Test 1', lut6=20, flip_flop=50),
-            # Fabric_LE(enable=True, clock='CLK_233', name='Test 2', lut6=10, flip_flop=30)
-        ]))
+        self.resources.register_module(ModuleType.FABRIC_LE, Fabric_LE_SubModule(self.resources, []))
 
         # dsp module
-        self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, [
-            # DSP(number_of_multipliers=11, enable=True, name="test test 1", clock='CLK_100'),
-            # DSP(number_of_multipliers=12, enable=True, name="test test 2", clock='CLK_233')
-        ]))
+        self.resources.register_module(ModuleType.DSP, DSP_SubModule(self.resources, []))
 
         # bram module
-        self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, [
-            # BRAM(name="test 1", bram_used=16, enable=True, type=BRAM_Type.BRAM_18k_TDP, port_a=PortProperties(clock='CLK_100'), port_b=PortProperties(clock='CLK_233')),
-            # BRAM(name="test 2", bram_used=17, enable=True, type=BRAM_Type.BRAM_18k_TDP)
-        ]))
+        self.resources.register_module(ModuleType.BRAM, BRAM_SubModule(self.resources, []))
 
         # io module
-        self.resources.register_module(ModuleType.IO, IO_SubModule(self.resources, [
-            # IO(name="test 1", clock="CLK_100", enable=True),
-            # IO(name="test 2", clock="CLK_233")
-        ]))
+        self.resources.register_module(ModuleType.IO, IO_SubModule(self.resources, []))
 
         # clocking module
-        self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, [
-            # Clock(True, "Default Clock", port="CLK_100", frequency=100000000),
-            # Clock(True, "PLL Clock", port="CLK_233", frequency=233000000)
-        ]))
+        self.resources.register_module(ModuleType.CLOCKING, Clock_SubModule(self.resources, []))
 
         # soc peripherals module
         self.resources.register_module(ModuleType.SOC_PERIPHERALS, Peripheral_SubModule(self.resources))
@@ -359,50 +300,6 @@ class RsDevice:
             total += values[0]
         return total * factor
 
-    def compute_NOC(self, temperature : float, worsecase : bool) -> float:
-        # todo: not all device has NOC
-        divfactor, coeff = self.resources.get_divfactor_coeff_NOC(worsecase)
-        power = self.calculate(temperature, coeff)
-        return power
-
-    def compute_Mem_SS(self, temperature : float, worsecase : bool) -> float:
-        # todo: not all device has Mem
-        divfactor, coeff = self.resources.get_divfactor_coeff_Mem_SS(worsecase)
-        power = self.calculate(temperature, coeff)
-        return power
-
-    def compute_A45(self, temperature : float, worsecase : bool) -> float:
-        # todo: not all device has ACPU
-        divfactor, coeff = self.resources.get_divfactor_coeff_A45(worsecase)
-        power = self.calculate(temperature, coeff)
-        return power
-
-    def compute_Config(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_Config(worsecase)
-        power = self.calculate(temperature, coeff)
-        return power
-
-    def compute_CLB(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_CLB(worsecase)
-        power = self.calculate(temperature, coeff)
-        num_clbs = self.resources.get_num_CLBs()
-        total_power = num_clbs * power
-        return total_power
-
-    def compute_BRAM(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_BRAM(worsecase)
-        power = self.calculate(temperature, coeff)
-        num_brams = self.resources.get_num_36K_BRAM()
-        total_power = num_brams * power
-        return total_power
-
-    def compute_DSP(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_DSP(worsecase)
-        power = self.calculate(temperature, coeff)
-        num_dsps = self.resources.get_num_DSP_BLOCKs()
-        total_power = num_dsps * power
-        return total_power
-
     def compute_Gearbox_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_GEARBOX_IO_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)
@@ -436,95 +333,16 @@ class RsDevice:
         total_power = power * num_io_banks_used * 20 * voltage / divfactor
         return total_power
 
-    def compute_VCC_BOOT_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_BOOT_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_BOOT_IO() / divfactor)
-        num_boot_ios = self.resources.get_num_BOOT_IOs()
-        total_power = power * math.ceil(num_boot_ios / 2)
-        return total_power
-
-    def compute_VCC_DDR_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_DDR_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_DDR_IO() / divfactor)
-        num_ddr_ios = self.resources.get_num_DDR_IOs()
-        total_power = power * (num_ddr_ios / 2)
-        return total_power
-
-    def compute_VCC_SOC_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_SOC_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_SOC_IO() / divfactor)
-        num_soc_ios = self.resources.get_num_SOC_IOs()
-        total_power = power * (num_soc_ios / 2)
-        return total_power
-
-    def compute_VCC_GIGE_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_GIGE_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_GBE_IO() / divfactor)
-        num_gige_ios = self.resources.get_num_GIGE_IOs()
-        total_power = power * (num_gige_ios / 2)
-        return total_power
-
-    def compute_VCC_USB_IO(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_USB_IO(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_USB_IO() / divfactor)
-        num_usb_ios = self.resources.get_num_USB_IOs()
-        total_power = power * math.ceil(num_usb_ios / 2)
-        return total_power
-
-    def compute_VCC_BOOT_AUX(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_BOOT_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_BOOT_AUX() / divfactor)
-        num_boot_ios = self.resources.get_num_BOOT_IOs()
-        total_power = power * (num_boot_ios / 40)
-        if worsecase == False:
-            total_power *= 0.8
-        return total_power
-
-    def compute_VCC_SOC_AUX(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_SOC_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_SOC_AUX() / divfactor)
-        num_soc_ios = self.resources.get_num_SOC_IOs()
-        total_power = power * (num_soc_ios / 40)
-        if worsecase == False:
-            total_power *= 0.8
-        return total_power
-
-    def compute_VCC_GIGE_AUX(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_GIGE_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_GBE_AUX() / divfactor)
-        num_gige_ios = self.resources.get_num_GIGE_IOs()
-        total_power = power * (num_gige_ios / 40)
-        if worsecase == False:
-            total_power *= 0.8
-        return total_power
-
-    def compute_VCC_USB_AUX(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_USB_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_USB_AUX() / divfactor)
-        num_usb_ios = self.resources.get_num_USB_IOs()
-        total_power = power * (num_usb_ios / 40)
-        return total_power
-
-    def compute_VCC_RC_OSC(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_RC_OSC(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_RC_OSC() / divfactor)
-        return power
-
-    def compute_VCC_PUF(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_VCC_PUF(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_PUF() / divfactor)
-        return power
-
-    def compute(self, temperature : float, worsecase : bool = True) -> StaticPowerResult:
+    def compute_OBSOLETE(self, temperature : float, worsecase : bool = True) -> StaticPowerResult:
         result = StaticPowerResult(
             temperature  = temperature,
-            NOC          = self.compute_NOC(temperature, worsecase),
-            Mem_SS       = self.compute_Mem_SS(temperature, worsecase),
-            A45          = self.compute_A45(temperature, worsecase),
-            Config       = self.compute_Config(temperature, worsecase),
-            CLB          = self.compute_CLB(temperature, worsecase),
-            BRAM         = self.compute_BRAM(temperature, worsecase),
-            DSP          = self.compute_DSP(temperature, worsecase),
+            # NOC          = self.compute_NOC(temperature, worsecase),
+            # Mem_SS       = self.compute_Mem_SS(temperature, worsecase),
+            # A45          = self.compute_A45(temperature, worsecase),
+            # Config       = self.compute_Config(temperature, worsecase),
+            # CLB          = self.compute_CLB(temperature, worsecase),
+            # BRAM         = self.compute_BRAM(temperature, worsecase),
+            # DSP          = self.compute_DSP(temperature, worsecase),
             Gearbox_HP   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
@@ -538,34 +356,39 @@ class RsDevice:
             HP_IO_1_2V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.2, worsecase),
             HP_IO_1_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.5, worsecase),
             HP_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.8, worsecase),
-            VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
-            VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
-            VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),
-            VCC_GIGE_IO  = self.compute_VCC_GIGE_IO(temperature, worsecase),
-            VCC_USB_IO   = self.compute_VCC_USB_IO(temperature, worsecase),
-            VCC_BOOT_AUX = self.compute_VCC_BOOT_AUX(temperature, worsecase),
-            VCC_SOC_AUX  = self.compute_VCC_SOC_AUX(temperature, worsecase),
-            VCC_GIGE_AUX = self.compute_VCC_GIGE_AUX(temperature, worsecase),
-            VCC_USB_AUX  = self.compute_VCC_USB_AUX(temperature, worsecase),
-            VCC_RC_OSC   = self.compute_VCC_RC_OSC(temperature, worsecase),
-            VCC_PUF      = self.compute_VCC_PUF(temperature, worsecase)
+            # VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
+            # VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
+            # VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),
+            # VCC_GIGE_IO  = self.compute_VCC_GIGE_IO(temperature, worsecase),
+            # VCC_USB_IO   = self.compute_VCC_USB_IO(temperature, worsecase),
+            # VCC_BOOT_AUX = self.compute_VCC_BOOT_AUX(temperature, worsecase),
+            # VCC_SOC_AUX  = self.compute_VCC_SOC_AUX(temperature, worsecase),
+            # VCC_GIGE_AUX = self.compute_VCC_GIGE_AUX(temperature, worsecase),
+            # VCC_USB_AUX  = self.compute_VCC_USB_AUX(temperature, worsecase),
+            # VCC_RC_OSC   = self.compute_VCC_RC_OSC(temperature, worsecase),
+            # VCC_PUF      = self.compute_VCC_PUF(temperature, worsecase)
         )
         return result
 
-    def compute_power_junction_temperature(self, temperature : float, theta_ja : float, dynamic_power : float, \
-            worsecase : bool, N : int = 4) -> StaticPowerResult:
+    def compute(self, temperature: float, scenerio: ScenarioType) -> StaticPowerResult:
+        # compute fabric/fpga static power
+        power = StaticPowerResult()
+        for modtype in (ModuleType.FABRIC_LE, ModuleType.BRAM, ModuleType.DSP):
+            power.add(self.get_module(modtype).compute_static_power(temperature, scenerio))
+
+        # compute processin/peripheral static power
+        for periph in self.get_module(ModuleType.SOC_PERIPHERALS).get_peripherals():
+            power.add(periph.compute_static_power(temperature, scenerio))
+        return power
+
+    def compute_power_junction_temperature(self, temperature: float, theta_ja: float, dynamic_power: float, \
+            scenario: ScenarioType, N: int = 4) -> StaticPowerResult:
         next_temperature = temperature
         res = None
         for i in range(N):
-            res = self.compute(next_temperature, worsecase)
+            res = self.compute(next_temperature, scenario)
             res.next_temperature = temperature + (theta_ja * (res.get_total_power() + dynamic_power))
             next_temperature = res.next_temperature
-            # print("[DEBUG]", i, temperature, theta_ja, dynamic_power, worsecase, next_temperature, \
-            #     res.get_total_power(), \
-            #     res.get_processing_total_power(), \
-            #     res.get_fpga_total_power(), \
-            #     # res, \
-            #     file=sys.stderr)
         return res
 
     def compute_static_power(self):
@@ -574,14 +397,14 @@ class RsDevice:
             self.specification.thermal.ambient.worsecase, \
             self.specification.thermal.theta_ja, \
             self.get_total_dynamic_power(True),
-            True)
+            ScenarioType.WORSE)
 
         # static power & junction temperature for typical case
         self.static_power_output[1] = self.compute_power_junction_temperature( \
             self.specification.thermal.ambient.typical, \
             self.specification.thermal.theta_ja, \
             self.get_total_dynamic_power(False),
-            False)
+            ScenarioType.TYPICAL)
 
     def clear(self) -> None:
         # clear all device inputs by user

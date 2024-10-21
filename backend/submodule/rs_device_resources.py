@@ -102,6 +102,7 @@ class PeripheralType(Enum):
     CONFIG = 'config'
     PUFFCC = 'puffcc'
     RC_OSC = 'rc_osc'
+    NOC = 'noc'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"
@@ -535,15 +536,6 @@ class RsDeviceResources:
         coeffs = [c.coeffs[:c.length] for c in polynomials]
         return 1/polynomials[0].factor, coeffs
 
-    def get_divfactor_coeff_CLB(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.CLB, worsecase)
-
-    def get_divfactor_coeff_BRAM(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.BRAM, worsecase)
-
-    def get_divfactor_coeff_DSP(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.DSP, worsecase)
-
     def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
         return self.get_polynomial_coeff(ElementType.GEARBOX_IO_HP if bank_type == 0 else ElementType.GEARBOX_IO_HR, worsecase)
 
@@ -552,18 +544,6 @@ class RsDeviceResources:
 
     def get_divfactor_coeff_AUX(self, worsecase : bool):
         return self.get_polynomial_coeff(ElementType.AUX, worsecase)
-
-    def get_divfactor_coeff_NOC(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.NOC, worsecase)
-
-    def get_divfactor_coeff_Mem_SS(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.MEM_SS, worsecase)
-
-    def get_divfactor_coeff_A45(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.ACPU, worsecase)
-
-    def get_divfactor_coeff_Config(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.CONFIG, worsecase)
 
     def get_divfactor_coeff_Aux_bank_type(self, bank_type: int, worsecase: bool):
         return self.get_polynomial_coeff(ElementType.AUX_HP if bank_type == 0 else ElementType.AUX_HR, worsecase)
@@ -583,39 +563,6 @@ class RsDeviceResources:
                 return self.get_polynomial_coeff(ElementType.IO_HP_1_5V, worsecase)
             elif voltage == 1.8:
                 return self.get_polynomial_coeff(ElementType.IO_HP_1_8V, worsecase)
-
-    def get_divfactor_coeff_VCC_BOOT_IO(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_BOOT_IO, worsecase)
-
-    def get_divfactor_coeff_VCC_DDR_IO(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_DDR_IO, worsecase)
-
-    def get_divfactor_coeff_VCC_SOC_IO(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_SOC_IO, worsecase)
-
-    def get_divfactor_coeff_VCC_GIGE_IO(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_GIGE_IO, worsecase)
-
-    def get_divfactor_coeff_VCC_USB_IO(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_USB_IO, worsecase)
-
-    def get_divfactor_coeff_VCC_BOOT_AUX(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_BOOT_AUX, worsecase)
-
-    def get_divfactor_coeff_VCC_SOC_AUX(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_SOC_AUX, worsecase)
-
-    def get_divfactor_coeff_VCC_GIGE_AUX(self, worsecase: bool):
-        return self.get_polynomial_coeff(ElementType.VCC_GIGE_AUX, worsecase)
-
-    def get_divfactor_coeff_VCC_USB_AUX(self, worsecase: bool):
-        return self.get_polynomial_coeff(ElementType.VCC_USB_AUX, worsecase)
-
-    def get_divfactor_coeff_VCC_PUF(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_PUF, worsecase)
-
-    def get_divfactor_coeff_VCC_RC_OSC(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.VCC_RC_OSC, worsecase)
 
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module

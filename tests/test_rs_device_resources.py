@@ -5,7 +5,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from submodule.rs_power_config import ElementType
-from submodule.rs_power_config import RsStaticPowerPolynomial
 from submodule.rs_device_resources import (
     RsDeviceResources,
     IO_Standard_Coeff,
@@ -30,7 +29,6 @@ def mock_device():
 def device_resources(mock_device):
     with patch('submodule.rs_device_resources.RsPowerConfig') as MockRsPowerConfig:
         MockRsPowerConfig.return_value.load.return_value = True
-        MockRsPowerConfig.return_value.get_polynomial_coeff.return_value = [RsStaticPowerPolynomial(length=5, factor=1.25, coeffs=[0.1, 0.2, 0.3, 0.4, 0.5])]
         yield RsDeviceResources(mock_device)
 
 def test_get_device_name(device_resources):
@@ -74,11 +72,6 @@ def test_register_module(device_resources):
     module = MagicMock()
     device_resources.register_module(ModuleType.CLOCKING, module)
     assert device_resources.get_module(ModuleType.CLOCKING) == module
-
-def test_get_divfactor_coeff_CLB(device_resources):
-    factor, coeffs = device_resources.get_divfactor_coeff_CLB(worsecase=True)
-    assert factor == 0.8
-    assert len(coeffs) > 0
 
 def test_get_clock_not_found(device_resources):
     device_resources.register_module(ModuleType.CLOCKING, MagicMock(get_all=MagicMock(return_value=[])))

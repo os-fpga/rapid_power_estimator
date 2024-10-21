@@ -20,10 +20,6 @@ class PowerConfigCoeffNotFoundException(RsCustomException):
     def __init__(self, component: str, name: str):
         super().__init__(f"Coeff '{name}' of component '{component}' not found")
 
-class PowerConfigPolynomialNotFoundException(RsCustomException):
-    def __init__(self, component: str, scenario: str):
-        super().__init__(f"Polynomial '{component}' for '{scenario}' case not found")
-
 class PowerConfigParsingException(RsCustomException):
     def __init__(self, error_message: str):
         super().__init__(f"Parsing Error: {error_message}")
@@ -132,7 +128,7 @@ class RsDynamicPowerCoeffSchema(Schema):
 
 class RsStaticPowerScenarioSchema(Schema):
     type = fields.Enum(ScenarioType, by_value=True, required=True)
-    coeffs = fields.List(fields.Float, many=True, required=True)
+    coeffs = fields.List(fields.Float, required=True)
     factor = fields.Float(required=True)
 
     @post_load

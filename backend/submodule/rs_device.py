@@ -293,13 +293,6 @@ class RsDevice:
         else:
             return self.resources.get_num_HR_Banks()
 
-    def calculate(self, temperature : float, coeffs : List[List[float]], factor : float = 1.0) -> float:
-        total = 0.0
-        for co in coeffs:
-            values = np.polyval(co, [temperature])
-            total += values[0]
-        return total * factor
-
     def compute_Gearbox_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_GEARBOX_IO_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)
@@ -313,11 +306,6 @@ class RsDevice:
         num_banks = self.get_io_banks(bank_type)
         total_power = num_banks * power
         return total_power
-
-    def compute_Aux(self, temperature : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_AUX(worsecase)
-        power = self.calculate(temperature, coeff, self.resources.get_VCC_AUX() / divfactor)
-        return power
 
     def compute_Aux_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_Aux_bank_type(bank_type.value, worsecase)
@@ -347,7 +335,7 @@ class RsDevice:
             Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
-            Aux          = self.compute_Aux(temperature, worsecase),
+            # Aux          = self.compute_Aux(temperature, worsecase),
             HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             HR_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 1.8, worsecase),
@@ -373,7 +361,7 @@ class RsDevice:
     def compute(self, temperature: float, scenerio: ScenarioType) -> StaticPowerResult:
         # compute fabric/fpga static power
         power = StaticPowerResult()
-        for modtype in (ModuleType.FABRIC_LE, ModuleType.BRAM, ModuleType.DSP):
+        for modtype in (ModuleType.FABRIC_LE, ModuleType.BRAM, ModuleType.DSP, ModuleType.CLOCKING):
             power.add(self.get_module(modtype).compute_static_power(temperature, scenerio))
 
         # compute processin/peripheral static power

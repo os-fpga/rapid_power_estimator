@@ -4,11 +4,13 @@
 #
 from dataclasses import dataclass, field
 from typing import List
+import numpy as np
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import ModuleType, ClockNotFoundException, \
-    ClockDescriptionPortValidationException, \
-    ClockMaxCountReachedException
+from .rs_device_resources import ModuleType, ClockNotFoundException, ClockDescriptionPortValidationException, \
+    ClockMaxCountReachedException, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
+from .rs_power_config import ElementType, PowerValue, ScenarioType
+from .rs_logger import RsLogLevel, log
 
 class Clock_State(RsEnum):
     ACTIVE = 1, "Active"
@@ -65,7 +67,7 @@ class Clock:
 
 class Clock_SubModule:
 
-    def __init__(self, resources, itemlist: List[Clock] = None):
+    def __init__(self, resources: RsDeviceResources, itemlist: List[Clock] = None):
         self.resources = resources
         self.total_clock_available = resources.get_num_Clocks()
         self.total_pll_available = resources.get_num_PLLs()
@@ -191,3 +193,25 @@ class Clock_SubModule:
         total_power = self.total_block_power + self.total_interconnect_power + self.total_pll_power
         for item in self.itemlist:
             item.compute_percentage(total_power)
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> float:
+        VCC_AUX = self.resources.get_VCC_AUX()
+        mylist = []
+
+        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.CLOCKING, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * VCC_AUX
+                total_power += power
+                # debug info
+                log(f'[CLOCK] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {VCC_AUX = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {power = }', RsLogLevel.DEBUG)
+                log(f'[CLOCK]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist

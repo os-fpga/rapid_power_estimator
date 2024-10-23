@@ -8,6 +8,14 @@
                 { "type": "worse", "coeffs": [0.00000000003, -0.0000000007, 0.000000001, 0.000007, 0.0002], "factor": 1.0 },
                 { "type": "typical", "coeffs": [0.00000000003, -0.0000000008, 0.000000001, 0.000008, 0.0002], "factor": 1.0 }
             ]
+        },
+        {
+            "rail_type": "Vcc_core (HR I/O)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.00005], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.00001], "factor": 1.0 }
+            ]
         }
     ]
 }

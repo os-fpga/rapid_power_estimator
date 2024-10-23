@@ -287,13 +287,6 @@ class RsDevice:
                 break
         return num_banks
 
-    def compute_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_IO_bank_type(bank_type.value, worsecase)
-        power = self.calculate(temperature, coeff)
-        num_banks = self.get_io_banks(bank_type)
-        total_power = num_banks * power
-        return total_power
-
     def compute_Aux_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_Aux_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)
@@ -320,8 +313,8 @@ class RsDevice:
             # DSP          = self.compute_DSP(temperature, worsecase),
             # Gearbox_HP   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             # Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
-            HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
-            HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
+            # HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
+            # HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             # Aux          = self.compute_Aux(temperature, worsecase),
             HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HR, worsecase),

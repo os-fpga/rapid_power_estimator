@@ -32,6 +32,7 @@ class PowerConfigNotAvailable(RsCustomException):
     def __init__(self):
         super().__init__(f"Power config data not available")
 
+# todo: can be replaced by peripheraltype?
 class ElementType(Enum):
     BRAM = 'bram'
     CLOCKING = 'clocking'
@@ -39,34 +40,7 @@ class ElementType(Enum):
     FABRIC_LE = 'fabric_le'
     IO = 'io'
     NOC = 'noc'
-    CLB = 'clb'
-    AUX = 'aux'
-    MEM_SS = 'mem_ss'
     ACPU = 'acpu'
-    CONFIG = 'config'
-    VCC_BOOT_IO = 'vcc_boot_io'
-    VCC_DDR_IO = 'vcc_ddr_io'
-    VCC_SOC_IO = 'vcc_soc_io'
-    VCC_GIGE_IO = 'vcc_gige_io'
-    VCC_USB_IO = 'vcc_usb_io'
-    VCC_BOOT_AUX = 'vcc_boot_aux'
-    VCC_SOC_AUX = 'vcc_soc_aux'
-    VCC_GIGE_AUX = 'vcc_gige_aux'
-    VCC_USB_AUX = 'vcc_usb_aux'
-    VCC_PUF = 'vcc_puf'
-    VCC_RC_OSC = 'vcc_rc_osc'
-    GEARBOX_IO_HP = 'gearbox_io_hp'
-    GEARBOX_IO_HR = 'gearbox_io_hr'
-    AUX_HP = 'aux_hp'
-    AUX_HR = 'aux_hr'
-    IO_HP = 'io_hp'
-    IO_HR = 'io_hr'
-    IO_HP_1_2V = 'io_hp_1_2v'
-    IO_HP_1_5V = 'io_hp_1_5v'
-    IO_HP_1_8V = 'io_hp_1_8v'
-    IO_HR_1_8V = 'io_hr_1_8v'
-    IO_HR_2_5V = 'io_hr_2_5v'
-    IO_HR_3_3V = 'io_hr_3_3v'
     UART = 'uart'
     SPI = 'spi'
     BCPU = 'bcpu'
@@ -81,6 +55,7 @@ class ElementType(Enum):
     REGULATOR = 'regulator'
     PUFFCC = 'puffcc'
     RC_OSC = 'rc_osc'
+    GEARBOX_HP = 'gearbox_hp'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

@@ -20,6 +20,7 @@
         { "$ref": "noc.json" },
         { "$ref": "puffcc.json" },
         { "$ref": "rc_osc.json" },
+        { "$ref": "gearbox_hp.json" },
         { "$ref": "regulator.json" }
     ]
 }

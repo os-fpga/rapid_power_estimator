@@ -216,6 +216,7 @@ class Peripheral_SubModule(SubModule):
         peripherals += self.create_peripherals(1, 'N22 RISC-V', PeripheralType.BCPU)
         peripherals += self.create_peripherals(1, 'Fabric', PeripheralType.FPGA_COMPLEX)
         peripherals += self.create_peripherals(1, 'GPIO', PeripheralType.GPIO)
+        peripherals += self.create_peripherals(1, 'Gearbox HP', PeripheralType.GEARBOX_HP)
         peripherals += self.create_peripherals(1, 'PUFFcc', PeripheralType.PUFFCC)
         peripherals += self.create_peripherals(1, 'RC Oscillator', PeripheralType.RC_OSC)
         peripherals += self.create_peripherals(1, 'NOC', PeripheralType.NOC)
@@ -464,6 +465,8 @@ class ComputeObject:
             return RCOsc0(context=context)
         elif type == PeripheralType.NOC:
             return Noc0(context=context)
+        elif type == PeripheralType.GEARBOX_HP:
+            return Gearbox0(context=context)
         return None
 
 @dataclass
@@ -1691,6 +1694,34 @@ class RCOsc0(ComputeObject):
                 log(f'[RC_OSC]   {VCC_RC_OSC = }', RsLogLevel.DEBUG)
                 log(f'[RC_OSC]   {power = }', RsLogLevel.DEBUG)
                 log(f'[RC_OSC]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
+@dataclass
+class Gearbox0(ComputeObject):
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        periph_type = self.get_context().get_type()
+        types = {
+            PeripheralType.GEARBOX_HP: ElementType.GEARBOX_HP,
+        }
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(types[periph_type], scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor
+                total_power += power
+                # debug info
+                log(f'[GEARBOX] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {periph_type = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {power = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))
 
         return mylist

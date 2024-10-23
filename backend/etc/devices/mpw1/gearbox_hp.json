@@ -1,0 +1,13 @@
+{
+    "type": "gearbox_hp",
+    "static_power": [
+        {
+            "rail_type": "Vcc_core (Gearbox HP)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.00000000003, -0.0000000006, 0.000000001, 0.000006, 0.0002], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.00000000002, -0.000000001, 0.00000001, 0.000004, 0.00005], "factor": 1.0 }
+            ]
+        }
+    ]
+}

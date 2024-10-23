@@ -103,6 +103,7 @@ class PeripheralType(Enum):
     PUFFCC = 'puffcc'
     RC_OSC = 'rc_osc'
     NOC = 'noc'
+    GEARBOX_HP = 'gearbox_hp'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"

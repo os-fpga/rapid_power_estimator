@@ -532,31 +532,6 @@ class RsDeviceResources:
     def get_SRAM_ACLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.SRAM, 'SRAM_ACLK_FACTOR')
 
-    def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.GEARBOX_IO_HP if bank_type == 0 else ElementType.GEARBOX_IO_HR, worsecase)
-
-    def get_divfactor_coeff_IO_bank_type(self, bank_type : int, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.IO_HP if bank_type == 0 else ElementType.IO_HR, worsecase)
-
-    def get_divfactor_coeff_Aux_bank_type(self, bank_type: int, worsecase: bool):
-        return self.get_polynomial_coeff(ElementType.AUX_HP if bank_type == 0 else ElementType.AUX_HR, worsecase)
-
-    def get_divfactor_coeff_IO_bank_type_voltage(self, bank_type : int, voltage : float, worsecase : bool = True):
-        if bank_type == 1: # HR
-            if voltage == 1.8:
-                return self.get_polynomial_coeff(ElementType.IO_HR_1_8V, worsecase)
-            elif voltage == 2.5:
-                return self.get_polynomial_coeff(ElementType.IO_HR_2_5V, worsecase)
-            elif voltage == 3.3:
-                return self.get_polynomial_coeff(ElementType.IO_HR_3_3V, worsecase)
-        elif bank_type == 0: # HP
-            if voltage == 1.2:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_2V, worsecase)
-            elif voltage == 1.5:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_5V, worsecase)
-            elif voltage == 1.8:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_8V, worsecase)
-
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module
         return module

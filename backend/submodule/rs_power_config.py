@@ -32,7 +32,6 @@ class PowerConfigNotAvailable(RsCustomException):
     def __init__(self):
         super().__init__(f"Power config data not available")
 
-# todo: can be replaced by peripheraltype?
 class ElementType(Enum):
     BRAM = 'bram'
     CLOCKING = 'clocking'

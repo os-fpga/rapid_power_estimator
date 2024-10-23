@@ -287,12 +287,6 @@ class RsDevice:
                 break
         return num_banks
 
-    def get_io_banks(self, bank_type : IO_BankType) -> int:
-        if bank_type == IO_BankType.HP:
-            return self.resources.get_num_HP_Banks()
-        else:
-            return self.resources.get_num_HR_Banks()
-
     def compute_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_IO_bank_type(bank_type.value, worsecase)
         power = self.calculate(temperature, coeff)

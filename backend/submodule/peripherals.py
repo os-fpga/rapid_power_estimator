@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from enum import IntFlag
 from typing import Any, List, Dict, Tuple
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
+from .rs_device_resources import IO_BankType, IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
 from .rs_power_config import ElementType, PowerValue, ScenarioType
 from .rs_message import RsMessage, RsMessageManager
 from .rs_logger import log, RsLogLevel
@@ -1706,12 +1706,15 @@ class Gearbox0(ComputeObject):
         types = {
             PeripheralType.GEARBOX_HP: ElementType.GEARBOX_HP,
         }
+        num_io_banks = {
+            PeripheralType.GEARBOX_HP: resources.get_num_HP_Banks(),
+        }
         mylist = []
 
         for rail_type, scene_list in resources.powercfg.get_polynomial(types[periph_type], scenario):
             total_power = 0.0
             for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor
+                power = np.polyval(s.coeffs, temperature) * s.factor * num_io_banks.get(periph_type, 0)
                 total_power += power
                 # debug info
                 log(f'[GEARBOX] {rail_type = }', RsLogLevel.DEBUG)
@@ -1720,6 +1723,7 @@ class Gearbox0(ComputeObject):
                 log(f'[GEARBOX]   {s.coeffs = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX]   {s.factor = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX]   {periph_type = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX]   {num_io_banks = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX]   {power = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))

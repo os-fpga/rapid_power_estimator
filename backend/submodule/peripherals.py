@@ -466,8 +466,10 @@ class ComputeObject:
             return RCOsc0(context=context)
         elif type == PeripheralType.NOC:
             return Noc0(context=context)
-        elif type == PeripheralType.GEARBOX_HP or type == PeripheralType.GEARBOX_HR:
-            return Gearbox0(context=context)
+        elif type == PeripheralType.GEARBOX_HP:
+            return Gearbox_HP_0(context=context)
+        elif type == PeripheralType.GEARBOX_HR:
+            return Gearbox_HR_0(context=context)
         return None
 
 @dataclass
@@ -1700,35 +1702,83 @@ class RCOsc0(ComputeObject):
         return mylist
 
 @dataclass
-class Gearbox0(ComputeObject):
+class Gearbox_HP_0(ComputeObject):
+    def get_hp_io_banks_used(self, voltage: float = None) -> int:
+        num_banks = 0
+        io = self.get_context().get_device_resources().get_module(ModuleType.IO)
+        for elem in io.io_usage:
+            if elem.type == IO_BankType.HP:
+                for item in elem.usage:
+                    if voltage is None or item.voltage == voltage:
+                        num_banks += item.banks_used
+                break
+        return num_banks
+
     def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
         resources = self.get_context().get_device_resources()
-        periph_type = self.get_context().get_type()
-        types = {
-            PeripheralType.GEARBOX_HP: ElementType.GEARBOX_HP,
-            PeripheralType.GEARBOX_HR: ElementType.GEARBOX_HR,
-        }
+        IO_BANKS = resources.get_num_HP_Banks()
         num_io_banks = {
-            PeripheralType.GEARBOX_HP: resources.get_num_HP_Banks(),
-            PeripheralType.GEARBOX_HR: resources.get_num_HR_Banks(),
+            "Vcc_core (Gearbox HP)": IO_BANKS,
+            "Vcc_core (HP I/O)": IO_BANKS,
+            "Vcc_hv_aux": self.get_hp_io_banks_used()
         }
         mylist = []
 
-        for rail_type, scene_list in resources.powercfg.get_polynomial(types[periph_type], scenario):
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GEARBOX_HP, scenario):
             total_power = 0.0
             for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor * num_io_banks.get(periph_type, 0)
+                power = np.polyval(s.coeffs, temperature) * s.factor * num_io_banks.get(rail_type, 0)
                 total_power += power
                 # debug info
-                log(f'[GEARBOX] {rail_type = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {temperature = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {scenario = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {s.coeffs = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {periph_type = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {num_io_banks = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {power = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX]   {total_power = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {num_io_banks = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {power = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist
+
+@dataclass
+class Gearbox_HR_0(ComputeObject):
+    def get_hr_io_banks_used(self, voltage: float = None) -> int:
+        num_banks = 0
+        io = self.get_context().get_device_resources().get_module(ModuleType.IO)
+        for elem in io.io_usage:
+            if elem.type == IO_BankType.HR:
+                for item in elem.usage:
+                    if voltage is None or item.voltage == voltage:
+                        num_banks += item.banks_used
+                break
+        return num_banks
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        resources = self.get_context().get_device_resources()
+        IO_BANKS = resources.get_num_HR_Banks()
+        num_io_banks = {
+            "Vcc_core (Gearbox HR)": IO_BANKS,
+            "Vcc_core (HR I/O)": IO_BANKS,
+            "Vcc_hr_aux": self.get_hr_io_banks_used()
+        }
+        mylist = []
+
+        for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GEARBOX_HR, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * num_io_banks.get(rail_type, 0)
+                total_power += power
+                # debug info
+                log(f'[GEARBOX_HR] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {num_io_banks = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {power = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))
 
         return mylist

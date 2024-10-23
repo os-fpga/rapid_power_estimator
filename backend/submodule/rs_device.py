@@ -276,24 +276,6 @@ class RsDevice:
     def update_spec(self, data):
         return update_attributes(self.specification, data)
 
-    def get_io_banks_used(self, bank_type : IO_BankType, voltage : float = None) -> int:
-        num_banks = 0
-        iomod = self.get_module(ModuleType.IO)
-        for elem in iomod.io_usage:
-            if elem.type == bank_type:
-                for item in elem.usage:
-                    if voltage is None or item.voltage == voltage:
-                        num_banks += item.banks_used
-                break
-        return num_banks
-
-    def compute_Aux_IO_bank_type(self, temperature : float, bank_type : IO_BankType, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_Aux_bank_type(bank_type.value, worsecase)
-        power = self.calculate(temperature, coeff)
-        num_io_banks_used = self.get_io_banks_used(bank_type)
-        total_power = power * num_io_banks_used
-        return total_power
-
     def compute_IO_bank_type_voltage(self, temperature : float, bank_type : IO_BankType, voltage : float, worsecase : bool) -> float:
         divfactor, coeff = self.resources.get_divfactor_coeff_IO_bank_type_voltage(bank_type.value, voltage, worsecase)
         power = self.calculate(temperature, coeff)
@@ -316,8 +298,8 @@ class RsDevice:
             # HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             # HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             # Aux          = self.compute_Aux(temperature, worsecase),
-            HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HP, worsecase),
-            HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HR, worsecase),
+            # HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HP, worsecase),
+            # HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             HR_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 1.8, worsecase),
             HR_IO_2_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 2.5, worsecase),
             HR_IO_3_3V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 3.3, worsecase),

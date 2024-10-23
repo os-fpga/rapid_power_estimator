@@ -16,6 +16,14 @@
                 { "type": "worse", "coeffs": [0.0001], "factor": 1.0 },
                 { "type": "typical", "coeffs": [0.00005], "factor": 1.0 }
             ]
+        },
+        {
+            "rail_type": "Vcc_hv_aux",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.000000001, 0.0000002, 0.00021, 0.0003], "factor": 1.0 }
+            ]
         }
     ]
 }

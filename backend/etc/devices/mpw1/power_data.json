@@ -21,6 +21,7 @@
         { "$ref": "puffcc.json" },
         { "$ref": "rc_osc.json" },
         { "$ref": "gearbox_hp.json" },
+        { "$ref": "gearbox_hr.json" },
         { "$ref": "regulator.json" }
     ]
 }

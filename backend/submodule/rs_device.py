@@ -319,7 +319,7 @@ class RsDevice:
             # BRAM         = self.compute_BRAM(temperature, worsecase),
             # DSP          = self.compute_DSP(temperature, worsecase),
             # Gearbox_HP   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HP, worsecase),
-            Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
+            # Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
             HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
             # Aux          = self.compute_Aux(temperature, worsecase),

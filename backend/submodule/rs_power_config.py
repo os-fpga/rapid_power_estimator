@@ -55,6 +55,7 @@ class ElementType(Enum):
     PUFFCC = 'puffcc'
     RC_OSC = 'rc_osc'
     GEARBOX_HP = 'gearbox_hp'
+    GEARBOX_HR = 'gearbox_hr'
 
 class ScenarioType(Enum):
     TYPICAL = 'typical'

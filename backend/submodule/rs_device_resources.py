@@ -104,6 +104,7 @@ class PeripheralType(Enum):
     RC_OSC = 'rc_osc'
     NOC = 'noc'
     GEARBOX_HP = 'gearbox_hp'
+    GEARBOX_HR = 'gearbox_hr'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"

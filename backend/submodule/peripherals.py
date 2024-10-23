@@ -217,6 +217,7 @@ class Peripheral_SubModule(SubModule):
         peripherals += self.create_peripherals(1, 'Fabric', PeripheralType.FPGA_COMPLEX)
         peripherals += self.create_peripherals(1, 'GPIO', PeripheralType.GPIO)
         peripherals += self.create_peripherals(1, 'Gearbox HP', PeripheralType.GEARBOX_HP)
+        peripherals += self.create_peripherals(1, 'Gearbox HR', PeripheralType.GEARBOX_HR)
         peripherals += self.create_peripherals(1, 'PUFFcc', PeripheralType.PUFFCC)
         peripherals += self.create_peripherals(1, 'RC Oscillator', PeripheralType.RC_OSC)
         peripherals += self.create_peripherals(1, 'NOC', PeripheralType.NOC)
@@ -465,7 +466,7 @@ class ComputeObject:
             return RCOsc0(context=context)
         elif type == PeripheralType.NOC:
             return Noc0(context=context)
-        elif type == PeripheralType.GEARBOX_HP:
+        elif type == PeripheralType.GEARBOX_HP or type == PeripheralType.GEARBOX_HR:
             return Gearbox0(context=context)
         return None
 
@@ -1705,9 +1706,11 @@ class Gearbox0(ComputeObject):
         periph_type = self.get_context().get_type()
         types = {
             PeripheralType.GEARBOX_HP: ElementType.GEARBOX_HP,
+            PeripheralType.GEARBOX_HR: ElementType.GEARBOX_HR,
         }
         num_io_banks = {
             PeripheralType.GEARBOX_HP: resources.get_num_HP_Banks(),
+            PeripheralType.GEARBOX_HR: resources.get_num_HR_Banks(),
         }
         mylist = []
 

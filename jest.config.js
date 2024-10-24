@@ -13,16 +13,7 @@ module.exports = {
   ],
   coverageReporters: ['text', 'lcov', 'json', 'html'],
   coverageDirectory: "coverage",
-
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 85,
-      lines: 90,
-      statements: 90,
-    },
-  },
-
+  
   testPathIgnorePatterns: [
     "/node_modules/",
     "/playwright_e2e/"

@@ -7,9 +7,24 @@ module.exports = {
 
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx}",   
-    "src/tests/**/*.{js,jsx}"  
+    "src/**/*.{js,jsx}",
+    "!src/**/*.test.{js,jsx}",
+    "!src/tests/**/*.{js,jsx}"
   ],
-  coverageReporters: ['text', 'lcov'],
+  coverageReporters: ['text', 'lcov', 'json', 'html'],
   coverageDirectory: "coverage",
+
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 85,
+      lines: 90,
+      statements: 90,
+    },
+  },
+
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/playwright_e2e/"
+  ],
 };

@@ -103,6 +103,8 @@ class PeripheralType(Enum):
     PUFFCC = 'puffcc'
     RC_OSC = 'rc_osc'
     NOC = 'noc'
+    GEARBOX_HP = 'gearbox_hp'
+    GEARBOX_HR = 'gearbox_hr'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"
@@ -530,39 +532,6 @@ class RsDeviceResources:
 
     def get_SRAM_ACLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.SRAM, 'SRAM_ACLK_FACTOR')
-
-    def get_polynomial_coeff(self, type: ElementType, worse: bool):
-        polynomials = self.powercfg.get_polynomial_coeff(type, ScenarioType.WORSE if worse else ScenarioType.TYPICAL)
-        coeffs = [c.coeffs[:c.length] for c in polynomials]
-        return 1/polynomials[0].factor, coeffs
-
-    def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.GEARBOX_IO_HP if bank_type == 0 else ElementType.GEARBOX_IO_HR, worsecase)
-
-    def get_divfactor_coeff_IO_bank_type(self, bank_type : int, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.IO_HP if bank_type == 0 else ElementType.IO_HR, worsecase)
-
-    def get_divfactor_coeff_AUX(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.AUX, worsecase)
-
-    def get_divfactor_coeff_Aux_bank_type(self, bank_type: int, worsecase: bool):
-        return self.get_polynomial_coeff(ElementType.AUX_HP if bank_type == 0 else ElementType.AUX_HR, worsecase)
-
-    def get_divfactor_coeff_IO_bank_type_voltage(self, bank_type : int, voltage : float, worsecase : bool = True):
-        if bank_type == 1: # HR
-            if voltage == 1.8:
-                return self.get_polynomial_coeff(ElementType.IO_HR_1_8V, worsecase)
-            elif voltage == 2.5:
-                return self.get_polynomial_coeff(ElementType.IO_HR_2_5V, worsecase)
-            elif voltage == 3.3:
-                return self.get_polynomial_coeff(ElementType.IO_HR_3_3V, worsecase)
-        elif bank_type == 0: # HP
-            if voltage == 1.2:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_2V, worsecase)
-            elif voltage == 1.5:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_5V, worsecase)
-            elif voltage == 1.8:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_8V, worsecase)
 
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module

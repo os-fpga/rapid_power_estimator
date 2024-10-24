@@ -1,0 +1,53 @@
+{
+    "type": "gearbox_hr",
+    "static_power": [
+        {
+            "rail_type": "Vcc_core (Gearbox HR)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.00000000003, -0.0000000007, 0.000000001, 0.000007, 0.0002], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.00000000003, -0.0000000008, 0.000000001, 0.000008, 0.0002], "factor": 1.0 }
+            ]
+        },
+        {
+            "rail_type": "Vcc_core (HR I/O)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.00005], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.00001], "factor": 1.0 }
+            ]
+        },
+        {
+            "rail_type": "Vcc_hr_aux",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.0000000008, 0.0000002, 0.00001, 0.007], "factor": 1.0 },
+                { "type": "typical", "coeffs": [0.000000001, 0.0000002, 0.00021, 0.0003], "factor": 1.0 }
+            ]
+        },
+        {
+            "rail_type": "Vcc_hr_io (1.8V)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.00001], "factor": 1.25 },
+                { "type": "typical", "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003], "factor": 1.25 }
+            ]
+        },
+        {
+            "rail_type": "Vcc_hr_io (2.5V)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009], "factor": 1.25 },
+                { "type": "typical", "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003], "factor": 1.25 }
+            ]
+        },
+        {
+            "rail_type": "Vcc_hr_io (3.3V)",
+            "domain": "Core",
+            "scenarios": [
+                { "type": "worse", "coeffs": [0.000000000001, -0.00000000003, 0.00000000006, 0.0000003, 0.000009], "factor": 1.25 },
+                { "type": "typical", "coeffs": [0.000000000001, -0.00000000006, 0.0000000005, 0.0000002, 0.000003], "factor": 1.25 }
+            ]
+        }
+    ]
+}

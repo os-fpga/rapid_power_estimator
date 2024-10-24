@@ -276,50 +276,6 @@ class RsDevice:
     def update_spec(self, data):
         return update_attributes(self.specification, data)
 
-    def compute_IO_bank_type_voltage(self, temperature : float, bank_type : IO_BankType, voltage : float, worsecase : bool) -> float:
-        divfactor, coeff = self.resources.get_divfactor_coeff_IO_bank_type_voltage(bank_type.value, voltage, worsecase)
-        power = self.calculate(temperature, coeff)
-        num_io_banks_used = self.get_io_banks_used(bank_type, voltage)
-        total_power = power * num_io_banks_used * 20 * voltage / divfactor
-        return total_power
-
-    def compute_OBSOLETE(self, temperature : float, worsecase : bool = True) -> StaticPowerResult:
-        result = StaticPowerResult(
-            temperature  = temperature,
-            # NOC          = self.compute_NOC(temperature, worsecase),
-            # Mem_SS       = self.compute_Mem_SS(temperature, worsecase),
-            # A45          = self.compute_A45(temperature, worsecase),
-            # Config       = self.compute_Config(temperature, worsecase),
-            # CLB          = self.compute_CLB(temperature, worsecase),
-            # BRAM         = self.compute_BRAM(temperature, worsecase),
-            # DSP          = self.compute_DSP(temperature, worsecase),
-            # Gearbox_HP   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HP, worsecase),
-            # Gearbox_HR   = self.compute_Gearbox_IO_bank_type(temperature, IO_BankType.HR, worsecase),
-            # HP_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HP, worsecase),
-            # HR_IO        = self.compute_IO_bank_type(temperature, IO_BankType.HR, worsecase),
-            # Aux          = self.compute_Aux(temperature, worsecase),
-            # HP_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HP, worsecase),
-            # HR_Aux       = self.compute_Aux_IO_bank_type(temperature, IO_BankType.HR, worsecase),
-            HR_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 1.8, worsecase),
-            HR_IO_2_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 2.5, worsecase),
-            HR_IO_3_3V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HR, 3.3, worsecase),
-            HP_IO_1_2V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.2, worsecase),
-            HP_IO_1_5V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.5, worsecase),
-            HP_IO_1_8V   = self.compute_IO_bank_type_voltage(temperature, IO_BankType.HP, 1.8, worsecase),
-            # VCC_BOOT_IO  = self.compute_VCC_BOOT_IO(temperature, worsecase),
-            # VCC_DDR_IO   = self.compute_VCC_DDR_IO(temperature, worsecase),
-            # VCC_SOC_IO   = self.compute_VCC_SOC_IO(temperature, worsecase),
-            # VCC_GIGE_IO  = self.compute_VCC_GIGE_IO(temperature, worsecase),
-            # VCC_USB_IO   = self.compute_VCC_USB_IO(temperature, worsecase),
-            # VCC_BOOT_AUX = self.compute_VCC_BOOT_AUX(temperature, worsecase),
-            # VCC_SOC_AUX  = self.compute_VCC_SOC_AUX(temperature, worsecase),
-            # VCC_GIGE_AUX = self.compute_VCC_GIGE_AUX(temperature, worsecase),
-            # VCC_USB_AUX  = self.compute_VCC_USB_AUX(temperature, worsecase),
-            # VCC_RC_OSC   = self.compute_VCC_RC_OSC(temperature, worsecase),
-            # VCC_PUF      = self.compute_VCC_PUF(temperature, worsecase)
-        )
-        return result
-
     def compute(self, temperature: float, scenerio: ScenarioType) -> StaticPowerResult:
         # compute fabric/fpga static power
         power = StaticPowerResult()

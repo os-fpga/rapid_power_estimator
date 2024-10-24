@@ -1717,17 +1717,20 @@ class Gearbox_HP_0(ComputeObject):
     def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
         resources = self.get_context().get_device_resources()
         IO_BANKS = resources.get_num_HP_Banks()
-        num_io_banks = {
+        io_banks_voltages = {
             "Vcc_core (Gearbox HP)": IO_BANKS,
-            "Vcc_core (HP I/O)": IO_BANKS,
-            "Vcc_hv_aux": self.get_hp_io_banks_used()
+            "Vcc_core (HP I/O)"    : IO_BANKS,
+            "Vcc_hv_aux"           : self.get_hp_io_banks_used(),
+            "Vcc_hp_io (1.2V)"     : self.get_hp_io_banks_used(1.2) * 20 * 1.2,
+            "Vcc_hp_io (1.5V)"     : self.get_hp_io_banks_used(1.5) * 20 * 1.5,
+            "Vcc_hp_io (1.8V)"     : self.get_hp_io_banks_used(1.8) * 20 * 1.8
         }
         mylist = []
 
         for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GEARBOX_HP, scenario):
             total_power = 0.0
             for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor * num_io_banks.get(rail_type, 0)
+                power = np.polyval(s.coeffs, temperature) * s.factor * io_banks_voltages.get(rail_type, 0)
                 total_power += power
                 # debug info
                 log(f'[GEARBOX_HP] {rail_type = }', RsLogLevel.DEBUG)
@@ -1735,7 +1738,7 @@ class Gearbox_HP_0(ComputeObject):
                 log(f'[GEARBOX_HP]   {scenario = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HP]   {s.coeffs = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HP]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX_HP]   {num_io_banks = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HP]   {io_banks_voltages = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HP]   {power = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HP]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))
@@ -1758,17 +1761,20 @@ class Gearbox_HR_0(ComputeObject):
     def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
         resources = self.get_context().get_device_resources()
         IO_BANKS = resources.get_num_HR_Banks()
-        num_io_banks = {
+        io_banks_voltages = {
             "Vcc_core (Gearbox HR)": IO_BANKS,
-            "Vcc_core (HR I/O)": IO_BANKS,
-            "Vcc_hr_aux": self.get_hr_io_banks_used()
+            "Vcc_core (HR I/O)"    : IO_BANKS,
+            "Vcc_hr_aux"           : self.get_hr_io_banks_used(),
+            "Vcc_hr_io (1.8V)"     : self.get_hr_io_banks_used(1.8) * 20 * 1.8,
+            "Vcc_hr_io (2.5V)"     : self.get_hr_io_banks_used(2.5) * 20 * 2.5,
+            "Vcc_hr_io (3.3V)"     : self.get_hr_io_banks_used(3.3) * 20 * 3.3
         }
         mylist = []
 
         for rail_type, scene_list in resources.powercfg.get_polynomial(ElementType.GEARBOX_HR, scenario):
             total_power = 0.0
             for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor * num_io_banks.get(rail_type, 0)
+                power = np.polyval(s.coeffs, temperature) * s.factor * io_banks_voltages.get(rail_type, 0)
                 total_power += power
                 # debug info
                 log(f'[GEARBOX_HR] {rail_type = }', RsLogLevel.DEBUG)
@@ -1776,7 +1782,7 @@ class Gearbox_HR_0(ComputeObject):
                 log(f'[GEARBOX_HR]   {scenario = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HR]   {s.coeffs = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HR]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[GEARBOX_HR]   {num_io_banks = }', RsLogLevel.DEBUG)
+                log(f'[GEARBOX_HR]   {io_banks_voltages = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HR]   {power = }', RsLogLevel.DEBUG)
                 log(f'[GEARBOX_HR]   {total_power = }', RsLogLevel.DEBUG)
             mylist.append(PowerValue(type=rail_type, value=total_power))

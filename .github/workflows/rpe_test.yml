@@ -2,10 +2,11 @@ name: Build and Publish RPE
 
 on:
   push:
-    # tags:
-    #   - '*'
-    # branches: 
-    #   - '*'
+    tags:
+      - '*'
+    branches: 
+      - '*'
+      - '*/**'
   pull_request:
 
 concurrency:
@@ -88,7 +89,7 @@ jobs:
 
       - name: E2E Playwright tests
         if: ${{ matrix.os == 'ubuntu-latest' }}  
-        run: npm compile && npx playwright test
+        run: npm run compile && npx playwright test
 
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}

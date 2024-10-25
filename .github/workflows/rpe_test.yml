@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -22,6 +22,7 @@ jobs:
           - ubuntu-22.04 # This is CentOS 7 under the hood
           - macos-12
           - windows-latest
+
     runs-on: ${{ matrix.os }}
     env:
       MODE: ${{ matrix.os }}
@@ -70,16 +71,28 @@ jobs:
               node --version
               python3 -V
         
-      - name: Install packages ${{ matrix.os }}
+      - name: Install Dep. packages Linux latest & windows & MacOS
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
-            npm install
-            python3 -m pip install -r requirements.txt
+              npm install
+              python3 -m pip install -r requirements.txt
+              npx playwright install --with-deps
+
+      - name: Unit Pytest Linux latest & windows & MacOS
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: python3 -m pytest
+    
+      - name: Unit Jtest Linux latest & windows & MacOS
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: npm test
+
+      - name: E2E Playwright tests
+        if: ${{ matrix.os == 'ubuntu-latest' }}  
+        run: npm compile && npx playwright test
 
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-            npx eslint src/
+        run: npx eslint src/
 
       - name: Install packages CentOS 7 & Run pytest & frontend test
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -95,17 +108,8 @@ jobs:
                 python3 -m pytest
                 npm test
 
-      - name: Run pytest on ${{ matrix.os }}
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
-        run: python3 -m pytest
-
-      - name: Run frontend unit test on ${{ matrix.os }}
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
-        run: |
-            npm test
-
   publish:
-    needs: build 	
+    needs: test 	
     strategy:
       fail-fast: false
       matrix:
@@ -113,6 +117,7 @@ jobs:
           - ubuntu-22.04 # This is CentOS 7 under the hood
           - macos-12
           - windows-latest
+          
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -224,41 +229,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
             files: dist/rapid_power_estimator*.exe
-
-  e2e_test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.8
-
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20.11
-
-    - name: Install dependencies
-      run: |
-          npm install
-          npm ci
-          python3 -m pip install -r requirements.txt
-
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-
-    - name: Run Playwright tests
-      run: npx playwright test
-
-    # - uses: actions/upload-artifact@v4
-    #   if: ${{ !cancelled() }}
-    #   with:
-    #     name: playwright-report
-    #     path: playwright-report/
-    #     retention-days: 30
-          
 
   coverage:
     runs-on: ubuntu-latest

@@ -2,8 +2,8 @@ name: Build and Publish RPE
 
 on:
   push:
-    tags:
-      - '*'
+    # tags:
+    #   - '*'
     branches: 
       - '*'
   pull_request:

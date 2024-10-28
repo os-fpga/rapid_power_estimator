@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Rapid Power Estimator'
-copyright = '2024, Ravikiran Chollangi, Chern Yee, Volodymyr Kochyn, Nadeem Yaseen, Shiva Ahir, Mustafa Abdaal'
-author = 'Ravikiran Chollangi, Chern Yee, Volodymyr Kochyn, Nadeem Yaseen, Shiva Ahir, Mustafa Abdaal'
+copyright = '2024, © Rapid Silicon Inc.'
+authors = 'Ravikiran Chollangi, Chern Yee, Volodymyr Kochyn, Nadeem Yaseen, Shiva Ahir, Mustafa Abdaal'
 release = '0.0.0'
 
 # -- General configuration ---------------------------------------------------

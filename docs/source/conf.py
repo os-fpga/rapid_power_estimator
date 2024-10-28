@@ -8,7 +8,7 @@
 
 project = 'Rapid Power Estimator'
 copyright = '2024, © Rapid Silicon Inc.'
-authors = 'Ravikiran Chollangi, Chern Yee, Volodymyr Kochyn, Nadeem Yaseen, Shiva Ahir, Mustafa Abdaal'
+authors = 'Ravikiran Chollangi, Chern Yee, Volodymyr Kochyn, Nadeem Yaseen, Shiva Ahir'
 release = '0.0.0'
 
 # -- General configuration ---------------------------------------------------

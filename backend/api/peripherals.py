@@ -118,12 +118,18 @@ class PeripheralSchema(Schema):
         elif peripheral_type == PeripheralType.FPGA_COMPLEX:
             return FpgaComplexSchema
         else:
-            return PeripheralSchema
+            return DefaultPeripheralSchema
 
     @classmethod
     def create_schema(cls, peripheral_type):
         schema_ctor = cls.get_schema(peripheral_type)
         return schema_ctor()
+
+class DummyOutputSchema(Schema):
+    pass
+
+class DefaultPeripheralSchema(PeripheralSchema):
+    output = fields.Nested(DummyOutputSchema, data_key="consumption")
 
 class SpiSchema(PeripheralSchema):
     enable = fields.Bool()
@@ -189,9 +195,6 @@ class MemorySchema(PeripheralSchema):
     data_rate = fields.Int()
     width = fields.Int()
     output = fields.Nested(MemoryOutputSchema, data_key="consumption")
-
-class DummyOutputSchema(Schema):
-    pass
 
 class ChannelOutputSchema(Schema):
     calculated_bandwidth = fields.Number()

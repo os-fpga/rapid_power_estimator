@@ -61,9 +61,7 @@ describe('SOCComponent', () => {
   test('renders SOCComponent with correct child components', () => {
     render(<SOCComponent device="test-device" setOpenedTable={mockSetOpenedTable} peripherals={mockPeripherals} />);
 
-    const acpuComponents = screen.getAllByText('Mocked ABCPUComponent');
-    expect(acpuComponents.length).toBe(2);
-
+    expect(screen.getAllByText('Mocked ABCPUComponent').length).toBe(2);
     expect(screen.getByText('Mocked TitleComponent')).toBeInTheDocument();
     expect(screen.getByText('Mocked DMAComponent')).toBeInTheDocument();
     expect(screen.getByText('Mocked ConnectivityComponent')).toBeInTheDocument();
@@ -75,7 +73,6 @@ describe('SOCComponent', () => {
 
     const acpuElement = screen.getAllByText('Mocked ABCPUComponent')[0];
     fireEvent.click(acpuElement);
-
     expect(mockSetOpenedTable).toHaveBeenCalledWith(Table.ACPU);
   });
 
@@ -84,7 +81,6 @@ describe('SOCComponent', () => {
 
     const bcpuElement = screen.getAllByText('Mocked ABCPUComponent')[1];
     fireEvent.click(bcpuElement);
-
     expect(mockSetOpenedTable).toHaveBeenCalledWith(Table.BCPU);
   });
 
@@ -93,7 +89,6 @@ describe('SOCComponent', () => {
 
     const dmaElement = screen.getByText('Mocked DMAComponent');
     fireEvent.click(dmaElement);
-
     expect(mockSetOpenedTable).toHaveBeenCalledWith(Table.DMA);
   });
 
@@ -102,7 +97,6 @@ describe('SOCComponent', () => {
 
     const connectivityElement = screen.getByText('Mocked ConnectivityComponent');
     fireEvent.click(connectivityElement);
-
     expect(mockSetOpenedTable).toHaveBeenCalledWith(Table.Connectivity);
   });
 
@@ -111,7 +105,36 @@ describe('SOCComponent', () => {
 
     const peripheralsElement = screen.getByText('Mocked PeripheralsComponent');
     fireEvent.click(peripheralsElement);
-
     expect(mockSetOpenedTable).toHaveBeenCalledWith(Table.Peripherals);
+  });
+
+  test('displays correct dynamic power values in TitleComponent', () => {
+    render(<SOCComponent device="test-device" setOpenedTable={mockSetOpenedTable} peripherals={mockPeripherals} />);
+
+    const dynamicPower = useSocTotalPower().totalConsumption.processing_complex.dynamic.power;
+    const dynamicPercentage = useSocTotalPower().totalConsumption.processing_complex.dynamic.percentage;
+
+    expect(dynamicPower).toBe(100);
+    expect(dynamicPercentage).toBe(50);
+  });
+
+  test('displays correct static power values in TitleComponent', () => {
+    render(<SOCComponent device="test-device" setOpenedTable={mockSetOpenedTable} peripherals={mockPeripherals} />);
+
+    const staticPower = useSocTotalPower().totalConsumption.processing_complex.static.power;
+    const staticPercentage = useSocTotalPower().totalConsumption.processing_complex.static.percentage;
+
+    expect(staticPower).toBe(30);
+    expect(staticPercentage).toBe(10);
+  });
+
+  test('displays correct total power values in TitleComponent', () => {
+    render(<SOCComponent device="test-device" setOpenedTable={mockSetOpenedTable} peripherals={mockPeripherals} />);
+
+    const totalPower = useSocTotalPower().totalConsumption.processing_complex.total_power;
+    const totalPercentage = useSocTotalPower().totalConsumption.processing_complex.total_percentage;
+
+    expect(totalPower).toBe(130);
+    expect(totalPercentage).toBe(60);
   });
 });

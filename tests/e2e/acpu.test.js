@@ -27,7 +27,7 @@ test('Launch Electron app, select device, toggle ACPU power, and click Add slowl
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   // Click OK in the popup
-  const okButton = await window.waitForSelector('body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-ni1kz0.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid');
+  const okButton = await window.waitForSelector('body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-apn68.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid > span');
   await okButton.click();
   await new Promise((resolve) => setTimeout(resolve, 2000)); 
 

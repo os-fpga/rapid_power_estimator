@@ -41,7 +41,7 @@ test('Launch Electron app, select device, toggle ACPU power, click Clocking, Add
   await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
 
   // Clicking OK to submit the form
-  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-ni1kz0.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
+  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-apn68.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
   const okButton = await window.waitForSelector(okButtonSelector);
   await okButton.click();
 

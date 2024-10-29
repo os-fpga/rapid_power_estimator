@@ -41,10 +41,11 @@ test('Launch Electron app, add clocking source, navigate to DSP block, configure
   await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
 
   // Clicking OK to submit the clocking form
-  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-ni1kz0.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
+  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-apn68.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
   const okButton = await window.waitForSelector(okButtonSelector);
   await okButton.click();
   await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for the form to submit
+
 
   // Navigate to the DSP block
   const dspBlockSelector = '#app > div > div.top-row-container > div.main-table-container.main-border > div.top-l2 > div.top-l2-col2 > div.top-l2-col2-elem > div > div:nth-child(3) > div:nth-child(2) > div';
@@ -95,7 +96,7 @@ test('Launch Electron app, add clocking source, navigate to DSP block, configure
   // Take note of the DSP power generated (assuming it's shown in the UI somewhere, you can add the selector for DSP power if needed)
 
   // Clicking OK to submit the DSP form
-  const dspOkButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-ni1kz0.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
+  const dspOkButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-apn68.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
   const dspOkButton = await window.waitForSelector(dspOkButtonSelector);
   await dspOkButton.click();
   await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for the form to submit

@@ -6,6 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "webpack --mode development && electron . --development",
+    "compile": "webpack --mode development",
     "build": "webpack --mode production && electron .",
     "test": "jest --coverage --coverageDirectory=coverage",
     "test:jest": "jest --coverage --coverageDirectory=coverage",
@@ -108,10 +109,10 @@
     "react-test-renderer": "^18.3.1",
     "style-loader": "^3.3.4",
     "webpack": "^5.90.1",
+    "@playwright/test": "^1.48.1",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@playwright/test": "^1.48.1",
     "antd": "^5.15.4",
     "electron-log": "^5.1.2",
     "electron-store": "^8.2.0",

@@ -113,6 +113,18 @@ class DSP_SubModule:
         self.total_block_power = 0.0
         self.itemlist: List[DSP] = itemlist or []
 
+        # Read power calculation coeffs
+        if self.total_dsp_blocks_available > 0:
+            self.VCC_CORE      = self.resources.get_VCC_CORE()
+            self.DSP_MULT_CAP  = self.resources.get_DSP_MULT_CAP()
+            self.DSP_MULT_CAP2 = self.resources.get_DSP_MULT_CAP2()
+            self.DSP_INT_CAP   = self.resources.get_DSP_INT_CAP()
+        else:
+            self.VCC_CORE      = 0.0
+            self.DSP_MULT_CAP  = 0.0
+            self.DSP_MULT_CAP2 = 0.0
+            self.DSP_INT_CAP   = 0.0
+
     def get_resources(self):
         total_dsp_blocks_used = 0
         for item in self.itemlist:
@@ -156,19 +168,13 @@ class DSP_SubModule:
         self.itemlist.clear()
 
     def compute_output_power(self):
-        # Get power calculation coefficients
-        VCC_CORE      = self.resources.get_VCC_CORE()
-        DSP_MULT_CAP  = self.resources.get_DSP_MULT_CAP()
-        DSP_MULT_CAP2 = self.resources.get_DSP_MULT_CAP2()
-        DSP_INT_CAP   = self.resources.get_DSP_INT_CAP()
-
         # Compute the total power consumption of all clocks
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
 
         # Compute the power consumption for each individual items
         for item in self.itemlist:
-            item.compute_dynamic_power(self.resources.get_clock(item.clock), VCC_CORE, DSP_MULT_CAP, DSP_MULT_CAP2, DSP_INT_CAP)
+            item.compute_dynamic_power(self.resources.get_clock(item.clock), self.VCC_CORE, self.DSP_MULT_CAP, self.DSP_MULT_CAP2, self.DSP_INT_CAP)
             self.total_interconnect_power += item.output.interconnect_power
             self.total_block_power += item.output.block_power
 
@@ -178,24 +184,24 @@ class DSP_SubModule:
             item.compute_percentage(total_power)
 
     def compute_static_power(self, temperature: float, scenario: ScenarioType) ->  List[PowerValue]:
-        DSP_BlOCKS = self.resources.get_num_DSP_BLOCKs()
         mylist = []
 
-        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.DSP, scenario):
-            total_power = 0.0
-            for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor
-                power = power * DSP_BlOCKS
-                total_power += power
-                # debug info
-                log(f'[DSP] {rail_type = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {temperature = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {scenario = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {s.coeffs = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {DSP_BlOCKS = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {power = }', RsLogLevel.DEBUG)
-                log(f'[DSP]   {total_power = }', RsLogLevel.DEBUG)
-            mylist.append(PowerValue(type=rail_type, value=total_power))
+        if self.total_dsp_blocks_available > 0:
+            for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.DSP, scenario):
+                total_power = 0.0
+                for s in scene_list:
+                    power = np.polyval(s.coeffs, temperature) * s.factor
+                    power = power * self.total_dsp_blocks_available
+                    total_power += power
+                    # debug info
+                    log(f'[DSP] {rail_type = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {temperature = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {scenario = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {s.coeffs = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {s.factor = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {self.total_dsp_blocks_available = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {power = }', RsLogLevel.DEBUG)
+                    log(f'[DSP]   {total_power = }', RsLogLevel.DEBUG)
+                mylist.append(PowerValue(type=rail_type, value=total_power))
 
         return mylist

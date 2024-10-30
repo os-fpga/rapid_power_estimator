@@ -7,10 +7,13 @@ from enum import Enum
 import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
+import numpy as np
 from utilities.common_utils import RsEnum, update_attributes
 from .rs_device_resources import IO_Standard_Coeff, IOFeatureNotFoundException, IOFeatureOdtBankNotFoundException, IOFeatureTypeMismatchException, IOStandardCoeffNotFoundException, \
     IONotFoundException, IO_BankType, IO_Standard, RsDeviceResources
 from .rs_message import RsMessage, RsMessageManager
+from .rs_power_config import ElementType, PowerValue, ScenarioType
+from .rs_logger import RsLogLevel, log
 
 class IO_Direction(RsEnum):
     INPUT = 0, "Input"
@@ -535,3 +538,52 @@ class IO_SubModule:
                 io_bank.percentage = (total_io_used / io_bank.total_io_available) * 100
             else:
                 io_bank.percentage = 0.0
+
+    def get_io_banks_used(self, io_type: IO_BankType, voltage: float = None) -> int:
+        num_banks = 0
+        for elem in self.io_usage:
+            if elem.type == io_type:
+                for item in elem.usage:
+                    if voltage is None or item.voltage == voltage:
+                        num_banks += item.banks_used
+                break
+        return num_banks
+
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
+        HR_IO_BANKS = self.resources.get_num_HR_Banks()
+        HP_IO_BANKS = self.resources.get_num_HP_Banks()
+        io_banks_voltages = {
+            "Vcc_core (Gearbox HR)": HR_IO_BANKS,
+            "Vcc_core (HR I/O)"    : HR_IO_BANKS,
+            "Vcc_hr_aux"           : self.get_io_banks_used(IO_BankType.HR),
+            "Vcc_hr_io (1.8V)"     : self.get_io_banks_used(IO_BankType.HR, 1.8) * 20 * 1.8,
+            "Vcc_hr_io (2.5V)"     : self.get_io_banks_used(IO_BankType.HR, 2.5) * 20 * 2.5,
+            "Vcc_hr_io (3.3V)"     : self.get_io_banks_used(IO_BankType.HR, 3.3) * 20 * 3.3,
+            "Vcc_core (Gearbox HP)": HP_IO_BANKS,
+            "Vcc_core (HP I/O)"    : HP_IO_BANKS,
+            "Vcc_hv_aux"           : self.get_io_banks_used(IO_BankType.HP),
+            "Vcc_hp_io (1.2V)"     : self.get_io_banks_used(IO_BankType.HP, 1.2) * 20 * 1.2,
+            "Vcc_hp_io (1.5V)"     : self.get_io_banks_used(IO_BankType.HP, 1.5) * 20 * 1.5,
+            "Vcc_hp_io (1.8V)"     : self.get_io_banks_used(IO_BankType.HP, 1.8) * 20 * 1.8,
+        }
+        mylist = []
+
+        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.IO, scenario):
+            total_power = 0.0
+            for s in scene_list:
+                power = np.polyval(s.coeffs, temperature) * s.factor * io_banks_voltages.get(rail_type, 0)
+                total_power += power
+                # debug info
+                log(f'[IO] {rail_type = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {temperature = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {scenario = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {s.coeffs = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {s.factor = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {HR_IO_BANKS = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {HP_IO_BANKS = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {io_banks_voltages = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {power = }', RsLogLevel.DEBUG)
+                log(f'[IO]   {total_power = }', RsLogLevel.DEBUG)
+            mylist.append(PowerValue(type=rail_type, value=total_power))
+
+        return mylist

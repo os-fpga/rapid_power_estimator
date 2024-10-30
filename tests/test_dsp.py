@@ -60,6 +60,7 @@ def test_compute_dynamic_power(enable, clock, VCC_CORE, DSP_MULT_CAP, DSP_MULT_C
 
 def test_dsp_submodule_initialization():
     mock_resources = Mock()
+    mock_resources.get_num_DSP_BLOCKs.return_value = 10
     dsps = [DSP(enable=True, name="DSP 1"), DSP(enable=False, name="DSP 2")]
     dsp_submodule = DSP_SubModule(mock_resources, dsps)
 
@@ -79,6 +80,7 @@ def test_get_dsp_resources():
 
 def test_add_and_get_dsp():
     mock_resources = Mock()
+    mock_resources.get_num_DSP_BLOCKs.return_value = 10
     dsp_submodule = DSP_SubModule(mock_resources, [])
 
     new_dsp_data = {
@@ -95,6 +97,7 @@ def test_add_and_get_dsp():
 
 def test_dsp_submodule_compute_output_power():
     mock_resources = Mock()
+    mock_resources.get_num_DSP_BLOCKs.return_value = 10
 
     # Assume some coefficients are returned by the mock
     mock_resources.get_VCC_CORE.return_value = 1.2

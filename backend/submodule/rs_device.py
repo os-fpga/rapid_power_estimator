@@ -279,7 +279,7 @@ class RsDevice:
     def compute(self, temperature: float, scenerio: ScenarioType) -> StaticPowerResult:
         # compute fabric/fpga static power
         power = StaticPowerResult()
-        for modtype in (ModuleType.FABRIC_LE, ModuleType.BRAM, ModuleType.DSP, ModuleType.CLOCKING):
+        for modtype in (ModuleType.FABRIC_LE, ModuleType.BRAM, ModuleType.DSP, ModuleType.CLOCKING, ModuleType.IO):
             power.add(self.get_module(modtype).compute_static_power(temperature, scenerio))
 
         # compute processin/peripheral static power

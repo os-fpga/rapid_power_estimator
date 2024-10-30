@@ -103,8 +103,6 @@ class PeripheralType(Enum):
     PUFFCC = 'puffcc'
     RC_OSC = 'rc_osc'
     NOC = 'noc'
-    GEARBOX_HP = 'gearbox_hp'
-    GEARBOX_HR = 'gearbox_hr'
 
 class IO_BankType(RsEnum):
     HP = 0, "HP"
@@ -213,16 +211,13 @@ class RsDeviceResources:
             return 2
 
     def get_num_DSP_BLOCKs(self) -> int:
-        # return self.get_attr('dsp')
-        return 176 # overwrite for test purpose
+        return self.get_attr('dsp')
 
     def get_num_18K_BRAM(self) -> int:
-        # return self.get_attr('bram')
-        return self.get_num_36K_BRAM() * 2 # overwrite for test purpose
+        return self.get_num_36K_BRAM() * 2
 
     def get_num_36K_BRAM(self) -> int:
-        # return self.get_attr('bram')
-        return 176 # overwrite for test purpose
+        return self.get_attr('bram')
 
     def get_series(self):
         return self.device.series
@@ -249,8 +244,7 @@ class RsDeviceResources:
         return self.get_attr('ff')
 
     def get_num_CLBs(self) -> int:
-        # return int(self.get_num_LUTs() / 8)
-        return 5676
+        return int(self.get_num_LUTs() / 8)
 
     def get_num_HP_Banks(self) -> int:
         # todo: how to get number of hp banks?
@@ -261,20 +255,17 @@ class RsDeviceResources:
         return 6
 
     def get_num_HP_IOs(self) -> int:
-        # todo: how to get number of HP IOs?
-        return 120
+        return self.get_attr('hp_io')
 
     def get_num_HR_IOs(self) -> int:
-        # todo: how to get number of HR IOs?
-        return 240
+        return self.get_attr('hr_io')
 
     def get_num_BOOT_IOs(self) -> int:
         # todo: how to get number of boot IOs?
         return 15
 
     def get_num_SOC_IOs(self) -> int:
-        # todo: how to get number of SoC IOs?
-        return 40
+        return self.get_attr('soc_io')
 
     def get_num_DDR_IOs(self) -> int:
         # todo: how to get number of DDR IOs?

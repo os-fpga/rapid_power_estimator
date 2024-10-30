@@ -4,6 +4,7 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
+from device.device_resource import ResourceAttributes
 from submodule.rs_power_config import ElementType
 from submodule.rs_device_resources import (
     RsDeviceResources,
@@ -23,6 +24,11 @@ def mock_device():
     device.package = 'TestPackage'
     device.speedgrade = 'Speed1'
     device.filepath = 'device.xml'
+    device.resources = {
+        "dsp": ResourceAttributes(type='dsp', num=176, label='DSP'),
+        "bram": ResourceAttributes(type='bram', num=176, label='BRAM'),
+        "lut": ResourceAttributes(type='lut', num=45408, label='LUTs')
+    }
     return device
 
 @pytest.fixture

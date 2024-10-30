@@ -6,6 +6,7 @@ on:
       - '*'
     branches: 
       - '*'
+      - '*/**'
   pull_request:
 
 concurrency:
@@ -13,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -22,6 +23,7 @@ jobs:
           - ubuntu-22.04 # This is CentOS 7 under the hood
           - macos-12
           - windows-latest
+
     runs-on: ${{ matrix.os }}
     env:
       MODE: ${{ matrix.os }}
@@ -70,16 +72,28 @@ jobs:
               node --version
               python3 -V
         
-      - name: Install packages ${{ matrix.os }}
+      - name: Install Dep. packages Linux latest & windows & MacOS
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: |
-            npm install
-            python3 -m pip install -r requirements.txt
+              npm install
+              python3 -m pip install -r requirements.txt
+              npx playwright install --with-deps
+
+      - name: Unit Pytest Linux latest & windows & MacOS
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: python3 -m pytest
+    
+      - name: Unit Jtest Linux latest & windows & MacOS
+        if: ${{ matrix.os != 'ubuntu-22.04' }}
+        run: npm test
+
+      - name: E2E Playwright tests on Linux latest & MacOS
+        if: ${{ matrix.os == 'ubuntu-latest' }}     
+        run: npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
 
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-            npx eslint src/
+        run: npx eslint src/
 
       - name: Install packages CentOS 7 & Run pytest & frontend test
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -95,17 +109,8 @@ jobs:
                 python3 -m pytest
                 npm test
 
-      - name: Run pytest on ${{ matrix.os }}
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
-        run: python3 -m pytest
-
-      - name: Run frontend unit test on ${{ matrix.os }}
-        if: ${{ matrix.os != 'ubuntu-22.04' }}
-        run: |
-            npm test
-
   publish:
-    needs: build 	
+    needs: test 	
     strategy:
       fail-fast: false
       matrix:
@@ -113,6 +118,7 @@ jobs:
           - ubuntu-22.04 # This is CentOS 7 under the hood
           - macos-12
           - windows-latest
+          
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write

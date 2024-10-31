@@ -1,8 +1,9 @@
+=================================================
 Welcome to Rapid Power Estimator's Documentation!
 =================================================
 
 Overview
-============
+###########
 
 Power and thermal specifications are critical considerations in the early stages of designing SoCs and FPGAs. Determining accurate power requirements and cooling solutions is essential to avoid over-designing or under-designing your product's power and thermal systems. It is a valuable tool in this process.
 
@@ -10,7 +11,7 @@ RPE allows you to estimate power consumption at various stages of your design cy
 
 
 Contents
-========
+#########
 
 .. toctree::
    :maxdepth: 2
@@ -23,8 +24,8 @@ Contents
    installation
    api_reference
 
-Indices and tables
-==================
+Indices and Tables
+###################
 
 * :ref:`genindex`
 * :ref:`modindex`

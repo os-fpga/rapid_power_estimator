@@ -1,5 +1,6 @@
+==========
 User Guide
-=====
+==========
 
 
 .. toctree::
@@ -7,7 +8,7 @@ User Guide
    :caption: Table of Contents
 
    introduction
-   launch
+   setup
    FPGA 
    SoC
    peripherals

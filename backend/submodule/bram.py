@@ -186,6 +186,18 @@ class BRAM_SubModule:
         self.total_block_power = 0.0
         self.itemlist: List[BRAM] = itemlist or []
 
+        # Read dynamic power calculation coeffs
+        if self.total_36k_bram_available > 0 and self.total_18k_bram_available > 0:
+            self.BRAM_WRITE_CAP = self.resources.get_BRAM_WRITE_CAP()
+            self.BRAM_READ_CAP  = self.resources.get_BRAM_READ_CAP()
+            self.BRAM_INT_CAP   = self.resources.get_BRAM_INT_CAP()
+            self.BRAM_FIFO_CAP  = self.resources.get_BRAM_FIFO_CAP()
+        else:
+            self.BRAM_WRITE_CAP = 0.0
+            self.BRAM_READ_CAP  = 0.0
+            self.BRAM_INT_CAP   = 0.0
+            self.BRAM_FIFO_CAP  = 0.0
+
     def get_resources(self):
         total_18k_bram_used = 0
         total_36k_bram_used = 0
@@ -231,12 +243,6 @@ class BRAM_SubModule:
         self.itemlist.clear()
 
     def compute_output_power(self):
-        # Get power calculation coefficients
-        BRAM_WRITE_CAP = self.resources.get_BRAM_WRITE_CAP()
-        BRAM_READ_CAP  = self.resources.get_BRAM_READ_CAP()
-        BRAM_INT_CAP   = self.resources.get_BRAM_INT_CAP()
-        BRAM_FIFO_CAP  = self.resources.get_BRAM_FIFO_CAP()
-
         # Compute the total power consumption of all clocks
         self.total_block_power = 0.0
         self.total_interconnect_power = 0.0
@@ -244,7 +250,7 @@ class BRAM_SubModule:
         # Compute the power consumption for each individual items
         for item in self.itemlist:
             item.compute_dynamic_power(self.resources.get_clock(item.port_a.clock), self.resources.get_clock(item.port_b.clock), \
-                BRAM_WRITE_CAP, BRAM_READ_CAP, BRAM_INT_CAP, BRAM_FIFO_CAP)
+                self.BRAM_WRITE_CAP, self.BRAM_READ_CAP, self.BRAM_INT_CAP, self.BRAM_FIFO_CAP)
             self.total_interconnect_power += item.output.interconnect_power
             self.total_block_power += item.output.block_power
 
@@ -253,25 +259,26 @@ class BRAM_SubModule:
         for item in self.itemlist:
             item.compute_percentage(total_power)
 
-    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> float:
-        NUM_36K_BRAM = self.resources.get_num_36K_BRAM()
+    def compute_static_power(self, temperature: float, scenario: ScenarioType) -> List[PowerValue]:
         mylist = []
 
-        for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.BRAM, scenario):
-            total_power = 0.0
-            for s in scene_list:
-                power = np.polyval(s.coeffs, temperature) * s.factor
-                power = power * NUM_36K_BRAM
-                total_power += power
-                # debug info
-                log(f'[BRAM] {rail_type = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {temperature = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {scenario = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {s.coeffs = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {s.factor = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {NUM_36K_BRAM = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {power = }', RsLogLevel.DEBUG)
-                log(f'[BRAM]   {total_power = }', RsLogLevel.DEBUG)
-            mylist.append(PowerValue(type=rail_type, value=total_power))
+        if self.total_36k_bram_available > 0 and self.total_18k_bram_available > 0:
+            for rail_type, scene_list in self.resources.powercfg.get_polynomial(ElementType.BRAM, scenario):
+                total_power = 0.0
+                for s in scene_list:
+                    power = np.polyval(s.coeffs, temperature) * s.factor
+                    power = power * self.total_36k_bram_available
+                    total_power += power
+                    # debug info
+                    log(f'[BRAM] {rail_type = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {temperature = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {scenario = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {s.coeffs = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {s.factor = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {self.total_36k_bram_available = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {self.total_18k_bram_available = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {power = }', RsLogLevel.DEBUG)
+                    log(f'[BRAM]   {total_power = }', RsLogLevel.DEBUG)
+                mylist.append(PowerValue(type=rail_type, value=total_power))
 
         return mylist

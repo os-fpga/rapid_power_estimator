@@ -1,6 +1,0 @@
-{
-    "type": "pwm",
-    "coeffs": [
-        { "name": "PWM_IO_FACTOR", "value": 0.001 }
-    ]
-}

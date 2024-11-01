@@ -1,9 +1,0 @@
-{
-    "type": "clocking",
-    "coeffs": [
-        { "name": "CLK_CAP"    , "value": 0.00001    },
-        { "name": "CLK_INT_CAP", "value": 0.00000003 },
-        { "name": "PLL_INT"    , "value": 0.0009     },
-        { "name": "PLL_AUX"    , "value": 0.01       }
-    ]
-}

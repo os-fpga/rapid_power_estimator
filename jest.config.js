@@ -7,9 +7,15 @@ module.exports = {
 
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx}",   
-    "src/tests/**/*.{js,jsx}"  
+    "src/**/*.{js,jsx}",
+    "!src/**/*.test.{js,jsx}",
+    "!src/tests/**/*.{js,jsx}"
   ],
-  coverageReporters: ['text', 'lcov'],
+  coverageReporters: ['text', 'lcov', 'json', 'html'],
   coverageDirectory: "coverage",
+
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/e2e/"
+  ],
 };

@@ -1,8 +1,0 @@
-{
-    "type": "jtag",
-    "coeffs": [
-        { "name": "JTAG_CLK_FACTOR"      , "value": 0.000407953336466165 },
-        { "name": "JTAG_SWITCHING_FACTOR", "value": 0.000264495634397032 },
-        { "name": "JTAG_IO_FACTOR"       , "value": 0.00004367522        }
-    ]
-}

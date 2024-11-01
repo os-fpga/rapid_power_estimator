@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from enum import IntFlag
 from typing import Any, List, Dict, Tuple
 from utilities.common_utils import RsEnum, update_attributes
-from .rs_device_resources import IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
+from .rs_device_resources import IO_BankType, IO_Standard, IO_Standard_Coeff, ModuleType, PeripheralPortNotFoundException, RsDeviceResources, PeripheralNotFoundException, PeripheralType
 from .rs_power_config import ElementType, PowerValue, ScenarioType
 from .rs_message import RsMessage, RsMessageManager
 from .rs_logger import log, RsLogLevel
@@ -215,13 +215,16 @@ class Peripheral_SubModule(SubModule):
         peripherals += self.create_peripherals(self.resources.get_num_DMAs(), 'DMA', PeripheralType.DMA)
         peripherals += self.create_peripherals(1, 'N22 RISC-V', PeripheralType.BCPU)
         peripherals += self.create_peripherals(1, 'Fabric', PeripheralType.FPGA_COMPLEX)
-        peripherals += self.create_peripherals(1, 'GPIO', PeripheralType.GPIO)
         peripherals += self.create_peripherals(1, 'PUFFcc', PeripheralType.PUFFCC)
         peripherals += self.create_peripherals(1, 'RC Oscillator', PeripheralType.RC_OSC)
         peripherals += self.create_peripherals(1, 'NOC', PeripheralType.NOC)
 
-        # add application processor for Gemini
-        if self.resources.get_series() == 'Gemini':
+        # add gpio
+        if self.resources.get_num_SOC_IOs() > 0:
+            peripherals += self.create_peripherals(1, 'GPIO', PeripheralType.GPIO)
+
+        # add application processor for Gemini (but not MPW1)
+        if self.resources.get_series() == 'Gemini' and self.resources.get_device_name() != 'MPW1':
             peripherals += self.create_peripherals(1, 'A45 RISC-V', PeripheralType.ACPU)
 
         return peripherals

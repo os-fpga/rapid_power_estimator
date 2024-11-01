@@ -211,16 +211,13 @@ class RsDeviceResources:
             return 2
 
     def get_num_DSP_BLOCKs(self) -> int:
-        # return self.get_attr('dsp')
-        return 176 # overwrite for test purpose
+        return self.get_attr('dsp')
 
     def get_num_18K_BRAM(self) -> int:
-        # return self.get_attr('bram')
-        return self.get_num_36K_BRAM() * 2 # overwrite for test purpose
+        return self.get_num_36K_BRAM() * 2
 
     def get_num_36K_BRAM(self) -> int:
-        # return self.get_attr('bram')
-        return 176 # overwrite for test purpose
+        return self.get_attr('bram')
 
     def get_series(self):
         return self.device.series
@@ -247,8 +244,7 @@ class RsDeviceResources:
         return self.get_attr('ff')
 
     def get_num_CLBs(self) -> int:
-        # return int(self.get_num_LUTs() / 8)
-        return 5676
+        return int(self.get_num_LUTs() / 8)
 
     def get_num_HP_Banks(self) -> int:
         # todo: how to get number of hp banks?
@@ -259,20 +255,17 @@ class RsDeviceResources:
         return 6
 
     def get_num_HP_IOs(self) -> int:
-        # todo: how to get number of HP IOs?
-        return 120
+        return self.get_attr('hp_io')
 
     def get_num_HR_IOs(self) -> int:
-        # todo: how to get number of HR IOs?
-        return 240
+        return self.get_attr('hr_io')
 
     def get_num_BOOT_IOs(self) -> int:
         # todo: how to get number of boot IOs?
         return 15
 
     def get_num_SOC_IOs(self) -> int:
-        # todo: how to get number of SoC IOs?
-        return 40
+        return self.get_attr('soc_io')
 
     def get_num_DDR_IOs(self) -> int:
         # todo: how to get number of DDR IOs?
@@ -530,39 +523,6 @@ class RsDeviceResources:
 
     def get_SRAM_ACLK_FACTOR(self) -> float:
         return self.powercfg.get_coeff(ElementType.SRAM, 'SRAM_ACLK_FACTOR')
-
-    def get_polynomial_coeff(self, type: ElementType, worse: bool):
-        polynomials = self.powercfg.get_polynomial_coeff(type, ScenarioType.WORSE if worse else ScenarioType.TYPICAL)
-        coeffs = [c.coeffs[:c.length] for c in polynomials]
-        return 1/polynomials[0].factor, coeffs
-
-    def get_divfactor_coeff_GEARBOX_IO_bank_type(self, bank_type : int, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.GEARBOX_IO_HP if bank_type == 0 else ElementType.GEARBOX_IO_HR, worsecase)
-
-    def get_divfactor_coeff_IO_bank_type(self, bank_type : int, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.IO_HP if bank_type == 0 else ElementType.IO_HR, worsecase)
-
-    def get_divfactor_coeff_AUX(self, worsecase : bool):
-        return self.get_polynomial_coeff(ElementType.AUX, worsecase)
-
-    def get_divfactor_coeff_Aux_bank_type(self, bank_type: int, worsecase: bool):
-        return self.get_polynomial_coeff(ElementType.AUX_HP if bank_type == 0 else ElementType.AUX_HR, worsecase)
-
-    def get_divfactor_coeff_IO_bank_type_voltage(self, bank_type : int, voltage : float, worsecase : bool = True):
-        if bank_type == 1: # HR
-            if voltage == 1.8:
-                return self.get_polynomial_coeff(ElementType.IO_HR_1_8V, worsecase)
-            elif voltage == 2.5:
-                return self.get_polynomial_coeff(ElementType.IO_HR_2_5V, worsecase)
-            elif voltage == 3.3:
-                return self.get_polynomial_coeff(ElementType.IO_HR_3_3V, worsecase)
-        elif bank_type == 0: # HP
-            if voltage == 1.2:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_2V, worsecase)
-            elif voltage == 1.5:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_5V, worsecase)
-            elif voltage == 1.8:
-                return self.get_polynomial_coeff(ElementType.IO_HP_1_8V, worsecase)
 
     def register_module(self, modtype, module):
         self.modules[modtype.value] = module

@@ -70,4 +70,27 @@ describe('PowerSummaryTable Component', () => {
     expect(within(noMessageRow).queryByText('Warning message')).toBeNull();
     expect(within(noMessageRow).queryByText('Error message')).toBeNull();
   });
+
+  test('total and percent values match sum of data', () => {
+    render(<PowerSummaryTable title="Power Summary" data={mockData} total={60} percent={80} />);
+  
+    const displayedTotal = screen.getByText((content) => content.includes('60.00') && content.includes('W'));
+    expect(displayedTotal).toBeInTheDocument();
+  
+    const progressBar = screen.getByRole('progressbar');
+    expect(progressBar).toHaveAttribute('value', '80');
+    expect(progressBar).toHaveAttribute('max', '100');
+  });  
+
+  test('renders correctly with no data entries', () => {
+    render(<PowerSummaryTable title="Power Summary" data={[]} total={0} percent={0} />);
+  
+    expect(screen.getByText('Power Summary')).toBeInTheDocument();
+  
+    expect(screen.getByText('0.00 W')).toBeInTheDocument();
+    expect(screen.getByText('0 %')).toBeInTheDocument();
+  
+    const progressBar = screen.getByRole('progressbar');
+    expect(progressBar).toHaveAttribute('value', '0');
+  });  
 });

@@ -88,8 +88,16 @@ jobs:
         run: npm test
 
       - name: E2E Playwright tests on Linux latest & MacOS
-        if: ${{ matrix.os == 'ubuntu-latest' }}     
-        run: npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+            npm run compile
+            npm start &  
+            sleep 5      
+            xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
+
+#      - name: E2E Playwright tests on Linux latest & MacOS
+#        if: ${{ matrix.os == 'ubuntu-latest' }}     
+#        run: npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
 
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}

@@ -206,15 +206,15 @@ jobs:
             echo ${{ github.ref }} 
 
       - name: Upload Package
-        if: ${{ github.ref == 'refs/heads/main' &&  matrix.os != 'windows-latest'  }}
-        uses: actions/upload-artifact@v3
+        if: ${{ github.ref == 'refs/heads/main' &&  matrix.os != 'windows-latest' }}
+        uses: actions/upload-artifact@v4.4.3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.tar.gz 
 
       - name: Upload Package
         if: ${{ github.ref == 'refs/heads/main' &&  matrix.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.4.3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.exe

@@ -91,6 +91,14 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}     
         run: npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test -- fle.test.js
 
+      - name: cat rpe log
+        if: always()
+        run:
+           ls -la
+           pwd
+           find . -type f -name "rpe.log" -exec cat {} +
+
+
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: npx eslint src/

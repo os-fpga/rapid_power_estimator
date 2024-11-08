@@ -96,9 +96,9 @@ jobs:
         
       - name: E2E Playwright tests on Linux latest & MacOS
         if: ${{ matrix.os == 'ubuntu-latest' }}     
-        run: cp -rf Raptor/etc backend && npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test -- fle.test.js
+        run: ls -l Raptor/etc/devices &&  cp -rf Raptor/etc backend && npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test -- fle.test.js
 
-      - name: cat rpe log
+      - name: cat RPE log
         if: matrix.os == 'ubuntu-latest'  &&  always()
         run: |
            ls -la

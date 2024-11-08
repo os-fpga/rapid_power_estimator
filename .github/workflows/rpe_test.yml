@@ -30,6 +30,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Bring in closed src device.xml
+        uses: actions/checkout@v4
+        with:
+          repository: os-fpga/Raptor
+          path: Raptor
+          sparse-checkout: 'etc'      
     
       - name: Setup Node.js ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
@@ -86,10 +93,18 @@ jobs:
       - name: Unit Jtest Linux latest & windows & MacOS
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: npm test
+        
+      - name: E2E Playwright tests on Linux latest & MacOS
+        if: ${{ matrix.os == 'ubuntu-latest' }}     
+        run: ls -l Raptor/etc/devices &&  cp -rf Raptor/etc backend && npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test -- fle.test.js
 
-     # - name: E2E Playwright tests on Linux latest & MacOS
-     #   if: ${{ matrix.os == 'ubuntu-latest' }}     
-     #   run: npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
+      - name: cat RPE log
+        if: matrix.os == 'ubuntu-latest'  &&  always()
+        run: |
+           ls -la
+           cd $HOME && pwd
+           find $HOME -type f -name "rpe.log" -exec cat {} +
+
 
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}

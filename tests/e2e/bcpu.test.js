@@ -27,7 +27,7 @@ test('Launch Electron app, select device MPW1 Gemini, and click on BCPU block', 
   await window.click(okButtonSelector);
 
   // click on Peripherals tab
-  const peripheralsTabSelector = '#app > div > div.top-row-container > div.main-table-container.main-border > div.top-l2 > div.top-l2-col1 > div:nth-child(3) > div > div:nth-child(2) > div:nth-child(2) > div.periph-internal-font-header';
+  const peripheralsTabSelector = '#app > div > div.top-row-container > div.main-table-container.main-border > div.top-l2 > div.top-l2-col1 > div:nth-child(3)';
   await window.waitForSelector(peripheralsTabSelector, { state: 'visible' });
   await window.click(peripheralsTabSelector);
 

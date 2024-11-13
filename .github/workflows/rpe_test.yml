@@ -103,7 +103,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'  &&  always()
         run: find $HOME -type f -name "rpe.log" -exec cat {} +
 
-
+      - name: E2E Playwright shut down test on Linux latest
+        if: ${{ matrix.os == 'ubuntu-latest' }}     
+        run: |
+              rm -rf $HOME/rpe.log && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test -- restart.test.js
+              cat $HOME/rpe.log | tail -n 2 | grep "Shutting down server..."
+              [[ $? != 0 ]] && exit 1
+              
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: npx eslint src/

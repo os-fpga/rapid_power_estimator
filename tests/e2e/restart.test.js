@@ -3,20 +3,17 @@ const { test, expect } = require('@playwright/test');
 const { execSync } = require('child_process');
 const os = require('os');
 
-function isElectronRunning() {
+function isElectronRunning(pid) {
   try {
     const platform = os.platform();
+    let output;
 
-    // Check if Electron process is running based on the operating system
     if (platform === 'win32') {
-      const output = execSync('tasklist').toString();
+      output = execSync(`tasklist /FI "PID eq ${pid}"`).toString();
       return output.includes('electron.exe');
-    } else if (platform === 'darwin') {
-      const output = execSync('ps -A').toString();
+    } else if (platform === 'darwin' || platform === 'linux') {
+      output = execSync(`ps -p ${pid}`).toString();
       return output.includes('Electron');
-    } else if (platform === 'linux') {
-      const output = execSync('pgrep electron').toString();
-      return output.trim() !== '';
     }
   } catch (error) {
     console.error('Error checking for Electron process:', error);
@@ -24,14 +21,14 @@ function isElectronRunning() {
   }
 }
 
-function forceKillElectron() {
+function forceKillElectron(pid) {
   try {
     const platform = os.platform();
 
     if (platform === 'win32') {
-      execSync('taskkill /F /IM electron.exe');
+      execSync(`taskkill /PID ${pid} /F`);
     } else if (platform === 'darwin' || platform === 'linux') {
-      execSync('pkill -f Electron');
+      process.kill(pid, 'SIGKILL');
     }
     console.log('Electron process forcefully terminated.');
   } catch (error) {
@@ -45,22 +42,23 @@ test('Launch and close Electron app 10 times', async () => {
 
     // Launch the Electron app
     const app = await electron.launch({ args: ['main.js'] });
+    const pid = app.process().pid;
     const window = await app.firstWindow();
 
     // Close the app
     await app.close();
 
-    // Wait for a moment to allow for process termination
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Waiting for a moment to allow for process termination
+    await new Promise((resolve) => setTimeout(resolve, 3000)); 
 
     // Check if the Electron app is still running
-    let running = isElectronRunning();
+    let running = isElectronRunning(pid);
     if (running) {
       console.warn(`Iteration ${i + 1}: Electron app is still running. Attempting to force kill.`);
-      forceKillElectron();
+      forceKillElectron(pid);
 
       // Re-check if the process is still running after the forced kill
-      running = isElectronRunning();
+      running = isElectronRunning(pid);
     }
 
     // Assert that the app is not running

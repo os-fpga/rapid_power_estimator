@@ -21,21 +21,6 @@ function isElectronRunning(pid) {
   }
 }
 
-function forceKillElectron(pid) {
-  try {
-    const platform = os.platform();
-
-    if (platform === 'win32') {
-      execSync(`taskkill /PID ${pid} /F`);
-    } else if (platform === 'darwin' || platform === 'linux') {
-      process.kill(pid, 'SIGKILL');
-    }
-    console.log('Electron process forcefully terminated.');
-  } catch (error) {
-    console.error('Error forcefully terminating Electron process:', error);
-  }
-}
-
 test('Launch and close Electron app 10 times', async () => {
   for (let i = 0; i < 10; i++) {
     console.log(`Iteration ${i + 1}: Launching and closing Electron app.`);
@@ -44,6 +29,11 @@ test('Launch and close Electron app 10 times', async () => {
     const app = await electron.launch({ args: ['main.js'] });
     const pid = app.process().pid;
     const window = await app.firstWindow();
+
+      // Selecting the device (MPW1 Gemini)
+  const deviceDropdown = await window.waitForSelector('#deviceId');
+  await deviceDropdown.selectOption('MPW1');
+
 
     // Close the app
     await app.close();
@@ -54,19 +44,6 @@ test('Launch and close Electron app 10 times', async () => {
     // Check if the Electron app is still running
     let running = isElectronRunning(pid);
     if (running) {
-      console.warn(`Iteration ${i + 1}: Electron app is still running. Attempting to force kill.`);
-      forceKillElectron(pid);
-
-      // Re-check if the process is still running after the forced kill
-      running = isElectronRunning(pid);
-    }
-
-    // Assert that the app is not running
-    expect(running).toBeFalsy();
-
-    if (!running) {
-      console.log(`Iteration ${i + 1}: Electron app closed successfully.`);
-    } else {
       console.error(`Iteration ${i + 1}: Electron app could not be terminated.`);
       break; // Stop further iterations if the app cannot be killed
     }

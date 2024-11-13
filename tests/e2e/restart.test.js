@@ -1,12 +1,23 @@
 const { _electron: electron } = require('playwright');
 const { test, expect } = require('@playwright/test');
 const { execSync } = require('child_process');
+const os = require('os');
 
 function isElectronRunning() {
   try {
-    // Check if Electron process is running on Windows
-    const output = execSync('tasklist').toString();
-    return output.includes('electron.exe');
+    const platform = os.platform();
+
+    // Check if Electron process is running based on the operating system
+    if (platform === 'win32') {
+      const output = execSync('tasklist').toString();
+      return output.includes('electron.exe');
+    } else if (platform === 'darwin') {
+      const output = execSync('ps -A').toString();
+      return output.includes('Electron');
+    } else if (platform === 'linux') {
+      const output = execSync('pgrep electron').toString();
+      return output.trim() !== '';
+    }
   } catch (error) {
     console.error('Error checking for Electron process:', error);
     return false;
@@ -15,7 +26,13 @@ function isElectronRunning() {
 
 function forceKillElectron() {
   try {
-    execSync('taskkill /F /IM electron.exe');
+    const platform = os.platform();
+
+    if (platform === 'win32') {
+      execSync('taskkill /F /IM electron.exe');
+    } else if (platform === 'darwin' || platform === 'linux') {
+      execSync('pkill -f Electron');
+    }
     console.log('Electron process forcefully terminated.');
   } catch (error) {
     console.error('Error forcefully terminating Electron process:', error);
@@ -36,7 +53,7 @@ test('Launch and close Electron app 10 times', async () => {
     // Wait for a moment to allow for process termination
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Check if the Electron app is still running in the task manager
+    // Check if the Electron app is still running
     let running = isElectronRunning();
     if (running) {
       console.warn(`Iteration ${i + 1}: Electron app is still running. Attempting to force kill.`);

@@ -22,7 +22,7 @@ function forceKillElectron() {
   }
 }
 
-test('Launch and close Electron app 100 times', async () => {
+test('Launch and close Electron app 10 times', async () => {
   for (let i = 0; i < 10; i++) {
     console.log(`Iteration ${i + 1}: Launching and closing Electron app.`);
 
@@ -55,8 +55,5 @@ test('Launch and close Electron app 100 times', async () => {
       console.error(`Iteration ${i + 1}: Electron app could not be terminated.`);
       break; // Stop further iterations if the app cannot be killed
     }
-
-    // Optional delay between iterations
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 });

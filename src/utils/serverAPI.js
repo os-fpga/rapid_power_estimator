@@ -3,17 +3,33 @@ const config = require('../../rpe.config.json');
 const { server } = config;
 let { port } = config;
 
-export function devices() { return `${server}:${port}/devices`; }
-export function attributes() { return `${server}:${port}/attributes`; }
-export function project() { return `${server}:${port}/project`; }
-export function projectClose() { return `${project()}/close`; }
-export function projectOpen() { return `${project()}/open`; }
-export function projectSave() { return `${project()}/create`; }
+export function devices() {
+  return `${server}:${port}/devices`;
+}
+
+export function attributes() {
+  return `${server}:${port}/attributes`;
+}
+
+export function project() {
+  return `${server}:${port}/project`;
+}
+
+export function projectClose() {
+  return `${project()}/close`;
+}
+
+export function projectOpen() {
+  return `${project()}/open`;
+}
+
+export function projectSave() {
+  return `${project()}/create`;
+}
 
 export function setPort(p, fetchDevices) {
   if (p !== undefined) {
     port = p;
-    // eslint-disable-next-line no-use-before-define
     GET(devices(), fetchDevices);
   }
 }
@@ -80,7 +96,7 @@ export function PATCH(url, data, callback) {
     if (response.ok) {
       if (callback) callback();
     } else {
-      // todo handle error
+      // TODO: handle error
     }
   });
 }
@@ -91,4 +107,10 @@ export function GET(url, callback) {
     .then((data) => {
       if (callback) callback(data);
     });
+}
+
+// function to call the shutdown API
+export function shutdown(callback) {
+  const shutdownUrl = 'http://localhost:5000/shutdown';
+  POST(shutdownUrl, null, callback);
 }

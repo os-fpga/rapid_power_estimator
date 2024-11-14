@@ -5,8 +5,7 @@
 import argparse
 import os
 import sys
-import signal
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flasgger import Swagger
 from submodule.rs_device_manager import RsDeviceManager
 from submodule.rs_logger import log_setup, log, RsLogLevel
@@ -19,6 +18,7 @@ from api.io import io_api
 from api.peripherals import peripherals_api
 from api.utils import attrs_api
 from api.project import project_api
+from api.shutdown import shutdown_api  #shutdown api
 
 # Create Flask app
 app = Flask(__name__)
@@ -45,8 +45,9 @@ app.register_blueprint(io_api)
 app.register_blueprint(peripherals_api)
 app.register_blueprint(attrs_api)
 app.register_blueprint(project_api)
+app.register_blueprint(shutdown_api)  # Register shutdown API
 
-# Hook up request signal to log request by UI
+# Hook up request signal to log requests by UI
 @app.before_request
 def before_request():
     log(f"{request.method} {request.url}")
@@ -55,23 +56,6 @@ def before_request():
 def after_request(response):
     log(f"{request.method} {request.url} {response.status_code} - DONE")
     return response
-
-# Graceful shutdown function
-def shutdown_server():
-    log("Shutting down server...")
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is not None:
-        func()
-
-# Signal handler for smooth shutdown
-def signal_handler(signal_received, frame):
-    log("Signal received, initiating shutdown...")
-    shutdown_server()
-    sys.exit(0)
-
-# Register the signal handler for SIGINT (Ctrl+C) and SIGTERM
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
 
 def main():
     # Parse command-line arguments

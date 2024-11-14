@@ -1,10 +1,10 @@
-const axios = require('axios');
+const { shutdown } = require('./serverapi');
 const isWindows = process.platform === 'win32';
 
 const kill = async (process) => {
   try {
-    // Call the shutdown API
-    await axios.post('http://localhost:5000/shutdown');
+    // calling the shutdown API
+    await shutdown();
     console.log('Shutdown API called successfully.');
   } catch (error) {
     console.error('Error calling shutdown API:', error);

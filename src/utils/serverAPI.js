@@ -109,8 +109,8 @@ export function GET(url, callback) {
     });
 }
 
-// function to call the shutdown API
+// Function to call the shutdown API
 export function shutdown(callback) {
-  const shutdownUrl = 'http://localhost:5000/shutdown';
+  const shutdownUrl = `${server}:${port}/shutdown`;
   POST(shutdownUrl, null, callback);
 }

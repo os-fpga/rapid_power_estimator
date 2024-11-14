@@ -1,4 +1,4 @@
-const { shutdown } = require('./serverapi');
+const { shutdown } = require('./src/utils/serverAPI'); // Use CommonJS `require` syntax
 const isWindows = process.platform === 'win32';
 
 const kill = async (process) => {

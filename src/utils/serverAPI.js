@@ -1,48 +1,47 @@
 const config = require('../../rpe.config.json');
-
 const { server } = config;
 let { port } = config;
 
-export function devices() {
+function devices() {
   return `${server}:${port}/devices`;
 }
 
-export function attributes() {
+function attributes() {
   return `${server}:${port}/attributes`;
 }
 
-export function project() {
+function project() {
   return `${server}:${port}/project`;
 }
 
-export function projectClose() {
+function projectClose() {
   return `${project()}/close`;
 }
 
-export function projectOpen() {
+function projectOpen() {
   return `${project()}/open`;
 }
 
-export function projectSave() {
+function projectSave() {
   return `${project()}/create`;
 }
 
-export function setPort(p, fetchDevices) {
+function setPort(p, fetchDevices) {
   if (p !== undefined) {
     port = p;
     GET(devices(), fetchDevices);
   }
 }
 
-export function peripheralPath(deviceId, url) {
+function peripheralPath(deviceId, url) {
   return `${devices()}/${deviceId}/peripherals/${url}`;
 }
 
-export function deviceInfo(deviceId) {
+function deviceInfo(deviceId) {
   return `${devices()}/${deviceId}`;
 }
 
-export const Elem = {
+const Elem = {
   clocking: 'clocking',
   io: 'io',
   bram: 'bram',
@@ -51,7 +50,7 @@ export const Elem = {
   peripherals: 'peripherals',
 };
 
-export const api = {
+const api = {
   fetch(func, deviceId) {
     return `${devices()}/${deviceId}/${func}`;
   },
@@ -65,43 +64,35 @@ export const api = {
   },
 };
 
-export function POST(url, data, callback) {
+function POST(url, data, callback) {
   fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   }).then((response) => {
-    if (response.ok) {
-      if (callback) callback();
-    }
+    if (response.ok && callback) callback();
   });
 }
 
-export function DELETE(url, callback) {
+function DELETE(url, callback) {
   fetch(url, {
     method: 'DELETE',
   }).then((response) => {
-    if (response.ok) {
-      if (callback) callback();
-    }
+    if (response.ok && callback) callback();
   });
 }
 
-export function PATCH(url, data, callback) {
+function PATCH(url, data, callback) {
   fetch(url, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   }).then((response) => {
-    if (response.ok) {
-      if (callback) callback();
-    } else {
-      // TODO: handle error
-    }
+    if (response.ok && callback) callback();
   });
 }
 
-export function GET(url, callback) {
+function GET(url, callback) {
   fetch(url)
     .then((response) => response.json())
     .then((data) => {
@@ -110,7 +101,27 @@ export function GET(url, callback) {
 }
 
 // Function to call the shutdown API
-export function shutdown(callback) {
+function shutdown(callback) {
   const shutdownUrl = `${server}:${port}/shutdown`;
   POST(shutdownUrl, null, callback);
 }
+
+// Exporting functions using CommonJS syntax
+module.exports = {
+  devices,
+  attributes,
+  project,
+  projectClose,
+  projectOpen,
+  projectSave,
+  setPort,
+  peripheralPath,
+  deviceInfo,
+  Elem,
+  api,
+  POST,
+  DELETE,
+  PATCH,
+  GET,
+  shutdown,
+};

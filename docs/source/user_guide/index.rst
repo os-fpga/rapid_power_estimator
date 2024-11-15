@@ -7,10 +7,8 @@ User Guide
    :maxdepth: 2
    :caption: Table of Contents
 
-   introduction
-   setup
-   FPGA 
-   SoC
-   peripherals
-   memory
-   results
+   introduction_index
+   setup_index
+   FPGA_index
+   SoC_index
+   results_index

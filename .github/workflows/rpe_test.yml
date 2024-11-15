@@ -5,8 +5,7 @@ on:
     tags:
       - '*'
     branches: 
-      - '*'
-      - '*/**'
+      - main
   pull_request:
 
 concurrency:
@@ -21,7 +20,7 @@ jobs:
         os: 
           - ubuntu-latest
           - ubuntu-22.04 # This is CentOS 7 under the hood
-          - macos-12
+          - macos-latest
           - windows-latest
 
     runs-on: ${{ matrix.os }}
@@ -30,6 +29,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Bring in device.xml
+        uses: actions/checkout@v4
+        with:
+          repository: os-fpga/Raptor
+          path: Raptor
+          sparse-checkout: 'etc'      
     
       - name: Setup Node.js ${{ matrix.os }}
         if: ${{ matrix.os != 'ubuntu-22.04' }}
@@ -86,10 +92,17 @@ jobs:
       - name: Unit Jtest Linux latest & windows & MacOS
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: npm test
+        
+      - name: E2E Playwright tests on Linux latest & MacOS
+        if: ${{ matrix.os == 'ubuntu-latest' }}     
+        run: |
+            cp -rf Raptor/etc backend
+            npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
 
-     # - name: E2E Playwright tests on Linux latest & MacOS
-     #   if: ${{ matrix.os == 'ubuntu-latest' }}     
-     #   run: npm run compile && xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npx playwright test
+      - name: cat RPE log
+        if: matrix.os == 'ubuntu-latest'  &&  always()
+        run: find $HOME -type f -name "rpe.log" -exec cat {} +
+
 
       - name: Run ESLint only on ubuntu-latest
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -116,7 +129,7 @@ jobs:
       matrix:
         os: 
           - ubuntu-22.04 # This is CentOS 7 under the hood
-          - macos-12
+          - macos-latest
           - windows-latest
           
     runs-on: ${{ matrix.os }}
@@ -206,15 +219,15 @@ jobs:
             echo ${{ github.ref }} 
 
       - name: Upload Package
-        if: ${{ github.ref == 'refs/heads/main' &&  matrix.os != 'windows-latest'  }}
-        uses: actions/upload-artifact@v3
+        if: ${{ github.ref == 'refs/heads/main' &&  matrix.os != 'windows-latest' }}
+        uses: actions/upload-artifact@v4.4.3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.tar.gz 
 
       - name: Upload Package
         if: ${{ github.ref == 'refs/heads/main' &&  matrix.os == 'windows-latest' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.4.3
         with:
             name: rapid_power_estimator_${{ matrix.os }}
             path: dist/rapid_power_estimator*.exe

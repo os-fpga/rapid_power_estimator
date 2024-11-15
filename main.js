@@ -192,7 +192,7 @@ const template = [
       { type: 'separator' },
       //{ role: 'quit' },
       {
-        label: 'Quit',
+        label: 'Exit',
         click: () => {
           kill(serverProcess);  // just making sure shutdown api is called
           app.quit();  // close the application

@@ -190,7 +190,14 @@ const template = [
         },
       },
       { type: 'separator' },
-      { role: 'quit' },
+      //{ role: 'quit' },
+      {
+        label: 'Quit',
+        click: () => {
+          kill(serverProcess);  // just making sure shutdown api is called
+          app.quit();  // close the application
+        },
+      },
     ],
   },
   // {

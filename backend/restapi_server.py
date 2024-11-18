@@ -38,7 +38,7 @@ def main():
     log_setup(filename=args.logfile, max_bytes=args.maxbytes * 1024, backup_count=args.backupcount)
 
     # Check if the device_file exists
-    if not os.path.exists(args.device_file):
+    if os.path.exists(args.device_file) == False:
         log(f"Device file '{args.device_file}' does not exist.", RsLogLevel.ERROR)
         sys.exit(1)
 
@@ -106,7 +106,6 @@ def main():
 
     # Start Rest API server
     app.run(debug=args.debug, port=args.port)
-
 
 if __name__ == "__main__":
     main()

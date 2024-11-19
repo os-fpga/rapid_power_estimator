@@ -317,7 +317,10 @@ app.whenReady().then(() => {
   });
 });
 
-app.on('window-all-closed', () => {
+app.on("before-quit", function () {
   kill(serverProcess);
+})
+
+app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

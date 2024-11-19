@@ -105,3 +105,4 @@ Enable/disable each channel using the checkboxes under the Enable column, then c
 .. image:: figures/SoC-figures-DMA-put_DMA_info.JPG
 
 For each channel, select a source & destination, typically a peripheral will be connected to a memory or vice-versa. Then select the active state, read/write rate & toggle rate.
+

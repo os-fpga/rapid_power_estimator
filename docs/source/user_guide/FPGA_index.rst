@@ -2,7 +2,6 @@
 FPGA Input
 =============
 
-This section will document FPGA input for Rapid Power Estimator.
 
 To begin inputting FPGA information, the user must have an RTL design that they would like to run on an FPGA platform. For users who have used other FPGA vendors' EDA tools, they can directly enter the FPGA input using their estimated FPGA utilization. 
 
@@ -78,3 +77,4 @@ Selecting the IO section displays an empty table, click the "Add" button above t
 .. image:: figures/FPGA-figures-IO-input_IO_info2.JPG
 
 Enter I/O port name, bus width, select clock, enter duty cycle, select IO direction & standard, drive strength (current in Amperes), slew rate, differential termination, pullup/pulldown resistors, data type, enter input enable rate, output enable rate, select synchronization & enter toggle rate
+

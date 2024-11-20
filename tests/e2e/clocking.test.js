@@ -34,8 +34,7 @@ test('Launch Electron app, select device, toggle ACPU power, click Clocking, Add
   await portSignalInput.fill('test');
 
   // Clicking OK to submit the form
-  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-49qm.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid > span';
-  const okButton = await window.waitForSelector(okButtonSelector);
+  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-49qm.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
   await okButton.click();
 
   // Closing the test

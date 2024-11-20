@@ -267,6 +267,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 800,
+    icon: `${__dirname}/imgs/rpeicon.png`,
     webPreferences: {
       preload: path.join(app.getAppPath(), 'preload.js'),
       nodeIntegration: true,

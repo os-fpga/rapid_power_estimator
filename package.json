@@ -28,6 +28,7 @@
       "node_modules/**/*",
       "package.json",
       "cleanup.js",
+      "imgs/*",
       "projectFile.js"
     ],
     "directories": {
@@ -37,6 +38,10 @@
       {
         "from": "backend/restapi_server.exe",
         "to": "./backend/restapi_server.exe"
+      },
+      {
+        "from": "backend/etc/devices",
+        "to": "./backend/etc/devices"
       },
       {
         "from": "backend/etc/device.xml",

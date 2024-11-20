@@ -47,6 +47,10 @@ Selecting the BRAM section displays an empty table, click the "Add" button above
 
 .. image:: figures/FPGA-figures-BRAM-input_BRAM_ports_info.JPG
 
+Select the type of BRAM used on the RTL design, then the no. of that type of BRAM used. 
+
+Next fill out the read & write ports info. For each, select the clock, enter port width and senter write enable, read enable as well as toggle rates.
+
 DSP - Digital Signal Processor
 ###############################
 
@@ -57,6 +61,8 @@ The DSP section is located directly below the FLE section.
 Selecting the DSP section displays an empty table, click the "Add" button above the table to fill out the DSP info.
 
 .. image:: figures/FPGA-figures-DSP-input_DSP_info.JPG
+
+Ener the no. of DSP multipliers used, select the DSP's mode, enter channel width for all inputs, select a clock, then select the pipeline type and enter toggle rate.
 
 IO - Input/Output
 ##################
@@ -70,3 +76,5 @@ Selecting the IO section displays an empty table, click the "Add" button above t
 .. image:: figures/FPGA-figures-IO-input_IO_info1.JPG
 
 .. image:: figures/FPGA-figures-IO-input_IO_info2.JPG
+
+Enter I/O port name, bus width, select clock, enter duty cycle, select IO direction & standard, drive strength (current in Amperes), slew rate, differential termination, pullup/pulldown resistors, data type, enter input enable rate, output enable rate, select synchronization & enter toggle rate

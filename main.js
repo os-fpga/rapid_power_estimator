@@ -212,9 +212,10 @@ const template = [
     label: 'Help',
     submenu: [
       {
+        label: 'User Guide',
         role: 'help',
         click: async () => {
-          await shell.openExternal('https://github.com/os-fpga/rapid_power_estimator/blob/main/README.md');
+          await shell.openExternal('https://rapidpowerestimator.readthedocs.io/en/latest/');
         },
       },
     ],

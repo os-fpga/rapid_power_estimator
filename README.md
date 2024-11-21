@@ -4,6 +4,8 @@
 
 # Rapid Power Estimator
 
+![RPE Logo](imgs/rpelogo.png)
+
 Rapid Power Estimation Tool allows you to estimate power consumption at various stages of your design cycle. It simplifies the input of design information through intuitive wizards and delivers comprehensive power and thermal data analysis.
 
 ## Pre-requisite

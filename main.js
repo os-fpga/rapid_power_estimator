@@ -218,8 +218,19 @@ const template = [
           await shell.openExternal('https://rapidpowerestimator.readthedocs.io/en/latest/');
         },
       },
+      {
+        label: 'About',
+        click: () => {
+          dialog.showMessageBox(mainWindow, {
+            type: 'info',
+            title: 'Rapid Power Estimator',
+            message: 'Rapid Power Estimator\nVersion: 0.0.1\nAuthor: © 2024 Rapid Silicon Inc. \nType: Engineering',
+            buttons: ['OK'],
+          });
+        },
+      },
     ],
-  },
+  },  
 ];
 
 const startFlaskServer = () => {

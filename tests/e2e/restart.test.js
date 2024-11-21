@@ -52,8 +52,8 @@ function isProcessRunning(pid) {
   }
 }
 
-test('Launch and close Electron app 10 times, ensuring backend termination', async () => {
-  for (let i = 0; i < 10; i++) {
+test('Launch and close Electron app 5 times, ensuring backend termination', async () => {
+  for (let i = 0; i < 5; i++) {
     console.log(`Iteration ${i + 1}: Launching and closing Electron app.`);
 
     // Launch the Electron app

@@ -33,9 +33,9 @@ test('Launch Electron app, add clocking source, navigate to DSP block, configure
   const portSignalInput = await window.waitForSelector(portSignalSelector);
   await portSignalInput.fill('test');
 
-  // Clicking OK to submit the clocking form
-  const okButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-49qm.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid > span';
-  const okButton = await window.waitForSelector(okButtonSelector);
+  // Clicking OK to submit the form
+  const modalFooterSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer';
+  const okButton = await window.locator(`${modalFooterSelector} button.ant-btn-primary`);
   await okButton.click();
 
   // Navigate to the DSP block
@@ -72,9 +72,13 @@ test('Launch Electron app, add clocking source, navigate to DSP block, configure
   const toggleRateInput = await window.waitForSelector(toggleRateSelector);
   await toggleRateInput.fill('50');
 
-  // Clicking OK to submit the DSP form
-  const dspOkButtonSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer > button.ant-btn.css-dev-only-do-not-override-49qm.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid';
-  const dspOkButton = await window.waitForSelector(dspOkButtonSelector);
+// Define the modal footer selector as the base context
+  const dspModalFooterSelector = 'body > div:nth-child(3) > div > div.ant-modal-wrap > div > div:nth-child(1) > div > div.ant-modal-footer';
+
+// Locate the OK button within the modal footer
+  const dspOkButton = await window.locator(`${dspModalFooterSelector} button.ant-btn-primary`);
+
+// Click the OK button
   await dspOkButton.click();
 
   // Closing the test

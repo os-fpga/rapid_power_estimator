@@ -67,13 +67,13 @@
         }
       ],
       "publisherName": "Rapid Silicon, Inc.",
-      "icon": "RPE_icon.png",
+      "icon": "imgs/rpeicon.png",
       "artifactName": "${name}_windows_installer.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerSidebar": "imgs/rpesidebar.bmp"
+      "installerSidebar": "imgs/rpesidebar.png"
     },
     "mac": {
       "category": "public.app-category.productivity",

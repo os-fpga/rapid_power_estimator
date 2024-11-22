@@ -225,7 +225,7 @@ const template = [
           const packagePath = path.join(__dirname, 'package.json');
           const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
       
-          const message = `${packageData.build.productName}\nVersion: ${packageData.version}\nAuthor: ${packageData.author}\nCopyright: ${packageData.build.copyright}\nType: Engineering`;
+          const message = `${packageData.build.productName}\nVersion: ${packageData.version}\nAuthor: ${packageData.author}\nCopyright: ${packageData.build.copyright}`;
       
           dialog.showMessageBox(mainWindow, {
             type: 'info',

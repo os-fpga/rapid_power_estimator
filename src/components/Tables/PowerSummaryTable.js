@@ -5,7 +5,7 @@ import { Tooltip } from 'antd';
 import { PowerCell } from './TableCells';
 import { fixed, color } from '../../utils/common';
 import { State } from '../ComponentsLib';
-import { api, PATCH, GET } from '../../utils/serverAPI'; 
+import { api, PATCH, GET } from '../../utils/serverAPI';
 import '../style/PowerSummaryTable.css';
 
 function PowerSummaryTableToolTip({ title, statusColor }) {
@@ -18,8 +18,13 @@ function PowerSummaryTableToolTip({ title, statusColor }) {
   );
 }
 
+PowerSummaryTableToolTip.propTypes = {
+  title: PropTypes.string.isRequired,
+  statusColor: PropTypes.string.isRequired,
+};
+
 function PowerSummaryTable({
-  title, data = [], total = 0, percent = 0, deviceId = 'MPW1'
+  title, data = [], total = 0, percent = 0, deviceId = 'MPW1',
 }) {
   const [thermalData, setThermalData] = useState({
     ambientTypical: 25,
@@ -28,7 +33,7 @@ function PowerSummaryTable({
   });
 
   const [powerData, setPowerData] = useState({
-    powerBudget: 1.00,
+    powerBudget: 1.0,
     fpgaScaling: 25,
     pcScaling: 25,
   });
@@ -43,23 +48,23 @@ function PowerSummaryTable({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        GET(api.consumption('consumption', deviceId), (result) => {
-          if (result && result.specification) {
-            const { specification } = result;
-            setThermalData({
-              ambientTypical: specification.thermal.ambient.typical,
-              ambientWorstCase: specification.thermal.ambient.worstcase,
-              thetaJa: specification.thermal.theta_ja,
-            });
-            setPowerData({
-              powerBudget: specification.power.budget,
-              fpgaScaling: specification.power.typical_dynamic_scaling.fpga_complex * 100,
-              pcScaling: specification.power.typical_dynamic_scaling.processing_complex * 100,
-            });
-          }
-        });
+        const result = await GET(api.consumption('consumption', deviceId));
+        if (result && result.specification) {
+          const { specification } = result;
+          setThermalData({
+            ambientTypical: specification.thermal.ambient.typical,
+            ambientWorstCase: specification.thermal.ambient.worstcase,
+            thetaJa: specification.thermal.theta_ja,
+          });
+          setPowerData({
+            powerBudget: specification.power.budget,
+            fpgaScaling: specification.power.typical_dynamic_scaling.fpga_complex * 100,
+            pcScaling: specification.power.typical_dynamic_scaling.processing_complex * 100,
+          });
+        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        // Log error for debugging purposes
+        console.error('Error fetching data:', error.message);
       }
     };
 
@@ -68,12 +73,10 @@ function PowerSummaryTable({
 
   const updateBackend = async (updatedData) => {
     try {
-      PATCH(api.deviceInfo(deviceId), updatedData, () => {
-        console.log('Backend updated successfully');
-        fetchData(); // refetching to sync UI with backend
-      });
+      await PATCH(api.deviceInfo(deviceId), updatedData);
     } catch (error) {
-      console.error("Error updating backend:", error);
+      // Log error for debugging purposes
+      console.error('Error updating backend:', error.message);
     }
   };
 
@@ -96,39 +99,49 @@ function PowerSummaryTable({
         power: updatedPowerData,
       },
     };
-
     updateBackend(updatedData);
   };
 
   const enforceNumericInput = (e) => {
-    const value = e.target.value;
-    const valid = /^-?\d*\.?\d*%?$/.test(value);
-    if (!valid) {
+    const { value } = e.target;
+    if (!/^-?\d*\.?\d*%?$/.test(value)) {
       e.target.value = value.slice(0, -1);
     }
   };
 
   const handleKeyDown = (e, nextFieldRef) => {
-    if (e.key === 'Enter' && nextFieldRef && nextFieldRef.current) {
+    if (e.key === 'Enter' && nextFieldRef?.current) {
       nextFieldRef.current.focus();
     }
   };
 
-  const getErrors = (messages) => messages?.filter((item) => item.some((inner) => inner.type === 'error')) || [];
-  const getWarnings = (messages) => messages?.filter((item) => item.some((inner) => inner.type === 'warn')) || [];
+  const getErrors = (messages) => (
+    messages?.filter((item) => item.some((inner) => inner.type === 'error')) || []
+  );
+  const getWarnings = (messages) => (
+    messages?.filter((item) => item.some((inner) => inner.type === 'warn')) || []
+  );
 
-  const buildMessage = (messages) => 
-    messages.reduce((acc, item, currentIndex) => {
-      item.forEach((i, index) => acc.push(<span key={`${currentIndex}+${index}`}>{i.text}<br /></span>));
-      return acc;
-    }, []);
+  const buildMessage = (messages) => messages.reduce((acc, item, currentIndex) => {
+    item.forEach((i, index) => acc.push(
+      //   <span key={`${currentIndex}-${index}`}>
+      <span key={i.id || `${currentIndex}-${index}`}>
+        {i.text}
+        <br />
+      </span>,
+    ));
+    return acc;
+  }, []);
 
   const message = (messages) => {
     const errors = getErrors(messages);
     return errors.length > 0 ? buildMessage(errors) : buildMessage(getWarnings(messages));
   };
 
-  const statusColor = (messages) => color(getErrors(messages).length > 0, getWarnings(messages).length > 0);
+  const statusColor = (messages) => color(
+    getErrors(messages).length > 0,
+    getWarnings(messages).length > 0,
+  );
 
   return (
     <div className="pst-container main-border">
@@ -138,7 +151,7 @@ function PowerSummaryTable({
           <table className="spec-table">
             <thead>
               <tr>
-                <th></th>
+                <th />
                 <th className="typical-header">Typical</th>
                 <th className="worst-header">Worst-Case</th>
               </tr>
@@ -154,7 +167,8 @@ function PowerSummaryTable({
                     onInput={enforceNumericInput}
                     ref={ambientTypicalRef}
                     onKeyDown={(e) => handleKeyDown(e, ambientWorstCaseRef)}
-                  /> °C
+                  />
+                  °C
                 </td>
                 <td className="value-cell">
                   <input
@@ -164,7 +178,8 @@ function PowerSummaryTable({
                     onInput={enforceNumericInput}
                     ref={ambientWorstCaseRef}
                     onKeyDown={(e) => handleKeyDown(e, thetaJaRef)}
-                  /> °C
+                  />
+                  °C
                 </td>
               </tr>
               <tr className="theta-row">
@@ -177,12 +192,12 @@ function PowerSummaryTable({
                     onInput={enforceNumericInput}
                     ref={thetaJaRef}
                     onKeyDown={(e) => handleKeyDown(e, powerBudgetRef)}
-                  /> °C/W
+                  />
+                  °C/W
                 </td>
               </tr>
             </tbody>
           </table>
-
           <div className="spec-header">Power Specification</div>
           <table className="power-spec-table">
             <tbody>
@@ -196,7 +211,8 @@ function PowerSummaryTable({
                     onInput={enforceNumericInput}
                     ref={powerBudgetRef}
                     onKeyDown={(e) => handleKeyDown(e, fpgaScalingRef)}
-                  /> W
+                  />
+                  W
                 </td>
               </tr>
               <tr>
@@ -210,7 +226,8 @@ function PowerSummaryTable({
                     onInput={enforceNumericInput}
                     ref={fpgaScalingRef}
                     onKeyDown={(e) => handleKeyDown(e, pcScalingRef)}
-                  /> %
+                  />
+                  %
                 </td>
                 <td className="scaling-cell">
                   PC:
@@ -220,20 +237,20 @@ function PowerSummaryTable({
                     onChange={(e) => handleFieldUpdate('pcScaling', e.target.value)}
                     onInput={enforceNumericInput}
                     ref={pcScalingRef}
-                  /> %
+                  />
+                  %
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       )}
-
       <div className="no-wrap bold-text-title">{title || 'FPGA Complex and Core Power'}</div>
       <div>
         <table className="pst-table">
           <tbody>
-            {data.map((item, index) => (
-              <tr key={index}>
+            {data.map((item) => (
+              <tr key={item.uniqueId}>
                 <td className="dot-td"><State messages={item.messages} baseClass="dot" /></td>
                 <td className="no-wrap">{item.text || 'N/A'}</td>
                 <PowerCell val={item.power || 0} />
@@ -241,7 +258,8 @@ function PowerSummaryTable({
                   {`${fixed(item.percent || 0, 0)} %`}
                 </td>
                 <td className="fixed-col">
-                  {(getErrors(item.messages).length > 0 || getWarnings(item.messages).length > 0) && (
+                  {(getErrors(item.messages).length > 0
+                  || getWarnings(item.messages).length > 0) && (
                     <PowerSummaryTableToolTip
                       title={message(item.messages)}
                       statusColor={statusColor(item.messages)}
@@ -253,7 +271,6 @@ function PowerSummaryTable({
           </tbody>
         </table>
       </div>
-
       <div className="spacer" />
       <div className="pst-bottom">
         <div className="pst-bottom-progress">
@@ -273,7 +290,16 @@ function PowerSummaryTable({
 
 PowerSummaryTable.propTypes = {
   title: PropTypes.string.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.arrayOf(PropTypes.shape({
+    uniqueId: PropTypes.string.isRequired,
+    text: PropTypes.string,
+    power: PropTypes.number,
+    percent: PropTypes.number,
+    messages: PropTypes.arrayOf(PropTypes.shape({
+      type: PropTypes.string,
+      text: PropTypes.string,
+    })),
+  })).isRequired,
   total: PropTypes.number.isRequired,
   percent: PropTypes.number.isRequired,
   deviceId: PropTypes.string.isRequired,

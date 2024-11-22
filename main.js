@@ -220,18 +220,19 @@ const template = [
       },
       {
         label: 'About',
-          click: () => {
-            const packagePath = path.join(__dirname, 'package.json');
-            const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-  
-            const message = `${packageData.name}\nVersion: ${packageData.version}\nAuthor: © ${packageData.author}\nType: Engineering`;
-
-            dialog.showMessageBox(mainWindow, {
-              type: 'info',
-              title: packageData.name,
-              message: message
-            });
-          }
+        click: () => {
+          // dynamically reading package.json
+          const packagePath = path.join(__dirname, 'package.json');
+          const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+      
+          const message = `${packageData.build.productName}\nVersion: ${packageData.version}\nAuthor: ${packageData.author}\nCopyright: ${packageData.build.copyright}\nType: Engineering`;
+      
+          dialog.showMessageBox(mainWindow, {
+            type: 'info',
+            title: packageData.build.productName,
+            message: message,
+          });
+        },
       },
     ],
   },  

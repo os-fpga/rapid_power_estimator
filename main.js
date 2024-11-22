@@ -220,14 +220,18 @@ const template = [
       },
       {
         label: 'About',
-        click: () => {
-          dialog.showMessageBox(mainWindow, {
-            type: 'info',
-            title: 'Rapid Power Estimator',
-            message: 'Rapid Power Estimator\nVersion: 0.0.1\nAuthor: © 2024 Rapid Silicon Inc. \nType: Engineering',
-            buttons: ['OK'],
-          });
-        },
+          click: () => {
+            const packagePath = path.join(__dirname, 'package.json');
+            const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  
+            const message = `${packageData.name}\nVersion: ${packageData.version}\nAuthor: © ${packageData.author}\nType: Engineering`;
+
+            dialog.showMessageBox(mainWindow, {
+              type: 'info',
+              title: packageData.name,
+              message: message
+            });
+          }
       },
     ],
   },  

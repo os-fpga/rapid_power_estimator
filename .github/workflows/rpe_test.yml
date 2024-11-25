@@ -93,7 +93,7 @@ jobs:
         if: ${{ matrix.os != 'ubuntu-22.04' }}
         run: npm test
         
-      - name: E2E Playwright tests on Linux latest & MacOS
+      - name: E2E Playwright tests on Linux latest
         if: ${{ matrix.os == 'ubuntu-latest' }}     
         run: |
             cp -rf Raptor/etc backend

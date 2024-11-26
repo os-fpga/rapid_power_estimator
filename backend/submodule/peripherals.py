@@ -70,10 +70,15 @@ class GpioStandard(RsEnum):
     SSTL_3_3V_Class_I     = 10, "SSTL 3.3V Class-I"
     SSTL_3_3V_Class_II    = 11, "SSTL 3.3V Class-II"
 
+#class N22_RISC_V_Clock(RsEnum):
+#    PLL_233MHz       = 0, "PLL (233 MHz)"
+#    BOOT_Clock_40MHz = 1, "BOOT CLK (40 MHz)"
+#    RC_OSC_50MHz     = 2, "RC OSC (50 MHz)"
+
 class N22_RISC_V_Clock(RsEnum):
-    PLL_233MHz       = 0, "PLL (233 MHz)"
-    BOOT_Clock_40MHz = 1, "BOOT CLK (40 MHz)"
-    RC_OSC_50MHz     = 2, "RC OSC (50 MHz)"
+    PLL_233MHz       = 0, "PLL"
+    BOOT_Clock_40MHz = 1, "BOOT CLK"
+    RC_OSC_50MHz     = 2, "RC OSC"    
 
 class Port_Activity(RsEnum):
     IDLE   = 0, "Idle"

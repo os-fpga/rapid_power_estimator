@@ -30,7 +30,7 @@ function DspModal({
         {
           fieldType: FieldType.number,
           id: 'number_of_multipliers',
-          text: 'XX',
+          text: 'Number of Multipliers',
           value: defaultValue.number_of_multipliers,
         },
         {

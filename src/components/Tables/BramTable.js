@@ -158,7 +158,7 @@ function BramTable({ device, update, notify }) {
   ];
 
   const mainTableHeader = [
-    '', 'Action', 'En', 'Name/Hierarchy', 'BRAM Type', 'Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
+    '', 'Action', 'En', 'Name/Hierarchy', 'BRAM Type', 'BRAMs Used', 'Port', 'Clock', 'Width', 'Write En', 'Read En',
     'Toggle Rate', 'Clock Freq', 'RAM Depth', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];
 

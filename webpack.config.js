@@ -39,5 +39,9 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, 'build'),
       clean: true,
     },
+    // optimization: {
+    //   minimize: false,
+    //  usedExports: false,
+    // },
   };
 };

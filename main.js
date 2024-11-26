@@ -10,6 +10,7 @@ const log = require('electron-log');
 const config = require('./rpe.config.json');
 const { kill } = require('./cleanup');
 const { openProjectRequest, saveProjectRequest } = require('./projectFile');
+const now = new Date(); 
 
 const logFormat = '[{h}:{i}:{s}.{ms}] [{level}] {text}';
 log.transports.console.format = logFormat;
@@ -154,6 +155,13 @@ if (!isDev) {
   });
   log.transports.console.level = false; // silent console
 }
+
+console.log(`
+  =================================================
+    RPE - Session Start at ${now.toLocaleString()} 
+  =================================================
+  `);  
+
 const template = [
   {
     label: 'File',
@@ -241,7 +249,7 @@ const template = [
 const startFlaskServer = () => {
   let apiServer;
   const RestAPIscript = path.join(__dirname, 'backend/restapi_server.py');
-  const restAPIexe = path.join(app.getAppPath(), '..', '..', 'backend', 'restapi_server.exe');
+  const restAPIexe = path.join(app.getAppPath(), '..', '..', 'backend', 'restapi_server.exe', 'restapi_server.exe');
 
   const args = [
     '--port', store.get('port'),
@@ -307,7 +315,7 @@ const createWindow = () => {
     store.set('device_xml', arg.device_xml);
     store.set('useDefaultFile', arg.useDefaultFile);
 
-    serverProcess.kill();
+    kill(serverProcess);
 
     app.relaunch();
     app.quit();
@@ -340,5 +348,10 @@ app.on("before-quit", function () {
 })
 
 app.on('window-all-closed', () => {
+  console.log(`
+    =================================================
+      RPE - Session closed at ${now.toLocaleString()} 
+    =================================================
+    `);  
   if (process.platform !== 'darwin') app.quit();
 });

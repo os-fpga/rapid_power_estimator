@@ -13,7 +13,7 @@
     "test:playwright": "npx playwright test",
     "postinstall": "electron-builder install-app-deps",
     "pack": "electron-builder --dir",
-    "dist": "pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe --onefile backend/restapi_server.py && webpack --mode production && electron-builder -p never"
+    "dist": "pyinstaller --distpath backend --workpath dist -y --clean -n restapi_server.exe backend/restapi_server.py && webpack --mode development && electron-builder -p never"
   },
   "build": {
     "appId": "org.rapidsilicon.rapid_power_estimator",
@@ -94,6 +94,7 @@
     "@babel/core": "^7.23.9",
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-react": "^7.24.1",
+    "@playwright/test": "^1.48.1",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.5.2",
@@ -114,7 +115,6 @@
     "react-test-renderer": "^18.3.1",
     "style-loader": "^3.3.4",
     "webpack": "^5.90.1",
-    "@playwright/test": "^1.48.1",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {

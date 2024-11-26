@@ -5,7 +5,7 @@ import { Tooltip } from 'antd';
 import { PowerCell } from './TableCells';
 import { fixed, color } from '../../utils/common';
 import { State } from '../ComponentsLib';
-import { api, PATCH, GET, deviceInfo } from '../../utils/serverAPI';
+import { GET, deviceInfo } from '../../utils/serverAPI';
 import '../style/PowerSummaryTable.css';
 
 function PowerSummaryTableToolTip({ title, statusColor }) {
@@ -18,7 +18,9 @@ function PowerSummaryTableToolTip({ title, statusColor }) {
   );
 }
 
-function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId = 'MPW1' }) {
+function PowerSummaryTable({
+  title, data = [], total = 0, percent = 0, deviceId = 'MPW1',
+}) {
   const [thermalData, setThermalData] = useState({
     ambientTypical: 25,
     ambientWorstCase: 50,
@@ -45,19 +47,20 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
         GET(deviceInfo(deviceId), (result) => {
           if (result && result.specification) {
             const { specification } = result;
-  
+
             // Process thermal data
             setThermalData({
               ambientTypical: specification.thermal?.ambient?.typical || 25,
               ambientWorstCase: specification.thermal?.ambient?.worstcase || 50,
               thetaJa: specification.thermal?.theta_ja || 10,
             });
-  
+
             // Process power data
             setPowerData({
               powerBudget: specification.power?.budget || 1.0,
               fpgaScaling: (specification.power?.typical_dynamic_scaling?.fpga_complex || 0) * 100,
-              pcScaling: (specification.power?.typical_dynamic_scaling?.processing_complex || 0) * 100,
+              pcScaling:
+              (specification.power?.typical_dynamic_scaling?.processing_complex || 0) * 100,
             });
           }
         });
@@ -65,34 +68,34 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
         console.error('Error fetching data:', error);
       }
     };
-  
-    fetchData(); // Trigger the fetch function
-  }, [deviceId]); // Re-run effect when deviceId changes  
 
-  const updateBackend = async (deviceId, thermalData, powerData) => {
+    fetchData(); // Trigger the fetch function
+  }, [deviceId]); // Re-run effect when deviceId changes
+
+  const updateBackend = async (deviceIdParam, thermalDataParam, powerDataParam) => {
     const updatedData = {
       specification: {
-          thermal: {
-              ambient: {
-                  typical: thermalData.ambientTypical || 0,
-                  worsecase: thermalData.ambientWorstCase || 0, // Note: This matches the schema
-              },
-              theta_ja: thermalData.thetaJa || 0,
+        thermal: {
+          ambient: {
+            typical: thermalDataParam.ambientTypical || 0,
+            worsecase: thermalDataParam.ambientWorstCase || 0, // Matches schema
           },
-          power: {
-              budget: powerData.powerBudget || 0,
-              typical_dynamic_scaling: {
-                  fpga_complex: powerData.fpgaScaling || 0,
-                  processing_complex: powerData.pcScaling || 0,
-              },
+          theta_ja: thermalDataParam.thetaJa || 0,
+        },
+        power: {
+          budget: powerDataParam.powerBudget || 0,
+          typical_dynamic_scaling: {
+            fpga_complex: powerDataParam.fpgaScaling || 0,
+            processing_complex: powerDataParam.pcScaling || 0,
           },
+        },
       },
-  };
-  
+    };
+
     console.log('PATCH Payload:', JSON.stringify(updatedData, null, 2));
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/devices/${deviceId}`, {
+      const response = await fetch(`http://127.0.0.1:5000/devices/${deviceIdParam}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -116,9 +119,9 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
     const updatedPowerData = { ...powerData };
 
     if (field in thermalData) {
-      updatedThermalData[field] = isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+      updatedThermalData[field] = Number.isNaN(parseFloat(value)) ? 0 : parseFloat(value);
     } else {
-      updatedPowerData[field] = isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+      updatedPowerData[field] = Number.isNaN(parseFloat(value)) ? 0 : parseFloat(value);
     }
 
     setThermalData(updatedThermalData);
@@ -128,7 +131,7 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
   };
 
   const enforceNumericInput = (e) => {
-    const value = e.target.value;
+    const { value } = e.target;
     const valid = /^-?\d*\.?\d*%?$/.test(value);
     if (!valid) {
       e.target.value = value.slice(0, -1);
@@ -141,24 +144,30 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
     }
   };
 
-  const getErrors = (messages) =>
-    messages?.filter((item) => item.some((inner) => inner.type === 'error')) || [];
-  const getWarnings = (messages) =>
-    messages?.filter((item) => item.some((inner) => inner.type === 'warn')) || [];
+  const getErrors = (messages) => messages?.filter((item) => item.some((inner) => inner.type === 'error')) || [];
+  const getWarnings = (messages) => messages?.filter((item) => item.some((inner) => inner.type === 'warn')) || [];
 
-  const buildMessage = (messages) =>
-    messages.reduce((acc, item, currentIndex) => {
-      item.forEach((i, index) => acc.push(<span key={`${currentIndex}+${index}`}>{i.text}<br /></span>));
-      return acc;
-    }, []);
+  const buildMessage = (messages) => messages.reduce((acc, item) => { // Removed `currentIndex`
+    item.forEach((i) => acc.push(
+      <span key={i.id}>
+        {' '}
+        {/* Replace with the unique property */}
+        {i.text}
+        <br />
+      </span>,
+    ));
+    return acc;
+  }, []);
 
   const message = (messages) => {
     const errors = getErrors(messages);
     return errors.length > 0 ? buildMessage(errors) : buildMessage(getWarnings(messages));
   };
 
-  const statusColor = (messages) =>
-    color(getErrors(messages).length > 0, getWarnings(messages).length > 0);
+  const statusColor = (messages) => color(
+    getErrors(messages).length > 0,
+    getWarnings(messages).length > 0,
+  );
 
   return (
     <div className="pst-container main-border">
@@ -168,7 +177,7 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
           <table className="spec-table">
             <thead>
               <tr>
-                <th></th>
+                <th />
                 <th className="typical-header">Typical</th>
                 <th className="worst-header">Worst-Case</th>
               </tr>
@@ -184,7 +193,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                     onInput={enforceNumericInput}
                     ref={ambientTypicalRef}
                     onKeyDown={(e) => handleKeyDown(e, ambientWorstCaseRef)}
-                  />{' '}
+                  />
+                  {' '}
                   °C
                 </td>
                 <td className="value-cell">
@@ -195,7 +205,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                     onInput={enforceNumericInput}
                     ref={ambientWorstCaseRef}
                     onKeyDown={(e) => handleKeyDown(e, thetaJaRef)}
-                  />{' '}
+                  />
+                  {' '}
                   °C
                 </td>
               </tr>
@@ -209,7 +220,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                     onInput={enforceNumericInput}
                     ref={thetaJaRef}
                     onKeyDown={(e) => handleKeyDown(e, powerBudgetRef)}
-                  />{' '}
+                  />
+                  {' '}
                   °C/W
                 </td>
               </tr>
@@ -229,7 +241,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                     onInput={enforceNumericInput}
                     ref={powerBudgetRef}
                     onKeyDown={(e) => handleKeyDown(e, fpgaScalingRef)}
-                  />{' '}
+                  />
+                  {' '}
                   W
                 </td>
               </tr>
@@ -244,7 +257,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                     onInput={enforceNumericInput}
                     ref={fpgaScalingRef}
                     onKeyDown={(e) => handleKeyDown(e, pcScalingRef)}
-                  />{' '}
+                  />
+                  {' '}
                   %
                 </td>
                 <td className="scaling-cell">
@@ -255,7 +269,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                     onChange={(e) => handleFieldUpdate('pcScaling', e.target.value)}
                     onInput={enforceNumericInput}
                     ref={pcScalingRef}
-                  />{' '}
+                  />
+                  {' '}
                   %
                 </td>
               </tr>
@@ -268,8 +283,10 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
       <div>
         <table className="pst-table">
           <tbody>
-            {data.map((item, index) => (
-              <tr key={index}>
+            {data.map((item) => (
+              <tr key={item.id}>
+                {' '}
+                {/* Use a unique property like `id` */}
                 <td className="dot-td">
                   <State messages={item.messages} baseClass="dot" />
                 </td>
@@ -279,7 +296,8 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
                   {`${fixed(item.percent || 0, 0)} %`}
                 </td>
                 <td className="fixed-col">
-                  {(getErrors(item.messages).length > 0 || getWarnings(item.messages).length > 0) && (
+                  {(getErrors(item.messages).length > 0
+                  || getWarnings(item.messages).length > 0) && (
                     <PowerSummaryTableToolTip
                       title={message(item.messages)}
                       statusColor={statusColor(item.messages)}
@@ -309,7 +327,18 @@ function PowerSummaryTable({ title, data = [], total = 0, percent = 0, deviceId 
 
 PowerSummaryTable.propTypes = {
   title: PropTypes.string.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      text: PropTypes.string, // Example property
+      power: PropTypes.number, // Example property
+      messages: PropTypes.arrayOf(
+        PropTypes.shape({
+          type: PropTypes.string.isRequired,
+          content: PropTypes.string,
+        }),
+      ), // Nested array of objects
+    }),
+  ).isRequired,
   total: PropTypes.number.isRequired,
   percent: PropTypes.number.isRequired,
   deviceId: PropTypes.string.isRequired,

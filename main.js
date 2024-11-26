@@ -232,7 +232,7 @@ const template = [
 
 const startFlaskServer = () => {
   let apiServer;
-  const RestAPIscript = path.join(__dirname, 'backend/restapi_server.pyy');
+  const RestAPIscript = path.join(__dirname, 'backend/restapi_server.py');
   const restAPIexe = path.join(app.getAppPath(), '..', '..', 'backend', 'restapi_server.exe', 'restapi_server.exe');
 
   const args = [

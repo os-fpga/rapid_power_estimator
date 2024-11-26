@@ -106,7 +106,7 @@ function DspTable({ device, update, notify }) {
   ];
 
   const mainTableHeader = [
-    '', 'Action', 'En', 'Name/Hierarchy', 'XX', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
+    '', 'Action', 'En', 'Name/Hierarchy', 'No. of Multipliers', 'DSP Mode', { className: 'no-wrap', text: 'A-W' }, { className: 'no-wrap', text: 'B-W' },
     'Clock', 'Pipeline', 'T-Rate',
     'Block Used', 'Clock Freq', 'O/P Sig Rate', 'Block Power', 'Intc. Power', '%',
   ];

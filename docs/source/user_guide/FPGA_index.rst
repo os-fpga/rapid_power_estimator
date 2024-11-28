@@ -25,7 +25,7 @@ Selecting the clocking section will display an empty table at the botton of the 
     #. For **Boot Clock** & **RC Oscillator** sources refer to your device's datasheet and enter frequencies accordingly.
 5. Select the Clock State - default is **active**
     #. Active for regular clock signals
-    #. Idle for unused not actively toggling or gated off signals
+    #. Gated for unused not actively toggling or gated off signals
 
 Repeat the steps above for each clock used in the RTL design.
 
@@ -47,8 +47,8 @@ Selecting the FLE section displays an empty table at the botton of the screen, c
 5. Enter toggle rate - Industry standard default is **12.5%** 
 6. Select glitch factor - default is **typical**
     #. Typical - Default option, for standard designs.
-    #. Fast - For designs with high switching activity or complex logic.
-    #. Very Fast - For high performance designs with high-frequency logic or heavy use of pipelining.
+    #. High - For designs with high switching activity or complex logic.
+    #. Very High - For high performance designs with high-frequency logic or heavy use of pipelining.
 7. Enter clock enable rate - Inudustry standard default is **50.0%**
 
 BRAM - Block Randon Access Memory 

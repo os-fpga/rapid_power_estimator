@@ -4,6 +4,7 @@
 #
 import argparse
 import os
+import signal
 import sys
 from flask import Flask, request, jsonify
 from flasgger import Swagger
@@ -34,7 +35,7 @@ def main():
     args = parser.parse_args()
 
     # setup app logger
-    log_setup(filename=args.logfile, max_bytes=args.maxbytes*1024, backup_count=args.backupcount)
+    log_setup(filename=args.logfile, max_bytes=args.maxbytes * 1024, backup_count=args.backupcount)
 
     # Check if the device_file exists
     if os.path.exists(args.device_file) == False:
@@ -54,7 +55,7 @@ def main():
         "swagger": "2.0",
         "info": {
             "title": "RPE Backend API",
-            "description": "The RPE Backend APIs which consumed by the RPE frontend for power and thermal estimation of the Rapid Silicon devices.",
+            "description": "The RPE Backend APIs which are consumed by the RPE frontend for power and thermal estimation of the Rapid Silicon devices.",
             "version": "0.1.0"
         }
     }
@@ -80,6 +81,25 @@ def main():
     def after_request(response):
         log(f"{request.method} {request.url} {response.status_code} - DONE")
         return response
+
+    # Graceful shutdown function
+    def shutdown_server():
+        log("Shutting down server...")
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is not None:
+            func()
+        else:
+            log("Server shutdown function not found.", RsLogLevel.ERROR)
+
+    # Signal handler for smooth shutdown
+    def signal_handler(signal_received, frame):
+        log(f"Signal {signal_received} received, initiating shutdown...")
+        shutdown_server()
+        sys.exit(0)
+
+    # Register the signal handler for SIGINT (Ctrl+C) and SIGTERM
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     # log app server started
     log("App server is running...")

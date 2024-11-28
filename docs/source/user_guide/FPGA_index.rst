@@ -14,6 +14,7 @@ Clocking
 The clocking section is located on the top left of the FPGA input section.
 
 .. image:: figures/FPGA-figures-clocking-clocking_selected.JPG
+
 Selecting the clocking section will display an empty table at the botton of the screen, click the "+Add" button above the table to fill out clock information.
 
 .. image:: figures/FPGA-figures-clocking-input_clock_info.JPG
@@ -133,3 +134,4 @@ Selecting the IO section displays an empty table, click the "Add" button above t
 13. Enter output enable rate - default is **50%** for outputs 
 14. select synchronization option - default is **none** for signals that are already clocked and don't cross domains
 15. Enter toggle rate - Industry standard default is **12.5%**
+

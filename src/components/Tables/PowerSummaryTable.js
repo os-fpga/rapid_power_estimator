@@ -23,7 +23,7 @@ function PowerSummaryTable({
 }) {
   const [thermalData, setThermalData] = useState({
     ambientTypical: 25,
-    ambientWorstCase: 50,
+    ambientWorseCase: 50,
     thetaJa: 10,
   });
 
@@ -34,7 +34,7 @@ function PowerSummaryTable({
   });
 
   const ambientTypicalRef = useRef(null);
-  const ambientWorstCaseRef = useRef(null);
+  const ambientWorseCaseRef = useRef(null);
   const thetaJaRef = useRef(null);
   const powerBudgetRef = useRef(null);
   const fpgaScalingRef = useRef(null);
@@ -51,7 +51,7 @@ function PowerSummaryTable({
             // Process thermal data
             setThermalData({
               ambientTypical: specification.thermal?.ambient?.typical || 25,
-              ambientWorstCase: specification.thermal?.ambient?.worstcase || 50,
+              ambientWorseCase: specification.thermal?.ambient?.worsecase || 50,
               thetaJa: specification.thermal?.theta_ja || 10,
             });
 
@@ -78,7 +78,7 @@ function PowerSummaryTable({
         thermal: {
           ambient: {
             typical: thermalDataParam.ambientTypical || 0,
-            worsecase: thermalDataParam.ambientWorstCase || 0, // Matches schema
+            worsecase: thermalDataParam.ambientWorseCase || 0, // Matches schema
           },
           theta_ja: thermalDataParam.thetaJa || 0,
         },
@@ -179,7 +179,7 @@ function PowerSummaryTable({
               <tr>
                 <th />
                 <th className="typical-header">Typical</th>
-                <th className="worst-header">Worst-Case</th>
+                <th className="worse-header">Worse-Case</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +192,7 @@ function PowerSummaryTable({
                     onChange={(e) => handleFieldUpdate('ambientTypical', e.target.value)}
                     onInput={enforceNumericInput}
                     ref={ambientTypicalRef}
-                    onKeyDown={(e) => handleKeyDown(e, ambientWorstCaseRef)}
+                    onKeyDown={(e) => handleKeyDown(e, ambientWorseCaseRef)}
                   />
                   {' '}
                   °C
@@ -200,10 +200,10 @@ function PowerSummaryTable({
                 <td className="value-cell">
                   <input
                     type="text"
-                    value={thermalData.ambientWorstCase}
-                    onChange={(e) => handleFieldUpdate('ambientWorstCase', e.target.value)}
+                    value={thermalData.ambientWorseCase}
+                    onChange={(e) => handleFieldUpdate('ambientWorseCase', e.target.value)}
                     onInput={enforceNumericInput}
-                    ref={ambientWorstCaseRef}
+                    ref={ambientWorseCaseRef}
                     onKeyDown={(e) => handleKeyDown(e, thetaJaRef)}
                   />
                   {' '}

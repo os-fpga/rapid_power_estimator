@@ -9,7 +9,7 @@ Launching RPE
 
 To launch the Rapid Power Estimator, simply navigate to your start menu and search for "Rapid Power Estimator". Once the application is found, click on the application icon to launch the tool.
 
-.. image:: figures/setup-figures-launching_RPE_from_windows_start_menu.JPG
+.. image:: figures/setup-figures-launching_RPE_from_windows_start_menu_v2.JPG
     :alt: RPE icon on windows start menu
 
 The Rapid Power Estimator will display the following screen upon launch.

@@ -20,7 +20,7 @@ Then click on each enabled peripheral's action column button to configure the pe
 
 For each peripheral, select it's usage as well as performance. 
 
-*Note:* For PWM, selecting an IO is also required to drive the PWM signal.
+*Note: For PWM, selecting an IO is also required to drive the PWM signal.*
 
 BCPU - Boot Central Processing Unit
 #######################################
@@ -29,12 +29,12 @@ The BCPU section is found at the top of the SoC input section, to the left of th
 
 Selecting the BCPU section will display the name of the CPU "N22 RISC-V", followed by it's configuration fields.
 
-.. image:: figures/SoC-figures-BCPU-BPCU_selected.JPG
+.. image:: figures/SoC-figures-BCPU-BCPU_selected_v2.JPG
 
 Enable/Disable encryption using the checkbox.
 
 Select Boot Mode, SPI is selected by default. 
-*note:* SPI is currently the only available mode.
+*note: SPI is currently the only available mode.*
 
 Select Clock, BOOT CLK is selected by default.
 
@@ -72,7 +72,7 @@ Selecting the memory section will display a table below with the available memor
 
 For each memory, select it's usage, then Memory Type, followed by required Data Rate & channel width. 
 
-*Note:* All devices will have OCM - on chip memory, DDR memory is only available on specific devices.
+*Note: All devices will have OCM - on chip memory, DDR memory is only available on specific devices.*
 
 .. image:: figures/memory-figures-input_DDR_memory_info.JPG
 
@@ -83,7 +83,7 @@ The ACPU section is found on the top left of the SoC input display.
 
 .. image:: figures/SoC-figures-ACPU-ACPU_selected.JPG
 
-Selecting the ACPU section will display the name of the CPU, followed by it's operating frequency & Load selection. *Note:* Application CPU is not available on all devices.
+Selecting the ACPU section will display the name of the CPU, followed by it's operating frequency & Load selection. *Note: Application CPU is not available on all devices.*
 
 Toggle the ACPU Power toggle switch on left hand side to enable ACPU, then select the load required from the Load dropdown. 
 

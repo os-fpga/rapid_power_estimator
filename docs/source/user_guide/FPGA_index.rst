@@ -61,7 +61,7 @@ The BRAM section is located directly below the clocking section.
 
 Selecting the BRAM section displays an empty table, click the "Add" button above the table to fill out the BRAM info.
 
-.. image:: figures/FPGA-figures-BRAM-input_BRAM_info.JPG
+.. image:: figures/FPGA-figures-BRAM-input_BRAM_info_v2.JPG
 
 .. image:: figures/FPGA-figures-BRAM-input_BRAM_ports_info.JPG
 
@@ -84,7 +84,7 @@ The DSP section is located directly below the FLE section.
 
 Selecting the DSP section displays an empty table, click the "Add" button above the table to fill out the DSP info.
 
-.. image:: figures/FPGA-figures-DSP-input_DSP_info.JPG
+.. image:: figures/FPGA-figures-DSP-input_DSP_info_v2.JPG
 
 1. Provide a name to label the DSP function within the hierarchy (optional)
 2. Enter the no. of DSP multipliers 

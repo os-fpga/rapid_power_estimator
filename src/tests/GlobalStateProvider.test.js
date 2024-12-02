@@ -20,7 +20,7 @@ jest.mock('../utils/serverAPI', () => ({
   },
   peripheralPath: jest.fn((device, path) => `/mock-api/peripheral/${device}/${path}`),
   attributes: jest.fn(() => '/mock-api/attributes'),
-  deviceInfo: jest.fn((device) => `/mock-api/device-info/${device}`), // Mock `deviceInfo`
+  deviceInfo: jest.fn((device) => `/mock-api/device-info/${device}`), 
 }));
 
 const TestComponent = () => {
@@ -70,7 +70,7 @@ describe('GlobalStateProvider', () => {
       } else if (url.includes('mock-peripheral')) {
         callback({ consumption: { messages: 'DMA Message' }, targets: 8 });
       } else if (url.includes('device-info')) {
-        callback({ specification: { thermal: {}, power: {} } }); // Mock device info response
+        callback({ specification: { thermal: {}, power: {} } }); 
       }
     });
 

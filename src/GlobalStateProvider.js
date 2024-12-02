@@ -149,8 +149,11 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
           });
           setPowerData({
             powerBudget: specification.power?.budget || 1.0,
-            fpgaScaling: (specification.power?.typical_dynamic_scaling?.fpga_complex || 0) * 100,
-            pcScaling: (specification.power?.typical_dynamic_scaling?.processing_complex || 0) * 100,
+            fpgaScaling:
+              (specification.power?.typical_dynamic_scaling?.fpga_complex || 0) * 100,
+            pcScaling:
+              (specification.power?.typical_dynamic_scaling?.processing_complex || 0)
+              * 100,
           });
         }
       });

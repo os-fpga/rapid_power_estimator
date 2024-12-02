@@ -34,7 +34,7 @@ function BramModal({
         {
           fieldType: FieldType.number,
           id: 'bram_used',
-          text: 'Used',
+          text: 'BRAMs Used',
           value: defaultValue.bram_used,
         },
         {

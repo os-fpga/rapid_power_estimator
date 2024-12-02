@@ -38,7 +38,7 @@ function ClockingModal({
         {
           fieldType: FieldType.number,
           id: 'frequency',
-          text: 'Frequency',
+          text: 'Frequency (Hz)',
           value: defaultValue.frequency,
         },
         {

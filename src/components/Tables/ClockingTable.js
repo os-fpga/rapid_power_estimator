@@ -29,7 +29,7 @@ function ClockingTable({ device, update, notify }) {
   const sources = GetOptions('Source');
 
   const mainTableHeader = [
-    '', 'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency', 'Clock Control', 'Fanout',
+    '', 'Action', 'En', 'Description', 'Source', 'Port/Signal name', 'Frequency (Hz)', 'Clock Control', 'Fanout',
     'Block Power', 'Intc. Power', '%',
   ];
 

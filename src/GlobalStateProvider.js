@@ -38,6 +38,16 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
   const [bcpuNames, setBcpuNames] = useState([]);
   const [connectivityNames, setConnectivityNames] = useState([]);
   const [dmaNames, setDmaNames] = useState([]);
+  const [thermalData, setThermalData] = useState({
+    ambientTypical: 25,
+    ambientWorseCase: 50,
+    thetaJa: 10,
+  });
+  const [powerData, setPowerData] = useState({
+    powerBudget: 1.0,
+    fpgaScaling: 25,
+    pcScaling: 25,
+  });
 
   let peripheralsMessages = {};
 
@@ -128,6 +138,22 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
           updatePeripherals(device, item.href, item.type);
         });
       });
+
+      server.GET(server.deviceInfo(device), (result) => {
+        if (result && result.specification) {
+          const { specification } = result;
+          setThermalData({
+            ambientTypical: specification.thermal?.ambient?.typical || 25,
+            ambientWorseCase: specification.thermal?.ambient?.worsecase || 50,
+            thetaJa: specification.thermal?.theta_ja || 10,
+          });
+          setPowerData({
+            powerBudget: specification.power?.budget || 1.0,
+            fpgaScaling: (specification.power?.typical_dynamic_scaling?.fpga_complex || 0) * 100,
+            pcScaling: (specification.power?.typical_dynamic_scaling?.processing_complex || 0) * 100,
+          });
+        }
+      });
     } else {
       setClockingState([]);
       setFleState([]);
@@ -136,7 +162,47 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
       setIoState([]);
       setSocState({});
       setPeripherals([]);
+      setThermalData({
+        ambientTypical: 25,
+        ambientWorseCase: 50,
+        thetaJa: 10,
+      });
+      setPowerData({
+        powerBudget: 1.0,
+        fpgaScaling: 25,
+        pcScaling: 25,
+      });
     }
+  }
+
+  function updateThermalAndPowerData(device, newThermalData, newPowerData) {
+    const updatedData = {
+      specification: {
+        thermal: {
+          ambient: {
+            typical: newThermalData.ambientTypical,
+            worsecase: newThermalData.ambientWorseCase,
+          },
+          theta_ja: newThermalData.thetaJa,
+        },
+        power: {
+          budget: newPowerData.powerBudget,
+          typical_dynamic_scaling: {
+            fpga_complex: newPowerData.fpgaScaling / 100,
+            processing_complex: newPowerData.pcScaling / 100,
+          },
+        },
+      },
+    };
+
+    server.PATCH(server.deviceInfo(device), updatedData, (response) => {
+      if (response.ok) {
+        setThermalData(newThermalData);
+        setPowerData(newPowerData);
+      } else {
+        console.error('Error updating thermal and power data:', response.statusText);
+      }
+    });
   }
 
   function GetOptions(id) {
@@ -150,6 +216,7 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
 
   const values = useMemo(() => ({
     updateGlobalState,
+    updateThermalAndPowerData,
     clockingState,
     fleState,
     bramState,
@@ -163,8 +230,10 @@ export function GlobalStateProvider({ children, fetch }) { // TODO temp fix for 
     connectivityNames,
     dmaNames,
     fetchAttributes,
+    thermalData,
+    powerData,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [bramState, clockingState, dspState, fleState, ioState, socState]);
+  }), [bramState, clockingState, dspState, fleState, ioState, socState, thermalData, powerData]);
 
   return (
     <GlobalStateContext.Provider value={values}>

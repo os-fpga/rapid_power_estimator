@@ -51,6 +51,7 @@ function DMAModal({
           fieldType: FieldType.float,
           id: 'toggle_rate',
           text: 'Toggle Rate',
+          step: '0.5',
           value: defaultValue.toggle_rate,
         },
       ]}

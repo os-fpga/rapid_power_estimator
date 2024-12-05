@@ -1,36 +1,180 @@
+/* Main container for the entire table layout */
 .pst-container {
-    padding: 8px;
+    padding: 4px; 
     display: flex;
     flex-direction: column;
-    row-gap: 5px;
+    row-gap: 2px; 
     height: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.pst-table {
+/* Styling for the Thermal and Power Specification section */
+.thermal-power-specification {
+    padding: 4px; 
+    background-color: #f0f7f5;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px; 
+    margin-bottom: 4px; 
+    display: flex;
+    flex-direction: column;
+    row-gap: 4px; 
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* Header styling for the Thermal and Power Specification */
+.spec-header {
+    font-weight: bold;
+    font-size: 11px; 
+    text-align: center;
+    color: #333;
+    background-color: #e1e1e1;
+    padding: 4px; 
+    border: 1px solid #c0c0c0;
+    border-radius: 4px; 
+}
+
+/* Table styling for the specification sections */
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 4px; 
+}
+
+.spec-table th, .spec-table td {
+    padding: 3px; 
+    text-align: center;
+    border: 1px solid #d1d1d1;
+    font-size: 10px; 
+}
+
+/* Styling for headers in the Typical and Worst-Case columns */
+.spec-table .typical-header, .spec-table .worst-header {
+    font-weight: bold;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #c0c0c0;
+}
+
+/* Special handling for ΘJA row that spans across two columns */
+.spec-table .theta-row td {
+    text-align: center;
+    font-weight: bold;
+    color: #444;
+    padding: 3px; 
+    border-right: 1px solid #d1d1d1;
+    border-left: 1px solid #d1d1d1;
+}
+
+/* Input field styling */
+.spec-table td input {
+    width: 45px; 
+    padding: 2px; 
+    font-size: 10px; 
+    text-align: center;
+}
+
+/* Bottom section for Power Specification */
+.power-spec-section {
+    padding: 4px; 
+    background-color: #f0f7f5;
+    border: 1px solid #d1d1d1;
+    border-radius: 6px; 
+    margin-bottom: 4px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Table for Power Specification */
+.power-spec-table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.pst-table td {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+.power-spec-table th, .power-spec-table td {
+    padding: 3px; 
+    text-align: center;
+    border: 1px solid #d1d1d1;
+    font-size: 10px; 
+}
+
+/* Styling for power budget and dynamic scaling */
+.power-spec-table .scaling-cell {
+    font-weight: bold;
+    color: #444;
+}
+
+/* Input fields in Power Specification */
+.power-spec-table td input {
+    width: 45px; 
+    padding: 2px; 
+    text-align: center;
+    font-size: 10px; 
+}
+
+/* Header styling for both Thermal and Power sections */
+.bold-text-title {
+    font-weight: bold;
+    font-size: 11px; 
+    color: #333;
+    text-align: left;
+}
+
+/* FPGA Complex and Core Power table */
+.pst-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    height: auto; /* Changed height to auto to fit content */
+    display: table;
+    table-layout: fixed; /* Ensure equal column widths */
+    margin-bottom: 0; /* Removed extra margin for symmetrical alignment */
 }
 
 .pst-table td {
+    padding: 0.20em 0.99em; /* Adjusted padding for consistent spacing */
     border-bottom: 1px solid #e1e1e1;
+    text-align: left; /* Align content to the left */
+    font-size: 10px; 
+    width: 100%;
 }
 
-.pst-table tbody>tr:last-child>td {
+/* Processing Complex (SOC) Power table */
+.pst-table-soc {
+    width: 100%;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    height: auto; /* Changed height to auto to fit content */
+    display: table;
+    table-layout: fixed;
+    margin-bottom: 0; /* Ensures symmetrical gap with the FPGA table */
+}
+
+.pst-table-soc td {
+    padding: 0.80em 0.99em; /* Same padding adjustments for consistency */
+    border-bottom: 1px solid #e1e1e1;
+    text-align: left;
+    font-size: 20px;
+    width: 100%;
+}
+
+.pst-table tbody>tr:last-child>td,
+.pst-table-soc tbody>tr:last-child>td {
     border-bottom: 0;
 }
 
+/* Bottom section */
 .pst-bottom {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     border-top: 1px solid #e1e1e1;
-    margin-top: 10px;
-    padding-top: 3px;
-    padding-bottom: 3px;
+    margin-top: 0;
+    padding-top: 2px; 
+    padding-bottom: 2px;
     align-items: flex-end;
 }
 
@@ -40,23 +184,40 @@
 
 .pst-bottom-progress {
     text-align: left;
+    width: 50%;
 }
 
 .pst-bottom-total {
     text-align: right;
-    width: 100%;
+    width: 50%;
     color: #7c7c7c;
-    font-size: 17px;
+    font-size: 10px;
 }
 
+/* Styling for dot icons */
 .dot-td {
     text-align: center;
 }
 
 .dot {
-    width: 10px;
-    height: 10px;
+    width: 8px; 
+    height: 8px;
     border-radius: 50%;
     display: inline-block;
     vertical-align: middle;
+}
+
+/* Remove unnecessary bottom space */
+.pst-container,
+.pst-table,
+.pst-table-soc {
+    margin-bottom: 0;
+    height: 100%; 
+}
+
+/* Ensure table fills the entire container */
+.pst-table, .pst-table-soc {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }

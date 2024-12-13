@@ -19,7 +19,7 @@ function PowerSummaryTableToolTip({ title, statusColor }) {
 }
 
 function PowerSummaryTable({
-  title, data = [], total = 0, percent = 0, deviceId = 'MPW1', #TODO
+  title, data = [], total = 0, percent = 0, deviceId = 'MPW1', //TODO
 }) {
   const [thermalData, setThermalData] = useState({
     ambientTypical: 25,

@@ -6,7 +6,6 @@ import * as server from '../utils/serverAPI';
 
 jest.mock('../utils/serverAPI', () => ({
   GET: jest.fn(),
-  PATCH: jest.fn(),
   api: {
     fetch: jest.fn((elem, device) => `/mock-api/${elem}/${device}`),
   },
@@ -20,25 +19,17 @@ jest.mock('../utils/serverAPI', () => ({
   },
   peripheralPath: jest.fn((device, path) => `/mock-api/peripheral/${device}/${path}`),
   attributes: jest.fn(() => '/mock-api/attributes'),
-  deviceInfo: jest.fn((device) => `/mock-api/device-info/${device}`), 
 }));
 
 const TestComponent = () => {
-  const {
-    updateGlobalState,
-    clockingState,
-    peripherals,
-    acpuNames,
-    fetchAttributes,
-    GetOptions,
-  } = useGlobalState();
+  const { updateGlobalState, clockingState, peripherals, acpuNames, fetchAttributes, GetOptions } = useGlobalState();
   const options = GetOptions('mock-attribute');
 
   return (
     <div>
       <div data-testid="clocking-state">{clockingState.join(', ')}</div>
       <div data-testid="peripherals-count">{peripherals.length}</div>
-      <div data-testid="acpu-names">{acpuNames.map((acpu) => acpu.text).join(', ')}</div>
+      <div data-testid="acpu-names">{acpuNames.map(acpu => acpu.text).join(', ')}</div>
       <button onClick={() => updateGlobalState('mock-device')}>Update Global State</button>
       <button onClick={fetchAttributes}>Fetch Attributes</button>
       <div data-testid="options">{options.join(', ')}</div>
@@ -69,8 +60,6 @@ describe('GlobalStateProvider', () => {
         callback([{ href: '/mock-peripheral', type: 'DMA' }]);
       } else if (url.includes('mock-peripheral')) {
         callback({ consumption: { messages: 'DMA Message' }, targets: 8 });
-      } else if (url.includes('device-info')) {
-        callback({ specification: { thermal: {}, power: {} } }); 
       }
     });
 

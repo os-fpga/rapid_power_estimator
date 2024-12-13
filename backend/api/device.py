@@ -312,7 +312,6 @@ class DeviceApi(Resource):
             device = device_mgr.get_device(device_id)
             schema = DeviceSchema()
             device.update_spec(schema.load(request.json)['specification'])
-            device.compute_output_power()
             from submodule.rs_project import RsProjectManager
             RsProjectManager.get_instance().set_modified(True)
             return schema.dump(device), 200
